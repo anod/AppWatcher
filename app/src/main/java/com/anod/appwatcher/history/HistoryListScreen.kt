@@ -53,9 +53,9 @@ fun HistoryListScreen(
     screenState: HistoryListState,
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (HistoryListEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<HistoryListAction>,
-    onActivityAction: (CommonActivityAction) -> Unit
+    onActivityAction: (CommonActivityAction) -> Unit,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -114,7 +114,7 @@ fun HistoryListScreen(
     }
 
     var showTagList: App? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = viewActions) {
+    LaunchedEffect(key1 = viewActions, key2 = onActivityAction) {
         viewActions.collect { action ->
             when (action) {
                 is HistoryListAction.ShowTagSnackbar -> {

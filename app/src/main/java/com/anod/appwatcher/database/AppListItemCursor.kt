@@ -56,8 +56,8 @@ class AppListItemCursor(cursor: Cursor?) : CursorIterator<AppListItem>(cursor) {
             projection.priceText = cursor.getColumnIndexOrThrow(AppListTable.Columns.PRICE_TEXT)
             projection.priceCurrency = cursor.getColumnIndexOrThrow(AppListTable.Columns.PRICE_CURRENCY)
             projection.priceMicros = cursor.getColumnIndexOrThrow(AppListTable.Columns.PRICE_MICROS)
-            projection.changeDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.details)
-            projection.newNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.noNewDetails)
+            projection.changeDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.DETAILS)
+            projection.newNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.NO_NEW_DETAILS)
             projection.recentFlag = cursor.getColumnIndexOrThrow(AppListTable.Columns.RECENT_FLAG)
         }
     }

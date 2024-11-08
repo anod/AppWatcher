@@ -236,20 +236,20 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
                 val selection = viewState.selection
                 when (status) {
                     is ImportStatus.Started -> {
-                        val newExtras = status.docIds.associateBy({ it }, { mapOf("status" to importStatusProgress) })
+                        val newExtras = status.docIds.associateBy({ it }, { mapOf("status" to IMPORT_STATUS_PROGRESS) })
                         viewState = viewState.copy(importStatus = status, selection = selection.setExtras(newExtras))
                     }
 
                     is ImportStatus.Progress -> {
                         val statusExtras = status.docIds.associateBy({ it }) { packageName ->
                             val resultCode = status.result.get(packageName)
-                            val packageStatus = if (resultCode == ImportInstalledTask.RESULT_OK) importStatusDone else importStatusError
+                            val packageStatus = if (resultCode == ImportInstalledTask.RESULT_OK) IMPORT_STATUS_DONE else IMPORT_STATUS_ERROR
                             mapOf("status" to packageStatus)
                         }
                         viewState = viewState.copy(importStatus = status, selection = selection.mergeExtras(statusExtras))
                     }
                     is ImportStatus.Finished -> {
-                        val deselectKeys = selection.filterWithExtra { it["status"] == importStatusDone }
+                        val deselectKeys = selection.filterWithExtra { it["status"] == IMPORT_STATUS_DONE }
                         viewState = viewState.copy(importStatus = status, refreshRequest = viewState.refreshRequest + 1, selection = selection.selectKeys(deselectKeys, false))
                     }
                     ImportStatus.NotStarted -> {
@@ -261,8 +261,8 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
     }
 
     companion object {
-        const val importStatusError = "e"
-        const val importStatusDone = "d"
-        const val importStatusProgress = "p"
+        const val IMPORT_STATUS_ERROR = "e"
+        const val IMPORT_STATUS_DONE = "d"
+        const val IMPORT_STATUS_PROGRESS = "p"
     }
 }

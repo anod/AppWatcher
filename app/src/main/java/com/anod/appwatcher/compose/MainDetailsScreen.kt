@@ -16,7 +16,7 @@ import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.HingeDeviceLayout
 
 @Composable
-fun MainDetailScreen(wideLayout: HingeDeviceLayout, main: @Composable () -> Unit, detail: @Composable () -> Unit,) {
+fun MainDetailScreen(wideLayout: HingeDeviceLayout, main: @Composable () -> Unit, detail: @Composable () -> Unit) {
     Row(
         modifier = Modifier.fillMaxSize()
     ) {

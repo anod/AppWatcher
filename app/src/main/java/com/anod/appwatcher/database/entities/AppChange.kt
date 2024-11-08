@@ -12,25 +12,26 @@ import com.anod.appwatcher.database.ChangelogTable
  * @author Alex Gavrishev
  * @date 02/09/2017
  */
-@Entity(tableName = ChangelogTable.table,
+@Entity(
+    tableName = ChangelogTable.TABLE,
     indices = [(Index(
-        value = arrayOf(ChangelogTable.Columns.appId, ChangelogTable.Columns.versionCode),
+        value = arrayOf(ChangelogTable.Columns.APP_ID, ChangelogTable.Columns.VERSION_CODE),
         unique = true))])
 data class AppChange(
     @PrimaryKey
     @ColumnInfo(name = BaseColumns._ID)
     val id: Int,
-    @ColumnInfo(name = ChangelogTable.Columns.appId)
+    @ColumnInfo(name = ChangelogTable.Columns.APP_ID)
     val appId: String,
-    @ColumnInfo(name = ChangelogTable.Columns.versionCode)
+    @ColumnInfo(name = ChangelogTable.Columns.VERSION_CODE)
     val versionCode: Int,
-    @ColumnInfo(name = ChangelogTable.Columns.versionName)
+    @ColumnInfo(name = ChangelogTable.Columns.VERSION_NAME)
     val versionName: String,
-    @ColumnInfo(name = ChangelogTable.Columns.details)
+    @ColumnInfo(name = ChangelogTable.Columns.DETAILS)
     val details: String,
-    @ColumnInfo(name = ChangelogTable.Columns.uploadDate)
+    @ColumnInfo(name = ChangelogTable.Columns.UPLOAD_DATE)
     val uploadDate: String,
-    @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
+    @ColumnInfo(name = ChangelogTable.Columns.NO_NEW_DETAILS)
     val noNewDetails: Boolean
 ) {
 

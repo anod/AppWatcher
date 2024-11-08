@@ -3,6 +3,7 @@ package com.anod.appwatcher.watchlist
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,7 +57,7 @@ fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 }
 
 @Composable
-private fun DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
+private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     DrawerHeader(
         mainState = mainState,
         onMainEvent = onMainEvent

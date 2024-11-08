@@ -4,15 +4,18 @@ import android.content.Intent
 import androidx.compose.runtime.Immutable
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import info.anodsplace.framework.content.CommonActivityAction
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
 data class UserLogState(
-    val messages: List<Message> = emptyList()
+    val messages: ImmutableList<Message> = persistentListOf()
 )
 
 sealed interface UserLogEvent {
-    object OnBackNav : UserLogEvent
-    object Share : UserLogEvent
+    data object OnBackNav : UserLogEvent
+    data object Share : UserLogEvent
 }
 
 class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonActivityAction>() {
@@ -20,7 +23,7 @@ class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonAct
 
     init {
         viewState = UserLogState(
-            messages = userLogger.messages
+            messages = userLogger.messages.toPersistentList()
         )
     }
 

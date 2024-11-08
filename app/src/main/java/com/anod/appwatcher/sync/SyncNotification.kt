@@ -14,21 +14,20 @@ import com.anod.appwatcher.utils.color.DynamicColors
 import com.anod.appwatcher.watchlist.MainActivity
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.text.Html
-import info.anodsplace.notification.NotificationManager
 
 /**
  * @author alex
  * *
  * @date 2014-09-24
  */
-class SyncNotification(private val context: info.anodsplace.context.ApplicationContext, private val notificationManager: info.anodsplace.notification.NotificationManager) {
+class SyncNotification(private val context: ApplicationContext, private val notificationManager: info.anodsplace.notification.NotificationManager) {
 
     companion object {
-        internal const val syncNotificationId = 1
-        internal const val gmsNotificationId = 2
-        const val updatesChannelId = "versions_updates"
-        const val pricesChannelId = "prices_change"
-        const val authenticationId = "authentication"
+        internal const val SYNC_NOTIFICATION_ID = 1
+        internal const val GMS_NOTIFICATION_ID = 2
+        const val UPDATES_CHANNEL_ID = "versions_updates"
+        const val PRICES_CHANNEL_ID = "prices_change"
+        const val AUTHENTICATION_ID = "authentication"
     }
 
     class Filter(
@@ -65,15 +64,15 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
     }
 
     fun createChannels() {
-        val updates = NotificationChannel(updatesChannelId, context.getString(R.string.channel_app_updates), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
+        val updates = NotificationChannel(UPDATES_CHANNEL_ID, context.getString(R.string.channel_app_updates), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         updates.description = context.getString(R.string.channel_updates_description)
         updates.setShowBadge(true)
 
-        val prices = NotificationChannel(pricesChannelId, context.getString(R.string.channel_prices), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
+        val prices = NotificationChannel(PRICES_CHANNEL_ID, context.getString(R.string.channel_prices), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_prices_description)
         prices.setShowBadge(true)
 
-        val authentication = NotificationChannel(authenticationId, context.getString(R.string.channel_authentication), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
+        val authentication = NotificationChannel(AUTHENTICATION_ID, context.getString(R.string.channel_authentication), info.anodsplace.notification.NotificationManager.IMPORTANCE_DEFAULT)
         prices.description = context.getString(R.string.channel_authentication_description)
         prices.setShowBadge(true)
         notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
@@ -83,11 +82,11 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
         val sorted = updatedApps.sortedWith(compareBy({ it.isNewUpdate }, { it.title }))
 
         val notification = this.create(sorted)
-        notificationManager.notify(syncNotificationId, notification)
+        notificationManager.notify(SYNC_NOTIFICATION_ID, notification)
     }
 
     fun cancel() {
-        notificationManager.cancel(syncNotificationId)
+        notificationManager.cancel(SYNC_NOTIFICATION_ID)
     }
 
     private fun create(updatedApps: List<UpdatedApp>): Notification {
@@ -101,7 +100,7 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
         val title = renderTitle(updatedApps)
         val text = renderText(updatedApps)
 
-        val builder = NotificationCompat.Builder(context.actual, updatesChannelId)
+        val builder = NotificationCompat.Builder(context.actual, UPDATES_CHANNEL_ID)
         builder
             .setAutoCancel(true)
             .setSmallIcon(R.drawable.ic_notification)
@@ -133,7 +132,7 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
         val updateIntent = NotificationActivity.intent(
             Uri.parse("com.anod.appwatcher://play/myapps/1"),
-            NotificationActivity.actionMyApps,
+            NotificationActivity.ACTION_MY_APPS,
             context.actual)
         builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
             PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -141,7 +140,7 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
         val readIntent = NotificationActivity.intent(
             Uri.parse("com.anod.appwatcher://dismiss/"),
-            NotificationActivity.actionDismiss,
+            NotificationActivity.ACTION_DISMISS,
             context.actual
         )
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
@@ -157,9 +156,9 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
         val playIntent = NotificationActivity.intent(
             Uri.parse("com.anod.appwatcher://play/" + update.packageName),
-            NotificationActivity.actionPlayStore,
+            NotificationActivity.ACTION_PLAY_STORE,
             context.actual).also {
-            it.putExtra(NotificationActivity.extraPackage, update.packageName)
+            it.putExtra(NotificationActivity.EXTRA_PACKAGE, update.packageName)
         }
 
         builder.addAction(R.drawable.ic_play_arrow_white_24dp, context.getString(R.string.store),
@@ -169,7 +168,7 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
         if (update.installedVersionCode > 0) {
             val updateIntent = NotificationActivity.intent(
                 Uri.parse("com.anod.appwatcher://play/myapps/1"),
-                NotificationActivity.actionMyApps,
+                NotificationActivity.ACTION_MY_APPS,
                 context.actual)
             builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
                 PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -178,7 +177,7 @@ class SyncNotification(private val context: info.anodsplace.context.ApplicationC
 
         val readIntent = NotificationActivity.intent(
             Uri.parse("com.anod.appwatcher://viewed/"),
-            NotificationActivity.actionMarkViewed,
+            NotificationActivity.ACTION_MARK_VIEWED,
             context.actual)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
             PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)

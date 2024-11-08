@@ -30,7 +30,7 @@ class InstalledPagingSource(
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
 
         if (sortId == Preferences.SORT_DATE_ASC || sortId == Preferences.SORT_DATE_DESC) {
-            val recentTime = dayStartAgoMillis(Preferences.recentDays)
+            val recentTime = dayStartAgoMillis(Preferences.RECENT_DAYS)
             val recentNotWatched = installed.filter {
                 !watchingPackages.containsKey(it.pkg.name) && it.pkg.updateTime > recentTime
             }.map { it.pkg }

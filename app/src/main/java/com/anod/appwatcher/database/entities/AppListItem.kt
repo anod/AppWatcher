@@ -16,10 +16,10 @@ data class AppListItem(
     @Embedded
     val app: App,
 
-    @ColumnInfo(name = ChangelogTable.Columns.details)
+    @ColumnInfo(name = ChangelogTable.Columns.DETAILS)
     val changeDetails: String?,
 
-    @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
+    @ColumnInfo(name = ChangelogTable.Columns.NO_NEW_DETAILS)
     val noNewDetails: Boolean,
 
     @ColumnInfo(name = AppListTable.Columns.RECENT_FLAG)

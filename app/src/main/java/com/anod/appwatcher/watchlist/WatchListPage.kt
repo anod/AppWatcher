@@ -86,7 +86,6 @@ import info.anodsplace.compose.placeholder
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -413,7 +412,7 @@ private fun AppItem(
 }
 
 @Composable
-private fun SelectedIcon(modifier: Modifier = Modifier, itemSelection: AppItemSelection, tint: Color = Color.Unspecified) {
+private fun SelectedIcon(itemSelection: AppItemSelection, modifier: Modifier = Modifier, tint: Color = Color.Unspecified) {
     AnimatedVisibility(
         modifier = modifier,
         visible = itemSelection == AppItemSelection.Selected,
@@ -789,7 +788,7 @@ private fun WatchListPreview() {
                     syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
-                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
             ),

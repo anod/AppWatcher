@@ -81,7 +81,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
         }
     }
 
-    LaunchedEffect(key1 = viewModel) {
+    LaunchedEffect(key1 = viewModel, key2 = onDismissRequest) {
         viewModel.viewActions.collect { action ->
             when (action) {
                 is EditTagAction.Dismiss -> onDismissRequest(action.tagId)

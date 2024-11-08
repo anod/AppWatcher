@@ -51,11 +51,11 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
     private val driveConnect by lazy { GoogleSignInConnect(activity, createGDriveSignInOptions()) }
 
     companion object {
-        const val resultCodeGDriveSignIn = 123
-        const val resultCodeGDriveException = 124
+        const val RESULT_CODE_GDRIVE_SIGN_IN = 123
+        const val RESULT_CODE_GDRIVE_EXCEPTION = 124
 
         fun showResolutionNotification(resolution: PendingIntent, context: ApplicationContext) {
-            val notification = NotificationCompat.Builder(context.actual, SyncNotification.authenticationId).apply {
+            val notification = NotificationCompat.Builder(context.actual, SyncNotification.AUTHENTICATION_ID).apply {
                 setAutoCancel(true)
                 setSmallIcon(R.drawable.ic_notification)
                 setContentTitle(context.getString(R.string.google_drive_sync_failed))
@@ -63,7 +63,7 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
                 setContentIntent(resolution)
             }.build()
             val notificationManager = KoinJavaComponent.getKoin().get<NotificationManager>()
-            notificationManager.notify(SyncNotification.gmsNotificationId, notification)
+            notificationManager.notify(SyncNotification.GMS_NOTIFICATION_ID, notification)
         }
     }
 
@@ -80,7 +80,7 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
 
             override fun onError(errorCode: Int, client: GoogleSignInClient) {
                 AppLog.e("Silent sign in failed with code $errorCode (${GoogleSignInStatusCodes.getStatusCodeString(errorCode)}). starting signIn intent")
-                activity.startActivityForResult(client.signInIntent, resultCodeGDriveSignIn)
+                activity.startActivityForResult(client.signInIntent, RESULT_CODE_GDRIVE_SIGN_IN)
             }
         })
     }
@@ -94,17 +94,17 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
     }
 
     fun requestEmail(lastSignedAccount: GoogleSignInAccount) {
-        GoogleSignIn.requestPermissions(activity, resultCodeGDriveSignIn, lastSignedAccount, Scope("email"))
+        GoogleSignIn.requestPermissions(activity, RESULT_CODE_GDRIVE_SIGN_IN, lastSignedAccount, Scope("email"))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == resultCodeGDriveSignIn) {
+        if (requestCode == RESULT_CODE_GDRIVE_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             handleSignInResult(task)
-        } else if (requestCode == resultCodeGDriveException) {
+        } else if (requestCode == RESULT_CODE_GDRIVE_EXCEPTION) {
             // Nothing?
         }
     }

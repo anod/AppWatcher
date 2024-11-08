@@ -15,7 +15,6 @@ import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
-import info.anodsplace.context.ApplicationContext
 import java.util.concurrent.TimeUnit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -28,8 +27,8 @@ import org.koin.core.parameter.parametersOf
 class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params), KoinComponent {
 
     companion object {
-        private const val windowStartDelaySeconds = 60L
-        private const val tag = "GDriveUpload"
+        private const val WINDOW_START_DELAY_SECONDS = 60L
+        private const val TAG = "GDriveUpload"
 
         fun schedule(requiresWifi: Boolean, requiresCharging: Boolean, context: Context) {
             val constraints: Constraints = Constraints.Builder().apply {
@@ -45,10 +44,10 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
                 OneTimeWorkRequest.Builder(UploadService::class.java)
                     .setInputData(Data.EMPTY)
                     .setConstraints(constraints)
-                    .setInitialDelay(windowStartDelaySeconds, TimeUnit.SECONDS)
+                    .setInitialDelay(WINDOW_START_DELAY_SECONDS, TimeUnit.SECONDS)
                     .build()
 
-            WorkManager.getInstance(context).enqueueUniqueWork(tag, ExistingWorkPolicy.REPLACE, request)
+            WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
         }
     }
 

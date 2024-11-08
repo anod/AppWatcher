@@ -13,7 +13,13 @@ import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
-import com.anod.appwatcher.database.*
+import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.ChangelogTable
+import com.anod.appwatcher.database.Cleanup
+import com.anod.appwatcher.database.DbContentProvider
+import com.anod.appwatcher.database.SchedulesTable
+import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppListItem
@@ -80,7 +86,7 @@ class UpdateCheck(
         val account = preferences.account
         if (account == null) {
             AppLog.w("No active account, skipping sync...", "UpdateCheck")
-            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoAccount), database)
+            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED_NO_ACCOUNT), database)
             return@withContext -1
         }
 
@@ -88,12 +94,12 @@ class UpdateCheck(
         if (!manualSync) {
             if (preferences.isWifiOnly && !networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
-                SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedNoWifi), database)
+                SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SKIPPED_NO_WIFI), database)
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS) {
-                SchedulesTable.Queries.save(schedule.finish(Schedule.statusSkippedMinTime), database)
+                SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SKIPPED_MIN_TIME), database)
                 AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
             }
@@ -103,7 +109,7 @@ class UpdateCheck(
 
         val refreshed = refreshAuthToken()
         if (!refreshed) {
-            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailedNoToken), database)
+            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED_NO_TOKEN), database)
             AppLog.e("Cannot receive access token")
             return@withContext -1
         }
@@ -126,9 +132,9 @@ class UpdateCheck(
         }
 
         if (syncResult.success) {
-            SchedulesTable.Queries.save(schedule.finish(Schedule.statusSuccess, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
+            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
-            SchedulesTable.Queries.save(schedule.finish(Schedule.statusFailed), database)
+            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED), database)
         }
 
         val updatedApps: List<UpdatedApp> = syncResult.updates
@@ -250,9 +256,9 @@ class UpdateCheck(
                 DbContentProvider.changelogUri
                     .buildUpon()
                     .appendPath("apps")
-                    .appendPath(it.getAsString(ChangelogTable.Columns.appId))
+                    .appendPath(it.getAsString(ChangelogTable.Columns.APP_ID))
                     .appendPath("v")
-                    .appendPath(it.getAsString(ChangelogTable.Columns.versionCode))
+                    .appendPath(it.getAsString(ChangelogTable.Columns.VERSION_CODE))
                     .build()
             }
         }

@@ -90,18 +90,23 @@ class DeviceBuild : DfeDeviceBuild {
 class DeviceInfoProvider(
     private val context: Context
 ): DfeDeviceInfoProvider {
-    private val GOOGLE_SERVICES_PACKAGE_ID = "com.google.android.gms"
-    private val GOOGLE_VENDING_PACKAGE_ID = "com.android.vending"
+    companion object {
+        private val GOOGLE_SERVICES_PACKAGE_ID = "com.google.android.gms"
+        private val GOOGLE_VENDING_PACKAGE_ID = "com.android.vending"
+    }
 
     private val androidDeviceId: String by lazy {
         AndroidDeviceId(context).load()
     }
-    private val localGsfVersion: Long = GFS_VERSION_CODE /* by lazy {
+    private val localGsfVersion: Long = GFS_VERSION_CODE
+
+    /* by lazy {
         getPackageInfo(context, GOOGLE_SERVICES_PACKAGE_ID)?.let {
             PackageInfoCompat.getLongVersionCode(it)
         } ?: GFS_VERSION_CODE
     } */
-    private val playVersion: Pair<Long, String> = Pair(PLAY_VERSION_CODE, PLAY_VERSION_NAME) /* by lazy {
+    private val playVersion: Pair<Long, String> = Pair(PLAY_VERSION_CODE, PLAY_VERSION_NAME)
+    /* by lazy {
         getPackageInfo(context, GOOGLE_VENDING_PACKAGE_ID)?.let {
             Pair(PackageInfoCompat.getLongVersionCode(it), it.versionName ?: PLAY_VERSION_NAME)
         } ?: Pair(PLAY_VERSION_CODE, PLAY_VERSION_NAME)
@@ -152,8 +157,8 @@ private fun getGLExtensionsWithEGL(): List<String> {
             egl.eglChooseConfig(display, attribList, configs, numConfig[0], numConfig)
 
             // Step 4: Create an OpenGL ES 2.0 context
-            val attrib_list = intArrayOf(EGL14.EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE)
-            val context = egl.eglCreateContext(display, configs[0], EGL10.EGL_NO_CONTEXT, attrib_list)
+            val contextAttribList = intArrayOf(EGL14.EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE)
+            val context = egl.eglCreateContext(display, configs[0], EGL10.EGL_NO_CONTEXT, contextAttribList)
 
             // Step 5: Create a 1x1 pixel surface to make the context current
             val surfaceAttribs = intArrayOf(EGL10.EGL_WIDTH, 1, EGL10.EGL_HEIGHT, 1, EGL10.EGL_NONE)

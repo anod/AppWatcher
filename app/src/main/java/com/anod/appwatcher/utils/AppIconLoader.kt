@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Path
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
@@ -29,7 +28,6 @@ import info.anodsplace.graphics.AdaptiveIcon
 import info.anodsplace.graphics.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okio.Buffer
 import okio.buffer
 import okio.source
 
@@ -58,14 +56,14 @@ interface AppIconLoader {
 
 class RealAppIconLoader(context: Context, private val prefs: Preferences, override val coilLoader: ImageLoader) : AppIconLoader {
     private val context: Context = context.applicationContext
-    private var _iconPathPair: Pair<Int, Path> = Pair(0, Path())
+    private var iconPathPair: Pair<Int, Path> = Pair(0, Path())
     private val iconPath: Path
         get() {
             val shapeHashCode = prefs.iconShape.hashCode()
-            if (shapeHashCode != _iconPathPair.first) {
-                _iconPathPair = Pair(shapeHashCode, AdaptiveIcon.maskToPath(prefs.iconShape))
+            if (shapeHashCode != iconPathPair.first) {
+                iconPathPair = Pair(shapeHashCode, AdaptiveIcon.maskToPath(prefs.iconShape))
             }
-            return _iconPathPair.second
+            return iconPathPair.second
         }
 
     private val iconSize: Int by lazy {
@@ -98,7 +96,6 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
                 mimeType = null,
                 dataSource = DataSource.DISK
             )
-
         }
     }
 

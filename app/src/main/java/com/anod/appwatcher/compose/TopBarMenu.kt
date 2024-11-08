@@ -1,5 +1,6 @@
 package com.anod.appwatcher.compose
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.anod.appwatcher.R
 
 @Composable
-fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
+fun DropdownMenuAction(content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit) {
     var topBarMoreMenu by remember { mutableStateOf(false) }
 
     MoreIconButton(onClick = { topBarMoreMenu = true })
@@ -34,7 +35,7 @@ fun DropdownMenuAction(content: @Composable (dismiss: () -> Unit) -> Unit) {
 }
 
 @Composable
-fun SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: IntRect) {
+fun ColumnScope.SortMenuItem(selectedSortId: Int, onChangeSort: (Int) -> Unit, barBounds: IntRect) {
     var topBarSortMenu by remember { mutableStateOf(false) }
     var menuItemWidth by remember { mutableIntStateOf(0) }
     DropdownMenuItem(
@@ -93,7 +94,7 @@ private fun SortDropdownMenu(
 }
 
 @Composable
-fun FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntRect) {
+fun ColumnScope.FilterMenuItem(filterId: Int, onFilterChange: (Int) -> Unit, barBounds: IntRect) {
     var topBarFilterMenu by remember { mutableStateOf(false) }
     var menuItemWidth by remember { mutableIntStateOf(0) }
     DropdownMenuItem(

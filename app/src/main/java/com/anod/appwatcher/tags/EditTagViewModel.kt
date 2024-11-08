@@ -9,7 +9,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

@@ -3,7 +3,11 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import androidx.room.withTransaction
 import com.anod.appwatcher.database.entities.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,13 +21,13 @@ import kotlinx.coroutines.withContext
 @Dao
 interface TagsTable {
 
-    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.NAME} COLLATE LOCALIZED ASC")
     fun observe(): Flow<List<Tag>>
 
     @Query("SELECT * FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
     fun observeTag(tagId: Int): Flow<Tag?>
 
-    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.NAME} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>
 
     @Query("SELECT * FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
@@ -41,7 +45,7 @@ interface TagsTable {
     @Query("DELETE FROM $TABLE")
     suspend fun delete()
 
-    @Query("INSERT INTO $TABLE (${Columns.name}, ${Columns.color}) VALUES (:name, :color)")
+    @Query("INSERT INTO $TABLE (${Columns.NAME}, ${Columns.COLOR}) VALUES (:name, :color)")
     suspend fun insert(name: String, color: Int): Long
 
     object Queries {
@@ -55,8 +59,8 @@ interface TagsTable {
         suspend fun insert(tag: Tag, db: AppsDatabase): Long {
             // Skip id to apply autoincrement
             val values = ContentValues().apply {
-                put(Columns.name, tag.name)
-                put(Columns.color, tag.color)
+                put(Columns.NAME, tag.name)
+                put(Columns.COLOR, tag.color)
             }
             var rowId = 0L
             withContext(Dispatchers.IO) {
@@ -70,25 +74,25 @@ interface TagsTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val name = "name"
-            const val color = "color"
+            const val NAME = "name"
+            const val COLOR = "color"
         }
     }
 
     object TableColumns {
-        const val _ID = TABLE + "." + BaseColumns._ID
-        const val name = "$TABLE.name"
-        const val color = "$TABLE.color"
+        const val BASE_ID = TABLE + "." + BaseColumns._ID
+        const val NAME = "$TABLE.name"
+        const val COLOR = "$TABLE.color"
     }
 
     object Projection {
-        const val _ID = 0
-        const val name = 1
-        const val color = 2
+        const val BASE_ID = 0
+        const val NAME = 1
+        const val COLOR = 2
     }
 
     companion object {
         const val TABLE = "tags"
-        val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
+        val projection = arrayOf(TableColumns.BASE_ID, TableColumns.NAME, TableColumns.COLOR)
     }
 }

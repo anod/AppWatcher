@@ -4,7 +4,11 @@ package com.anod.appwatcher.database
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.anod.appwatcher.database.entities.Schedule
 import java.util.concurrent.Callable
 import kotlinx.coroutines.Dispatchers
@@ -14,16 +18,16 @@ import kotlinx.coroutines.withContext
 @Dao
 interface SchedulesTable {
 
-    @Query("SELECT * FROM $table ORDER BY ${Columns.start} DESC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.START} DESC")
     fun load(): Flow<List<Schedule>>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(schedule: Schedule)
 
-    @Query("DELETE FROM $table WHERE ${Columns.start} < :time")
+    @Query("DELETE FROM $TABLE WHERE ${Columns.START} < :time")
     suspend fun clean(time: Long)
 
-    @Query("UPDATE $table SET ${Columns.notified} = :notified WHERE ${BaseColumns._ID} = :id")
+    @Query("UPDATE $TABLE SET ${Columns.NOTIFIED} = :notified WHERE ${BaseColumns._ID} = :id")
     suspend fun updateNotified(id: Long, notified: Int)
 
     object Queries {
@@ -39,27 +43,27 @@ interface SchedulesTable {
         suspend fun insert(schedule: Schedule, db: AppsDatabase): Long = withContext(Dispatchers.IO) {
             // Skip id to apply autoincrement
             return@withContext db.runInTransaction(Callable {
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, schedule.contentValues)
+                db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, schedule.contentValues)
             })
         }
     }
 
     class Columns : BaseColumns {
         companion object {
-            const val start = "start"
-            const val finish = "finish"
-            const val result = "result"
-            const val reason = "reason"
-            const val checked = "checked"
-            const val found = "found"
-            const val unavailable = "unavailable"
-            const val notified = "notified"
+            const val START = "start"
+            const val FINISH = "finish"
+            const val RESULT = "result"
+            const val REASON = "reason"
+            const val CHECKED = "checked"
+            const val FOUND = "found"
+            const val UNAVAILABLE = "unavailable"
+            const val NOTIFIED = "notified"
         }
     }
 
     companion object {
-        const val table = "schedules"
-        val projection = arrayOf(TagsTable.TableColumns._ID, TagsTable.TableColumns.name, TagsTable.TableColumns.color)
+        const val TABLE = "schedules"
+        val projection = arrayOf(TagsTable.TableColumns.BASE_ID, TagsTable.TableColumns.NAME, TagsTable.TableColumns.COLOR)
     }
 }
 
@@ -68,12 +72,12 @@ val Schedule.contentValues: ContentValues
         if (id > -1) {
             put(BaseColumns._ID, id)
         }
-        put(SchedulesTable.Columns.start, start)
-        put(SchedulesTable.Columns.finish, finish)
-        put(SchedulesTable.Columns.result, result)
-        put(SchedulesTable.Columns.reason, reason)
-        put(SchedulesTable.Columns.checked, checked)
-        put(SchedulesTable.Columns.found, found)
-        put(SchedulesTable.Columns.unavailable, unavailable)
-        put(SchedulesTable.Columns.notified, notified)
+        put(SchedulesTable.Columns.START, start)
+        put(SchedulesTable.Columns.FINISH, finish)
+        put(SchedulesTable.Columns.RESULT, result)
+        put(SchedulesTable.Columns.REASON, reason)
+        put(SchedulesTable.Columns.CHECKED, checked)
+        put(SchedulesTable.Columns.FOUND, found)
+        put(SchedulesTable.Columns.UNAVAILABLE, unavailable)
+        put(SchedulesTable.Columns.NOTIFIED, notified)
     }

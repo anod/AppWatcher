@@ -118,10 +118,10 @@ class WatchListPagingSource(
     }
 
     companion object {
-        const val pageSize = 20
+        const val PAGE_SIZE = 20
         fun getRefreshKey(position: Int): Int {
-            val pages = position / pageSize
-            return pages * pageSize
+            val pages = position / PAGE_SIZE
+            return pages * PAGE_SIZE
         }
     }
 }

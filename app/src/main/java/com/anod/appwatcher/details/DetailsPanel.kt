@@ -217,12 +217,12 @@ private val headerHeightDp = 80.dp
 private fun DetailsScreenContent(
     screenState: DetailsState,
     onEvent: (DetailsEvent) -> Unit,
-    modifier: Modifier = Modifier,
     viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
-    onCommonActivityAction: (CommonActivityAction) -> Unit
+    onCommonActivityAction: (CommonActivityAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = onEvent) {
         onEvent(DetailsEvent.LoadChangelog)
     }
 
@@ -344,7 +344,7 @@ private fun DetailsScreenContent(
 
     val context = LocalContext.current
     var showTagList: App? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = onCommonActivityAction, key2 = onDismissRequest) {
         viewActions.collect { action ->
             when (action) {
                 DetailsAction.Dismiss -> {
@@ -561,7 +561,7 @@ private fun VersionInfoCell(
 }
 
 @Composable
-private fun HorizontalDivider(modifier: Modifier = Modifier, thickness: Dp = DividerDefaults.Thickness, color: Color = DividerDefaults.color,) {
+private fun HorizontalDivider(modifier: Modifier = Modifier, thickness: Dp = DividerDefaults.Thickness, color: Color = DividerDefaults.color) {
     val targetThickness = if (thickness == Dp.Hairline) {
         (1f / LocalDensity.current.density).dp
     } else {

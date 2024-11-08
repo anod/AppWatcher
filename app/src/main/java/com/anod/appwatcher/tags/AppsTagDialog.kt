@@ -56,7 +56,7 @@ fun AppsTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
         )
     }
 
-    LaunchedEffect(key1 = viewModel) {
+    LaunchedEffect(key1 = viewModel, key2 = onDismissRequest) {
         viewModel.viewActions.collect { action ->
             when (action) {
                 AppsTagScreenAction.Dismiss -> onDismissRequest()
@@ -66,7 +66,7 @@ fun AppsTagDialog(tag: Tag, onDismissRequest: () -> Unit) {
 }
 
 @Composable
-fun AppsTagScreen(screenState: AppsTagScreenState, onEvent: (AppsTagScreenEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get(),) {
+fun AppsTagScreen(screenState: AppsTagScreenState, onEvent: (AppsTagScreenEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get()) {
     Surface {
         Column(
             modifier = Modifier.fillMaxSize()

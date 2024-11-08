@@ -18,19 +18,21 @@ import kotlinx.coroutines.withContext
 @Dao
 interface ChangelogTable {
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId ORDER BY ${Columns.versionCode} DESC")
+    @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} == :appId ORDER BY ${Columns.VERSION_CODE} DESC")
     suspend fun ofApp(appId: String): List<AppChange>
 
-    @Query("SELECT * FROM $table ORDER BY ${Columns._ID} DESC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.BASE_ID} DESC")
     fun all(): Cursor
 
-    @Query("SELECT * FROM $table " +
-        "WHERE ${Columns.versionCode} = (" +
-        "SELECT MAX(${Columns.versionCode}) FROM $table WHERE ${Columns.versionCode} < :versionCode AND ${Columns.appId} == :appId" +
-        ") LIMIT 1")
+    @Query(
+        "SELECT * FROM $TABLE " +
+            "WHERE ${Columns.VERSION_CODE} = (" +
+            "SELECT MAX(${Columns.VERSION_CODE}) FROM $TABLE WHERE ${Columns.VERSION_CODE} < :versionCode AND ${Columns.APP_ID} == :appId" +
+            ") LIMIT 1"
+    )
     suspend fun findPrevious(versionCode: Int, appId: String): AppChange?
 
-    @Query("UPDATE $table SET ${Columns.noNewDetails} = 0")
+    @Query("UPDATE $TABLE SET ${Columns.NO_NEW_DETAILS} = 0")
     suspend fun resetNoNewDetails(): Int
 
     @Suppress("FunctionName")
@@ -62,37 +64,37 @@ interface ChangelogTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val _ID = BaseColumns._ID
-            const val appId = "app_id"
-            const val versionCode = "code"
-            const val versionName = "name"
-            const val details = "details"
-            const val uploadDate = "upload_date"
-            const val noNewDetails = "no_new_details"
+            const val BASE_ID = BaseColumns._ID
+            const val APP_ID = "app_id"
+            const val VERSION_CODE = "code"
+            const val VERSION_NAME = "name"
+            const val DETAILS = "details"
+            const val UPLOAD_DATE = "upload_date"
+            const val NO_NEW_DETAILS = "no_new_details"
         }
     }
 
     object TableColumns {
-        const val _ID = table + "." + BaseColumns._ID
-        const val appId = "$table.app_id"
-        const val versionCode = "$table.code"
-        const val versionName = "$table.name"
-        const val details = "$table.details"
-        const val uploadDate = "$table.upload_date"
-        const val noNewDetails = "$table.no_new_details"
+        const val BASE_ID = TABLE + "." + BaseColumns._ID
+        const val APP_ID = "$TABLE.app_id"
+        const val VERSION_CODE = "$TABLE.code"
+        const val VERSION_NAME = "$TABLE.name"
+        const val DETAILS = "$TABLE.details"
+        const val UPLOAD_DATE = "$TABLE.upload_date"
+        const val NO_NEW_DETAILS = "$TABLE.no_new_details"
     }
 
     companion object {
-        const val table = "changelog"
+        const val TABLE = "changelog"
     }
 }
 
 val AppChange.contentValues: ContentValues
     get() = ContentValues().apply {
-        put(ChangelogTable.Columns.appId, appId)
-        put(ChangelogTable.Columns.versionCode, versionCode)
-        put(ChangelogTable.Columns.versionName, versionName)
-        put(ChangelogTable.Columns.details, details)
-        put(ChangelogTable.Columns.uploadDate, uploadDate)
-        put(ChangelogTable.Columns.noNewDetails, noNewDetails)
+        put(ChangelogTable.Columns.APP_ID, appId)
+        put(ChangelogTable.Columns.VERSION_CODE, versionCode)
+        put(ChangelogTable.Columns.VERSION_NAME, versionName)
+        put(ChangelogTable.Columns.DETAILS, details)
+        put(ChangelogTable.Columns.UPLOAD_DATE, uploadDate)
+        put(ChangelogTable.Columns.NO_NEW_DETAILS, noNewDetails)
     }

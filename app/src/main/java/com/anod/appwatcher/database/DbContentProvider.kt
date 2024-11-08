@@ -16,22 +16,22 @@ import info.anodsplace.applog.AppLog
 class DbContentProvider : ContentProvider() {
 
     companion object {
-        const val authority = BuildConfig.APPLICATION_ID
+        const val AUTHORITY = BuildConfig.APPLICATION_ID
 
-        private const val apps = 10
-        private const val app = 20
-        private const val changelogVersion = 200
+        private const val APPS = 10
+        private const val APP = 20
+        private const val CHANGELOG_VERSION = 200
 
-        val appsUri = Uri.parse("content://$authority/apps")!!
-        val changelogUri = Uri.parse("content://$authority/changelog")!!
+        val appsUri = Uri.parse("content://$AUTHORITY/apps")!!
+        val changelogUri = Uri.parse("content://$AUTHORITY/changelog")!!
 
         private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH)
 
         init {
-            uriMatcher.addURI(authority, "apps", apps)
-            uriMatcher.addURI(authority, "apps/#", app)
+            uriMatcher.addURI(AUTHORITY, "apps", APPS)
+            uriMatcher.addURI(AUTHORITY, "apps/#", APP)
 
-            uriMatcher.addURI(authority, "changelog/apps/*/v/#", changelogVersion)
+            uriMatcher.addURI(AUTHORITY, "changelog/apps/*/v/#", CHANGELOG_VERSION)
         }
     }
 
@@ -45,7 +45,7 @@ class DbContentProvider : ContentProvider() {
             return null
         }
         when (matched) {
-            app -> {
+            APP -> {
                 val rowId = uri.lastPathSegment ?: "0"
                 return Query(
                     type = matched,
@@ -55,11 +55,12 @@ class DbContentProvider : ContentProvider() {
                     notifyUri = appsUri.buildUpon().appendPath(rowId).build()
                 )
             }
-            changelogVersion -> {
+
+            CHANGELOG_VERSION -> {
                 return Query(
                     type = matched,
-                    table = ChangelogTable.table,
-                    selection = ChangelogTable.Columns.appId + "=? AND " + ChangelogTable.Columns.versionCode + "=?",
+                    table = ChangelogTable.TABLE,
+                    selection = ChangelogTable.Columns.APP_ID + "=? AND " + ChangelogTable.Columns.VERSION_CODE + "=?",
                     selectionArgs = arrayOf(
                         uri.pathSegments[uri.pathSegments.size - 3],
                         uri.lastPathSegment ?: "-1"

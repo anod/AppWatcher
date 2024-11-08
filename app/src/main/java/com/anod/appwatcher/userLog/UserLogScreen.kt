@@ -6,7 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -21,7 +26,8 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.ShareIconButton
 import com.anod.appwatcher.preferences.Preferences
-import info.anodsplace.notification.NotificationManager
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.koin.java.KoinJavaComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +60,7 @@ fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, pr
 }
 
 @Composable
-fun UserLogMessages(messages: List<Message>, modifier: Modifier = Modifier, contentPadding: PaddingValues = PaddingValues(0.dp),) {
+fun UserLogMessages(messages: ImmutableList<Message>, modifier: Modifier = Modifier, contentPadding: PaddingValues = PaddingValues(0.dp)) {
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding,
@@ -133,7 +139,7 @@ private fun UserLogScreenPreview() {
 10-05 22:44:09.137 D/DataSyncManager( 2982): onReceive: level = 100 batteryStatus = 2
 10-05 22:44:09.138 D/QtiCarrierConfigHelper( 2861): WARNING, no carrier configs on phone Id: 1
 10-05 22:44:09.141 D/KeyguardUpdateMonitor( 2562): handleBatteryUpdate
-            """.trimIndent().split("\n").map { UserLogMessage.from(it) }
+            """.trimIndent().split("\n").map { UserLogMessage.from(it) }.toPersistentList()
         ),
         onEvent = {},
         prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)

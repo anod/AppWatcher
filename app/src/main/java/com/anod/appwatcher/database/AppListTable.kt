@@ -10,7 +10,12 @@ import androidx.room.RawQuery
 import androidx.room.withTransaction
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.anod.appwatcher.database.entities.*
+import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppChange
+import com.anod.appwatcher.database.entities.AppListItem
+import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.PackageRowPair
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.ktx.chunked
 import info.anodsplace.ktx.dayStartAgoMillis
@@ -75,12 +80,12 @@ interface AppListTable {
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query(
-        "SELECT $TABLE.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+        "SELECT $TABLE.*, ${ChangelogTable.TableColumns.DETAILS}, ${ChangelogTable.TableColumns.NO_NEW_DETAILS}, " +
             "CASE WHEN ${Columns.SYNC_TIMESTAMP} > :recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
             "FROM $TABLE " +
-            "LEFT JOIN ${ChangelogTable.table} ON " +
-            "${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.appId} " +
-            "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.versionCode} " +
+            "LEFT JOIN ${ChangelogTable.TABLE} ON " +
+            "${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.APP_ID} " +
+            "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.VERSION_CODE} " +
             "WHERE " +
             "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END " +
             "ORDER BY " +
@@ -214,11 +219,11 @@ interface AppListTable {
             val selection = createSelection(tagId, titleFilter, offset)
 
             val sql =
-                "SELECT $TABLE.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+                "SELECT $TABLE.*, ${ChangelogTable.TableColumns.DETAILS}, ${ChangelogTable.TableColumns.NO_NEW_DETAILS}, " +
                     "CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
                     "FROM $TABLE " + appTagsTable +
-                    "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.appId} " +
-                    "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.versionCode} " +
+                    "LEFT JOIN ${ChangelogTable.TABLE} ON ${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.APP_ID} " +
+                    "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.VERSION_CODE} " +
                     "WHERE ${selection.first} " +
                     "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} " +
                     rangeSql
@@ -345,7 +350,7 @@ interface AppListTable {
         const val TABLE = "app_list"
 
         val recentTime: Long
-            get() = dayStartAgoMillis(daysAgo = Preferences.recentDays)
+            get() = dayStartAgoMillis(daysAgo = Preferences.RECENT_DAYS)
     }
 }
 

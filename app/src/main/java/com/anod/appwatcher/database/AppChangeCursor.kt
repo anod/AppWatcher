@@ -25,12 +25,12 @@ class AppChangeCursor(cursor: Cursor?) : CursorIterator<AppChange>(cursor) {
     init {
         if (cursor != null) {
             projection.rowId = cursor.getColumnIndexOrThrow(BaseColumns._ID)
-            projection.appId = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.appId)
-            projection.versionNumber = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.versionCode)
-            projection.versionName = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.versionName)
-            projection.details = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.details)
-            projection.uploadDate = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.uploadDate)
-            projection.noNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.noNewDetails)
+            projection.appId = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.APP_ID)
+            projection.versionNumber = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.VERSION_CODE)
+            projection.versionName = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.VERSION_NAME)
+            projection.details = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.DETAILS)
+            projection.uploadDate = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.UPLOAD_DATE)
+            projection.noNewDetails = cursor.getColumnIndexOrThrow(ChangelogTable.Columns.NO_NEW_DETAILS)
         }
     }
 

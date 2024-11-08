@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
  */
 @Database(
     entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
-    version = AppsDatabase.version,
+    version = AppsDatabase.VERSION,
     exportSchema = true)
 abstract class AppsDatabase : RoomDatabase() {
 
@@ -42,7 +42,7 @@ abstract class AppsDatabase : RoomDatabase() {
         }
 
         return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.authority, ArrayList(operations))
+            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
         }
     }
 
@@ -52,38 +52,39 @@ abstract class AppsDatabase : RoomDatabase() {
         }
 
         return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.authority, ArrayList(operations))
+            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
         }
     }
 
     companion object {
-        const val version = 19
+        const val VERSION = 19
         val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
 
         private val MIGRATION_17_18 = object : Migration(17, 18) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE ${SchedulesTable.table} ADD COLUMN ${SchedulesTable.Columns.notified} INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE ${SchedulesTable.TABLE} ADD COLUMN ${SchedulesTable.Columns.NOTIFIED} INTEGER NOT NULL DEFAULT 0")
             }
         }
 
         private val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `${SchedulesTable.table}` (" +
-                    "`_id` INTEGER NOT NULL, " +
-                    "`start` INTEGER NOT NULL, " +
-                    "`finish` INTEGER NOT NULL, " +
-                    "`result` INTEGER NOT NULL, " +
-                    "`reason` INTEGER NOT NULL, " +
-                    "`checked` INTEGER NOT NULL, " +
-                    "`found` INTEGER NOT NULL, " +
-                    "`unavailable` INTEGER NOT NULL, " +
-                    "PRIMARY KEY(`_id`))")
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `${SchedulesTable.TABLE}` (" +
+                        "`_id` INTEGER NOT NULL, " +
+                        "`start` INTEGER NOT NULL, " +
+                        "`finish` INTEGER NOT NULL, " +
+                        "`result` INTEGER NOT NULL, " +
+                        "`reason` INTEGER NOT NULL, " +
+                        "`checked` INTEGER NOT NULL, " +
+                        "`found` INTEGER NOT NULL, " +
+                        "`unavailable` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`_id`))")
             }
         }
 
         private val MIGRATION_15_16 = object : Migration(15, 16) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.noNewDetails + " INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE " + ChangelogTable.TABLE + " ADD COLUMN " + ChangelogTable.Columns.NO_NEW_DETAILS + " INTEGER NOT NULL DEFAULT 0")
             }
         }
 
@@ -112,7 +113,7 @@ abstract class AppsDatabase : RoomDatabase() {
         private val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 try {
-                    database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+                    database.execSQL("ALTER TABLE " + ChangelogTable.TABLE + " ADD COLUMN " + ChangelogTable.Columns.UPLOAD_DATE + " TEXT")
                 } catch (e: Exception) {
                     AppLog.e(e)
                 }
@@ -122,7 +123,7 @@ abstract class AppsDatabase : RoomDatabase() {
         private val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 try {
-                    database.execSQL("ALTER TABLE " + ChangelogTable.table + " ADD COLUMN " + ChangelogTable.Columns.uploadDate + " TEXT")
+                    database.execSQL("ALTER TABLE " + ChangelogTable.TABLE + " ADD COLUMN " + ChangelogTable.Columns.UPLOAD_DATE + " TEXT")
                 } catch (e: Exception) {
                     AppLog.e(e)
                 }

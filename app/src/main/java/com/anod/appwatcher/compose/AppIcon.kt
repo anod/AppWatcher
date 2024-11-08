@@ -18,9 +18,9 @@ import com.anod.appwatcher.utils.AppIconLoader
 fun AppIconImage(
     app: App,
     contentDescription: String,
+    appIconLoader: AppIconLoader,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
-    appIconLoader: AppIconLoader
 ) {
     val imageRequest by remember(app.iconUrl) {
         derivedStateOf {

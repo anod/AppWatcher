@@ -2,10 +2,17 @@ package com.anod.appwatcher.watchlist
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -32,7 +39,7 @@ fun WatchListTopBar(
     containerColor: Color,
     contentColor: Color,
     visibleActions: @Composable () -> Unit,
-    dropdownActions: @Composable ((dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
+    dropdownActions: @Composable (ColumnScope.(dismiss: () -> Unit, barBounds: IntRect) -> Unit)? = null,
     navigationIcon: @Composable (() -> Unit)? = null,
     onEvent: (WatchListEvent) -> Unit
 ) {

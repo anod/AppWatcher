@@ -21,9 +21,9 @@ data class Tag(
     @PrimaryKey
     @ColumnInfo(name = BaseColumns._ID)
     val id: Int,
-    @ColumnInfo(name = TagsTable.Columns.name)
+    @ColumnInfo(name = TagsTable.Columns.NAME)
     val name: String,
-    @ColumnInfo(name = TagsTable.Columns.color)
+    @ColumnInfo(name = TagsTable.Columns.COLOR)
     @ColorInt
     val color: Int
 ) : Parcelable {

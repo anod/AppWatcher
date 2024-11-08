@@ -62,10 +62,10 @@ fun SearchResultsScreen(
     screenState: SearchViewState,
     pagingDataFlow: () -> Flow<PagingData<ListItem>>,
     onEvent: (SearchViewEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<SearchViewAction>,
     onActivityAction: (CommonActivityAction) -> Unit = { },
-    onShowAccountDialog: () -> Unit = { }
+    onShowAccountDialog: () -> Unit = { },
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -127,7 +127,7 @@ fun SearchResultsScreen(
 
     var showTagList: Pair<App, Boolean>? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = viewActions) {
+    LaunchedEffect(key1 = viewActions, key2 = onShowAccountDialog, key3 = onActivityAction) {
         viewActions.collect { action ->
             when (action) {
                 SearchViewAction.ShowAccountDialog -> onShowAccountDialog()

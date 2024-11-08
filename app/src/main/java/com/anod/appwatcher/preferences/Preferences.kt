@@ -93,7 +93,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
 
     var updatesFrequency: Int
         get() {
-            val freq = preferences.getInt(updateFrequency, -1)
+            val freq = preferences.getInt(UPDATE_FREQUENCY, -1)
             if (freq == -1) {
                 // 2 hrs fallback
                 return if (preferences.getBoolean(AUTOSYNC, true)) 7200 else 0
@@ -101,7 +101,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
             return freq
         }
         set(value) {
-            preferences.edit().putInt(updateFrequency, value).apply()
+            preferences.edit().putInt(UPDATE_FREQUENCY, value).apply()
         }
 
     var isRequiresCharging: Boolean
@@ -183,7 +183,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
     }
 
     companion object {
-        const val recentDays: Long = 2
+        const val RECENT_DAYS: Long = 2
 
         private const val VIEWED = "viewed"
         const val LAST_UPDATE_TIME = "last_update_time"
@@ -206,7 +206,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         private const val DRIVE_SYNC_TIME = "drive_sync_time"
         private const val AUTOSYNC = "autosync"
         private const val REQUIRES_CHARGING = "requires-charging"
-        private const val updateFrequency = "update_frequency"
+        private const val UPDATE_FREQUENCY = "update_frequency"
 
         const val VERSION_CODE = "version_code"
         const val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"

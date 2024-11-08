@@ -41,6 +41,8 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -58,7 +60,7 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
         setContent {
             val schedules by database.schedules().load().collectAsState(initial = emptyList())
             SchedulesHistoryScreen(
-                schedules = schedules,
+                schedules = schedules.toPersistentList(),
                 dateFormat = dateFormat,
                 onActivityAction = { onCommonActivityAction(it) }
             )
@@ -68,7 +70,7 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: List<Schedule>, dateFormat: DateFormat, onActivityAction: (CommonActivityAction) -> Unit) {
+fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, onActivityAction: (CommonActivityAction) -> Unit) {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -133,13 +135,13 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
 
             ScheduleChip(
                 text = when (schedule.reason) {
-                    Schedule.reasonSchedule -> stringResource(R.string.schedule_reason_schedule)
-                    Schedule.reasonManual -> stringResource(R.string.schedule_status_manual)
+                    Schedule.REASON_SCHEDULE -> stringResource(R.string.schedule_reason_schedule)
+                    Schedule.REASON_MANUAL -> stringResource(R.string.schedule_status_manual)
                     else -> "Unknown"
                 },
                 color = when (schedule.reason) {
-                    Schedule.reasonSchedule -> colorGrey
-                    Schedule.reasonManual -> colorYellow
+                    Schedule.REASON_SCHEDULE -> colorGrey
+                    Schedule.REASON_MANUAL -> colorYellow
                     else -> colorBlue
                 }
             )
@@ -168,13 +170,13 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
         if (result is Failed || result is Skipped) {
             Text(text = when (result) {
                 is Failed -> when (result.reason) {
-                    Schedule.statusFailed -> "Unknown error"
-                    Schedule.statusFailedNoToken -> "Cannot receive access token"
+                    Schedule.STATUS_FAILED -> "Unknown error"
+                    Schedule.STATUS_FAILED_NO_TOKEN -> "Cannot receive access token"
                     else -> ""
                 }
                 is Skipped -> when (result.reason) {
-                    Schedule.statusSkippedMinTime -> "Last update less than second"
-                    Schedule.statusSkippedNoWifi -> "Wifi not enabled"
+                    Schedule.STATUS_SKIPPED_MIN_TIME -> "Last update less than second"
+                    Schedule.STATUS_SKIPPED_NO_WIFI -> "Wifi not enabled"
                     else -> ""
                 }
                 else -> ""

@@ -47,9 +47,9 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
         // where after filter if there is only one pages items are shown multiple times
         return Pager(
             config = PagingConfig(
-                pageSize = WatchListPagingSource.pageSize,
+                pageSize = WatchListPagingSource.PAGE_SIZE,
                 enablePlaceholders = false,
-                initialLoadSize = WatchListPagingSource.pageSize,
+                initialLoadSize = WatchListPagingSource.PAGE_SIZE,
                 maxSize = 1000
             ),
             initialKey = null,
