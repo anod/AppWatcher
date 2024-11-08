@@ -115,6 +115,9 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.runtime.tracing)
 
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+
     // Coil
     implementation(libs.coil.core)
     implementation(libs.coil.compose.core)

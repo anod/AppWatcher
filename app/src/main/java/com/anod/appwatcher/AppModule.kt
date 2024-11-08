@@ -6,6 +6,7 @@ import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
 import coil3.ImageLoader
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
@@ -22,6 +23,8 @@ import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.ktx.createLruCache
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.notification.RealNotificationManager
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -61,8 +64,18 @@ fun createAppModule(): Module = module {
     singleOf(::PackageChangedReceiver)
     singleOf(::AuthTokenBlocking)
     single {
+        HttpClient(OkHttp) {
+            engine {
+                preconfigured = get<OkHttpClient>()
+            }
+        }
+    }
+    single {
         ImageLoader.Builder(get())
             .components {
+                add(
+                    KtorNetworkFetcherFactory(httpClient = get<HttpClient>())
+                )
                 add(RealAppIconLoader.PackageIconFetcher.Factory(get()))
             }
             .build()
