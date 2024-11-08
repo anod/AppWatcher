@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.ImageLoader
+import coil3.ImageLoader
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme

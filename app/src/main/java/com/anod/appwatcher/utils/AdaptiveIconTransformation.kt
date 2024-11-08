@@ -4,12 +4,12 @@ package com.anod.appwatcher.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Path
-import coil.size.Size
-import coil.size.pxOrElse
-import coil.transform.Transformation
+import coil3.size.Size
+import coil3.size.pxOrElse
+import coil3.transform.Transformation
 import info.anodsplace.graphics.AdaptiveIcon
 
-class AdaptiveIconTransformation(context: Context, mask: Path, key: String) : Transformation {
+class AdaptiveIconTransformation(context: Context, mask: Path, key: String) : Transformation() {
 
     private val icon = AdaptiveIcon(context, mask)
 

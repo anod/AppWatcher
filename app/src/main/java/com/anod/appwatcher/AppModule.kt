@@ -5,7 +5,7 @@ import android.content.pm.ShortcutManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
-import coil.ImageLoader
+import coil3.ImageLoader
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver

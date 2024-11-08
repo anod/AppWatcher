@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -114,6 +115,7 @@ fun WishListScreen(
     }
 
     var showTagList: App? by remember { mutableStateOf(null) }
+    val latestOnActivityAction by rememberUpdatedState(onActivityAction)
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
@@ -123,7 +125,7 @@ fun WishListScreen(
                         showTagList = action.info
                     }
                 }
-                is WishListAction.ActivityAction -> onActivityAction(action.action)
+                is WishListAction.ActivityAction -> latestOnActivityAction(action.action)
             }
         }
     }

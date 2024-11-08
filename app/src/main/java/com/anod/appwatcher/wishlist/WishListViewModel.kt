@@ -46,7 +46,7 @@ sealed interface WishListAction {
 }
 
 sealed interface WishListEvent {
-    object OnBackPress : WishListEvent
+    data object OnBackPress : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
     class SelectApp(val app: App?) : WishListEvent
     class SetWideLayout(val wideLayout: HingeDeviceLayout) : WishListEvent

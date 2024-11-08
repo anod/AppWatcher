@@ -44,6 +44,8 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.graphics.toIcon
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
@@ -75,7 +77,7 @@ data class WatchListSharedState(
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
     val dbAppsChange: Int = 0,
-    val recentlyInstalledApps: List<App>? = null,
+    val recentlyInstalledApps: ImmutableList<App>? = null,
     val refreshRequest: Int = 0,
     val enablePullToRefresh: Boolean = false,
     val isRequestPinShortcutSupported: Boolean = false
@@ -234,7 +236,7 @@ class WatchListStateViewModel(
                         recentlyInstalledAppsLoader.load(limit = 20)
                     }
                     .collect {
-                        viewState = viewState.copy(recentlyInstalledApps = it)
+                        viewState = viewState.copy(recentlyInstalledApps = it.toPersistentList())
                     }
             }
         }

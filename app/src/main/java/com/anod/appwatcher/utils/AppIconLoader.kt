@@ -8,14 +8,18 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
-import coil.ImageLoader
-import coil.decode.DataSource
-import coil.decode.ImageSource
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.fetch.SourceResult
-import coil.request.ImageRequest
-import coil.request.Options
+import coil3.Image
+import coil3.ImageLoader
+import coil3.decode.DataSource
+import coil3.decode.ImageSource
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.SourceFetchResult
+import coil3.request.ImageRequest
+import coil3.request.Options
+import coil3.request.placeholder
+import coil3.request.target
+import coil3.request.transformations
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.preferences.Preferences
@@ -26,17 +30,19 @@ import info.anodsplace.graphics.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.Buffer
+import okio.buffer
+import okio.source
 
 interface AppIconLoader {
     val coilLoader: ImageLoader
-    suspend fun get(imageUrl: String): Drawable?
+    suspend fun get(imageUrl: String): Image?
     fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit)
     fun loadAppIntoImageView(app: App, iconView: ImageView, @DrawableRes defaultRes: Int)
     fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit = {}): ImageRequest
 
     class Simple(context: Context, override val coilLoader: ImageLoader) : AppIconLoader {
         private val context: Context = context.applicationContext
-        override suspend fun get(imageUrl: String): Drawable? = null
+        override suspend fun get(imageUrl: String): Image? = null
 
         override fun retrieve(imageUrl: String, customize: (ImageRequest.Builder) -> Unit) {
         }
@@ -83,17 +89,22 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null
 
             val source = icon.toByteArray() ?: return null
-            return SourceResult(
-                source = ImageSource(Buffer().apply { write(source) }, options.context),
+            return SourceFetchResult(
+                source = ImageSource(
+                    source = source.inputStream().source().buffer(),
+                    fileSystem = options.fileSystem,
+                    metadata = null
+                ),
                 mimeType = null,
                 dataSource = DataSource.DISK
             )
+
         }
     }
 
-    override suspend fun get(imageUrl: String): Drawable? = withContext(Dispatchers.IO) {
+    override suspend fun get(imageUrl: String): Image? = withContext(Dispatchers.IO) {
         return@withContext try {
-            coilLoader.execute(request(imageUrl)).drawable
+            coilLoader.execute(request(imageUrl)).image
         } catch (e: Exception) {
             AppLog.e(e)
             null

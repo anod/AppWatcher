@@ -24,8 +24,6 @@ android {
 
 dependencies {
     implementation(files("libs/keyczar-0.71g-090613.jar"))
-    implementation(libs.androidx.collection)
-    implementation(libs.androidx.collection.ktx)
     // Update from 3.11.4 breaks parsing, may be needs to be regenerated
     api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
     implementation(libs.okhttp)
@@ -34,5 +32,4 @@ dependencies {
     implementation(project(":lib:framework"))
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
-    implementation(libs.kotlin.stdlib)
 }

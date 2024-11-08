@@ -340,14 +340,12 @@ interface AppListTable {
     }
 
     companion object {
-
         const val ERROR_ALREADY_ADDED = -1
         const val ERROR_INSERT = -2
-
         const val TABLE = "app_list"
 
         val recentTime: Long
-            get() = dayStartAgoMillis(days = Preferences.recentDays)
+            get() = dayStartAgoMillis(daysAgo = Preferences.recentDays)
     }
 }
 

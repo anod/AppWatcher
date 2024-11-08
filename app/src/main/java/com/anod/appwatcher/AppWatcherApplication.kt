@@ -16,6 +16,7 @@ import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.networkConnection
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
+import info.anodsplace.applog.AndroidLogger
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationInstance
 import java.io.IOException
@@ -102,7 +103,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             || networkConnection.isNetworkException(tr)
     }
 
-    private inner class FirebaseLogger : AppLog.Logger.Android() {
+    private inner class FirebaseLogger : AndroidLogger() {
         override fun println(priority: Int, tag: String, msg: String) {
             super.println(priority, tag, msg)
             FirebaseCrashlytics.getInstance().log("$priority/$tag: $msg")

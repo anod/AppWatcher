@@ -69,8 +69,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import coil.ImageLoader
-import coil.compose.AsyncImage
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
@@ -84,6 +84,10 @@ import com.anod.appwatcher.utils.SelectionState
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.placeholder
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.koin.java.KoinJavaComponent.getKoin
 
 enum class AppItemSelection {
@@ -106,7 +110,7 @@ fun WatchListPage(
     onEvent: (WatchListEvent) -> Unit,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
-    recentlyInstalledApps: List<App>? = null,
+    recentlyInstalledApps: ImmutableList<App>? = null,
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val pullRefreshState = rememberPullToRefreshState()
@@ -179,7 +183,7 @@ fun WatchListSectionItem(
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
     appIconLoader: AppIconLoader = getKoin().get(),
-    recentlyInstalledApps: List<App>? = null,
+    recentlyInstalledApps: ImmutableList<App>? = null,
 ) {
     when (item) {
         is SectionItem.Header -> when (item.type) {
@@ -419,7 +423,7 @@ private fun SelectedIcon(modifier: Modifier = Modifier, itemSelection: AppItemSe
 
     ) {
         Icon(
-            modifier = modifier.size(18.dp),
+            modifier = Modifier.size(18.dp),
             painter = painterResource(id = R.drawable.ic_check_circle_selected_18dp),
             contentDescription = stringResource(id = R.string.selected),
             tint = tint
@@ -443,10 +447,10 @@ private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Bo
 }
 
 @Composable
-private fun RecentItem(recentApps: List<App>?, onEvent: (WatchListEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get()) {
+private fun RecentItem(recentApps: ImmutableList<App>?, onEvent: (WatchListEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get()) {
     RecentItemRow(
         loading = recentApps == null,
-        recentApps = recentApps ?: emptyList(),
+        recentApps = recentApps ?: persistentListOf(),
         onEvent = onEvent,
         appIconLoader = appIconLoader
     )
@@ -455,7 +459,7 @@ private fun RecentItem(recentApps: List<App>?, onEvent: (WatchListEvent) -> Unit
 @Composable
 private fun RecentItemRow(
     loading: Boolean,
-    recentApps: List<App>,
+    recentApps: ImmutableList<App>,
     onEvent: (WatchListEvent) -> Unit,
     appIconLoader: AppIconLoader = getKoin().get()
 ) {
@@ -704,7 +708,7 @@ private fun WatchListPreview() {
                     syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna." +
-                        " Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    " Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
             ),
@@ -730,7 +734,7 @@ private fun WatchListPreview() {
                     syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
-                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
             ),
@@ -756,7 +760,7 @@ private fun WatchListPreview() {
                     syncTime = 0
                 ),
                 changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
-                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                    "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
             ),
@@ -784,7 +788,8 @@ private fun WatchListPreview() {
                     status = 0,
                     syncTime = 0
                 ),
-                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
+                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
             ),
@@ -894,7 +899,7 @@ private fun WatchListPreviewRecent() {
                         status = 0,
                         syncTime = 0
                     ),
-                ),
+                ).toPersistentList(),
                 onEvent = { },
                 appIconLoader = appIconLoader
             )
@@ -913,7 +918,7 @@ private fun WatchListPreviewRecentLoading() {
         Surface {
             RecentItemRow(
                 loading = true,
-                recentApps = listOf(),
+                recentApps = persistentListOf(),
                 onEvent = { },
                 appIconLoader = appIconLoader
             )

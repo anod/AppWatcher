@@ -108,16 +108,17 @@ dependencies {
 
     implementation(libs.material)
 
-    implementation(libs.paging.runtime)
-    implementation(libs.paging.compose)
+    implementation(libs.paging.common)
+    implementation(libs.paging.compose.android)
 
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.runtime.tracing)
 
     // Coil
-    implementation(libs.coil.base)
-    implementation(libs.coil.compose.base)
+    implementation(libs.coil.core)
+    implementation(libs.coil.compose.core)
+    implementation(libs.coil.network.ktor3)
 
     // Google
     implementation(libs.play.services.oss.licenses)
@@ -144,14 +145,15 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.common.java8)
 
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+    ksp(libs.room.compiler)
 
     // Kotlin
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
-    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.collections.immutable)
 
     testImplementation(libs.junit)
 
