@@ -14,16 +14,16 @@ import com.anod.appwatcher.database.AppTagsTable
  * @date 27/04/2017.
  */
 @Entity(
-    tableName = AppTagsTable.table,
+    tableName = AppTagsTable.TABLE,
     indices = [Index(value = ["app_id", "tags_id"], unique = true)]
 )
 data class AppTag(
     @PrimaryKey
     @ColumnInfo(name = BaseColumns._ID)
     val id: Int,
-    @ColumnInfo(name = AppTagsTable.Columns.appId)
+    @ColumnInfo(name = AppTagsTable.Columns.APP_ID)
     val appId: String,
-    @ColumnInfo(name = AppTagsTable.Columns.tagId)
+    @ColumnInfo(name = AppTagsTable.Columns.TAGS_ID)
     val tagId: Int
 ) {
 

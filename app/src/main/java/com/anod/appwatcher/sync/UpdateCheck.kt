@@ -267,7 +267,7 @@ class UpdateCheck(
                         AppLog.d("Set not fetched app as viewed")
                         statusBatch.add(contentValuesOf(
                             BaseColumns._ID to app.rowId,
-                            AppListTable.Columns.status to App.STATUS_NORMAL
+                            AppListTable.Columns.STATUS to App.STATUS_NORMAL
                         ))
                     }
                 }
@@ -305,7 +305,7 @@ class UpdateCheck(
         // Mark updated app as normal
         if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
             AppLog.d("Set ${localApp.appId} update as viewed")
-            values.put(AppListTable.Columns.status, App.STATUS_NORMAL)
+            values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
             val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
@@ -383,27 +383,27 @@ class UpdateCheck(
     private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {
         val uploadTime = marketApp.extractUploadDate(uploadDateParserCache)
         values.put(BaseColumns._ID, localApp.rowId)
-        values.put(AppListTable.Columns.uploadTimestamp, uploadTime)
-        values.put(AppListTable.Columns.uploadDate, marketApp.appDetails.uploadDate)
-        values.put(AppListTable.Columns.versionName, marketApp.appDetails.versionString)
-        values.put(AppListTable.Columns.versionNumber, marketApp.appDetails.versionCode)
+        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, uploadTime)
+        values.put(AppListTable.Columns.UPLOAD_DATE, marketApp.appDetails.uploadDate)
+        values.put(AppListTable.Columns.VERSION_NAME, marketApp.appDetails.versionString)
+        values.put(AppListTable.Columns.VERSION_NUMBER, marketApp.appDetails.versionCode)
 
         if (marketApp.appDetails.appType != localApp.appType) {
-            values.put(AppListTable.Columns.appType, marketApp.appDetails.appType)
+            values.put(AppListTable.Columns.APP_TYPE, marketApp.appDetails.appType)
         }
 
         val offer = marketApp.offer
         if (offer.currencyCode != localApp.price.cur) {
-            values.put(AppListTable.Columns.priceCurrency, offer.currencyCode)
+            values.put(AppListTable.Columns.PRICE_CURRENCY, offer.currencyCode)
         }
         if (offer.formattedAmount != localApp.price.text) {
-            values.put(AppListTable.Columns.priceText, offer.formattedAmount)
+            values.put(AppListTable.Columns.PRICE_TEXT, offer.formattedAmount)
         }
         if (localApp.price.micros != offer.micros.toInt()) {
-            values.put(AppListTable.Columns.priceMicros, offer.micros)
+            values.put(AppListTable.Columns.PRICE_MICROS, offer.micros)
         }
         if (!marketApp.iconUrl.isNullOrEmpty()) {
-            values.put(AppListTable.Columns.iconUrl, marketApp.iconUrl)
+            values.put(AppListTable.Columns.ICON_URL, marketApp.iconUrl)
         }
     }
 }

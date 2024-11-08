@@ -21,10 +21,10 @@ import kotlinx.coroutines.withContext
 @Dao
 interface AppTagsTable {
 
-    @Query("SELECT * FROM $table WHERE ${Columns.tagId} = :tagId")
+    @Query("SELECT * FROM $TABLE WHERE ${Columns.TAGS_ID} = :tagId")
     fun forTag(tagId: Int): Flow<List<AppTag>>
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} = :appId")
+    @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} = :appId")
     fun forApp(appId: String): Flow<List<AppTag>>
 
     @Query("SELECT IFNULL(tags_id, 0) AS tags_id, count() as count FROM app_list l " +
@@ -32,45 +32,45 @@ interface AppTagsTable {
         "GROUP BY tags_id")
     fun queryCounts(): Flow<List<TagAppsCount>>
 
-    @Query("SELECT * FROM $table")
+    @Query("SELECT * FROM $TABLE")
     suspend fun load(): List<AppTag>
 
-    @Query("SELECT DISTINCT ${TableColumns.tagId} FROM $table")
+    @Query("SELECT DISTINCT ${TableColumns.TAG_ID} FROM $TABLE")
     suspend fun loadTagIds(): List<Int>
 
-    @Query("DELETE FROM $table WHERE ${TableColumns.appId} NOT IN (SELECT ${AppListTable.TableColumns.appId} FROM ${AppListTable.table})")
+    @Query("DELETE FROM $TABLE WHERE ${TableColumns.APP_ID} NOT IN (SELECT ${AppListTable.TableColumns.APP_ID} FROM ${AppListTable.TABLE})")
     suspend fun clean(): Int
 
-    @Query("DELETE FROM $table")
+    @Query("DELETE FROM $TABLE")
     suspend fun delete()
 
-    @Query("DELETE FROM $table WHERE ${Columns.tagId} IN (:tagIds)")
+    @Query("DELETE FROM $TABLE WHERE ${Columns.TAGS_ID} IN (:tagIds)")
     suspend fun deleteIds(tagIds: List<Int>)
 
-    @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId")
+    @Query("DELETE FROM $TABLE WHERE ${Columns.TAGS_ID} = :tagId")
     suspend fun delete(tagId: Int)
 
-    @Query("DELETE FROM $table WHERE ${Columns.tagId} = :tagId AND ${Columns.appId} = :appId")
+    @Query("DELETE FROM $TABLE WHERE ${Columns.TAGS_ID} = :tagId AND ${Columns.APP_ID} = :appId")
     suspend fun delete(tagId: Int, appId: String): Int
 
-    @Query("INSERT INTO $table (${Columns.appId}, ${Columns.tagId}) VALUES (:appId, :tagId)")
+    @Query("INSERT INTO $TABLE (${Columns.APP_ID}, ${Columns.TAGS_ID}) VALUES (:appId, :tagId)")
     suspend fun insert(appId: String, tagId: Int): Long
 
     class Columns : BaseColumns {
         companion object {
-            const val appId = "app_id"
-            const val tagId = "tags_id"
+            const val APP_ID = "app_id"
+            const val TAGS_ID = "tags_id"
         }
     }
 
     object TableColumns {
-        const val _ID = table + "." + BaseColumns._ID
-        const val appId = "$table.app_id"
-        const val tagId = "$table.tags_id"
+        const val BASE_ID = TABLE + "." + BaseColumns._ID
+        const val APP_ID = "$TABLE.app_id"
+        const val TAG_ID = "$TABLE.tags_id"
     }
 
     companion object {
-        const val table = "app_tags"
+        const val TABLE = "app_tags"
     }
 
     object Queries {
@@ -87,7 +87,7 @@ interface AppTagsTable {
             db.withTransaction {
                 for (appId in apps) {
                     val values = AppTag(appId, tag.id).contentValues
-                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                    db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, values)
                 }
             }
         }
@@ -95,13 +95,13 @@ interface AppTagsTable {
         // Executed in transaction
         suspend fun insert(appTags: List<AppTag>, db: AppsDatabase) = withContext(Dispatchers.IO) {
             appTags.forEach { appTag ->
-                db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, appTag.contentValues)
+                db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, appTag.contentValues)
             }
         }
 
         suspend fun insert(tagId: Int, appId: String, db: AppsDatabase): Long {
             return db.withTransaction {
-                return@withTransaction db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
+                return@withTransaction db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, AppTag(appId, tagId).contentValues)
             }
         }
 
@@ -110,7 +110,7 @@ interface AppTagsTable {
                 db.appTags().delete(tagId)
                 for (appId in appIds) {
                     val values = AppTag(appId, tagId).contentValues
-                    db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                    db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, values)
                 }
             }
         }
@@ -120,7 +120,7 @@ interface AppTagsTable {
 val AppTag.contentValues: ContentValues
     get() {
         val values = ContentValues()
-        values.put(AppTagsTable.Columns.appId, appId)
-        values.put(AppTagsTable.Columns.tagId, tagId)
+        values.put(AppTagsTable.Columns.APP_ID, appId)
+        values.put(AppTagsTable.Columns.TAGS_ID, tagId)
         return values
     }

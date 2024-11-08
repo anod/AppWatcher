@@ -53,9 +53,9 @@ fun WishListScreen(
     screenState: WishListState,
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (WishListEvent) -> Unit,
-    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
     viewActions: Flow<WishListAction>,
-    onActivityAction: (CommonActivityAction) -> Unit
+    onActivityAction: (CommonActivityAction) -> Unit,
+    appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }

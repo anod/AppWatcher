@@ -443,7 +443,7 @@ private fun Changelog(isLocalApp: Boolean, changesHtml: String, noNewDetails: Bo
 }
 
 @Composable
-private fun RecentItem(recentApps: List<App>? = null, onEvent: (WatchListEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get(),) {
+private fun RecentItem(recentApps: List<App>?, onEvent: (WatchListEvent) -> Unit, appIconLoader: AppIconLoader = getKoin().get()) {
     RecentItemRow(
         loading = recentApps == null,
         recentApps = recentApps ?: emptyList(),
@@ -703,7 +703,8 @@ private fun WatchListPreview() {
                     status = 0,
                     syncTime = 0
                 ),
-                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna." +
+                        " Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
             ),
@@ -728,7 +729,8 @@ private fun WatchListPreview() {
                     status = 0,
                     syncTime = 0
                 ),
-                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
+                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = true,
                 recentFlag = true
             ),
@@ -753,7 +755,8 @@ private fun WatchListPreview() {
                     status = 0,
                     syncTime = 0
                 ),
-                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
+                changeDetails = "Nunc aliquam egestas diam, id bibendum massa. Duis vitae lorem nunc. Integer eu elit urna. " +
+                        "Phasellus pretium enim ut felis consequat elementum. Cras feugiat sed purus consequat mollis. Vivamus ut urna a augue facilisis aliquam. Cras eget ipsum ex.",
                 noNewDetails = false,
                 recentFlag = true
             ),

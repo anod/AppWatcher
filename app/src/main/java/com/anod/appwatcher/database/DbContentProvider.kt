@@ -49,7 +49,7 @@ class DbContentProvider : ContentProvider() {
                 val rowId = uri.lastPathSegment ?: "0"
                 return Query(
                     type = matched,
-                    table = AppListTable.table,
+                    table = AppListTable.TABLE,
                     selection = BaseColumns._ID + "=?",
                     selectionArgs = arrayOf(rowId),
                     notifyUri = appsUri.buildUpon().appendPath(rowId).build()

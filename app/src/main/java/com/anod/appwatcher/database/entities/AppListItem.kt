@@ -22,7 +22,7 @@ data class AppListItem(
     @ColumnInfo(name = ChangelogTable.Columns.noNewDetails)
     val noNewDetails: Boolean,
 
-    @ColumnInfo(name = AppListTable.Columns.recentFlag)
+    @ColumnInfo(name = AppListTable.Columns.RECENT_FLAG)
     val recentFlag: Boolean
 )
 

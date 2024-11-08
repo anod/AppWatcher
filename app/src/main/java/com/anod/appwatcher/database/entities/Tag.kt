@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  * @author Alex Gavrishev
  * @date 10/03/2017
  */
-@Entity(tableName = TagsTable.table)
+@Entity(tableName = TagsTable.TABLE)
 @Parcelize
 data class Tag(
     @PrimaryKey

@@ -34,19 +34,19 @@ interface AppListTable {
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     suspend fun load(query: SupportSQLiteQuery): List<AppListItem>
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
+    @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} == :appId")
     fun observeApp(appId: String): Flow<App?>
 
-    @Query("SELECT * FROM $table WHERE ${Columns.appId} == :appId")
+    @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} == :appId")
     suspend fun loadApp(appId: String): App?
 
-    @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} == :rowId")
+    @Query("SELECT * FROM $TABLE WHERE ${BaseColumns._ID} == :rowId")
     suspend fun loadAppRow(rowId: Int): App?
 
     @Suppress("FunctionName")
     @Query(
-        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table " +
-            "WHERE ${Columns.packageName} IN (:packageNames) AND ${Columns.status} != ${App.STATUS_DELETED}"
+        "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE " +
+            "WHERE ${Columns.PACKAGE_NAME} IN (:packageNames) AND ${Columns.STATUS} != ${App.STATUS_DELETED}"
     )
     suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
@@ -55,76 +55,76 @@ interface AppListTable {
     }
 
     @Query(
-        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "${Columns.status} != ${App.STATUS_DELETED}"
+        "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
+            "${Columns.STATUS} != ${App.STATUS_DELETED}"
     )
     fun observePackagesList(): Flow<List<PackageRowPair>>
 
     @Query(
-        "SELECT ${BaseColumns._ID}, ${Columns.packageName} FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END"
+        "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END"
     )
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
 
     @Query(
-        "SELECT $table.*, " +
-            "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-            "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+        "SELECT $TABLE.*, " +
+            "CASE WHEN ${Columns.SYNC_TIMESTAMP} > :recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
+            "FROM $TABLE WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END "
     )
     fun load(includeDeleted: Boolean, recentTime: Long): Cursor
 
     @Query(
-        "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-            "CASE WHEN ${Columns.syncTimestamp} > :recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-            "FROM $table " +
+        "SELECT $TABLE.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+            "CASE WHEN ${Columns.SYNC_TIMESTAMP} > :recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
+            "FROM $TABLE " +
             "LEFT JOIN ${ChangelogTable.table} ON " +
-            "${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-            "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+            "${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.appId} " +
+            "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.versionCode} " +
             "WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END " +
             "ORDER BY " +
-            "CASE WHEN :sortId = 0 THEN ${Columns.title} COLLATE NOCASE END ASC, " +
-            "CASE WHEN :sortId = 1 THEN ${Columns.title} COLLATE NOCASE END DESC, " +
-            "CASE WHEN :sortId = 2 THEN ${Columns.uploadTimestamp} END ASC, " +
-            "CASE WHEN :sortId = 3 THEN ${Columns.uploadTimestamp} END DESC "
+            "CASE WHEN :sortId = 0 THEN ${Columns.TITLE} COLLATE NOCASE END ASC, " +
+            "CASE WHEN :sortId = 1 THEN ${Columns.TITLE} COLLATE NOCASE END DESC, " +
+            "CASE WHEN :sortId = 2 THEN ${Columns.UPLOAD_TIMESTAMP} END ASC, " +
+            "CASE WHEN :sortId = 3 THEN ${Columns.UPLOAD_TIMESTAMP} END DESC "
     )
     fun loadAppList(includeDeleted: Boolean, sortId: Int, recentTime: Long): Cursor
 
     @Query(
         "SELECT COUNT(${BaseColumns._ID}) " +
-            "FROM $table WHERE " +
-            "CASE :includeDeleted WHEN 0 THEN ${Columns.status} != ${App.STATUS_DELETED} ELSE ${Columns.status} >= ${App.STATUS_NORMAL} END "
+            "FROM $TABLE WHERE " +
+            "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END "
     )
     suspend fun count(includeDeleted: Boolean): Int
 
-    @Query("DELETE FROM $table WHERE ${Columns.status} == ${App.STATUS_DELETED}")
+    @Query("DELETE FROM $TABLE WHERE ${Columns.STATUS} == ${App.STATUS_DELETED}")
     suspend fun cleanDeleted(): Int
 
-    @Query("DELETE FROM $table")
+    @Query("DELETE FROM $TABLE")
     suspend fun delete()
 
-    @Query("UPDATE $table SET ${Columns.status} = :status WHERE ${BaseColumns._ID} = :rowId")
+    @Query("UPDATE $TABLE SET ${Columns.STATUS} = :status WHERE ${BaseColumns._ID} = :rowId")
     suspend fun updateStatus(rowId: Int, status: Int): Int
 
     @Query(
-        "INSERT INTO $table (" +
-            "${Columns.appId}," +
-            "${Columns.packageName}," +
-            "${Columns.versionNumber}," +
-            "${Columns.versionName}," +
-            "${Columns.title}," +
-            "${Columns.creator}," +
-            "${Columns.iconUrl}," +
-            "${Columns.status}," +
-            "${Columns.uploadDate}," +
-            "${Columns.priceText}," +
-            "${Columns.priceCurrency}," +
-            "${Columns.priceMicros}," +
-            "${Columns.detailsUrl}," +
-            "${Columns.uploadTimestamp}," +
-            "${Columns.appType}," +
-            "${Columns.syncTimestamp}) VALUES (" +
+        "INSERT INTO $TABLE (" +
+            "${Columns.APP_ID}," +
+            "${Columns.PACKAGE_NAME}," +
+            "${Columns.VERSION_NUMBER}," +
+            "${Columns.VERSION_NAME}," +
+            "${Columns.TITLE}," +
+            "${Columns.CREATOR}," +
+            "${Columns.ICON_URL}," +
+            "${Columns.STATUS}," +
+            "${Columns.UPLOAD_DATE}," +
+            "${Columns.PRICE_TEXT}," +
+            "${Columns.PRICE_CURRENCY}," +
+            "${Columns.PRICE_MICROS}," +
+            "${Columns.DETAILS_URL}," +
+            "${Columns.UPLOAD_TIMESTAMP}," +
+            "${Columns.APP_TYPE}," +
+            "${Columns.SYNC_TIMESTAMP}) VALUES (" +
             ":appId, :packageName, :versionNumber, :versionName, :title, " +
             ":creator, :iconUrl, :status, :uploadDate, " +
             ":priceText, :priceCurrency, :priceMicros, " +
@@ -169,7 +169,7 @@ interface AppListTable {
         fun changes(table: AppListTable): Flow<List<Int>> {
             return table.observeRows(
                 SimpleSQLiteQuery(
-                    "SELECT ${BaseColumns._ID} FROM ${AppListTable.table} LIMIT 1",
+                    "SELECT ${BaseColumns._ID} FROM ${AppListTable.TABLE} LIMIT 1",
                     emptyArray()
                 )
             )
@@ -207,18 +207,18 @@ interface AppListTable {
         ): Pair<String, Array<String>> {
             val appTagsTable = when (tagId) {
                 null -> ""
-                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.table} ON ${AppTagsTable.TableColumns.appId} = ${TableColumns.appId} "
-                else -> "INNER JOIN ${AppTagsTable.table} ON ${AppTagsTable.TableColumns.appId} = ${TableColumns.appId} "
+                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
+                else -> "INNER JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
             }
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
             val selection = createSelection(tagId, titleFilter, offset)
 
             val sql =
-                "SELECT $table.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
-                    "CASE WHEN ${Columns.syncTimestamp} > $recentTime THEN 1 ELSE 0 END ${Columns.recentFlag} " +
-                    "FROM $table " + appTagsTable +
-                    "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.appId} == ${ChangelogTable.TableColumns.appId} " +
-                    "AND ${TableColumns.versionNumber} == ${ChangelogTable.TableColumns.versionCode} " +
+                "SELECT $TABLE.*, ${ChangelogTable.TableColumns.details}, ${ChangelogTable.TableColumns.noNewDetails}, " +
+                    "CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
+                    "FROM $TABLE " + appTagsTable +
+                    "LEFT JOIN ${ChangelogTable.table} ON ${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.appId} " +
+                    "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.versionCode} " +
                     "WHERE ${selection.first} " +
                     "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} " +
                     rangeSql
@@ -229,7 +229,7 @@ interface AppListTable {
             // Skip id to apply autoincrement
             return@withContext db.runInTransaction(Callable {
                 db.openHelper.writableDatabase.insert(
-                    table,
+                    TABLE,
                     SQLiteDatabase.CONFLICT_REPLACE,
                     app.contentValues
                 )
@@ -239,8 +239,8 @@ interface AppListTable {
         suspend fun delete(appId: String, db: AppsDatabase): Int {
             return db.withTransaction {
                 return@withTransaction db.openHelper.writableDatabase.delete(
-                    table,
-                    "${Columns.appId} = ?",
+                    TABLE,
+                    "${Columns.APP_ID} = ?",
                     arrayOf(appId)
                 )
             }
@@ -248,16 +248,16 @@ interface AppListTable {
 
         private fun createSortOrder(sortId: Int, orderByRecentlyUpdated: Boolean): String {
             val filter = mutableListOf(
-                Columns.status + " DESC"
+                Columns.STATUS + " DESC"
             )
             if (orderByRecentlyUpdated) {
-                filter.add(Columns.recentFlag + " DESC")
+                filter.add(Columns.RECENT_FLAG + " DESC")
             }
             when (sortId) {
-                Preferences.SORT_NAME_DESC -> filter.add(Columns.title + " COLLATE NOCASE DESC")
-                Preferences.SORT_DATE_ASC -> filter.add(Columns.uploadTimestamp + " ASC")
-                Preferences.SORT_DATE_DESC -> filter.add(Columns.uploadTimestamp + " DESC")
-                else -> filter.add(Columns.title + " COLLATE NOCASE ASC")
+                Preferences.SORT_NAME_DESC -> filter.add(Columns.TITLE + " COLLATE NOCASE DESC")
+                Preferences.SORT_DATE_ASC -> filter.add(Columns.UPLOAD_TIMESTAMP + " ASC")
+                Preferences.SORT_DATE_DESC -> filter.add(Columns.UPLOAD_TIMESTAMP + " DESC")
+                else -> filter.add(Columns.TITLE + " COLLATE NOCASE ASC")
             }
             return filter.joinToString(", ")
         }
@@ -266,20 +266,20 @@ interface AppListTable {
             val selc = ArrayList<String>(3)
             val args = ArrayList<String>(5)
 
-            selc.add(Columns.status + " != ?")
+            selc.add(Columns.STATUS + " != ?")
             args.add(App.STATUS_DELETED.toString())
 
             if (tagId != null) {
                 if (tagId == Tag.empty.id) {
-                    selc.add(AppTagsTable.TableColumns.tagId + " IS NULL")
+                    selc.add(AppTagsTable.TableColumns.TAG_ID + " IS NULL")
                 } else {
-                    selc.add(AppTagsTable.TableColumns.tagId + " = ?")
+                    selc.add(AppTagsTable.TableColumns.TAG_ID + " = ?")
                     args.add(tagId.toString())
                 }
             }
 
             if (titleFilter.isNotEmpty()) {
-                selc.add(Columns.title + " LIKE ?")
+                selc.add(Columns.TITLE + " LIKE ?")
                 args.add("%$titleFilter%")
             }
 
@@ -312,31 +312,31 @@ interface AppListTable {
 
     class Columns : BaseColumns {
         companion object {
-            const val appId = "app_id"
-            const val packageName = "package"
-            const val versionNumber = "ver_num"
-            const val versionName = "ver_name"
-            const val title = "title"
-            const val creator = "creator"
-            const val iconCache = "icon"
-            const val iconUrl = "iconUrl"
-            const val status = "status"
-            const val uploadTimestamp = "update_date"
-            const val priceText = "price_text"
-            const val priceCurrency = "price_currency"
-            const val priceMicros = "price_micros"
-            const val uploadDate = "upload_date"
-            const val detailsUrl = "details_url"
-            const val appType = "app_type"
-            const val syncTimestamp = "sync_version"
-            const val recentFlag = "recent_flag"
+            const val APP_ID = "app_id"
+            const val PACKAGE_NAME = "package"
+            const val VERSION_NUMBER = "ver_num"
+            const val VERSION_NAME = "ver_name"
+            const val TITLE = "title"
+            const val CREATOR = "creator"
+            const val ICON_CACHE = "icon"
+            const val ICON_URL = "iconUrl"
+            const val STATUS = "status"
+            const val UPLOAD_TIMESTAMP = "update_date"
+            const val PRICE_TEXT = "price_text"
+            const val PRICE_CURRENCY = "price_currency"
+            const val PRICE_MICROS = "price_micros"
+            const val UPLOAD_DATE = "upload_date"
+            const val DETAILS_URL = "details_url"
+            const val APP_TYPE = "app_type"
+            const val SYNC_TIMESTAMP = "sync_version"
+            const val RECENT_FLAG = "recent_flag"
         }
     }
 
     object TableColumns {
-        const val _ID = table + "." + BaseColumns._ID
-        const val appId = "$table.app_id"
-        const val versionNumber = "$table.ver_num"
+        const val BASE_ID = TABLE + "." + BaseColumns._ID
+        const val APP_ID = "$TABLE.app_id"
+        const val VERSION_NUMBER = "$TABLE.ver_num"
     }
 
     companion object {
@@ -344,7 +344,7 @@ interface AppListTable {
         const val ERROR_ALREADY_ADDED = -1
         const val ERROR_INSERT = -2
 
-        const val table = "app_list"
+        const val TABLE = "app_list"
 
         val recentTime: Long
             get() = dayStartAgoMillis(days = Preferences.recentDays)
@@ -360,24 +360,24 @@ val App.contentValues: ContentValues
         if (rowId > 0) {
             put(BaseColumns._ID, rowId)
         }
-        put(AppListTable.Columns.appId, appId)
-        put(AppListTable.Columns.packageName, packageName)
-        put(AppListTable.Columns.title, title)
-        put(AppListTable.Columns.versionNumber, versionNumber)
-        put(AppListTable.Columns.versionName, versionName)
-        put(AppListTable.Columns.creator, creator)
-        put(AppListTable.Columns.status, status)
-        put(AppListTable.Columns.uploadDate, uploadDate)
+        put(AppListTable.Columns.APP_ID, appId)
+        put(AppListTable.Columns.PACKAGE_NAME, packageName)
+        put(AppListTable.Columns.TITLE, title)
+        put(AppListTable.Columns.VERSION_NUMBER, versionNumber)
+        put(AppListTable.Columns.VERSION_NAME, versionName)
+        put(AppListTable.Columns.CREATOR, creator)
+        put(AppListTable.Columns.STATUS, status)
+        put(AppListTable.Columns.UPLOAD_DATE, uploadDate)
 
-        put(AppListTable.Columns.priceText, price.text)
-        put(AppListTable.Columns.priceCurrency, price.cur)
-        put(AppListTable.Columns.priceMicros, price.micros)
+        put(AppListTable.Columns.PRICE_TEXT, price.text)
+        put(AppListTable.Columns.PRICE_CURRENCY, price.cur)
+        put(AppListTable.Columns.PRICE_MICROS, price.micros)
 
-        put(AppListTable.Columns.detailsUrl, detailsUrl)
+        put(AppListTable.Columns.DETAILS_URL, detailsUrl)
 
-        put(AppListTable.Columns.iconUrl, iconUrl)
-        put(AppListTable.Columns.uploadTimestamp, uploadTime)
+        put(AppListTable.Columns.ICON_URL, iconUrl)
+        put(AppListTable.Columns.UPLOAD_TIMESTAMP, uploadTime)
 
-        put(AppListTable.Columns.appType, appType)
-        put(AppListTable.Columns.syncTimestamp, syncTime)
+        put(AppListTable.Columns.APP_TYPE, appType)
+        put(AppListTable.Columns.SYNC_TIMESTAMP, syncTime)
     }

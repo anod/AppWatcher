@@ -17,31 +17,31 @@ import kotlinx.coroutines.withContext
 @Dao
 interface TagsTable {
 
-    @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     fun observe(): Flow<List<Tag>>
 
-    @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    @Query("SELECT * FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
     fun observeTag(tagId: Int): Flow<Tag?>
 
-    @Query("SELECT * FROM $table ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
+    @Query("SELECT * FROM $TABLE ORDER BY ${Columns.name} COLLATE LOCALIZED ASC")
     suspend fun load(): List<Tag>
 
-    @Query("SELECT * FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    @Query("SELECT * FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
     suspend fun loadById(tagId: Int): Tag?
 
-    @Query("SELECT ${BaseColumns._ID} FROM $table")
+    @Query("SELECT ${BaseColumns._ID} FROM $TABLE")
     suspend fun loadIds(): List<Int>
 
-    @Query("DELETE FROM $table WHERE ${BaseColumns._ID} = :tagId")
+    @Query("DELETE FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
     suspend fun delete(tagId: Int)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(tag: Tag)
 
-    @Query("DELETE FROM $table")
+    @Query("DELETE FROM $TABLE")
     suspend fun delete()
 
-    @Query("INSERT INTO $table (${Columns.name}, ${Columns.color}) VALUES (:name, :color)")
+    @Query("INSERT INTO $TABLE (${Columns.name}, ${Columns.color}) VALUES (:name, :color)")
     suspend fun insert(name: String, color: Int): Long
 
     object Queries {
@@ -61,7 +61,7 @@ interface TagsTable {
             var rowId = 0L
             withContext(Dispatchers.IO) {
                 db.runInTransaction {
-                    rowId = db.openHelper.writableDatabase.insert(table, SQLiteDatabase.CONFLICT_REPLACE, values)
+                    rowId = db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, values)
                 }
             }
             return rowId
@@ -76,9 +76,9 @@ interface TagsTable {
     }
 
     object TableColumns {
-        const val _ID = table + "." + BaseColumns._ID
-        const val name = "$table.name"
-        const val color = "$table.color"
+        const val _ID = TABLE + "." + BaseColumns._ID
+        const val name = "$TABLE.name"
+        const val color = "$TABLE.color"
     }
 
     object Projection {
@@ -88,7 +88,7 @@ interface TagsTable {
     }
 
     companion object {
-        const val table = "tags"
+        const val TABLE = "tags"
         val projection = arrayOf(TableColumns._ID, TableColumns.name, TableColumns.color)
     }
 }

@@ -33,37 +33,37 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
     return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName ?: "", appTitle, launchComponent)
 }
 
-@Entity(tableName = AppListTable.table)
+@Entity(tableName = AppListTable.TABLE)
 data class App(
     @PrimaryKey @ColumnInfo(name = BaseColumns._ID) val rowId: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.appId) val appId: String,
+    @ColumnInfo(name = AppListTable.Columns.APP_ID) val appId: String,
 
-    @ColumnInfo(name = AppListTable.Columns.packageName) val packageName: String,
+    @ColumnInfo(name = AppListTable.Columns.PACKAGE_NAME) val packageName: String,
 
-    @ColumnInfo(name = AppListTable.Columns.versionNumber) val versionNumber: Int,
+    @ColumnInfo(name = AppListTable.Columns.VERSION_NUMBER) val versionNumber: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.versionName) val versionName: String,
+    @ColumnInfo(name = AppListTable.Columns.VERSION_NAME) val versionName: String,
 
-    @ColumnInfo(name = AppListTable.Columns.title) val title: String,
+    @ColumnInfo(name = AppListTable.Columns.TITLE) val title: String,
 
-    @ColumnInfo(name = AppListTable.Columns.creator) val creator: String,
+    @ColumnInfo(name = AppListTable.Columns.CREATOR) val creator: String,
 
-    @ColumnInfo(name = AppListTable.Columns.iconUrl) val iconUrl: String,
+    @ColumnInfo(name = AppListTable.Columns.ICON_URL) val iconUrl: String,
 
-    @ColumnInfo(name = AppListTable.Columns.status) val status: Int,
+    @ColumnInfo(name = AppListTable.Columns.STATUS) val status: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.uploadDate) val uploadDate: String,
+    @ColumnInfo(name = AppListTable.Columns.UPLOAD_DATE) val uploadDate: String,
 
     @Embedded val price: Price,
 
-    @ColumnInfo(name = AppListTable.Columns.detailsUrl) val detailsUrl: String?,
+    @ColumnInfo(name = AppListTable.Columns.DETAILS_URL) val detailsUrl: String?,
 
-    @ColumnInfo(name = AppListTable.Columns.uploadTimestamp) val uploadTime: Long,
+    @ColumnInfo(name = AppListTable.Columns.UPLOAD_TIMESTAMP) val uploadTime: Long,
 
-    @ColumnInfo(name = AppListTable.Columns.appType) val appType: String,
+    @ColumnInfo(name = AppListTable.Columns.APP_TYPE) val appType: String,
 
-    @ColumnInfo(name = AppListTable.Columns.syncTimestamp) val syncTime: Long,
+    @ColumnInfo(name = AppListTable.Columns.SYNC_TIMESTAMP) val syncTime: Long,
 
     @Ignore val recentFlag: Boolean
 ) {

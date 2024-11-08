@@ -14,6 +14,6 @@ data class PackageRowPair(
     @ColumnInfo(name = BaseColumns._ID)
     val rowId: Int,
 
-    @ColumnInfo(name = AppListTable.Columns.packageName)
+    @ColumnInfo(name = AppListTable.Columns.PACKAGE_NAME)
     val packageName: String
 )
