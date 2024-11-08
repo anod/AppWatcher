@@ -4,11 +4,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Path
-import android.net.Uri
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import coil3.Image
 import coil3.ImageLoader
+import coil3.Uri
 import coil3.decode.DataSource
 import coil3.decode.ImageSource
 import coil3.fetch.FetchResult
@@ -19,6 +19,7 @@ import coil3.request.Options
 import coil3.request.placeholder
 import coil3.request.target
 import coil3.request.transformations
+import coil3.toAndroidUri
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.preferences.Preferences
@@ -81,7 +82,7 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
         private val packageManager: PackageManager = context.packageManager
 
         override suspend fun fetch(): FetchResult? {
-            val part = data.schemeSpecificPart
+            val part = data.toAndroidUri().schemeSpecificPart
             val cmp = ComponentName.unflattenFromString(part) ?: return null
 
             val icon = packageManager.loadIcon(cmp, context.resources.displayMetrics) ?: return null

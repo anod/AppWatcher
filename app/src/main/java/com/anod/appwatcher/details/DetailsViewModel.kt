@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.palette.graphics.Palette
+import coil3.asDrawable
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
@@ -42,8 +43,6 @@ import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.text.Html
 import info.anodsplace.graphics.chooseDark
-import java.net.URLEncoder
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -52,6 +51,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.net.URLEncoder
+import java.util.Locale
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -231,7 +232,7 @@ class DetailsViewModel(
 
     private fun loadAppIcon(iconUrl: String) {
         viewModelScope.launch {
-            val drawable = iconLoader.get(iconUrl) as? BitmapDrawable
+            val drawable = iconLoader.get(iconUrl)?.asDrawable(context.resources) as? BitmapDrawable
             if (drawable == null) {
                 viewState = viewState.copy(appIconState = AppIconState.Default)
                 return@launch
