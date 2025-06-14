@@ -14,14 +14,14 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.watchlist.DetailContent
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 open class SearchComposeActivity : BaseComposeActivity() {
     val viewModel: SearchViewModel by viewModels(factoryProducer = {
         SearchViewModel.Factory(
-            initialState = intentToState(intent, hingeDevice.layout.value),
+            initialState = intentToState(intent, foldableDevice.layout.value),
         )
     })
 
@@ -89,13 +89,13 @@ open class SearchComposeActivity : BaseComposeActivity() {
         }
 
         lifecycleScope.launch {
-            hingeDevice.layout.collect {
+            foldableDevice.layout.collect {
                 viewModel.handleEvent(SearchViewEvent.SetWideLayout(it))
             }
         }
     }
 
-    private fun intentToState(intent: Intent?, wideLayout: HingeDeviceLayout) = SearchViewState(
+    private fun intentToState(intent: Intent?, wideLayout: FoldableDeviceLayout) = SearchViewState(
         wideLayout = wideLayout,
         searchQuery = intent?.getStringExtra(EXTRA_KEYWORD) ?: "",
         isPackageSearch = intent?.getBooleanExtra(EXTRA_PACKAGE, false) ?: false,

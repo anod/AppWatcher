@@ -20,7 +20,7 @@ import com.anod.appwatcher.utils.getInt
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackagesCodes
@@ -35,7 +35,7 @@ data class InstalledListState(
     val sortId: Int,
     val selectionMode: Boolean = false,
     val titleFilter: String = "",
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
     val selectedApp: App? = null,
     val importStatus: ImportStatus = ImportStatus.NotStarted,
     val selection: SelectionState = SelectionState(),
@@ -46,7 +46,7 @@ data class InstalledListState(
 
 sealed interface InstalledListEvent {
     object OnBackPressed : InstalledListEvent
-    class SetWideLayout(val layout: HingeDeviceLayout) : InstalledListEvent
+    class SetWideLayout(val layout: FoldableDeviceLayout) : InstalledListEvent
     class ListEvent(val event: WatchListEvent) : InstalledListEvent
     class FilterByTitle(val query: String) : InstalledListEvent
     class ChangeSort(val sortId: Int) : InstalledListEvent

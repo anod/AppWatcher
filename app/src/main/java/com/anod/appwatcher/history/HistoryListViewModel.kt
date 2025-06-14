@@ -21,7 +21,7 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppNameFilter
@@ -38,7 +38,7 @@ data class HistoryListState(
     val account: Account? = null,
     val authToken: String = "",
     val nameFilter: String = "",
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
     val selectedApp: App? = null,
 )
 
@@ -51,13 +51,13 @@ sealed interface HistoryListEvent {
     data object OnBackPress : HistoryListEvent
     class OnNameFilter(val query: String) : HistoryListEvent
     class SelectApp(val app: App?) : HistoryListEvent
-    class SetWideLayout(val wideLayout: HingeDeviceLayout) : HistoryListEvent
+    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : HistoryListEvent
 }
 
-class HistoryListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, HistoryListAction>(), KoinComponent {
+class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, HistoryListAction>(), KoinComponent {
 
     class Factory(
-        private val wideLayout: HingeDeviceLayout
+        private val wideLayout: FoldableDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

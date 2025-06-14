@@ -29,7 +29,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
 
     private val viewModel: WishListViewModel by viewModels(factoryProducer = {
         WishListViewModel.Factory(
-            wideLayout = hingeDevice.layout.value,
+            wideLayout = foldableDevice.layout.value,
         )
     })
 
@@ -86,7 +86,7 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
         }
 
         lifecycleScope.launch {
-            hingeDevice.layout.collect {
+            foldableDevice.layout.collect {
                 viewModel.handleEvent(WishListEvent.SetWideLayout(it))
             }
         }

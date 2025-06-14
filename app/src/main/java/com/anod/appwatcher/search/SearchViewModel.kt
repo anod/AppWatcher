@@ -33,7 +33,7 @@ import com.anod.appwatcher.utils.networkConnection
 import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
@@ -76,7 +76,7 @@ private fun startActivityAction(intent: Intent, finish: Boolean = false): Search
 sealed interface SearchViewEvent {
     data object NoAccount : SearchViewEvent
     data object OnBackPressed : SearchViewEvent
-    class SetWideLayout(val wideLayout: HingeDeviceLayout) : SearchViewEvent
+    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
     class AccountSelectError(val errorMessage: String) : SearchViewEvent
@@ -93,7 +93,7 @@ data class SearchViewState(
     val isPackageSearch: Boolean = false,
     val authenticated: Boolean = false,
     val searchStatus: SearchStatus = SearchStatus.Loading,
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
     val selectedApp: App? = null
 )
 

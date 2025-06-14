@@ -13,10 +13,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import com.anod.appwatcher.watchlist.DetailContent
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 
 @Composable
-fun MainDetailScreen(wideLayout: HingeDeviceLayout, main: @Composable () -> Unit, detail: @Composable () -> Unit) {
+fun MainDetailScreen(wideLayout: FoldableDeviceLayout, main: @Composable () -> Unit, detail: @Composable () -> Unit) {
     Row(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -45,7 +45,7 @@ fun MainDetailScreen(wideLayout: HingeDeviceLayout, main: @Composable () -> Unit
 private fun MainDetailScreenPreview() {
     AppTheme {
         MainDetailScreen(
-            wideLayout = HingeDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
+            wideLayout = FoldableDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
             main = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
             detail = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
         )

@@ -38,7 +38,7 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
@@ -71,7 +71,7 @@ data class WatchListSharedState(
     val showSearch: Boolean = false,
     val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(isWideLayout = false, hinge = Rect()),
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
     val selectedApp: App? = null,
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
@@ -93,7 +93,7 @@ sealed interface WatchListEvent {
 
     class ChangeSort(val sortId: Int) : WatchListEvent
     class FilterByTitle(val query: String) : WatchListEvent
-    class SetWideLayout(val layout: HingeDeviceLayout) : WatchListEvent
+    class SetWideLayout(val layout: FoldableDeviceLayout) : WatchListEvent
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
@@ -126,7 +126,7 @@ class WatchListStateViewModel(
     state: SavedStateHandle,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
-    wideLayout: HingeDeviceLayout
+    wideLayout: FoldableDeviceLayout
 ) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, CommonActivityAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
@@ -146,7 +146,7 @@ class WatchListStateViewModel(
 
     class Factory(
         private val defaultFilterId: Int,
-        private val wideLayout: HingeDeviceLayout,
+        private val wideLayout: FoldableDeviceLayout,
         private val collectRecentlyInstalledApps: Boolean
     ) : AbstractSavedStateViewModelFactory() {
         @Suppress("UNCHECKED_CAST")

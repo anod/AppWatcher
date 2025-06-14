@@ -50,7 +50,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.handleEvent(SettingsViewEvent.SetWideLayout(hingeDevice.layout.value))
+        viewModel.handleEvent(SettingsViewEvent.SetWideLayout(foldableDevice.layout.value))
 
         gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
         notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
@@ -111,7 +111,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                hingeDevice.layout.collect {
+                foldableDevice.layout.collect {
                     viewModel.handleEvent(SettingsViewEvent.SetWideLayout(it))
                 }
             }

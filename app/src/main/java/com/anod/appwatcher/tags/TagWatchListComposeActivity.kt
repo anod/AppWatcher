@@ -32,7 +32,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
     private val viewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = Filters.ALL,
-            wideLayout = hingeDevice.layout.value,
+            wideLayout = foldableDevice.layout.value,
             collectRecentlyInstalledApps = false
         )
     })
@@ -114,7 +114,7 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                hingeDevice.layout.collect {
+                foldableDevice.layout.collect {
                     viewModel.handleEvent(WatchListEvent.SetWideLayout(it))
                 }
             }

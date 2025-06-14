@@ -46,7 +46,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
     private val listViewModel: WatchListStateViewModel by viewModels(factoryProducer = {
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            wideLayout = hingeDevice.layout.value,
+            wideLayout = foldableDevice.layout.value,
             collectRecentlyInstalledApps = prefs.showRecent
         )
     })
@@ -180,7 +180,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                hingeDevice.layout.collect {
+                foldableDevice.layout.collect {
                     listViewModel.handleEvent(WatchListEvent.SetWideLayout(it))
                 }
             }

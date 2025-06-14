@@ -31,7 +31,7 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
 
     private val viewModel: HistoryListViewModel by viewModels(factoryProducer = {
         HistoryListViewModel.Factory(
-            wideLayout = hingeDevice.layout.value,
+            wideLayout = foldableDevice.layout.value,
         )
     })
 
@@ -89,7 +89,7 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                hingeDevice.layout.collect {
+                foldableDevice.layout.collect {
                     viewModel.handleEvent(HistoryListEvent.SetWideLayout(it))
                 }
             }

@@ -29,7 +29,7 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
@@ -51,7 +51,7 @@ data class SettingsViewState(
     val isProgressVisible: Boolean = false,
     val recreateWatchlistOnBack: Boolean = false,
     val areNotificationsEnabled: Boolean = false,
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout()
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout()
 )
 
 sealed interface SettingsViewEvent {
@@ -72,7 +72,7 @@ sealed interface SettingsViewEvent {
     class GDriveLoginResult(val isSuccess: Boolean, val errorCode: Int) : SettingsViewEvent
     object NotificationPermissionRequest : SettingsViewEvent
     class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
-    class SetWideLayout(val wideLayout: HingeDeviceLayout) : SettingsViewEvent
+    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SettingsViewEvent
     object ShowAppSettings : SettingsViewEvent
     object CheckNotificationPermission : SettingsViewEvent
     object DbCleanup : SettingsViewEvent

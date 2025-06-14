@@ -21,7 +21,7 @@ import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
-import info.anodsplace.framework.app.HingeDeviceLayout
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
@@ -36,7 +36,7 @@ import org.koin.core.component.inject
 @Immutable
 data class WishListState(
     val nameFilter: String = "",
-    val wideLayout: HingeDeviceLayout = HingeDeviceLayout(),
+    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
     val selectedApp: App? = null,
 )
 
@@ -49,13 +49,13 @@ sealed interface WishListEvent {
     data object OnBackPress : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
     class SelectApp(val app: App?) : WishListEvent
-    class SetWideLayout(val wideLayout: HingeDeviceLayout) : WishListEvent
+    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : WishListEvent
 }
 
-class WishListViewModel(wideLayout: HingeDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
+class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
 
     class Factory(
-        private val wideLayout: HingeDeviceLayout
+        private val wideLayout: FoldableDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

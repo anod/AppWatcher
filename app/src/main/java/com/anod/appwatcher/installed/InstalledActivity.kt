@@ -32,7 +32,7 @@ class InstalledActivity : BaseComposeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.handleEvent(InstalledListEvent.SetWideLayout(hingeDevice.layout.value))
+        viewModel.handleEvent(InstalledListEvent.SetWideLayout(foldableDevice.layout.value))
 
         setContent {
             AppTheme(
@@ -91,7 +91,7 @@ class InstalledActivity : BaseComposeActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                hingeDevice.layout.collect {
+                foldableDevice.layout.collect {
                     viewModel.handleEvent(InstalledListEvent.SetWideLayout(it))
                 }
             }

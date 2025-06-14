@@ -2,17 +2,13 @@ package com.anod.appwatcher.compose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.WindowCompat
-import info.anodsplace.context.ApplicationContext
-import info.anodsplace.framework.app.HingeDevice
+import info.anodsplace.framework.app.FoldableDevice
 
 abstract class BaseComposeActivity : ComponentActivity() {
-    lateinit var hingeDevice: HingeDevice
+    lateinit var foldableDevice: FoldableDevice
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        hingeDevice = HingeDevice.create(this)
+        foldableDevice = FoldableDevice.create(this)
         super.onCreate(savedInstanceState)
     }
 }
