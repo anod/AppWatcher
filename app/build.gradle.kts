@@ -10,12 +10,12 @@ plugins {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
         minSdk = 27
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 16900
         versionName = "1.6.9"
     }
@@ -107,7 +107,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
 
-    implementation(libs.material)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)

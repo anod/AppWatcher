@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "info.anodpslace.appwatcher.macrobenchmark"
-    compileSdk = 34
+    compileSdk = 36
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         minSdk = 28
-        targetSdk = 33
+        targetSdk = 36
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

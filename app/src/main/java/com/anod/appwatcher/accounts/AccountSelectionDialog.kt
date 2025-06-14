@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Activity
 import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -23,7 +24,7 @@ sealed interface AccountSelectionResult {
  * @date 9/17/13
  */
 class AccountSelectionDialog(
-    private val activity: AppCompatActivity,
+    private val activity: ComponentActivity,
     private val preferences: Preferences
 ) {
 

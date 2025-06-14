@@ -9,7 +9,7 @@ import finsky.protos.AndroidCheckinRequest
 import finsky.protos.DeviceConfigurationProto
 import finsky.protos.DeviceFeature
 
-fun checkinRequest(timeToReport: Long, deviceInfo: DfeDeviceInfoProvider) = AndroidCheckinRequest.newBuilder().also {
+fun checkinRequest(timeToReport: Long, deviceInfo: DfeDeviceInfoProvider): AndroidCheckinRequest = AndroidCheckinRequest.newBuilder().also {
     it.id = 0
     it.checkin = deviceInfo.toCheckInProto(timeToReport)
     it.locale = deviceInfo.locale.description
