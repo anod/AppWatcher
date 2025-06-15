@@ -92,11 +92,6 @@ android {
     namespace = "com.anod.appwatcher"
 }
 
-// https://youtrack.jetbrains.com/issue/KT-55947
-kotlin {
-    jvmToolchain(17)
-}
-
 dependencies {
     ktlintRuleset(libs.ktlint.compose)
     // AndroidX
