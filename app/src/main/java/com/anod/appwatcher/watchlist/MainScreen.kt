@@ -1,21 +1,80 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
 import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
 import com.anod.appwatcher.compose.RefreshIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
+
+@Composable
+fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout) {
+    val mainViewModel: MainViewModel = viewModel()
+    val listViewModel: WatchListStateViewModel = viewModel(factory =
+        WatchListStateViewModel.Factory(
+            defaultFilterId = prefs.defaultMainFilterId,
+            wideLayout = wideLayout,
+            collectRecentlyInstalledApps = prefs.showRecent
+        )
+    )
+    AppTheme(
+        theme = prefs.theme,
+        transparentSystemUi = true
+    ) {
+        val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
+        val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
+        val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
+        val drawerState = rememberDrawerState(initialValue = drawerValue)
+        LaunchedEffect(true) {
+            mainViewModel.viewActions.collect { action ->
+                if (action is MainViewAction.DrawerState) {
+                    if (action.isOpen) {
+                        drawerState.open()
+                    } else {
+                        drawerState.close()
+                    }
+                } else {
+                   // TODO: onMainAction(action)
+                }
+            }
+        }
+        val pagingSourceConfig = WatchListPagingSource.Config(
+            filterId = listState.filterId,
+            tagId = null,
+            showRecentlyDiscovered = prefs.showRecentlyDiscovered,
+            showOnDevice = prefs.showOnDevice,
+            showRecentlyInstalled = prefs.showRecent
+        )
+        MainScreen(
+            mainState = mainState,
+            drawerState = drawerState,
+            onMainEvent = mainViewModel::handleEvent,
+            listState = listState,
+            pagingSourceConfig = pagingSourceConfig,
+            onListEvent = listViewModel::handleEvent,
+            installedApps = listViewModel.installedApps
+        )
+    }
+}
 
 @Composable
 fun MainScreen(

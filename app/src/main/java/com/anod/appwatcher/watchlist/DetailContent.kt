@@ -17,12 +17,7 @@ import info.anodsplace.framework.content.CommonActivityAction
 fun DetailContent(app: App?, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
     Surface {
         if (app == null) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
-            }
+            EmptyBoxSmile()
         } else {
             DetailsPanel(
                 app = app,
@@ -30,5 +25,15 @@ fun DetailContent(app: App?, onDismissRequest: () -> Unit, onCommonActivityActio
                 onCommonActivityAction = onCommonActivityAction
             )
         }
+    }
+}
+
+@Composable
+fun EmptyBoxSmile() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)
     }
 }

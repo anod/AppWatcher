@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
     alias(libs.plugins.ktlint.gradle)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
@@ -104,6 +105,8 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.adaptive)
 
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)

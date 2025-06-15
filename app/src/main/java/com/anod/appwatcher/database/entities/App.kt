@@ -18,6 +18,7 @@ import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getLaunchComponent
 import info.anodsplace.framework.content.getPackageInfoOrNull
+import kotlinx.serialization.Serializable
 import java.text.DateFormat
 import java.util.Date
 
@@ -34,6 +35,7 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
 }
 
 @Entity(tableName = AppListTable.TABLE)
+@Serializable
 data class App(
     @PrimaryKey @ColumnInfo(name = BaseColumns._ID) val rowId: Int,
 
