@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 import com.anod.appwatcher.database.TagsTable
 import info.anodsplace.ktx.hashCodeOf
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * @author Alex Gavrishev
@@ -17,6 +18,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Entity(tableName = TagsTable.TABLE)
 @Parcelize
+@Serializable
 data class Tag(
     @PrimaryKey
     @ColumnInfo(name = BaseColumns._ID)

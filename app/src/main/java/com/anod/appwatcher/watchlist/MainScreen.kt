@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavBackStack
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.FilterMenuAction
@@ -21,13 +22,21 @@ import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
 import com.anod.appwatcher.compose.RefreshIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.navigation.HistoryNavKey
+import com.anod.appwatcher.navigation.InstalledNavKey
+import com.anod.appwatcher.navigation.MarketSearchNavKey
+import com.anod.appwatcher.navigation.SelectedAppNavKey
+import com.anod.appwatcher.navigation.SettingsNavKey
+import com.anod.appwatcher.navigation.TagWatchListNavKey
+import com.anod.appwatcher.navigation.WishListNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.app.FoldableDeviceLayout
+import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 
 @Composable
-fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout) {
+fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
     val mainViewModel: MainViewModel = viewModel()
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
@@ -36,46 +45,69 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout) {
             collectRecentlyInstalledApps = prefs.showRecent
         )
     )
-    AppTheme(
-        theme = prefs.theme,
-        transparentSystemUi = true
-    ) {
-        val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
-        val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
-        val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
-        val drawerState = rememberDrawerState(initialValue = drawerValue)
-        LaunchedEffect(true) {
-            mainViewModel.viewActions.collect { action ->
-                if (action is MainViewAction.DrawerState) {
-                    if (action.isOpen) {
-                        drawerState.open()
-                    } else {
-                        drawerState.close()
-                    }
+
+    val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
+    val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
+    val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
+    val drawerState = rememberDrawerState(initialValue = drawerValue)
+    LaunchedEffect(true) {
+        mainViewModel.viewActions.collect { action ->
+            if (action is MainViewAction.DrawerState) {
+                if (action.isOpen) {
+                    drawerState.open()
                 } else {
-                   // TODO: onMainAction(action)
+                    drawerState.close()
                 }
+            } else {
+               onMainAction(action, backStack, onCommonActivityAction)
             }
         }
-        val pagingSourceConfig = WatchListPagingSource.Config(
-            filterId = listState.filterId,
-            tagId = null,
-            showRecentlyDiscovered = prefs.showRecentlyDiscovered,
-            showOnDevice = prefs.showOnDevice,
-            showRecentlyInstalled = prefs.showRecent
-        )
-        MainScreen(
-            mainState = mainState,
-            drawerState = drawerState,
-            onMainEvent = mainViewModel::handleEvent,
-            listState = listState,
-            pagingSourceConfig = pagingSourceConfig,
-            onListEvent = listViewModel::handleEvent,
-            installedApps = listViewModel.installedApps
-        )
     }
+    LaunchedEffect(true) {
+        listViewModel.viewActions.collect { action ->
+            when (action) {
+                is WatchListAction.ActivityAction -> { onCommonActivityAction(action.action) }
+                is WatchListAction.SelectApp -> backStack.add(SelectedAppNavKey(action.app))
+            }
+        }
+    }
+    val pagingSourceConfig = WatchListPagingSource.Config(
+        filterId = listState.filterId,
+        tagId = null,
+        showRecentlyDiscovered = prefs.showRecentlyDiscovered,
+        showOnDevice = prefs.showOnDevice,
+        showRecentlyInstalled = prefs.showRecent
+    )
+    MainScreen(
+        mainState = mainState,
+        drawerState = drawerState,
+        onMainEvent = mainViewModel::handleEvent,
+        listState = listState,
+        pagingSourceConfig = pagingSourceConfig,
+        onListEvent = listViewModel::handleEvent,
+        installedApps = listViewModel.installedApps
+    )
 }
 
+private fun onMainAction(action: MainViewAction, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
+    when (action) {
+        is MainViewAction.NavigateTo -> {
+            when (action.id) {
+                DrawerItem.Id.Add -> backStack.add(MarketSearchNavKey)
+                DrawerItem.Id.Installed -> backStack.add(InstalledNavKey(importMode = false))
+                DrawerItem.Id.Refresh -> {}
+                DrawerItem.Id.Settings -> backStack.add(SettingsNavKey)
+                DrawerItem.Id.Wishlist -> backStack.add(WishListNavKey)
+                DrawerItem.Id.Purchases -> backStack.add(HistoryNavKey)
+            }
+        }
+        is MainViewAction.NavigateToTag -> backStack.add(TagWatchListNavKey(tag = action.tag))
+        MainViewAction.RequestNotificationPermission -> {} //notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+        MainViewAction.ChooseAccount -> {} //accountSelectionDialog.show()
+        is MainViewAction.ActivityAction -> onCommonActivityAction(action.action)
+        is MainViewAction.DrawerState -> { }
+    }
+}
 @Composable
 fun MainScreen(
     mainState: MainViewState,

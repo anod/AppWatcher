@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.widget.Toast
@@ -61,6 +60,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import androidx.core.graphics.drawable.toDrawable
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
+import kotlin.reflect.KClass
 
 @Immutable
 data class WatchListSharedState(
@@ -72,7 +76,6 @@ data class WatchListSharedState(
     val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
-    val selectedApp: App? = null,
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
@@ -97,7 +100,7 @@ sealed interface WatchListEvent {
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
-    class SelectApp(val app: App?) : WatchListEvent
+    class SelectApp(val app: App) : WatchListEvent
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListEvent
     data object PinTagShortcut : WatchListEvent
 
@@ -107,27 +110,33 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): CommonActivityAction.StartActivity {
-    return CommonActivityAction.StartActivity(
-        intent = intent,
-        addMultiWindowFlags = addMultiWindowFlags
-    )
+sealed interface WatchListAction {
+    data class ActivityAction(val action: CommonActivityAction) : WatchListAction
+    data class SelectApp(val app: App) : WatchListAction
 }
 
-private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): CommonActivityAction.ShowToast {
-    return CommonActivityAction.ShowToast(
+private fun CommonActivityAction.toWatchListAction(): WatchListAction.ActivityAction = WatchListAction.ActivityAction(this)
+
+private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): WatchListAction.ActivityAction
+    = CommonActivityAction.StartActivity(
+        intent = intent,
+        addMultiWindowFlags = addMultiWindowFlags
+    ).toWatchListAction()
+
+
+private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction.ActivityAction
+    = CommonActivityAction.ShowToast(
         resId = resId,
         text = text,
         length = length
-    )
-}
+    ).toWatchListAction()
 
 class WatchListStateViewModel(
     state: SavedStateHandle,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
     wideLayout: FoldableDeviceLayout
-) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, CommonActivityAction>(), KoinComponent {
+) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, WatchListAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
@@ -148,11 +157,11 @@ class WatchListStateViewModel(
         private val defaultFilterId: Int,
         private val wideLayout: FoldableDeviceLayout,
         private val collectRecentlyInstalledApps: Boolean
-    ) : AbstractSavedStateViewModelFactory() {
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(key: String, modelClass: Class<T>, handle: SavedStateHandle): T {
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             return WatchListStateViewModel(
-                state = handle,
+                state = extras.createSavedStateHandle(),
                 defaultFilterId = defaultFilterId,
                 wideLayout = wideLayout,
                 collectRecentlyInstalledApps = collectRecentlyInstalledApps
@@ -195,7 +204,7 @@ class WatchListStateViewModel(
                     .observeTag(viewState.tag.id)
                     .collect { tag ->
                         if (tag == null) {
-                            emitAction(CommonActivityAction.Finish)
+                            emitAction(CommonActivityAction.Finish.toWatchListAction())
                         } else {
                             viewState = viewState.copy(
                                 tag = tag,
@@ -255,16 +264,16 @@ class WatchListStateViewModel(
             is WatchListEvent.FilterById -> viewState = viewState.copy(filterId = event.filterId)
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListEvent.ShowSearch -> viewState = viewState.copy(showSearch = event.show)
-            is WatchListEvent.SelectApp -> viewState = viewState.copy(selectedApp = event.app)
+            is WatchListEvent.SelectApp -> emitAction(WatchListAction.SelectApp(event.app))
 
             WatchListEvent.NavigationButton -> {
-                if (viewState.showSearch) {
-                    viewState = viewState.copy(showSearch = false, titleFilter = "")
-                } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
-                    viewState = viewState.copy(selectedApp = null)
-                } else {
-                    emitAction(CommonActivityAction.Finish)
-                }
+//                if (viewState.showSearch) {
+//                    viewState = viewState.copy(showSearch = false, titleFilter = "")
+//                } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
+//                    viewState = viewState.copy(selectedApp = null)
+//                } else {
+//                    emitAction(CommonActivityAction.Finish)
+//                }
             }
 
             is WatchListEvent.SearchSubmit -> {
@@ -298,7 +307,7 @@ class WatchListStateViewModel(
             ))
             WatchListEvent.Refresh -> refresh()
             is WatchListEvent.AppClick -> {
-                viewState = viewState.copy(selectedApp = event.app)
+                emitAction(WatchListAction.SelectApp(event.app))
             }
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.EmptyButton -> {
@@ -344,7 +353,7 @@ class WatchListStateViewModel(
                 ))
             } catch (e: Exception) {
                 AppLog.e(e)
-                emitAction(CommonActivityAction.ShowToast(
+                emitAction(showToastAction(
                     resId = R.string.unable_pin_shortcut,
                     length = Toast.LENGTH_SHORT
                 ))
@@ -354,7 +363,7 @@ class WatchListStateViewModel(
 
     private suspend fun createTagIcon(): Icon = withContext(Dispatchers.Default) {
         val roles = MaterialColors.getColorRoles(viewState.tag.color, false)
-        val background = ColorDrawable(roles.accent)
+        val background = roles.accent.toDrawable()
         val foreground: Drawable = ContextCompat.getDrawable(application, R.drawable.shortcut_tag)!!
         foreground.setTint(roles.onAccent)
         return@withContext AdaptiveIconDrawable(background, foreground).toIcon(application)
@@ -366,14 +375,14 @@ class WatchListStateViewModel(
             appScope.launch {
                 try {
                     requestRefresh()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     if (networkConnection.isNetworkAvailable) {
-                        emitAction(CommonActivityAction.ShowToast(
+                        emitAction(showToastAction(
                             resId = R.string.failed_gain_access,
                             length = Toast.LENGTH_SHORT
                         ))
                     } else {
-                        emitAction(CommonActivityAction.ShowToast(
+                        emitAction(showToastAction(
                             resId = R.string.check_connection,
                             length = Toast.LENGTH_SHORT
                         ))

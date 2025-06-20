@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavBackStack
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -51,11 +54,28 @@ import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.java.KoinJavaComponent
+
+@Composable
+fun SearchResultsScreenScene(wideLayout: FoldableDeviceLayout, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
+    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(
+        initialState = SearchViewState(wideLayout = wideLayout), // intentToState(intent, foldableDevice.layout.value),
+    ))
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    SearchResultsScreen(
+        screenState = screenState,
+        onEvent = viewModel::handleEvent,
+        pagingDataFlow = { viewModel.pagingData },
+        viewActions = viewModel.viewActions,
+        onActivityAction = { onCommonActivityAction(it) },
+        onShowAccountDialog = { /* accountSelectionDialog.show() */ }
+    )
+}
 
 @Composable
 fun SearchResultsScreen(
@@ -136,7 +156,7 @@ fun SearchResultsScreen(
                         message = action.message,
                         duration = action.duration
                     )
-                    if (action.finish) {
+                    if (action.exit) {
                         onActivityAction(CommonActivityAction.Finish)
                     }
                 }

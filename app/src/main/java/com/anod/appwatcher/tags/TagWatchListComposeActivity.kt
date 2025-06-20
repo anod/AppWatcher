@@ -21,6 +21,7 @@ import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
+import com.anod.appwatcher.watchlist.WatchListAction
 import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
@@ -69,11 +70,11 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                             )
                         },
                         detail = {
-                            DetailContent(
-                                app = screenState.selectedApp,
-                                onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-                                onCommonActivityAction = { onCommonActivityAction(it) }
-                            )
+//                            DetailContent(
+//                                app = screenState.selectedApp,
+//                                onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+//                                onCommonActivityAction = { onCommonActivityAction(it) }
+//                            )
                         }
                     )
                 } else {
@@ -83,13 +84,13 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                         onEvent = viewModel::handleEvent,
                         installedApps = viewModel.installedApps
                     )
-                    if (screenState.selectedApp != null) {
-                        DetailsDialog(
-                            app = screenState.selectedApp!!,
-                            onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-                            onCommonActivityAction = { onCommonActivityAction(it) }
-                        )
-                    }
+//                    if (screenState.selectedApp != null) {
+//                        DetailsDialog(
+//                            app = screenState.selectedApp!!,
+//                            onDismissRequest = { viewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+//                            onCommonActivityAction = { onCommonActivityAction(it) }
+//                        )
+//                    }
                 }
 
                 if (screenState.showAppTagDialog) {
@@ -109,7 +110,13 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.viewActions.collect { onCommonActivityAction(it) }
+            viewModel.viewActions.collect {
+                when (it) {
+                    is WatchListAction.ActivityAction -> onCommonActivityAction(it.action)
+                    is WatchListAction.SelectApp -> {}
+                }
+
+            }
         }
 
         lifecycleScope.launch {
@@ -121,18 +128,18 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (viewModel.viewState.wideLayout.isWideLayout) {
-            if (viewModel.viewState.selectedApp != null) {
-                viewModel.handleEvent(WatchListEvent.SelectApp(app = null))
-            } else {
-                super.onBackPressed()
-            }
-        } else {
-            super.onBackPressed()
-        }
-    }
+//    @Deprecated("Deprecated in Java")
+//    override fun onBackPressed() {
+//        if (viewModel.viewState.wideLayout.isWideLayout) {
+//            if (viewModel.viewState.selectedApp != null) {
+//                viewModel.handleEvent(WatchListEvent.SelectApp(app = null))
+//            } else {
+//                super.onBackPressed()
+//            }
+//        } else {
+//            super.onBackPressed()
+//        }
+//    }
 
     companion object {
         fun createTagIntent(tag: Tag, context: Context) = Intent(context, TagWatchListComposeActivity::class.java).apply {

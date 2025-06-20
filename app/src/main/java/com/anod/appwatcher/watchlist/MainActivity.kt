@@ -146,11 +146,11 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                             )
                         },
                         detail = {
-                            DetailContent(
-                                app = listState.selectedApp,
-                                onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-                                onCommonActivityAction = { onCommonActivityAction(it) }
-                            )
+//                            DetailContent(
+//                                app = listState.selectedApp,
+//                                onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+//                                onCommonActivityAction = { onCommonActivityAction(it) }
+//                            )
                         }
                     )
                 } else {
@@ -163,19 +163,19 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                         onListEvent = listViewModel::handleEvent,
                         installedApps = listViewModel.installedApps
                     )
-                    if (listState.selectedApp != null) {
-                        DetailsDialog(
-                            app = listState.selectedApp!!,
-                            onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-                            onCommonActivityAction = { onCommonActivityAction(it) }
-                        )
-                    }
+//                    if (listState.selectedApp != null) {
+//                        DetailsDialog(
+//                            app = listState.selectedApp!!,
+//                            onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
+//                            onCommonActivityAction = { onCommonActivityAction(it) }
+//                        )
+//                    }
                 }
             }
         }
 
         lifecycleScope.launch {
-            listViewModel.viewActions.collect { onCommonActivityAction(it) }
+          //  listViewModel.viewActions.collect { onCommonActivityAction(it) }
         }
 
         lifecycleScope.launch {
