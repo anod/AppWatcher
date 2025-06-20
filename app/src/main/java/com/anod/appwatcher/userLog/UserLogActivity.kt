@@ -7,7 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.anod.appwatcher.compose.BaseComposeActivity
-import info.anodsplace.framework.content.onCommonActivityAction
+import com.anod.appwatcher.utils.onScreenCommonAction
 import kotlinx.coroutines.launch
 
 /**
@@ -30,7 +30,7 @@ class UserLogActivity : BaseComposeActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.viewActions.collect { onCommonActivityAction(it) }
+            viewModel.viewActions.collect { onScreenCommonAction(action = it, navigateBack = { finish() }) }
         }
     }
 }

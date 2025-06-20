@@ -30,7 +30,8 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.permissions.AppPermission
@@ -79,7 +80,9 @@ sealed interface SettingsViewEvent {
 }
 
 sealed interface SettingsViewAction {
-    class ActivityAction(val action: CommonActivityAction) : SettingsViewAction
+    data object OnBackPressed : SettingsViewAction
+    data class StartActivity(override val intent: Intent) : SettingsViewAction, StartActivityAction
+    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), SettingsViewAction
     object GDriveSignIn : SettingsViewAction
     object GDriveSignOut : SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
@@ -90,24 +93,18 @@ sealed interface SettingsViewAction {
     class ImportResult(val result: Int) : SettingsViewAction
 }
 
-private val finishAction = SettingsViewAction.ActivityAction(CommonActivityAction.Finish)
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): SettingsViewAction.ActivityAction {
-    return SettingsViewAction.ActivityAction(
-        action = CommonActivityAction.StartActivity(
-            intent = intent,
-            addMultiWindowFlags = addMultiWindowFlags
-        )
+private fun startActivityAction(intent: Intent): SettingsViewAction {
+    return SettingsViewAction.StartActivity(
+        intent = intent,
     )
 }
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction.ActivityAction {
-    return SettingsViewAction.ActivityAction(
-        action = CommonActivityAction.ShowToast(
-            resId = resId,
-            text = text,
-            length = length
-        )
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction {
+    return SettingsViewAction.ShowToast(
+        resId = resId,
+        text = text,
+        length = length
     )
 }
 
@@ -147,18 +144,15 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             is SettingsViewEvent.GDriveLoginResult -> onGDriveLoginResult(event.isSuccess, event.errorCode)
             SettingsViewEvent.GDriveSyncNow -> gDriveSyncNow()
             is SettingsViewEvent.GDriveSyncToggle -> gDriveSyncToggle(event.checked)
-            SettingsViewEvent.OnBackNav -> emitAction(finishAction)
+            SettingsViewEvent.OnBackNav -> emitAction(SettingsViewAction.OnBackPressed)
             SettingsViewEvent.OpenRefreshHistory -> emitAction(startActivityAction(
                 Intent(application, SchedulesHistoryActivity::class.java),
-                addMultiWindowFlags = true
             ))
             SettingsViewEvent.OpenUserLog -> emitAction(startActivityAction(
                 Intent(application, UserLogActivity::class.java),
-                addMultiWindowFlags = true
             ))
             SettingsViewEvent.OssLicenses -> emitAction(startActivityAction(
                 Intent(application, OssLicensesMenuActivity::class.java),
-                addMultiWindowFlags = true
             ))
             is SettingsViewEvent.SetRecreateFlag -> {
                 val result = setRecreateFlag(event.item, event.enabled)
@@ -181,7 +175,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             }
             SettingsViewEvent.ShowAppSettings -> emitAction(startActivityAction(
                 intent = Intent().forAppInfo(application.packageName),
-                addMultiWindowFlags = true
             ))
             SettingsViewEvent.CheckNotificationPermission -> {
                 val areNotificationsEnabled = prefs.areNotificationsEnabled

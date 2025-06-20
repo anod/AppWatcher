@@ -11,7 +11,6 @@ import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,7 +37,6 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
@@ -64,6 +62,9 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import info.anodsplace.framework.content.ShowToastAction
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import kotlin.reflect.KClass
 
 @Immutable
@@ -111,25 +112,21 @@ sealed interface WatchListEvent {
 }
 
 sealed interface WatchListAction {
-    data class ActivityAction(val action: CommonActivityAction) : WatchListAction
+    data class StartActivity(override val intent: Intent) : WatchListAction, StartActivityAction
+    class ShowToast(resId: Int, text: String, length: Int) : ShowToastActionDefaults(resId, text, length), WatchListAction
     data class SelectApp(val app: App) : WatchListAction
 }
 
-private fun CommonActivityAction.toWatchListAction(): WatchListAction.ActivityAction = WatchListAction.ActivityAction(this)
-
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): WatchListAction.ActivityAction
-    = CommonActivityAction.StartActivity(
-        intent = intent,
-        addMultiWindowFlags = addMultiWindowFlags
-    ).toWatchListAction()
+private fun startActivityAction(intent: Intent): WatchListAction
+    = WatchListAction.StartActivity(intent)
 
 
-private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction.ActivityAction
-    = CommonActivityAction.ShowToast(
+private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction
+    = WatchListAction.ShowToast(
         resId = resId,
         text = text,
         length = length
-    ).toWatchListAction()
+    )
 
 class WatchListStateViewModel(
     state: SavedStateHandle,
@@ -204,7 +201,7 @@ class WatchListStateViewModel(
                     .observeTag(viewState.tag.id)
                     .collect { tag ->
                         if (tag == null) {
-                            emitAction(CommonActivityAction.Finish.toWatchListAction())
+                            // TODO: emitAction(CommonActivityAction.Finish.toWatchListAction())
                         } else {
                             viewState = viewState.copy(
                                 tag = tag,
@@ -303,7 +300,6 @@ class WatchListStateViewModel(
             }
             WatchListEvent.PlayStoreMyApps -> emitAction(startActivityAction(
                 intent = Intent().forMyApps(true),
-                addMultiWindowFlags = true
             ))
             WatchListEvent.Refresh -> refresh()
             is WatchListEvent.AppClick -> {

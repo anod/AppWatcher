@@ -33,7 +33,8 @@ import com.anod.appwatcher.utils.prefs
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.onCommonActivityAction
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -104,7 +105,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.viewActions.collect { action ->
                     AppLog.d("Action collected $action")
-                    handleUiAction(action)
+                    handleUiAction(action, this@SettingsActivity)
                 }
             }
         }
@@ -123,7 +124,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         viewModel.handleEvent(SettingsViewEvent.CheckNotificationPermission)
     }
 
-    private fun handleUiAction(action: SettingsViewAction) {
+    private fun handleUiAction(action: SettingsViewAction, activity: SettingsActivity) {
         when (action) {
             is SettingsViewAction.ExportResult -> onExportResult(action.result)
             is SettingsViewAction.ImportResult -> onImportResult(action.result)
@@ -141,7 +142,9 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
                 ProcessPhoenix.triggerRebirth(applicationContext, Intent(applicationContext, AppWatcherActivity::class.java))
             }
             SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
-            is SettingsViewAction.ActivityAction -> onCommonActivityAction(action = action.action)
+            SettingsViewAction.OnBackPressed -> activity.finish()
+            is SettingsViewAction.ShowToast -> activity.showToast(action)
+            is SettingsViewAction.StartActivity -> activity.startActivity(action)
         }
     }
 

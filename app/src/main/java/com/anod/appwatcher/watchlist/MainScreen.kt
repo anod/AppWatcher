@@ -1,5 +1,6 @@
 package com.anod.appwatcher.watchlist
 
+import android.content.Context
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
@@ -11,11 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
 import com.anod.appwatcher.R
-import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
 import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
@@ -32,11 +33,12 @@ import com.anod.appwatcher.navigation.WishListNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
 
 @Composable
-fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
+fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backStack: NavBackStack) {
     val mainViewModel: MainViewModel = viewModel()
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
@@ -50,6 +52,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
     val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
     val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
     val drawerState = rememberDrawerState(initialValue = drawerValue)
+    val context = LocalContext.current
     LaunchedEffect(true) {
         mainViewModel.viewActions.collect { action ->
             if (action is MainViewAction.DrawerState) {
@@ -59,14 +62,15 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
                     drawerState.close()
                 }
             } else {
-               onMainAction(action, backStack, onCommonActivityAction)
+               onMainAction(action, context, backStack)
             }
         }
     }
     LaunchedEffect(true) {
         listViewModel.viewActions.collect { action ->
             when (action) {
-                is WatchListAction.ActivityAction -> { onCommonActivityAction(action.action) }
+                is WatchListAction.StartActivity -> context.startActivity(action)
+                is WatchListAction.ShowToast -> context.showToast(action)
                 is WatchListAction.SelectApp -> backStack.add(SelectedAppNavKey(action.app))
             }
         }
@@ -89,7 +93,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
     )
 }
 
-private fun onMainAction(action: MainViewAction, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
+private fun onMainAction(action: MainViewAction, context: Context, backStack: NavBackStack) {
     when (action) {
         is MainViewAction.NavigateTo -> {
             when (action.id) {
@@ -104,8 +108,9 @@ private fun onMainAction(action: MainViewAction, backStack: NavBackStack, onComm
         is MainViewAction.NavigateToTag -> backStack.add(TagWatchListNavKey(tag = action.tag))
         MainViewAction.RequestNotificationPermission -> {} //notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
         MainViewAction.ChooseAccount -> {} //accountSelectionDialog.show()
-        is MainViewAction.ActivityAction -> onCommonActivityAction(action.action)
+        is MainViewAction.ShowToast -> context.showToast(action)
         is MainViewAction.DrawerState -> { }
+        is MainViewAction.StartActivity -> context.startActivity(action)
     }
 }
 @Composable

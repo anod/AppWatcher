@@ -46,8 +46,8 @@ private fun MainDetailScreenPreview() {
     AppTheme {
         MainDetailScreen(
             wideLayout = FoldableDeviceLayout(isWideLayout = true, hinge = Rect(0, 0, 80, 0)),
-            main = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
-            detail = { DetailContent(app = null, onDismissRequest = {}, onCommonActivityAction = {}) },
+            main = { DetailContent(app = null, onDismissRequest = {}) },
+            detail = { DetailContent(app = null, onDismissRequest = {}) },
         )
     }
 }

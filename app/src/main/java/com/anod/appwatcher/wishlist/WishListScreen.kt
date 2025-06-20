@@ -45,7 +45,6 @@ import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -55,7 +54,7 @@ fun WishListScreen(
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (WishListEvent) -> Unit,
     viewActions: Flow<WishListAction>,
-    onActivityAction: (CommonActivityAction) -> Unit,
+    navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
@@ -115,7 +114,6 @@ fun WishListScreen(
     }
 
     var showTagList: App? by remember { mutableStateOf(null) }
-    val latestOnActivityAction by rememberUpdatedState(onActivityAction)
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
@@ -125,7 +123,8 @@ fun WishListScreen(
                         showTagList = action.info
                     }
                 }
-                is WishListAction.ActivityAction -> latestOnActivityAction(action.action)
+
+                is WishListAction.NavigateBack -> navigateBack()
             }
         }
     }

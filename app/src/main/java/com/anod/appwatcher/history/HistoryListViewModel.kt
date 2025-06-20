@@ -22,7 +22,6 @@ import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.PaidHistoryFilter
@@ -43,8 +42,8 @@ data class HistoryListState(
 )
 
 sealed interface HistoryListAction {
+    data object OnBackPress : HistoryListAction
     class ShowTagSnackbar(val info: App) : HistoryListAction
-    class ActivityAction(val action: CommonActivityAction) : HistoryListAction
 }
 
 sealed interface HistoryListEvent {
@@ -114,7 +113,7 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
 
     override fun handleEvent(event: HistoryListEvent) {
         when (event) {
-            HistoryListEvent.OnBackPress -> emitAction(HistoryListAction.ActivityAction(CommonActivityAction.Finish))
+            HistoryListEvent.OnBackPress -> emitAction(HistoryListAction.OnBackPress)
             is HistoryListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is HistoryListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)

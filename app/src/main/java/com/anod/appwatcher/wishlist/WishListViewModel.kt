@@ -22,7 +22,6 @@ import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
@@ -42,7 +41,7 @@ data class WishListState(
 
 sealed interface WishListAction {
     class ShowTagSnackbar(val info: App) : WishListAction
-    class ActivityAction(val action: CommonActivityAction) : WishListAction
+    data object NavigateBack : WishListAction
 }
 
 sealed interface WishListEvent {
@@ -115,7 +114,7 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {
-            WishListEvent.OnBackPress -> emitAction(WishListAction.ActivityAction(CommonActivityAction.Finish))
+            WishListEvent.OnBackPress -> emitAction(WishListAction.NavigateBack)
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is WishListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)

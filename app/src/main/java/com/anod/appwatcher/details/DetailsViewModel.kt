@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.text.format.Formatter
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
@@ -37,7 +36,7 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
@@ -53,6 +52,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.net.URLEncoder
 import java.util.Locale
+import androidx.core.net.toUri
+import info.anodsplace.framework.content.StartActivityAction
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -113,28 +114,18 @@ data class AppVersionInfo(
 }
 
 sealed interface DetailsAction {
-    class ActivityAction(val action: CommonActivityAction) : DetailsAction
+    class StartActivity(override val intent: Intent) : DetailsAction, StartActivityAction
     class ShowTagSnackbar(val appInfo: App) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App, val recentChange: AppChange) : DetailsAction
+    class ShowToast(@StringRes override val resId: Int) : ShowToastActionDefaults(resId), DetailsAction
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): DetailsAction.ActivityAction {
-    return DetailsAction.ActivityAction(
-        action = CommonActivityAction.StartActivity(
-            intent = intent,
-            addMultiWindowFlags = addMultiWindowFlags
-        )
-    )
-}
+private fun startActivityAction(intent: Intent): DetailsAction
+     = DetailsAction.StartActivity(intent = intent)
 
-private fun showToastAction(@StringRes resId: Int): DetailsAction {
-    return DetailsAction.ActivityAction(
-        action = CommonActivityAction.ShowToast(
-            resId = resId
-        )
-    )
-}
+private fun showToastAction(@StringRes resId: Int): DetailsAction
+    = DetailsAction.ShowToast(resId = resId)
 
 sealed interface DetailsEvent {
     class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsEvent
@@ -280,7 +271,6 @@ class DetailsViewModel(
                 emitAction(
                     startActivityAction(
                         intent = Intent().forAppInfo(viewState.appId),
-                        addMultiWindowFlags = true
                     )
                 )
 
@@ -291,7 +281,6 @@ class DetailsViewModel(
                     emitAction(
                         startActivityAction(
                             intent = launchIntent,
-                            addMultiWindowFlags = true
                         )
                     )
                 }
@@ -315,7 +304,6 @@ class DetailsViewModel(
             DetailsEvent.PlayStore -> emitAction(
                 startActivityAction(
                     intent = Intent().forPlayStore(viewState.appId),
-                    addMultiWindowFlags = true
                 )
             )
 
@@ -325,7 +313,7 @@ class DetailsViewModel(
                 val encoded = URLEncoder.encode(Html.parse(text).toString(), "utf-8")
                 emitAction(startActivityAction((Intent(Intent.ACTION_VIEW).apply {
                     data =
-                        Uri.parse("https://translate.google.com/?sl=auto&tl=$lang&text=$encoded&op=translate")
+                        "https://translate.google.com/?sl=auto&tl=$lang&text=$encoded&op=translate".toUri()
                 })))
             }
 
@@ -334,7 +322,7 @@ class DetailsViewModel(
                     action = startActivityAction(
                         Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse(event.url)
+                            event.url.toUri()
                         )
                     )
                 )
@@ -378,7 +366,7 @@ class DetailsViewModel(
                 }
             } catch (e: AuthTokenStartIntent) {
                 loadError = true
-                emitAction(startActivityAction(e.intent, addMultiWindowFlags = true))
+                emitAction(startActivityAction(e.intent))
             } catch (e: Exception) {
                 loadError = true
                 AppLog.e("loadChangelog", e)

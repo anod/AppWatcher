@@ -44,7 +44,6 @@ import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -54,7 +53,7 @@ fun HistoryListScreen(
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (HistoryListEvent) -> Unit,
     viewActions: Flow<HistoryListAction>,
-    onActivityAction: (CommonActivityAction) -> Unit,
+    navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
@@ -114,7 +113,7 @@ fun HistoryListScreen(
     }
 
     var showTagList: App? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = viewActions, key2 = onActivityAction) {
+    LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             when (action) {
                 is HistoryListAction.ShowTagSnackbar -> {
@@ -123,7 +122,8 @@ fun HistoryListScreen(
                         showTagList = action.info
                     }
                 }
-                is HistoryListAction.ActivityAction -> onActivityAction(action.action)
+
+                HistoryListAction.OnBackPress -> navigateBack()
             }
         }
     }

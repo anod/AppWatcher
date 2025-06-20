@@ -15,7 +15,6 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.watchlist.DetailContent
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 open class SearchComposeActivity : BaseComposeActivity() {
@@ -43,35 +42,31 @@ open class SearchComposeActivity : BaseComposeActivity() {
                         main = {
                             SearchResultsScreen(
                                 screenState = screenState,
-                                onEvent = viewModel::handleEvent,
                                 pagingDataFlow = { viewModel.pagingData },
+                                onEvent = viewModel::handleEvent,
                                 viewActions = viewModel.viewActions,
-                                onActivityAction = { onCommonActivityAction(it) },
-                                onShowAccountDialog = { accountSelectionDialog.show() }
+                                onShowAccountDialog = { accountSelectionDialog.show() },
                             )
                         },
                         detail = {
                             DetailContent(
                                 app = screenState.selectedApp,
                                 onDismissRequest = { viewModel.handleEvent(SearchViewEvent.SelectApp(app = null)) },
-                                onCommonActivityAction = { onCommonActivityAction(it) }
                             )
                         }
                     )
                 } else {
                     SearchResultsScreen(
                         screenState = screenState,
-                        onEvent = viewModel::handleEvent,
                         pagingDataFlow = { viewModel.pagingData },
+                        onEvent = viewModel::handleEvent,
                         viewActions = viewModel.viewActions,
-                        onActivityAction = { onCommonActivityAction(it) },
-                        onShowAccountDialog = { accountSelectionDialog.show() }
+                        onShowAccountDialog = { accountSelectionDialog.show() },
                     )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
                             app = screenState.selectedApp!!,
                             onDismissRequest = { viewModel.handleEvent(SearchViewEvent.SelectApp(app = null)) },
-                            onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
                 }

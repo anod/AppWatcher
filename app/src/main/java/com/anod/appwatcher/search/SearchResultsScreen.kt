@@ -35,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation3.runtime.NavBackStack
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -55,25 +54,25 @@ import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.startActivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun SearchResultsScreenScene(wideLayout: FoldableDeviceLayout, backStack: NavBackStack, onCommonActivityAction: (CommonActivityAction) -> Unit) {
+fun SearchResultsScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit = {}) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(
         initialState = SearchViewState(wideLayout = wideLayout), // intentToState(intent, foldableDevice.layout.value),
     ))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     SearchResultsScreen(
         screenState = screenState,
-        onEvent = viewModel::handleEvent,
         pagingDataFlow = { viewModel.pagingData },
+        onEvent = viewModel::handleEvent,
         viewActions = viewModel.viewActions,
-        onActivityAction = { onCommonActivityAction(it) },
-        onShowAccountDialog = { /* accountSelectionDialog.show() */ }
+        onShowAccountDialog = { /* accountSelectionDialog.show() */ },
+        navigateBack = navigateBack
     )
 }
 
@@ -83,8 +82,8 @@ fun SearchResultsScreen(
     pagingDataFlow: () -> Flow<PagingData<ListItem>>,
     onEvent: (SearchViewEvent) -> Unit,
     viewActions: Flow<SearchViewAction>,
-    onActivityAction: (CommonActivityAction) -> Unit = { },
     onShowAccountDialog: () -> Unit = { },
+    navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
@@ -147,7 +146,7 @@ fun SearchResultsScreen(
 
     var showTagList: Pair<App, Boolean>? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = viewActions, key2 = onShowAccountDialog, key3 = onActivityAction) {
+    LaunchedEffect(key1 = viewActions, key2 = onShowAccountDialog) {
         viewActions.collect { action ->
             when (action) {
                 SearchViewAction.ShowAccountDialog -> onShowAccountDialog()
@@ -156,36 +155,37 @@ fun SearchResultsScreen(
                         message = action.message,
                         duration = action.duration
                     )
-                    if (action.exit) {
-                        onActivityAction(CommonActivityAction.Finish)
+                    if (action.exitScreen) {
+                        navigateBack()
                     }
                 }
                 is SearchViewAction.ShowTagSnackbar -> {
-                    val finishActivity = action.isShareSource
+                    val exitScreen = action.isShareSource
                     val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = Pair(action.info, finishActivity)
-                    } else if (finishActivity) {
-                        onActivityAction(CommonActivityAction.Finish)
+                        showTagList = Pair(action.info, exitScreen)
+                    } else if (exitScreen) {
+                        navigateBack()
                     }
                 }
                 is SearchViewAction.AlreadyWatchedNotice -> {
                     deleteNoticeDocument = action.document
                 }
-                is SearchViewAction.ActivityAction -> onActivityAction(action.action)
+                SearchViewAction.NavigateBack -> navigateBack()
+                is SearchViewAction.StartActivity -> context.startActivity(action)
             }
         }
     }
 
     if (showTagList != null) {
-        val (appInfo, finishActivity) = showTagList!!
+        val (appInfo, exitScreen) = showTagList!!
         TagSelectionDialog(
             appId = appInfo.appId,
             appTitle = appInfo.title,
             onDismissRequest = {
                 showTagList = null
-                if (finishActivity) {
-                    onActivityAction(CommonActivityAction.Finish)
+                if (exitScreen) {
+                    navigateBack()
                 }
             }
         )
@@ -282,8 +282,8 @@ private fun LoadingStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.Loading),
             pagingDataFlow = { flowOf() },
             onEvent = { },
+            viewActions = flowOf(),
             appIconLoader = appIconLoader,
-            viewActions = flowOf()
         )
     }
 }
@@ -300,8 +300,8 @@ private fun EmptyStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.NoResults(query = "")),
             pagingDataFlow = { flowOf() },
             onEvent = { },
+            viewActions = flowOf(),
             appIconLoader = appIconLoader,
-            viewActions = flowOf()
         )
     }
 }
@@ -318,8 +318,8 @@ private fun RetryStatePreview() {
             screenState = SearchViewState(searchStatus = SearchStatus.Error("")),
             pagingDataFlow = { flowOf() },
             onEvent = { },
+            viewActions = flowOf(),
             appIconLoader = appIconLoader,
-            viewActions = flowOf()
         )
     }
 }
@@ -360,8 +360,8 @@ private fun SearchSingleResultPreview() {
             ),
             pagingDataFlow = { flowOf() },
             onEvent = { },
+            viewActions = flowOf(),
             appIconLoader = appIconLoader,
-            viewActions = flowOf()
         )
     }
 }

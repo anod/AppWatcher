@@ -24,7 +24,8 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.ktx.Hash
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,7 +59,8 @@ sealed interface MainViewEvent {
 }
 
 sealed interface MainViewAction {
-    class ActivityAction(val action: CommonActivityAction) : MainViewAction
+    class StartActivity(override val intent: Intent) : MainViewAction, StartActivityAction
+    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), MainViewAction
     data object ChooseAccount : MainViewAction
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
     data object RequestNotificationPermission : MainViewAction
@@ -66,24 +68,15 @@ sealed interface MainViewAction {
     class DrawerState(val isOpen: Boolean) : MainViewAction
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): MainViewAction.ActivityAction {
-    return MainViewAction.ActivityAction(
-        action = CommonActivityAction.StartActivity(
-            intent = intent,
-            addMultiWindowFlags = addMultiWindowFlags
-        )
-    )
-}
+private fun startActivityAction(intent: Intent): MainViewAction
+    = MainViewAction.StartActivity(intent)
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): MainViewAction.ActivityAction {
-    return MainViewAction.ActivityAction(
-        action = CommonActivityAction.ShowToast(
-            resId = resId,
-            text = text,
-            length = length
-        )
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): MainViewAction
+    = MainViewAction.ShowToast(
+        resId = resId,
+        text = text,
+        length = length
     )
-}
 
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
     private val database: AppsDatabase by inject()

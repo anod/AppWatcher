@@ -18,7 +18,6 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
-import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 
@@ -56,15 +55,13 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
                                 screenState = screenState,
                                 onEvent = viewModel::handleEvent,
                                 pagingDataFlow = viewModel.pagingData,
-                                viewActions = viewModel.viewActions,
-                                onActivityAction = { onCommonActivityAction(it) }
+                                viewActions = viewModel.viewActions
                             )
                         },
                         detail = {
                             DetailContent(
                                 app = screenState.selectedApp,
                                 onDismissRequest = { viewModel.handleEvent(HistoryListEvent.SelectApp(app = null)) },
-                                onCommonActivityAction = { onCommonActivityAction(it) }
                             )
                         }
                     )
@@ -74,13 +71,11 @@ class HistoryListActivity : BaseComposeActivity(), KoinComponent {
                         onEvent = viewModel::handleEvent,
                         pagingDataFlow = viewModel.pagingData,
                         viewActions = viewModel.viewActions,
-                        onActivityAction = { onCommonActivityAction(it) }
                     )
                     if (screenState.selectedApp != null) {
                         DetailsDialog(
                             app = screenState.selectedApp!!,
                             onDismissRequest = { viewModel.handleEvent(HistoryListEvent.SelectApp(app = null)) },
-                            onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
                 }

@@ -3,7 +3,7 @@ package com.anod.appwatcher.userLog
 import android.content.Intent
 import androidx.compose.runtime.Immutable
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import info.anodsplace.framework.content.CommonActivityAction
+import com.anod.appwatcher.utils.ScreenCommonAction
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -18,7 +18,7 @@ sealed interface UserLogEvent {
     data object Share : UserLogEvent
 }
 
-class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonActivityAction>() {
+class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, ScreenCommonAction>() {
     private val userLogger = UserLogger()
 
     init {
@@ -29,8 +29,8 @@ class UserLogViewModel : BaseFlowViewModel<UserLogState, UserLogEvent, CommonAct
 
     override fun handleEvent(event: UserLogEvent) {
         when (event) {
-            UserLogEvent.OnBackNav -> emitAction(CommonActivityAction.Finish)
-            UserLogEvent.Share -> emitAction(CommonActivityAction.StartActivity(intent = Intent().apply {
+            UserLogEvent.OnBackNav -> emitAction(ScreenCommonAction.NavigateBack)
+            UserLogEvent.Share -> emitAction(ScreenCommonAction.StartActivity(intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TITLE, "AppWatcher Log")
                 putExtra(Intent.EXTRA_TEXT, userLogger.content)

@@ -35,8 +35,6 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
-import info.anodsplace.framework.content.CommonActivityAction
-import info.anodsplace.framework.content.onCommonActivityAction
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -62,7 +60,7 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
             SchedulesHistoryScreen(
                 schedules = schedules.toPersistentList(),
                 dateFormat = dateFormat,
-                onActivityAction = { onCommonActivityAction(it) }
+                navigateBack = { finish() }
             )
         }
     }
@@ -70,13 +68,13 @@ class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, onActivityAction: (CommonActivityAction) -> Unit) {
+fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, navigateBack: () -> Unit) {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
-                    navigationIcon = { BackArrowIconButton(onClick = { onActivityAction(CommonActivityAction.Finish) }) },
+                    navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
                 )
                 LazyColumn {
                     items(schedules.size) { index ->

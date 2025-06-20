@@ -20,7 +20,6 @@ import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.EmptyBoxSmile
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
-import info.anodsplace.framework.content.onCommonActivityAction
 import org.koin.core.component.KoinComponent
 import androidx.core.net.toUri
 import androidx.navigation3.runtime.NavBackStack
@@ -69,7 +68,6 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 prefs = prefs,
                 wideLayout = wideLayout,
                 backStack = backStack,
-                onCommonActivityAction = { onCommonActivityAction(it) }
             )
         }
         entry<SelectedAppNavKey>(
@@ -78,7 +76,6 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             DetailContent(
                 app = key.selectedApp,
                 onDismissRequest = {  },
-                onCommonActivityAction = { onCommonActivityAction(it) }
             )
         }
         entry<MarketSearchNavKey>(
@@ -92,8 +89,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             val wideLayout by foldableDevice.layout.collectAsState()
             SearchResultsScreenScene(
                 wideLayout = wideLayout,
-                backStack = backStack,
-                onCommonActivityAction = { onCommonActivityAction(it) }
+                navigateBack = { backStack.removeLastOrNull() },
             )
         }
     }

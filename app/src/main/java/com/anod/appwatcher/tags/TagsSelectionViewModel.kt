@@ -2,7 +2,6 @@ package com.anod.appwatcher.tags
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -13,8 +12,8 @@ import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.ScreenCommonAction
 import info.anodsplace.compose.CheckBoxItem
-import info.anodsplace.framework.content.CommonActivityAction
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -39,7 +38,7 @@ sealed interface TagSelectionEvent {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewModel<TagsSelectionState, TagSelectionEvent, CommonActivityAction>(), KoinComponent {
+class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewModel<TagsSelectionState, TagSelectionEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(private val appId: String, private val appTitle: String) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

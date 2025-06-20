@@ -14,6 +14,7 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.ScreenCommonAction
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.filterWithExtra
 import com.anod.appwatcher.utils.getInt
@@ -21,7 +22,6 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +58,7 @@ sealed interface InstalledListEvent {
     object NoAccount : InstalledListEvent
 }
 
-class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListState, InstalledListEvent, CommonActivityAction>(), KoinComponent {
+class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListState, InstalledListEvent, ScreenCommonAction>(), KoinComponent {
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
@@ -108,7 +108,7 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             InstalledListEvent.Import -> import()
             is InstalledListEvent.AuthTokenError -> {
                 if (event.error is CheckTokenError.RequiresInteraction) {
-                    emitAction(CommonActivityAction.StartActivity(event.error.intent))
+                    emitAction(ScreenCommonAction.StartActivity(event.error.intent))
                 } else {
                     tokenErrorToast()
                 }
@@ -121,14 +121,14 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
     private fun tokenErrorToast() {
         if (networkConnection.isNetworkAvailable) {
             emitAction(
-                CommonActivityAction.ShowToast(
+                ScreenCommonAction.ShowToast(
                     resId = R.string.failed_gain_access,
                     length = Toast.LENGTH_SHORT
                 )
             )
         } else {
             emitAction(
-                CommonActivityAction.ShowToast(
+                ScreenCommonAction.ShowToast(
                     resId = R.string.check_connection,
                     length = Toast.LENGTH_SHORT
                 )
@@ -141,10 +141,10 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             if (viewState.selectedApp != null) {
                 handleEvent(InstalledListEvent.SelectApp(app = null))
             } else {
-                emitAction(CommonActivityAction.Finish)
+                emitAction(ScreenCommonAction.NavigateBack)
             }
         } else {
-            emitAction(CommonActivityAction.Finish)
+            emitAction(ScreenCommonAction.NavigateBack)
         }
     }
 

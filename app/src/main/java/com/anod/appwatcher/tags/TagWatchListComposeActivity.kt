@@ -17,16 +17,15 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.WatchListAction
 import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import info.anodsplace.framework.app.addMultiWindowFlags
-import info.anodsplace.framework.content.onCommonActivityAction
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
 import kotlinx.coroutines.launch
 
 class TagWatchListComposeActivity : BaseComposeActivity() {
@@ -112,8 +111,9 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
         lifecycleScope.launch {
             viewModel.viewActions.collect {
                 when (it) {
-                    is WatchListAction.ActivityAction -> onCommonActivityAction(it.action)
                     is WatchListAction.SelectApp -> {}
+                    is WatchListAction.ShowToast -> showToast(it)
+                    is WatchListAction.StartActivity -> startActivity(it)
                 }
 
             }

@@ -26,7 +26,6 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.history.HistoryListActivity
 import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
@@ -34,7 +33,8 @@ import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.onCommonActivityAction
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
@@ -222,8 +222,9 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             is MainViewAction.NavigateToTag -> startActivity(TagWatchListComposeActivity.createTagIntent(action.tag, this))
             MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
             MainViewAction.ChooseAccount -> accountSelectionDialog.show()
-            is MainViewAction.ActivityAction -> onCommonActivityAction(action.action)
             is MainViewAction.DrawerState -> { }
+            is MainViewAction.ShowToast -> showToast(action)
+            is MainViewAction.StartActivity -> startActivity(action)
         }
     }
 

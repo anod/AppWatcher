@@ -11,10 +11,9 @@ import androidx.compose.ui.res.painterResource
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.details.DetailsPanel
-import info.anodsplace.framework.content.CommonActivityAction
 
 @Composable
-fun DetailContent(app: App?, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
+fun DetailContent(app: App?, onDismissRequest: () -> Unit) {
     Surface {
         if (app == null) {
             EmptyBoxSmile()
@@ -22,7 +21,6 @@ fun DetailContent(app: App?, onDismissRequest: () -> Unit, onCommonActivityActio
             DetailsPanel(
                 app = app,
                 onDismissRequest = onDismissRequest,
-                onCommonActivityAction = onCommonActivityAction
             )
         }
     }

@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.annotation.Keep
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,11 +19,12 @@ import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.details.DetailsDialog
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.ScreenCommonAction
+import com.anod.appwatcher.utils.onScreenCommonAction
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.MainActivity
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import info.anodsplace.framework.content.onCommonActivityAction
 import kotlinx.coroutines.launch
 
 @Keep
@@ -63,7 +65,6 @@ class InstalledActivity : BaseComposeActivity() {
                             DetailContent(
                                 app = screenState.selectedApp,
                                 onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
-                                onCommonActivityAction = { onCommonActivityAction(it) }
                             )
                         }
                     )
@@ -78,7 +79,6 @@ class InstalledActivity : BaseComposeActivity() {
                         DetailsDialog(
                             app = screenState.selectedApp!!,
                             onDismissRequest = { viewModel.handleEvent(InstalledListEvent.SelectApp(app = null)) },
-                            onCommonActivityAction = { onCommonActivityAction(it) }
                         )
                     }
                 }
@@ -86,7 +86,7 @@ class InstalledActivity : BaseComposeActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.viewActions.collect { onCommonActivityAction(it) }
+            viewModel.viewActions.collect { onScreenCommonAction(it, { finish() } ) }
         }
 
         lifecycleScope.launch {
