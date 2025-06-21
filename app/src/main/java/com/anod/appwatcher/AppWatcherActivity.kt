@@ -29,8 +29,10 @@ import com.anod.appwatcher.navigation.MainScreenNavKey
 import com.anod.appwatcher.navigation.MarketSearchNavKey
 import com.anod.appwatcher.navigation.SelectedAppNavKey
 import com.anod.appwatcher.navigation.SettingsNavKey
+import com.anod.appwatcher.navigation.TagWatchListNavKey
 import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
+import com.anod.appwatcher.tags.TagWatchListScreenScene
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
@@ -69,7 +71,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             MainScreenScene(
                 prefs = prefs,
                 wideLayout = wideLayout,
-                backStack = backStack,
+                navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
         entry<SelectedAppNavKey>(
@@ -94,9 +97,27 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
-        entry<SettingsNavKey> {
+        entry<SettingsNavKey>(
+            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SettingsNavKey)
+        ) {
             SettingsScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
+            )
+        }
+        entry<TagWatchListNavKey>(
+            metadata = ListDetailSceneStrategy.listPane(
+                sceneKey = TagWatchListNavKey,
+                detailPlaceholder = {
+                    EmptyBoxSmile()
+                }
+            )
+        ) { key ->
+            val wideLayout by foldableDevice.layout.collectAsState()
+            TagWatchListScreenScene(
+                tag = key.tag,
+                wideLayout = wideLayout,
+                navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
     }

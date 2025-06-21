@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
@@ -59,10 +60,13 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import androidx.core.graphics.drawable.toDrawable
+import androidx.lifecycle.DEFAULT_ARGS_KEY
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import info.anodsplace.framework.content.ShowToastAction
+import androidx.navigation3.runtime.NavKey
+import com.anod.appwatcher.navigation.InstalledNavKey
+import com.anod.appwatcher.navigation.MarketSearchNavKey
 import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.StartActivityAction
 import kotlin.reflect.KClass
@@ -88,7 +92,7 @@ data class WatchListSharedState(
 )
 
 sealed interface WatchListEvent {
-    data object NavigationButton : WatchListEvent
+    data object OnBackPressed : WatchListEvent
     data object PlayStoreMyApps : WatchListEvent
     data object Refresh : WatchListEvent
 
@@ -115,11 +119,12 @@ sealed interface WatchListAction {
     data class StartActivity(override val intent: Intent) : WatchListAction, StartActivityAction
     class ShowToast(resId: Int, text: String, length: Int) : ShowToastActionDefaults(resId, text, length), WatchListAction
     data class SelectApp(val app: App) : WatchListAction
+    class NavigateTo(val navKey: NavKey): WatchListAction
+    data object NavigateBack : WatchListAction
 }
 
 private fun startActivityAction(intent: Intent): WatchListAction
     = WatchListAction.StartActivity(intent)
-
 
 private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction
     = WatchListAction.ShowToast(
@@ -130,6 +135,7 @@ private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toa
 
 class WatchListStateViewModel(
     state: SavedStateHandle,
+    initialTag: Tag,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
     wideLayout: FoldableDeviceLayout
@@ -153,12 +159,14 @@ class WatchListStateViewModel(
     class Factory(
         private val defaultFilterId: Int,
         private val wideLayout: FoldableDeviceLayout,
-        private val collectRecentlyInstalledApps: Boolean
+        private val collectRecentlyInstalledApps: Boolean,
+        private val initialTag: Tag = Tag.empty
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             return WatchListStateViewModel(
                 state = extras.createSavedStateHandle(),
+                initialTag = initialTag,
                 defaultFilterId = defaultFilterId,
                 wideLayout = wideLayout,
                 collectRecentlyInstalledApps = collectRecentlyInstalledApps
@@ -173,7 +181,9 @@ class WatchListStateViewModel(
         val extraTag: Tag? = state[EXTRA_TAG]
         val tag: Tag = if (extraTag == null) {
             val extraTagId: Int = state[EXTRA_TAG_ID] ?: 0
-            if (extraTagId != 0) Tag(extraTagId, "", state[EXTRA_TAG_COLOR] ?: Tag.DEFAULT_COLOR) else Tag.empty
+            if (extraTagId != 0) {
+                Tag(extraTagId, "", state[EXTRA_TAG_COLOR] ?: Tag.DEFAULT_COLOR)
+            } else initialTag
         } else {
             extraTag
         }
@@ -262,30 +272,14 @@ class WatchListStateViewModel(
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListEvent.ShowSearch -> viewState = viewState.copy(showSearch = event.show)
             is WatchListEvent.SelectApp -> emitAction(WatchListAction.SelectApp(event.app))
-
-            WatchListEvent.NavigationButton -> {
-//                if (viewState.showSearch) {
-//                    viewState = viewState.copy(showSearch = false, titleFilter = "")
-//                } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
-//                    viewState = viewState.copy(selectedApp = null)
-//                } else {
-//                    emitAction(CommonActivityAction.Finish)
-//                }
-            }
+            WatchListEvent.OnBackPressed -> emitAction(WatchListAction.NavigateBack)
 
             is WatchListEvent.SearchSubmit -> {
                 val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
-                emitAction(
-                    startActivityAction(
-                        intent = MarketSearchActivity.intent(
-                            application,
-                            query,
-                            true,
-                            initiateSearch = true
-                        )
-                    )
-                )
+                emitAction(WatchListAction.NavigateTo(
+                    MarketSearchNavKey(keyword = query, focus = true)
+                ))
             }
 
             is WatchListEvent.UpdateSyncProgress -> {
@@ -308,16 +302,10 @@ class WatchListStateViewModel(
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.EmptyButton -> {
                 when (event.idx) {
-                    1 -> emitAction(startActivityAction(
-                        intent = MarketSearchActivity.intent(
-                            application,
-                            keyword = "",
-                            focus = true,
-                        )
+                    1 -> emitAction(WatchListAction.NavigateTo(
+                        MarketSearchNavKey(focus = true)
                     ))
-                    2 -> emitAction(startActivityAction(
-                        intent = InstalledActivity.intent(importMode = true, application)
-                    ))
+                    2 -> emitAction(WatchListAction.NavigateTo(InstalledNavKey(importMode = true)))
                     3 -> emitAction(startActivityAction(
                         intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
                     ))

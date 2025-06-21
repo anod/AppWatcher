@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
@@ -25,6 +26,7 @@ import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.navigation.HistoryNavKey
 import com.anod.appwatcher.navigation.InstalledNavKey
+import com.anod.appwatcher.navigation.MainScreenNavKey
 import com.anod.appwatcher.navigation.MarketSearchNavKey
 import com.anod.appwatcher.navigation.SelectedAppNavKey
 import com.anod.appwatcher.navigation.SettingsNavKey
@@ -38,14 +40,15 @@ import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 
 @Composable
-fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backStack: NavBackStack) {
+fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val mainViewModel: MainViewModel = viewModel()
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
             wideLayout = wideLayout,
             collectRecentlyInstalledApps = prefs.showRecent
-        )
+        ),
+        key = MainScreenNavKey.toString()
     )
 
     val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
@@ -62,7 +65,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
                     drawerState.close()
                 }
             } else {
-               onMainAction(action, context, backStack)
+               onMainAction(action, context, navigateTo)
             }
         }
     }
@@ -71,7 +74,9 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
             when (action) {
                 is WatchListAction.StartActivity -> context.startActivity(action)
                 is WatchListAction.ShowToast -> context.showToast(action)
-                is WatchListAction.SelectApp -> backStack.add(SelectedAppNavKey(action.app))
+                is WatchListAction.SelectApp -> navigateTo(SelectedAppNavKey(action.app))
+                WatchListAction.NavigateBack -> navigateBack()
+                is WatchListAction.NavigateTo -> navigateTo(action.navKey)
             }
         }
     }
@@ -93,19 +98,19 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, backSt
     )
 }
 
-private fun onMainAction(action: MainViewAction, context: Context, backStack: NavBackStack) {
+private fun onMainAction(action: MainViewAction, context: Context, navigateTo: (NavKey) -> Unit) {
     when (action) {
         is MainViewAction.NavigateTo -> {
             when (action.id) {
-                DrawerItem.Id.Add -> backStack.add(MarketSearchNavKey)
-                DrawerItem.Id.Installed -> backStack.add(InstalledNavKey(importMode = false))
+                DrawerItem.Id.Add -> navigateTo(MarketSearchNavKey())
+                DrawerItem.Id.Installed -> navigateTo(InstalledNavKey(importMode = false))
                 DrawerItem.Id.Refresh -> {}
-                DrawerItem.Id.Settings -> backStack.add(SettingsNavKey)
-                DrawerItem.Id.Wishlist -> backStack.add(WishListNavKey)
-                DrawerItem.Id.Purchases -> backStack.add(HistoryNavKey)
+                DrawerItem.Id.Settings -> navigateTo(SettingsNavKey)
+                DrawerItem.Id.Wishlist -> navigateTo(WishListNavKey)
+                DrawerItem.Id.Purchases -> navigateTo(HistoryNavKey)
             }
         }
-        is MainViewAction.NavigateToTag -> backStack.add(TagWatchListNavKey(tag = action.tag))
+        is MainViewAction.NavigateToTag -> navigateTo(TagWatchListNavKey(tag = action.tag))
         MainViewAction.RequestNotificationPermission -> {} //notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
         MainViewAction.ChooseAccount -> {} //accountSelectionDialog.show()
         is MainViewAction.ShowToast -> context.showToast(action)
@@ -152,7 +157,7 @@ fun MainScreen(
                     subtitle = subtitle,
                     filterId = filterId,
                     onListEvent = {
-                        if (it is WatchListEvent.NavigationButton) {
+                        if (it is WatchListEvent.OnBackPressed) {
                             if (listState.showSearch) {
                                 onListEvent(WatchListEvent.ShowSearch(show = false))
                             } else {

@@ -91,7 +91,6 @@ fun SearchTopBar(
                     } else {
                         onNavigation()
                     }
-                    onNavigation()
                 }
                 SearchTopBarEvent.SearchAction -> {
                     showSearchView = true

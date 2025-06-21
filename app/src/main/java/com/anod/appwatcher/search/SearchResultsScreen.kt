@@ -146,7 +146,7 @@ fun SearchResultsScreen(
 
     var showTagList: Pair<App, Boolean>? by remember { mutableStateOf(null) }
     var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = viewActions, key2 = onShowAccountDialog) {
+    LaunchedEffect(key1 = true, key2 = onShowAccountDialog) {
         viewActions.collect { action ->
             when (action) {
                 SearchViewAction.ShowAccountDialog -> onShowAccountDialog()

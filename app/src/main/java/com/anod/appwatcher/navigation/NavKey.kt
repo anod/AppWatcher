@@ -9,7 +9,11 @@ import kotlinx.serialization.Serializable
 data object MainScreenNavKey : NavKey
 
 @Serializable
-data object MarketSearchNavKey : NavKey
+data class MarketSearchNavKey(
+    val keyword: String = "",
+    val focus: Boolean = false,
+    val initiateSearch: Boolean = false
+) : NavKey
 
 @Serializable
 data object SettingsNavKey : NavKey

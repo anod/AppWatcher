@@ -92,7 +92,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                 if (mainViewModel.viewState.isDrawerOpen) {
                     mainViewModel.handleEvent(MainViewEvent.DrawerState(isOpen = false))
                 } else {
-                    listViewModel.handleEvent(WatchListEvent.NavigationButton)
+                    listViewModel.handleEvent(WatchListEvent.OnBackPressed)
                 }
             }
         })

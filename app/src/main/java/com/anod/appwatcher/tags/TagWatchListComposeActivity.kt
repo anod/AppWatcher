@@ -114,6 +114,8 @@ class TagWatchListComposeActivity : BaseComposeActivity() {
                     is WatchListAction.SelectApp -> {}
                     is WatchListAction.ShowToast -> showToast(it)
                     is WatchListAction.StartActivity -> startActivity(it)
+                    WatchListAction.NavigateBack -> finish()
+                    is WatchListAction.NavigateTo -> {}
                 }
 
             }
