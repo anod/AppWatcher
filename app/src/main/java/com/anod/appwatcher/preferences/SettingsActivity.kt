@@ -25,12 +25,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
-import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.showToast
@@ -41,11 +39,10 @@ import info.anodsplace.permissions.toRequestInput
 import kotlinx.coroutines.launch
 
 @SuppressLint("Registered")
-open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
+open class SettingsActivity : BaseComposeActivity() {
 
     private lateinit var gDriveErrorIntentRequest: ActivityResultLauncher<Intent>
     private lateinit var notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>
-    private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(this, this) }
     private val viewModel: SettingsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +50,9 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
         viewModel.handleEvent(SettingsViewEvent.SetWideLayout(foldableDevice.layout.value))
 
-        gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
+        gDriveErrorIntentRequest = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            viewModel.handleEvent(SettingsViewEvent.GDriveActivityResult(activityResult))
+        }
         notificationPermissionRequest = registerForActivityResult(AppPermissions.Request()) {
             val enabled = it[AppPermission.PostNotification.value] ?: false
             viewModel.handleEvent(SettingsViewEvent.NotificationPermissionResult(enabled))
@@ -128,10 +127,6 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         when (action) {
             is SettingsViewAction.ExportResult -> onExportResult(action.result)
             is SettingsViewAction.ImportResult -> onImportResult(action.result)
-            SettingsViewAction.GDriveSignIn -> gDriveSignIn.signIn()
-            SettingsViewAction.GDriveSignOut -> {
-                lifecycleScope.launch { gDriveSignIn.signOut() }
-            }
             is SettingsViewAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
             SettingsViewAction.Recreate -> {
                 this@SettingsActivity.setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
@@ -182,7 +177,7 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        gDriveSignIn.onActivityResult(requestCode, resultCode, data)
+        //gDriveSignIn.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
     }
 
@@ -190,13 +185,5 @@ open class SettingsActivity : BaseComposeActivity(), GDriveSignIn.Listener {
         val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
         i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(i)
-    }
-
-    override fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount) {
-        viewModel.handleEvent(SettingsViewEvent.GDriveLoginResult(true, 0))
-    }
-
-    override fun onGDriveLoginError(errorCode: Int) {
-        viewModel.handleEvent(SettingsViewEvent.GDriveLoginResult(false, errorCode))
     }
 }

@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import org.koin.java.KoinJavaComponent
+import kotlin.coroutines.resumeWithException
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {
     return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -42,13 +43,9 @@ internal fun createCredentials(context: Context, googleAccount: GoogleSignInAcco
         .setSelectedAccount(googleAccount.account)
 }
 
-interface ResultListener {
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-}
+class GDriveSignIn(private val context: ApplicationContext) {
 
-class GDriveSignIn(private val activity: Activity, private val listener: Listener) : ResultListener {
-
-    private val driveConnect by lazy { GoogleSignInConnect(activity, createGDriveSignInOptions()) }
+    private val driveConnect by lazy { GoogleSignInConnect(context, createGDriveSignInOptions()) }
 
     companion object {
         const val RESULT_CODE_GDRIVE_SIGN_IN = 123
@@ -67,25 +64,23 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
         }
     }
 
-    interface Listener {
-        fun onGDriveLoginSuccess(googleSignInAccount: GoogleSignInAccount)
-        fun onGDriveLoginError(errorCode: Int)
-    }
+    class GoogleSignInRequestException(val intent: Intent, val resultCode: Int) : Throwable()
+    class GoogleSignInFailedException(val resultCode: Int) : Throwable()
 
-    fun signIn() {
+    suspend fun signIn() = suspendCoroutine { continuation ->
         driveConnect.connect(object : GoogleSignInConnect.Result {
             override fun onSuccess(account: GoogleSignInAccount, client: GoogleSignInClient) {
-                listener.onGDriveLoginSuccess(account)
+                continuation.resume(account)
             }
 
             override fun onError(errorCode: Int, client: GoogleSignInClient) {
                 AppLog.e("Silent sign in failed with code $errorCode (${GoogleSignInStatusCodes.getStatusCodeString(errorCode)}). starting signIn intent")
-                activity.startActivityForResult(client.signInIntent, RESULT_CODE_GDRIVE_SIGN_IN)
+                continuation.resumeWithException(GoogleSignInRequestException(client.signInIntent, RESULT_CODE_GDRIVE_SIGN_IN))
             }
         })
     }
 
-    suspend fun signOut() = suspendCoroutine<Unit> { continuation ->
+    suspend fun signOut() = suspendCoroutine { continuation ->
         driveConnect.disconnect(object : GoogleSignInConnect.SignOutResult {
             override fun onResult() {
                 continuation.resume(Unit)
@@ -94,32 +89,28 @@ class GDriveSignIn(private val activity: Activity, private val listener: Listene
     }
 
     fun requestEmail(lastSignedAccount: GoogleSignInAccount) {
-        GoogleSignIn.requestPermissions(activity, RESULT_CODE_GDRIVE_SIGN_IN, lastSignedAccount, Scope("email"))
+        // GoogleSignIn.requestPermissions(activity, RESULT_CODE_GDRIVE_SIGN_IN, lastSignedAccount, Scope("email"))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    suspend fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) = suspendCoroutine { continuation ->
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RESULT_CODE_GDRIVE_SIGN_IN) {
+        if (resultCode == Activity.RESULT_OK && data?.extras != null) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
-        } else if (requestCode == RESULT_CODE_GDRIVE_EXCEPTION) {
+            val completedTask = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = completedTask.getResult(ApiException::class.java)!!
+                // Signed in successfully, show authenticated UI.
+                continuation.resume(account)
+            } catch (e: ApiException) {
+                // The ApiException status code indicates the detailed failure reason.
+                // Please refer to the GoogleSignInStatusCodes class reference for more information.
+                AppLog.e(e)
+                continuation.resumeWithException(GoogleSignInFailedException(e.statusCode))
+            }
+        } else {
+            continuation.resumeWithException(GoogleSignInFailedException(resultCode))
             // Nothing?
-        }
-    }
-
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account = completedTask.getResult(ApiException::class.java)!!
-
-            // Signed in successfully, show authenticated UI.
-            listener.onGDriveLoginSuccess(account)
-        } catch (e: ApiException) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            AppLog.e(e)
-            listener.onGDriveLoginError(e.statusCode)
         }
     }
 }

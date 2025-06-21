@@ -28,6 +28,8 @@ import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.navigation.MainScreenNavKey
 import com.anod.appwatcher.navigation.MarketSearchNavKey
 import com.anod.appwatcher.navigation.SelectedAppNavKey
+import com.anod.appwatcher.navigation.SettingsNavKey
+import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -75,7 +77,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
-                onDismissRequest = {  },
+                onDismissRequest = { backStack.removeLastOrNull() },
             )
         }
         entry<MarketSearchNavKey>(
@@ -90,6 +92,11 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             SearchResultsScreenScene(
                 wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
+            )
+        }
+        entry<SettingsNavKey> {
+            SettingsScreenScene(
+                navigateBack = { backStack.removeLastOrNull() }
             )
         }
     }
