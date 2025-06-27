@@ -16,7 +16,7 @@ import com.anod.appwatcher.R
 data class DrawerItem(
     val id: Id,
     val icon: ImageVector,
-    @StringRes val title: Int
+    @param:StringRes val title: Int
 ) {
     sealed interface Id {
         object Refresh : Id

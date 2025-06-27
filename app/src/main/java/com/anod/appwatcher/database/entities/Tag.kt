@@ -26,7 +26,7 @@ data class Tag(
     @ColumnInfo(name = TagsTable.Columns.NAME)
     val name: String,
     @ColumnInfo(name = TagsTable.Columns.COLOR)
-    @ColorInt
+    @param:ColorInt
     val color: Int
 ) : Parcelable {
 

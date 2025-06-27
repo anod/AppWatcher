@@ -118,7 +118,7 @@ sealed interface DetailsAction {
     class ShowTagSnackbar(val appInfo: App) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App, val recentChange: AppChange) : DetailsAction
-    class ShowToast(@StringRes override val resId: Int) : ShowToastActionDefaults(resId), DetailsAction
+    class ShowToast(@param:StringRes override val resId: Int) : ShowToastActionDefaults(resId), DetailsAction
 }
 
 private fun startActivityAction(intent: Intent): DetailsAction

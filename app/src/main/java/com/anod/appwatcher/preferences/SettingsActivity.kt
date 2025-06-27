@@ -175,12 +175,6 @@ open class SettingsActivity : BaseComposeActivity() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        //gDriveSignIn.onActivityResult(requestCode, resultCode, data)
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     private fun recreateWatchlist() {
         val i = Intent(this@SettingsActivity, AppWatcherActivity::class.java)
         i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
