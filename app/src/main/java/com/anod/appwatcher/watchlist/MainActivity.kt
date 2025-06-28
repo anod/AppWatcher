@@ -27,7 +27,6 @@ import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.history.HistoryListActivity
-import com.anod.appwatcher.installed.InstalledActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
@@ -62,7 +61,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
         }
         if (extras.containsKey("open_recently_installed")) {
             intent!!.extras!!.remove("open_recently_installed")
-            startActivity(InstalledActivity.intent(importMode = false, context = this))
+            //startActivity(InstalledActivity.intent(importMode = false, context = this))
             finish()
             return
         }
@@ -212,7 +211,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
             is MainViewAction.NavigateTo -> {
                 when (action.id) {
                     DrawerItem.Id.Add -> startActivity(Intent(this, MarketSearchActivity::class.java))
-                    DrawerItem.Id.Installed -> startActivity(InstalledActivity.intent(false, this))
+                    DrawerItem.Id.Installed -> { }//startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
                     DrawerItem.Id.Settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this))

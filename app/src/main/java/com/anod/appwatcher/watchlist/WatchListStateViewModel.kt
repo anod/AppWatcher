@@ -8,15 +8,18 @@ import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
-import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.AppWatcherActivity
-import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.toAndroidAccount
@@ -24,7 +27,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.installed.InstalledActivity
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -41,6 +44,8 @@ import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.graphics.toIcon
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -59,16 +64,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import androidx.core.graphics.drawable.toDrawable
-import androidx.lifecycle.DEFAULT_ARGS_KEY
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.navigation3.runtime.NavKey
-import com.anod.appwatcher.navigation.InstalledNavKey
-import com.anod.appwatcher.navigation.MarketSearchNavKey
-import info.anodsplace.framework.content.ShowToastActionDefaults
-import info.anodsplace.framework.content.StartActivityAction
 import kotlin.reflect.KClass
 
 @Immutable
@@ -278,7 +273,7 @@ class WatchListStateViewModel(
                 val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
                 emitAction(WatchListAction.NavigateTo(
-                    MarketSearchNavKey(keyword = query, focus = true)
+                    SceneNavKey.Search(keyword = query, focus = true)
                 ))
             }
 
@@ -303,9 +298,9 @@ class WatchListStateViewModel(
             is WatchListEvent.EmptyButton -> {
                 when (event.idx) {
                     1 -> emitAction(WatchListAction.NavigateTo(
-                        MarketSearchNavKey(focus = true)
+                        SceneNavKey.Search(focus = true)
                     ))
-                    2 -> emitAction(WatchListAction.NavigateTo(InstalledNavKey(importMode = true)))
+                    2 -> emitAction(WatchListAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
                     3 -> emitAction(startActivityAction(
                         intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
                     ))
@@ -313,8 +308,8 @@ class WatchListStateViewModel(
             }
             is WatchListEvent.SectionHeaderClick -> {
                 when (event.type) {
-                    SectionHeader.RecentlyInstalled -> emitAction(startActivityAction(
-                        intent = InstalledActivity.intent(importMode = false, application)
+                    SectionHeader.RecentlyInstalled -> emitAction(WatchListAction.NavigateTo(
+                        SceneNavKey.Installed(importMode = false)
                     ))
                     else -> { }
                 }

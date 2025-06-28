@@ -17,14 +17,63 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
+import com.anod.appwatcher.model.Filters
+import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.ScreenCommonAction
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
+
+@Composable
+fun InstalledListScreenScene(
+    showAction: Boolean,
+    navigateBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val viewModel: InstalledListViewModel = viewModel(
+        factory = InstalledListViewModel.Factory(
+            showAction = showAction,
+            sortId = if (showAction) Preferences.SORT_NAME_ASC else Preferences.SORT_DATE_DESC
+        ),
+        key = SceneNavKey.Installed.toString()
+    )
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+
+    val pagingSourceConfig = WatchListPagingSource.Config(
+        filterId = Filters.ALL,
+        tagId = null,
+        showRecentlyDiscovered = false,
+        showOnDevice = true,
+        showRecentlyInstalled = false
+    )
+
+    InstalledListScreen(
+        screenState = screenState,
+        pagingSourceConfig = pagingSourceConfig,
+        onEvent = viewModel::handleEvent,
+        installedApps = viewModel.installedApps
+    )
+
+   LaunchedEffect(true) {
+        viewModel.viewActions.collect { action ->
+            when (action) {
+                ScreenCommonAction.NavigateBack -> navigateBack()
+                is ScreenCommonAction.ShowToast -> context.showToast(action)
+                is ScreenCommonAction.StartActivity -> context.startActivity(action)
+            }
+        }
+    }
+}
 
 @Composable
 fun InstalledListScreen(

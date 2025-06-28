@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.FilterMenuAction
@@ -24,14 +23,7 @@ import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
 import com.anod.appwatcher.compose.RefreshIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.navigation.HistoryNavKey
-import com.anod.appwatcher.navigation.InstalledNavKey
-import com.anod.appwatcher.navigation.MainScreenNavKey
-import com.anod.appwatcher.navigation.MarketSearchNavKey
-import com.anod.appwatcher.navigation.SelectedAppNavKey
-import com.anod.appwatcher.navigation.SettingsNavKey
-import com.anod.appwatcher.navigation.TagWatchListNavKey
-import com.anod.appwatcher.navigation.WishListNavKey
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.app.FoldableDeviceLayout
@@ -48,7 +40,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
             wideLayout = wideLayout,
             collectRecentlyInstalledApps = prefs.showRecent
         ),
-        key = MainScreenNavKey.toString()
+        key = SceneNavKey.Main.toString()
     )
 
     val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
@@ -74,7 +66,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
             when (action) {
                 is WatchListAction.StartActivity -> context.startActivity(action)
                 is WatchListAction.ShowToast -> context.showToast(action)
-                is WatchListAction.SelectApp -> navigateTo(SelectedAppNavKey(action.app))
+                is WatchListAction.SelectApp -> navigateTo(SceneNavKey.AppDetails(action.app))
                 WatchListAction.NavigateBack -> navigateBack()
                 is WatchListAction.NavigateTo -> navigateTo(action.navKey)
             }
@@ -102,15 +94,15 @@ private fun onMainAction(action: MainViewAction, context: Context, navigateTo: (
     when (action) {
         is MainViewAction.NavigateTo -> {
             when (action.id) {
-                DrawerItem.Id.Add -> navigateTo(MarketSearchNavKey())
-                DrawerItem.Id.Installed -> navigateTo(InstalledNavKey(importMode = false))
+                DrawerItem.Id.Add -> navigateTo(SceneNavKey.Search())
+                DrawerItem.Id.Installed -> navigateTo(SceneNavKey.Installed(importMode = false))
                 DrawerItem.Id.Refresh -> {}
-                DrawerItem.Id.Settings -> navigateTo(SettingsNavKey)
-                DrawerItem.Id.Wishlist -> navigateTo(WishListNavKey)
-                DrawerItem.Id.Purchases -> navigateTo(HistoryNavKey)
+                DrawerItem.Id.Settings -> navigateTo(SceneNavKey.Settings)
+                DrawerItem.Id.Wishlist -> navigateTo(SceneNavKey.WishList)
+                DrawerItem.Id.Purchases -> navigateTo(SceneNavKey.PurchaseHistory)
             }
         }
-        is MainViewAction.NavigateToTag -> navigateTo(TagWatchListNavKey(tag = action.tag))
+        is MainViewAction.NavigateToTag -> navigateTo(SceneNavKey.TagWatchList(tag = action.tag))
         MainViewAction.RequestNotificationPermission -> {} //notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
         MainViewAction.ChooseAccount -> {} //accountSelectionDialog.show()
         is MainViewAction.ShowToast -> context.showToast(action)

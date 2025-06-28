@@ -9,30 +9,29 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.net.toUri
+import androidx.core.os.bundleOf
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
+import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.installed.InstalledListScreenScene
+import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.preferences.SettingsScreenScene
+import com.anod.appwatcher.search.SearchResultsScreenScene
+import com.anod.appwatcher.tags.TagWatchListScreenScene
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.EmptyBoxSmile
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import org.koin.core.component.KoinComponent
-import androidx.core.net.toUri
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavEntry
-import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.navigation.MainScreenNavKey
-import com.anod.appwatcher.navigation.MarketSearchNavKey
-import com.anod.appwatcher.navigation.SelectedAppNavKey
-import com.anod.appwatcher.navigation.SettingsNavKey
-import com.anod.appwatcher.navigation.TagWatchListNavKey
-import com.anod.appwatcher.preferences.SettingsScreenScene
-import com.anod.appwatcher.search.SearchResultsScreenScene
-import com.anod.appwatcher.tags.TagWatchListScreenScene
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
@@ -41,8 +40,10 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         setTheme(R.style.AppTheme_Main)
         super.onCreate(savedInstanceState)
 
+        val elements = createInitialBackstack()
         setContent {
-            val backStack = rememberNavBackStack(MainScreenNavKey)
+
+            val backStack = rememberNavBackStack(*elements)
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
             AppTheme(
                 theme = prefs.theme,
@@ -58,10 +59,30 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         }
     }
 
+    private fun createInitialBackstack(): Array<NavKey> {
+        val extras = intent?.extras ?: bundleOf()
+        var elements = arrayOf<NavKey>(SceneNavKey.Main)
+        if (extras.containsKey("open_recently_installed")) {
+            intent!!.extras!!.remove("open_recently_installed")
+            elements += SceneNavKey.Installed(importMode = false)
+        } else if (extras.containsKey(WatchListStateViewModel.EXTRA_TAG_ID)) {
+            val extraTagId = extras.getInt(WatchListStateViewModel.EXTRA_TAG_ID)
+            intent!!.extras!!.remove(WatchListStateViewModel.EXTRA_TAG_ID)
+            elements += SceneNavKey.TagWatchList(
+                tag = Tag(
+                    id = extraTagId,
+                    name = "",
+                    color = extras.getInt(WatchListStateViewModel.EXTRA_TAG_COLOR)
+                )
+            )
+        }
+        return elements
+    }
+
     private fun provideNavEntries(backStack: NavBackStack): (NavKey) -> NavEntry<NavKey> = entryProvider {
-        entry<MainScreenNavKey>(
+        entry<SceneNavKey.Main>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = MainScreenNavKey,
+                sceneKey = SceneNavKey.Main,
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -75,17 +96,17 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 navigateTo = { backStack.add(it) }
             )
         }
-        entry<SelectedAppNavKey>(
-            metadata = ListDetailSceneStrategy.detailPane()
+        entry<SceneNavKey.AppDetails>(
+            metadata = ListDetailSceneStrategy.detailPane(sceneKey = SceneNavKey.AppDetails)
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
                 onDismissRequest = { backStack.removeLastOrNull() },
             )
         }
-        entry<MarketSearchNavKey>(
+        entry<SceneNavKey.Search>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = MarketSearchNavKey,
+                sceneKey = SceneNavKey.Search,
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -97,16 +118,16 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
-        entry<SettingsNavKey>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SettingsNavKey)
+        entry<SceneNavKey.Settings>(
+            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.Settings)
         ) {
             SettingsScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
-        entry<TagWatchListNavKey>(
+        entry<SceneNavKey.TagWatchList>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = TagWatchListNavKey,
+                sceneKey = SceneNavKey.TagWatchList,
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -118,6 +139,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
+            )
+        }
+        entry<SceneNavKey.Installed>(
+            metadata = ListDetailSceneStrategy.listPane(
+                sceneKey = SceneNavKey.Installed,
+                detailPlaceholder = {
+                    EmptyBoxSmile()
+                }
+            )
+        ) { key ->
+            InstalledListScreenScene(
+                showAction = key.importMode,
+                navigateBack = { backStack.removeLastOrNull() },
             )
         }
     }

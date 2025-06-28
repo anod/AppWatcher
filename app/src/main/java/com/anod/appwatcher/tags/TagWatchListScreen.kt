@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
@@ -24,7 +23,7 @@ import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.navigation.TagWatchListNavKey
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListAction
 import com.anod.appwatcher.watchlist.WatchListEvent
@@ -47,7 +46,7 @@ fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigate
             collectRecentlyInstalledApps = false,
             initialTag = tag
         ),
-        key = TagWatchListNavKey.toString()
+        key = SceneNavKey.TagWatchList.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
