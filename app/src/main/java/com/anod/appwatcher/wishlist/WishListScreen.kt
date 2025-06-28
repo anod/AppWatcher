@@ -20,10 +20,10 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -39,14 +40,35 @@ import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
-import com.anod.appwatcher.tags.TagSnackbar
+import com.anod.appwatcher.tags.TagSnackbar.Visuals
 import com.anod.appwatcher.utils.AppIconLoader
+import info.anodsplace.framework.app.FoldableDeviceLayout
+import info.anodsplace.framework.content.startActivity
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
+
+@Composable
+fun WishListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit) {
+    val viewModel: WishListViewModel = viewModel(
+        factory = WishListViewModel.Factory(
+            wideLayout = wideLayout,
+        ),
+        key = SceneNavKey.WishList.toString()
+    )
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    WishListScreen(
+        screenState = screenState,
+        onEvent = viewModel::handleEvent,
+        pagingDataFlow = viewModel.pagingData,
+        viewActions = viewModel.viewActions,
+        navigateBack = navigateBack
+    )
+}
 
 @Composable
 fun WishListScreen(
@@ -85,28 +107,36 @@ fun WishListScreen(
                 .padding(paddingValues)
                 .fillMaxSize(),
         ) {
-            val items = pagingDataFlow.collectAsLazyPagingItems()
-            when (items.loadState.refresh) {
-                is LoadState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+            if (screenState.isError) {
+                RetryButton(onRetryClick = {
+                    onEvent(WishListEvent.RetryClick)
+                })
+            } else {
+                val items = pagingDataFlow.collectAsLazyPagingItems()
+                when (items.loadState.refresh) {
+                    is LoadState.Loading -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                     }
-                }
-                is LoadState.Error -> {
-                    RetryButton(onRetryClick = {
-                        items.refresh()
-                    })
-                }
-                is LoadState.NotLoading -> {
-                    val isEmpty = items.itemCount < 1
-                    if (isEmpty) {
-                        WishlistEmpty()
-                    } else {
-                        WishlistResults(
-                            items = items,
-                            onEvent = onEvent,
-                            appIconLoader = appIconLoader
-                        )
+
+                    is LoadState.Error -> {
+                        RetryButton(onRetryClick = {
+                            items.refresh()
+                        })
+                    }
+
+                    is LoadState.NotLoading -> {
+                        val isEmpty = items.itemCount < 1
+                        if (isEmpty) {
+                            WishlistEmpty()
+                        } else {
+                            WishlistResults(
+                                items = items,
+                                onEvent = onEvent,
+                                appIconLoader = appIconLoader
+                            )
+                        }
                     }
                 }
             }
@@ -118,13 +148,14 @@ fun WishListScreen(
         viewActions.collect { action ->
             when (action) {
                 is WishListAction.ShowTagSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
+                    val result = snackbarHostState.showSnackbar(Visuals(action.info, context))
                     if (result == SnackbarResult.ActionPerformed) {
                         showTagList = action.info
                     }
                 }
 
                 is WishListAction.NavigateBack -> navigateBack()
+                is WishListAction.StartActivity -> context.startActivity(action)
             }
         }
     }

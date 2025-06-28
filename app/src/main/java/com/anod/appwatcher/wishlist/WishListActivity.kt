@@ -1,7 +1,5 @@
 package com.anod.appwatcher.wishlist
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -87,7 +85,4 @@ class WishListActivity : BaseComposeActivity(), KoinComponent {
         }
     }
 
-    companion object {
-        fun intent(context: Context): Intent = Intent(context, WishListActivity::class.java)
-    }
 }

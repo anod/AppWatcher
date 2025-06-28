@@ -31,6 +31,7 @@ import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.EmptyBoxSmile
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
+import com.anod.appwatcher.wishlist.WishListScreenScene
 import org.koin.core.component.KoinComponent
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -151,6 +152,20 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) { key ->
             InstalledListScreenScene(
                 showAction = key.importMode,
+                navigateBack = { backStack.removeLastOrNull() },
+            )
+        }
+        entry<SceneNavKey.WishList>(
+            metadata = ListDetailSceneStrategy.listPane(
+                sceneKey = SceneNavKey.WishList,
+                detailPlaceholder = {
+                    EmptyBoxSmile()
+                }
+            )
+        ) {
+            val wideLayout by foldableDevice.layout.collectAsState()
+            WishListScreenScene(
+                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }

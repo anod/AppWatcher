@@ -30,7 +30,6 @@ import com.anod.appwatcher.history.HistoryListActivity
 import com.anod.appwatcher.tags.TagWatchListComposeActivity
 import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.wishlist.WishListActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
@@ -214,7 +213,7 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Installed -> { }//startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
                     DrawerItem.Id.Settings -> startActivity(Intent(this, SettingsActivity::class.java))
-                    DrawerItem.Id.Wishlist -> startActivity(WishListActivity.intent(this))
+                    DrawerItem.Id.Wishlist -> {} //startActivity(WishListActivity.intent(this))
                     DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this))
                 }
             }
