@@ -45,7 +45,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
     override fun onCreate() {
         super.onCreate()
 
-        if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder()
                 .detectActivityLeaks()
                 .detectAll()

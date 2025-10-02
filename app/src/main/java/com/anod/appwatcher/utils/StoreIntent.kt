@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.core.net.toUri
 
 /**
  * @author Alex Gavrishev
@@ -17,23 +18,16 @@ object StoreIntent {
 fun Intent.forPlayStore(pkg: String): Intent {
     val url = String.format(StoreIntent.URL_PLAY_STORE, pkg)
     this.action = Intent.ACTION_VIEW
-    this.data = Uri.parse(url)
+    this.data = url.toUri()
     return this
 }
 
 fun Intent.forMyApps(update: Boolean): Intent {
     action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
-    component = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        ComponentName(
+    component = ComponentName(
             "com.android.vending",
             "com.android.vending.AssetBrowserActivity"
         )
-    } else {
-        ComponentName(
-            "com.android.vending",
-            "com.google.android.finsky.activities.MainActivity"
-        )
-    }
     if (update) {
         this.putExtra("trigger_update_all", true)
     }

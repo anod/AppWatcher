@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
-        minSdk = 27
+        minSdk = 31
         targetSdk = 36
         versionCode = 16900
         versionName = "1.6.9"
@@ -107,8 +107,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
 
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.adaptive)
 

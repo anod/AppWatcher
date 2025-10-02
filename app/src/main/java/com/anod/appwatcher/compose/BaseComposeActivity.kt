@@ -18,9 +18,7 @@ abstract class BaseComposeActivity : ComponentActivity() {
 
 fun ComponentActivity.setEdgeToEdgeConfig() {
     enableEdgeToEdge()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        // Force the 3-button navigation bar to be transparent
-        // See: https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
-        window.isNavigationBarContrastEnforced = false
-    }
+    // Force the 3-button navigation bar to be transparent
+    // See: https://developer.android.com/develop/ui/views/layout/edge-to-edge#create-transparent
+    window.isNavigationBarContrastEnforced = false
 }
