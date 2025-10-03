@@ -38,7 +38,8 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
             wideLayout = wideLayout,
-            collectRecentlyInstalledApps = prefs.showRecent
+            collectRecentlyInstalledApps = prefs.showRecent,
+            initialTag = Tag.empty
         ),
         key = SceneNavKey.Main.toString()
     )

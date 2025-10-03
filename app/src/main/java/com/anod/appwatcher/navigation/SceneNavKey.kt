@@ -13,7 +13,9 @@ sealed interface SceneNavKey : NavKey {
     data class Search(
         val keyword: String = "",
         val focus: Boolean = false,
-        val initiateSearch: Boolean = false
+        val initiateSearch: Boolean = false,
+        val isPackageSearch: Boolean = false,
+        val isShareSource: Boolean = false
     ) : SceneNavKey
 
     @Serializable

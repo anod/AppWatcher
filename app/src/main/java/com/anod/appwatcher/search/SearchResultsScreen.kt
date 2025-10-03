@@ -45,6 +45,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
@@ -60,11 +61,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.java.KoinJavaComponent
 
+fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchViewState(
+    wideLayout = wideLayout,
+    searchQuery = this.keyword,
+    initiateSearch = this.initiateSearch,
+    isPackageSearch = this.isPackageSearch,
+    isShareSource = this.isShareSource,
+    hasFocus = this.focus
+)
+
 @Composable
-fun SearchResultsScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit = {}) {
-    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(
-        initialState = SearchViewState(wideLayout = wideLayout), // intentToState(intent, foldableDevice.layout.value),
-    ))
+fun SearchResultsScreenScene(initialState: SearchViewState, navigateBack: () -> Unit = {}) {
+    val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(initialState))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     SearchResultsScreen(
         screenState = screenState,

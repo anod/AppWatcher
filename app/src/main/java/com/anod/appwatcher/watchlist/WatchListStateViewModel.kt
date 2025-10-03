@@ -130,7 +130,7 @@ private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toa
 
 class WatchListStateViewModel(
     state: SavedStateHandle,
-    initialTag: Tag,
+    tag: Tag,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
     wideLayout: FoldableDeviceLayout
@@ -145,23 +145,18 @@ class WatchListStateViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
-    companion object {
-        const val EXTRA_TAG = "extra_tag"
-        const val EXTRA_TAG_ID = "tag_id"
-        const val EXTRA_TAG_COLOR = "tag_color"
-    }
-
     class Factory(
         private val defaultFilterId: Int,
         private val wideLayout: FoldableDeviceLayout,
         private val collectRecentlyInstalledApps: Boolean,
-        private val initialTag: Tag = Tag.empty
+        private val initialTag: Tag
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+            val state = extras.createSavedStateHandle()
             return WatchListStateViewModel(
-                state = extras.createSavedStateHandle(),
-                initialTag = initialTag,
+                state = state,
+                tag = initialTag,
                 defaultFilterId = defaultFilterId,
                 wideLayout = wideLayout,
                 collectRecentlyInstalledApps = collectRecentlyInstalledApps
@@ -173,15 +168,6 @@ class WatchListStateViewModel(
         val expandSearch = state.remove("expand_search") ?: false
         val fromNotification = state.remove("extra_noti") ?: false
         val filterId = if (fromNotification || expandSearch) defaultFilterId else state.getInt("tab_id", defaultFilterId)
-        val extraTag: Tag? = state[EXTRA_TAG]
-        val tag: Tag = if (extraTag == null) {
-            val extraTagId: Int = state[EXTRA_TAG_ID] ?: 0
-            if (extraTagId != 0) {
-                Tag(extraTagId, "", state[EXTRA_TAG_COLOR] ?: Tag.DEFAULT_COLOR)
-            } else initialTag
-        } else {
-            extraTag
-        }
         viewState = WatchListSharedState(
             tag = tag,
             sortId = prefs.sortIndex,
@@ -198,6 +184,11 @@ class WatchListStateViewModel(
             syncProgressFlow(application).collect {
                 handleEvent(WatchListEvent.UpdateSyncProgress(syncProgress = it))
             }
+        }
+
+        if (viewState.tag.isEmpty) {
+            AppLog.d("mark updates as viewed.")
+            prefs.isLastUpdatesViewed = true
         }
 
         if (!viewState.tag.isEmpty) {
@@ -273,7 +264,7 @@ class WatchListStateViewModel(
                 val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
                 emitAction(WatchListAction.NavigateTo(
-                    SceneNavKey.Search(keyword = query, focus = true)
+                    SceneNavKey.Search(keyword = query, focus = true, initiateSearch = true)
                 ))
             }
 
@@ -298,7 +289,7 @@ class WatchListStateViewModel(
             is WatchListEvent.EmptyButton -> {
                 when (event.idx) {
                     1 -> emitAction(WatchListAction.NavigateTo(
-                        SceneNavKey.Search(focus = true)
+                        SceneNavKey.Search(focus = true,)
                     ))
                     2 -> emitAction(WatchListAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
                     3 -> emitAction(startActivityAction(
@@ -320,7 +311,7 @@ class WatchListStateViewModel(
     }
 
     private fun pinTagShortcut() {
-        val intent = AppWatcherActivity.createTagShortcutIntent(viewState.tag.id, viewState.tag.color, application)
+        val intent = AppWatcherActivity.tagShortcutIntent(viewState.tag.id, viewState.tag.color, application)
         viewModelScope.launch {
             try {
                 val icon = createTagIcon()
