@@ -245,7 +245,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
     private fun onGDriveActivityResult(activityResult: ActivityResult): Unit {
         viewModelScope.launch {
             try {
-                gDriveSignIn.onActivityResult(activityResult.resultCode, activityResult.resultCode, activityResult.data)
+                gDriveSignIn.onActivityResult(activityResult.resultCode, activityResult.data)
                 onGDriveLoginResult(true, -1)
             } catch (e: Throwable) {
                 when (e) {

@@ -90,7 +90,7 @@ class GDriveSignIn(private val context: ApplicationContext) {
         })
     }
 
-    suspend fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) = suspendCoroutine { continuation ->
+    suspend fun onActivityResult(resultCode: Int, data: Intent?) = suspendCoroutine { continuation ->
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (resultCode == Activity.RESULT_OK && data?.extras != null) {
             // The Task returned from this call is always completed, no need to attach
