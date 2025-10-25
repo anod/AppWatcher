@@ -22,6 +22,12 @@ sealed interface SceneNavKey : NavKey {
     data object Settings : SceneNavKey
 
     @Serializable
+    data object RefreshHistory : SceneNavKey
+
+    @Serializable
+    data object UserLog : SceneNavKey
+
+    @Serializable
     data class Installed(val importMode: Boolean) : SceneNavKey
 
     @Serializable

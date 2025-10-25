@@ -3,7 +3,7 @@ package com.anod.appwatcher.userLog
 import android.content.Intent
 import androidx.compose.runtime.Immutable
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import com.anod.appwatcher.utils.ScreenCommonAction
+import info.anodsplace.framework.content.ScreenCommonAction
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList

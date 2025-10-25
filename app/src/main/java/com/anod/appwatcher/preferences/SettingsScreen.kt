@@ -37,14 +37,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
-import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.compose.AppTheme
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
@@ -63,7 +62,7 @@ import info.anodsplace.permissions.toRequestInput
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun SettingsScreenScene(navigateBack: () -> Unit) {
+fun SettingsScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: SettingsViewModel = viewModel()
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
@@ -96,7 +95,8 @@ fun SettingsScreenScene(navigateBack: () -> Unit) {
                     ProcessPhoenix.triggerRebirth(context.applicationContext, Intent(context.applicationContext, AppWatcherActivity::class.java))
                 }
                 SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
-                SettingsViewAction.OnBackPressed -> navigateBack()
+                SettingsViewAction.NavigateBack -> navigateBack()
+                is SettingsViewAction.NavigateTo -> navigateTo(action.navKey)
                 is SettingsViewAction.ShowToast -> context.showToast(action)
                 is SettingsViewAction.StartActivity -> context.startActivity(action)
             }
@@ -159,7 +159,7 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
                     navigationIcon = {
-                        IconButton(onClick = { onEvent(SettingsViewEvent.OnBackNav) }) {
+                        IconButton(onClick = { onEvent(SettingsViewEvent.NavigateBack) }) {
                             Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                         }
                     },

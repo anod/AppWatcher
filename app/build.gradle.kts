@@ -1,13 +1,15 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.baselineprofile)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
     alias(libs.plugins.ktlint.gradle)
-    alias(libs.plugins.jetbrains.kotlin.serialization)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
 }
@@ -53,13 +55,13 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            proguardFile(getDefaultProguardFile("proguard-android.txt"))
+            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
             proguardFile("proguard-project.txt")
         }
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFile(getDefaultProguardFile("proguard-android.txt"))
+            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
             proguardFile("proguard-project.pro")
             signingConfig = signingConfigs.getByName("release")
         }
@@ -101,6 +103,7 @@ dependencies {
     ktlintRuleset(libs.ktlint.compose)
     // AndroidX
     implementation(libs.androidx.appcompat) // AppCompatActivity
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.palette)
     implementation(libs.work.runtime)
     implementation(libs.work.runtime.ktx)
@@ -113,8 +116,9 @@ dependencies {
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)
 
+    implementation(libs.kotlinx.serialization.json)
+
     // Compose
-    implementation(libs.androidx.activity.compose)
     implementation(libs.runtime.tracing)
 
     implementation(libs.ktor.client.core)

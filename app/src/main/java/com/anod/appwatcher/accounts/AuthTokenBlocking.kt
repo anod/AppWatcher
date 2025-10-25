@@ -7,11 +7,11 @@ import android.accounts.OperationCanceledException
 import android.content.Intent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 class AuthTokenStartIntent(val intent: Intent) : RuntimeException("getAuthToken finished with intent: $intent")
 
@@ -19,6 +19,7 @@ sealed interface CheckTokenError {
     class Unknown(val e: Exception) : CheckTokenError
     class RequiresInteraction(val intent: Intent) : CheckTokenError
     object NoToken : CheckTokenError
+    object NoAccount : CheckTokenError
 }
 
 sealed interface CheckTokenResult {
@@ -44,7 +45,8 @@ class AuthTokenBlocking(context: ApplicationContext) {
     private val accountManager: AccountManager = AccountManager.get(context.actual)
     private var lastUpdated = 0L
 
-    suspend fun checkToken(account: Account): CheckTokenResult {
+    suspend fun checkToken(account: Account?): CheckTokenResult {
+        val account = account ?: return CheckTokenResult.Error(CheckTokenError.NoAccount)
         if (isFresh) {
             return CheckTokenResult.Success(invalidated = false)
         }

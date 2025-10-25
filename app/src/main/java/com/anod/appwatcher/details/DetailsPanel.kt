@@ -103,7 +103,7 @@ import com.anod.appwatcher.compose.TagIcon
 import com.anod.appwatcher.compose.TranslateIcon
 import com.anod.appwatcher.compose.UninstallIcon
 import com.anod.appwatcher.compose.WatchedIcon
-import com.anod.appwatcher.compose.rememberViwModeStoreOwner
+import com.anod.appwatcher.compose.rememberViewModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
@@ -116,10 +116,10 @@ import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.framework.text.Html
-import java.text.DateFormat
-import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.text.DateFormat
+import java.util.Date
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
@@ -128,7 +128,7 @@ private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.M
 
 @Composable
 fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
-    val storeOwner = rememberViwModeStoreOwner()
+    val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",
@@ -157,7 +157,7 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
 
 @Composable
 fun DetailsDialog(app: App, onDismissRequest: () -> Unit) {
-    val storeOwner = rememberViwModeStoreOwner()
+    val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",

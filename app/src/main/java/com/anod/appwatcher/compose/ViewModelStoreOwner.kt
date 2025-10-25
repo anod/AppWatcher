@@ -18,7 +18,7 @@ class ComposableViewModelStoreOwner : ViewModelStoreOwner {
 }
 
 @Composable
-fun rememberViwModeStoreOwner(): ViewModelStoreOwner {
+fun rememberViewModeStoreOwner(): ViewModelStoreOwner {
     val owner = remember { ComposableViewModelStoreOwner() }
     DisposableEffect(key1 = owner) {
         onDispose {

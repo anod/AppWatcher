@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -21,12 +25,15 @@ import androidx.navigation3.ui.NavDisplay
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.history.HistoryListScreenScene
 import com.anod.appwatcher.installed.InstalledListScreenScene
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
 import com.anod.appwatcher.search.toViewState
+import com.anod.appwatcher.sync.SchedulesHistoryScreenScene
 import com.anod.appwatcher.tags.TagWatchListScreenScene
+import com.anod.appwatcher.userLog.UserLogScreenScene
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.EmptyBoxSmile
@@ -55,7 +62,37 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                     backStack = backStack,
                     onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
                     sceneStrategy = listDetailStrategy,
-                    entryProvider = provideNavEntries(backStack)
+                    entryProvider = provideNavEntries(backStack),
+                    transitionSpec = {
+                        // Slide in from right when navigating forward
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(350)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(350)
+                        )
+                    },
+                    popTransitionSpec = {
+                        // Slide in from left when navigating back
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = tween(350)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(350)
+                        )
+                    },
+                    predictivePopTransitionSpec = {
+                        // Slide in from left when navigating back
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = tween(350)
+                        ) togetherWith slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(350)
+                        )
+                    }
                 )
             }
         }
@@ -86,8 +123,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             ))
         }
         var elements = arrayOf<NavKey>(SceneNavKey.Main)
-        if (extras.containsKey("open_recently_installed")) {
-            intent!!.extras!!.remove("open_recently_installed")
+        if (extras.containsKey(EXTRA_OPEN_RECENTLY_INSTALLED)) {
+            intent!!.extras!!.remove(EXTRA_OPEN_RECENTLY_INSTALLED)
             elements += SceneNavKey.Installed(importMode = false)
         } else if (extras.containsKey(EXTRA_LIST_TAG_ID)) {
             val extraTagId = extras.getInt(EXTRA_LIST_TAG_ID)
@@ -99,6 +136,9 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                     color = extras.getInt(EXTRA_LIST_TAG_COLOR)
                 )
             )
+        } else if (extras.containsKey(EXTRA_GDRIVE_SIGNIN)) {
+            intent!!.extras!!.remove(EXTRA_GDRIVE_SIGNIN)
+            elements += SceneNavKey.Settings
         }
         return elements
     }
@@ -146,6 +186,30 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.Settings)
         ) {
             SettingsScreenScene(
+                navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
+            )
+        }
+        entry<SceneNavKey.PurchaseHistory>(
+            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.PurchaseHistory)
+        ) {
+            val wideLayout by foldableDevice.layout.collectAsState()
+            HistoryListScreenScene(
+                wideLayout = wideLayout,
+                navigateBack = { backStack.removeLastOrNull() }
+            )
+        }
+        entry<SceneNavKey.UserLog>(
+            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.UserLog)
+        ) {
+            UserLogScreenScene(
+                navigateBack = { backStack.removeLastOrNull() }
+            )
+        }
+        entry<SceneNavKey.RefreshHistory>(
+            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.RefreshHistory)
+        ) {
+            SchedulesHistoryScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
@@ -208,6 +272,9 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         const val EXTRA_FROM_NOTIFICATION = "list.extra_noti"
         const val EXTRA_EXPAND_SEARCH = "list.expand_search"
 
+        const val EXTRA_OPEN_RECENTLY_INSTALLED = "open_recently_installed"
+        const val EXTRA_GDRIVE_SIGNIN = "gdrive.signin"
+
         const val ARG_FILTER = "filter"
         const val ARG_SORT = "sort"
         const val ARG_TAG = "tag"
@@ -234,6 +301,11 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
         fun tagIntent(tag: Tag, context: Context) = Intent(context, AppWatcherActivity::class.java).apply {
             putExtra(EXTRA_LIST_TAG, tag)
+            addMultiWindowFlags(context)
+        }
+
+        fun gDriveSignInIntent(context: Context) = Intent(context, AppWatcherActivity::class.java).apply {
+            putExtra(EXTRA_GDRIVE_SIGNIN, true)
             addMultiWindowFlags(context)
         }
 

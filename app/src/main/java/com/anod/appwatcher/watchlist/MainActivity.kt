@@ -1,6 +1,5 @@
 package com.anod.appwatcher.watchlist
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -12,22 +11,16 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.anod.appwatcher.AppWatcherActivity
-import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
-import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.accounts.AccountSelectionDialog
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.compose.MainDetailScreen
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.history.HistoryListActivity
-import com.anod.appwatcher.utils.getIntentFlags
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.showToast
@@ -103,47 +96,6 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                         }
                     }
                 }
-
-                if (listState.wideLayout.isWideLayout) {
-                    MainDetailScreen(
-                        wideLayout = listState.wideLayout,
-                        main = {
-                            MainScreen(
-                                mainState = mainState,
-                                drawerState = drawerState,
-                                onMainEvent = mainViewModel::handleEvent,
-                                listState = listState,
-                                pagingSourceConfig = pagingSourceConfig,
-                                onListEvent = listViewModel::handleEvent,
-                                installedApps = listViewModel.installedApps
-                            )
-                        },
-                        detail = {
-//                            DetailContent(
-//                                app = listState.selectedApp,
-//                                onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-//                                onCommonActivityAction = { onCommonActivityAction(it) }
-//                            )
-                        }
-                    )
-                } else {
-                    MainScreen(
-                        mainState = mainState,
-                        drawerState = drawerState,
-                        onMainEvent = mainViewModel::handleEvent,
-                        listState = listState,
-                        pagingSourceConfig = pagingSourceConfig,
-                        onListEvent = listViewModel::handleEvent,
-                        installedApps = listViewModel.installedApps
-                    )
-//                    if (listState.selectedApp != null) {
-//                        DetailsDialog(
-//                            app = listState.selectedApp!!,
-//                            onDismissRequest = { listViewModel.handleEvent(WatchListEvent.SelectApp(app = null)) },
-//                            onCommonActivityAction = { onCommonActivityAction(it) }
-//                        )
-//                    }
-                }
             }
         }
 
@@ -187,9 +139,9 @@ abstract class MainActivity : BaseComposeActivity(), KoinComponent {
                     DrawerItem.Id.Add -> startActivity(AppWatcherActivity.searchIntent(this, "", focus = true))
                     DrawerItem.Id.Installed -> { }//startActivity(InstalledActivity.intent(false, this))
                     DrawerItem.Id.Refresh -> { }
-                    DrawerItem.Id.Settings -> startActivity(Intent(this, SettingsActivity::class.java))
+                    DrawerItem.Id.Settings -> {} //startActivity(Intent(this, SettingsActivity::class.java))
                     DrawerItem.Id.Wishlist -> {} //startActivity(WishListActivity.intent(this))
-                    DrawerItem.Id.Purchases -> startActivity(HistoryListActivity.intent(this))
+                    DrawerItem.Id.Purchases -> {} //startActivity(HistoryListActivity.intent(this))
                 }
             }
             is MainViewAction.NavigateToTag -> { }

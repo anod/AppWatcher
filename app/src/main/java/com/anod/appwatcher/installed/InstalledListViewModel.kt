@@ -18,7 +18,6 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
-import com.anod.appwatcher.utils.ScreenCommonAction
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.filterWithExtra
 import com.anod.appwatcher.utils.getInt
@@ -27,6 +26,7 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,7 +60,6 @@ sealed interface InstalledListEvent {
     class SelectApp(val app: App?) : InstalledListEvent
     class AuthTokenError(val error: CheckTokenError) : InstalledListEvent
     object Import : InstalledListEvent
-    object NoAccount : InstalledListEvent
 }
 
 class InstalledListViewModel(
@@ -136,8 +135,6 @@ class InstalledListViewModel(
                     tokenErrorToast()
                 }
             }
-
-            InstalledListEvent.NoAccount -> tokenErrorToast()
         }
     }
 
@@ -205,19 +202,13 @@ class InstalledListViewModel(
     }
 
     private suspend fun checkAuthToken(): Boolean {
-        val account = prefs.account?.toAndroidAccount()
-        return if (account == null) {
-            handleEvent(InstalledListEvent.NoAccount)
-            false
-        } else {
-            when (val result = authToken.checkToken(account)) {
-                is CheckTokenResult.Error -> {
-                    handleEvent(InstalledListEvent.AuthTokenError(result.error))
-                    false
-                }
-
-                is CheckTokenResult.Success -> true
+        return when (val result = authToken.checkToken(prefs.account?.toAndroidAccount())) {
+            is CheckTokenResult.Error -> {
+                handleEvent(InstalledListEvent.AuthTokenError(result.error))
+                false
             }
+
+            is CheckTokenResult.Success -> true
         }
     }
 

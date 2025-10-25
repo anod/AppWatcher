@@ -1,5 +1,6 @@
 package com.anod.appwatcher.backup.gdrive
 
+import android.accounts.Account
 import android.text.format.Formatter
 import com.anod.appwatcher.backup.DbJsonReader
 import com.anod.appwatcher.backup.DbJsonWriter
@@ -10,21 +11,19 @@ import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.UserRecoverableAuthException
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import info.anodsplace.applog.AppLog
-import info.anodsplace.context.ApplicationContext
-import java.io.BufferedReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.BufferedReader
 
 /**
  * @author alex
  * *
  * @date 2014-11-15
  */
-class GDriveSync(private val googleAccount: GoogleSignInAccount, private val context: info.anodsplace.context.ApplicationContext, private val database: AppsDatabase) {
+class GDriveSync(private val googleAccount: Account, private val context: info.anodsplace.context.ApplicationContext, private val database: AppsDatabase) {
 
     class SyncError(val error: UserRecoverableAuthException?, cause: Exception) : Exception(cause.message, cause)
 

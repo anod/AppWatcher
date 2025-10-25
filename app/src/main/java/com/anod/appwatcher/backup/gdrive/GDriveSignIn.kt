@@ -1,21 +1,19 @@
 package com.anod.appwatcher.backup.gdrive
 
+import android.accounts.Account
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
-import com.anod.appwatcher.SettingsActivity
 import com.anod.appwatcher.sync.SyncNotification
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
-import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.services.drive.DriveScopes
@@ -23,12 +21,12 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GoogleSignInConnect
+import org.koin.java.KoinJavaComponent
 import java.util.Collections
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import org.koin.java.KoinJavaComponent
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 internal fun createGDriveSignInOptions(): GoogleSignInOptions {
     return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -37,10 +35,10 @@ internal fun createGDriveSignInOptions(): GoogleSignInOptions {
         .build()
 }
 
-internal fun createCredentials(context: Context, googleAccount: GoogleSignInAccount): HttpRequestInitializer {
+internal fun createCredentials(context: Context, googleAccount: Account?): HttpRequestInitializer {
     return GoogleAccountCredential
         .usingOAuth2(context, Collections.singleton(DriveScopes.DRIVE_APPDATA))
-        .setSelectedAccount(googleAccount.account)
+        .setSelectedAccount(googleAccount)
 }
 
 class GDriveSignIn(private val context: ApplicationContext) {
@@ -62,6 +60,10 @@ class GDriveSignIn(private val context: ApplicationContext) {
             val notificationManager = KoinJavaComponent.getKoin().get<NotificationManager>()
             notificationManager.notify(SyncNotification.GMS_NOTIFICATION_ID, notification)
         }
+
+        fun getLastSignedInAccount(context: Context): Account? {
+            return GoogleSignIn.getLastSignedInAccount(context)?.account
+        }
     }
 
     class GoogleSignInRequestException(val intent: Intent, val resultCode: Int) : Throwable()
@@ -69,13 +71,13 @@ class GDriveSignIn(private val context: ApplicationContext) {
 
     suspend fun signIn() = suspendCoroutine { continuation ->
         driveConnect.connect(object : GoogleSignInConnect.Result {
-            override fun onSuccess(account: GoogleSignInAccount, client: GoogleSignInClient) {
+            override fun onSuccess(account: Account) {
                 continuation.resume(account)
             }
 
-            override fun onError(errorCode: Int, client: GoogleSignInClient) {
-                AppLog.e("Silent sign in failed with code $errorCode (${GoogleSignInStatusCodes.getStatusCodeString(errorCode)}). starting signIn intent")
-                continuation.resumeWithException(GoogleSignInRequestException(client.signInIntent, RESULT_CODE_GDRIVE_SIGN_IN))
+            override fun onError(errorCode: Int, errorMessage: String, signInIntent: Intent) {
+                AppLog.e("Silent sign in failed with code $errorCode ($errorMessage). starting signIn intent")
+                continuation.resumeWithException(GoogleSignInRequestException(signInIntent, RESULT_CODE_GDRIVE_SIGN_IN))
             }
         })
     }
@@ -86,10 +88,6 @@ class GDriveSignIn(private val context: ApplicationContext) {
                 continuation.resume(Unit)
             }
         })
-    }
-
-    fun requestEmail(lastSignedAccount: GoogleSignInAccount) {
-        // GoogleSignIn.requestPermissions(activity, RESULT_CODE_GDRIVE_SIGN_IN, lastSignedAccount, Scope("email"))
     }
 
     suspend fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) = suspendCoroutine { continuation ->
@@ -119,10 +117,10 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
 
     private val driveConnect by lazy { GoogleSignInConnect(context, createGDriveSignInOptions()) }
 
-    fun signInLocked(): GoogleSignInAccount {
+    fun signInLocked(): Account {
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context.actual)
-        if (lastSignedInAccount != null) {
-            return lastSignedInAccount
+        if (lastSignedInAccount?.account != null) {
+            return lastSignedInAccount.account!!
         }
 
         try {
@@ -131,7 +129,7 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
             val errorCode = e.statusCode
             AppLog.e("Silent sign in failed with code $errorCode (${GoogleSignInStatusCodes.getStatusCodeString(errorCode)}). starting signIn intent")
             if (errorCode == GoogleSignInStatusCodes.SIGN_IN_REQUIRED) {
-                val settingActivity = Intent(context.actual, SettingsActivity::class.java)
+                val settingActivity = AppWatcherActivity.gDriveSignInIntent(context.actual)
                 settingActivity.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 GDriveSignIn.showResolutionNotification(
                     PendingIntent.getActivity(context.actual, 0, settingActivity, PendingIntent.FLAG_IMMUTABLE), context)

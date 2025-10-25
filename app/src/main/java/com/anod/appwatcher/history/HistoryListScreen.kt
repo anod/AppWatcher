@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -38,14 +40,34 @@ import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.tags.TagSelectionDialog
 import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
+import info.anodsplace.framework.app.FoldableDeviceLayout
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
+
+@Composable
+fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit) {
+    val viewModel: HistoryListViewModel = viewModel(
+        factory = HistoryListViewModel.Factory(
+            wideLayout = wideLayout,
+        ),
+        key = SceneNavKey.Main.toString()
+    )
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    HistoryListScreen(
+        screenState = screenState,
+        onEvent = viewModel::handleEvent,
+        pagingDataFlow = viewModel.pagingData,
+        viewActions = viewModel.viewActions,
+        navigateBack = navigateBack
+    )
+}
 
 @Composable
 fun HistoryListScreen(

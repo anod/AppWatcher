@@ -22,7 +22,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- for checkin Wi-Fi -->
+    <!-- for checking Wi-Fi -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- for Export -->
@@ -35,7 +35,6 @@
 
     <application
         android:name=".AppWatcherApplication"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
@@ -55,23 +54,6 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.anod.appwatcher.wishlist.WishListActivity"
-            android:label="@string/wishlist" />
-
-        <activity
-            android:name="com.anod.appwatcher.userLog.UserLogActivity"
-            android:label="@string/log" />
-
-        <activity
-            android:name="com.anod.appwatcher.sync.SchedulesHistoryActivity"
-            android:label="@string/refresh_history" />
-
-        <activity
-            android:name="com.anod.appwatcher.history.HistoryListActivity"
-            android:label="@string/purchase_history" />
-
         <activity
             android:name="com.anod.appwatcher.AppWatcherActivity"
             android:clearTaskOnLaunch="true"
@@ -94,15 +76,8 @@
             android:taskAffinity="com.anod.appwatcher.notification"
             android:theme="@style/InvisibleTheme" />
         <activity
-            android:name=".SettingsActivity"
-            android:resizeableActivity="true"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:label="@string/preferences" />
-
-        <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
             android:theme="@style/Theme.AppCompat.DayNight" />
-
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:theme="@style/Theme.AppCompat.DayNight" />

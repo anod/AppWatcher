@@ -26,13 +26,11 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.ScreenCommonAction
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.showToast
-import info.anodsplace.framework.content.startActivity
+import info.anodsplace.framework.content.onScreenCommonAction
 
 @Composable
 fun InstalledListScreenScene(
@@ -66,11 +64,7 @@ fun InstalledListScreenScene(
 
    LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            when (action) {
-                ScreenCommonAction.NavigateBack -> navigateBack()
-                is ScreenCommonAction.ShowToast -> context.showToast(action)
-                is ScreenCommonAction.StartActivity -> context.startActivity(action)
-            }
+            context.onScreenCommonAction(action, navigateBack)
         }
     }
 }

@@ -12,8 +12,8 @@ import com.anod.appwatcher.database.AppTagsTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.utils.BaseFlowViewModel
-import com.anod.appwatcher.utils.ScreenCommonAction
 import info.anodsplace.compose.CheckBoxItem
+import info.anodsplace.framework.content.ScreenCommonAction
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map

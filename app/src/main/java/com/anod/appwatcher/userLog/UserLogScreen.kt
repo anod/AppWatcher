@@ -13,6 +13,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,14 +24,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.ShareIconButton
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.framework.content.onScreenCommonAction
+import info.anodsplace.notification.NotificationManager
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.koin.java.KoinJavaComponent
+
+@Composable
+fun UserLogScreenScene(navigateBack: () -> Unit) {
+    val viewModel: UserLogViewModel = viewModel()
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    UserLogScreen(
+        screenState = screenState,
+        onEvent = viewModel::handleEvent
+    )
+    val context = LocalContext.current
+    LaunchedEffect(true) {
+        viewModel.viewActions.collect { action ->
+            context.onScreenCommonAction(action, navigateBack)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,6 +164,6 @@ private fun UserLogScreenPreview() {
             """.trimIndent().split("\n").map { UserLogMessage.from(it) }.toPersistentList()
         ),
         onEvent = {},
-        prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
+        prefs = Preferences(context, NotificationManager.NoOp(), scope)
     )
 }

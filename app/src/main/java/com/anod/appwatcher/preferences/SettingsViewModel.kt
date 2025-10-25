@@ -10,6 +10,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import androidx.work.Operation
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportBackupTask
@@ -19,14 +20,12 @@ import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.Cleanup
-import com.anod.appwatcher.sync.SchedulesHistoryActivity
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdatedApp
-import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
@@ -68,7 +67,7 @@ sealed interface SettingsViewEvent {
     class UpdateCrashReports(val checked: Boolean) : SettingsViewEvent
     class SetRecreateFlag(val item: PreferenceItem, val enabled: Boolean, val update: (Boolean) -> Unit) : SettingsViewEvent
     class UpdateTheme(val newTheme: Int) : SettingsViewEvent
-    object OnBackNav : SettingsViewEvent
+    object NavigateBack : SettingsViewEvent
     object TestNotification : SettingsViewEvent
     object OssLicenses : SettingsViewEvent
     object OpenUserLog : SettingsViewEvent
@@ -82,7 +81,7 @@ sealed interface SettingsViewEvent {
 }
 
 sealed interface SettingsViewAction {
-    data object OnBackPressed : SettingsViewAction
+    data object NavigateBack : SettingsViewAction
     data class StartActivity(override val intent: Intent) : SettingsViewAction, StartActivityAction
     class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
@@ -91,12 +90,7 @@ sealed interface SettingsViewAction {
     object RequestNotificationPermission : SettingsViewAction
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
-}
-
-private fun startActivityAction(intent: Intent): SettingsViewAction {
-    return SettingsViewAction.StartActivity(
-        intent = intent,
-    )
+    data class NavigateTo(val navKey: NavKey) : SettingsViewAction
 }
 
 private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction {
@@ -143,14 +137,20 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             }
             SettingsViewEvent.GDriveSyncNow -> gDriveSyncNow()
             is SettingsViewEvent.GDriveSyncToggle -> gDriveSyncToggle(event.checked)
-            SettingsViewEvent.OnBackNav -> emitAction(SettingsViewAction.OnBackPressed)
-            SettingsViewEvent.OpenRefreshHistory -> emitAction(startActivityAction(
-                Intent(application, SchedulesHistoryActivity::class.java),
+            SettingsViewEvent.NavigateBack -> emitAction(SettingsViewAction.NavigateBack)
+            SettingsViewEvent.OpenRefreshHistory -> emitAction(
+                SettingsViewAction.NavigateTo(
+                    navKey = SceneNavKey.RefreshHistory
+                )
+            )
+
+            SettingsViewEvent.OpenUserLog -> emitAction(
+                SettingsViewAction.NavigateTo(
+                    navKey = SceneNavKey.UserLog
             ))
-            SettingsViewEvent.OpenUserLog -> emitAction(startActivityAction(
-                Intent(application, UserLogActivity::class.java),
-            ))
-            SettingsViewEvent.OssLicenses -> emitAction(startActivityAction(
+
+            SettingsViewEvent.OssLicenses -> emitAction(
+                SettingsViewAction.StartActivity(
                 Intent(application, OssLicensesMenuActivity::class.java),
             ))
             is SettingsViewEvent.SetRecreateFlag -> {
@@ -172,7 +172,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     items = preferenceItems(prefs, inProgress = false, playServices, application)
                 )
             }
-            SettingsViewEvent.ShowAppSettings -> emitAction(startActivityAction(
+            SettingsViewEvent.ShowAppSettings -> emitAction(
+                SettingsViewAction.StartActivity(
                 intent = Intent().forAppInfo(application.packageName),
             ))
             SettingsViewEvent.CheckNotificationPermission -> {
@@ -256,7 +257,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
     }
 
     private fun gDriveSyncNow() {
-        val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
+        val googleAccount = GDriveSignIn.getLastSignedInAccount(context)
         if (googleAccount != null) {
             appScope.launch {
                 try {

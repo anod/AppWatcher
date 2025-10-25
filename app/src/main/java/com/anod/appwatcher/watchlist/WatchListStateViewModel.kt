@@ -114,7 +114,7 @@ sealed interface WatchListAction {
     data class StartActivity(override val intent: Intent) : WatchListAction, StartActivityAction
     class ShowToast(resId: Int, text: String, length: Int) : ShowToastActionDefaults(resId, text, length), WatchListAction
     data class SelectApp(val app: App) : WatchListAction
-    class NavigateTo(val navKey: NavKey): WatchListAction
+    data class NavigateTo(val navKey: NavKey): WatchListAction
     data object NavigateBack : WatchListAction
 }
 
