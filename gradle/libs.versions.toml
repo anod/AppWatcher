@@ -45,6 +45,7 @@ runtime-tracing = "1.9.4"
 uiautomator = "2.3.0"
 window = "1.5.0"
 work-runtime = "2.11.0"
+profileinstaller = "1.4.1"
 
 [libraries]
 androidx-activity = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
@@ -121,6 +122,7 @@ runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version
 
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "work-runtime" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work-runtime" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -133,3 +135,4 @@ kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", vers
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktlint-gradle = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
 room = { id = "androidx.room", version.ref = "room" }
+android-test = { id = "com.android.test", version.ref = "agp" }

@@ -32,5 +32,5 @@ include(
     ":lib:ktx",
     ":lib:permissions",
     ":lib:playservices",
-    ":macrobenchmark"
+    ":baselineprofile",
 )

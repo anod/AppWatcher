@@ -100,6 +100,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
     ktlintRuleset(libs.ktlint.compose)
     // AndroidX
     implementation(libs.androidx.appcompat) // AppCompatActivity
