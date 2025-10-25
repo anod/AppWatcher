@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarVisuals
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.model.AppListFilter
+import info.anodsplace.framework.content.ShowSnackbarData
 import info.anodsplace.ktx.hashCodeOf
 
 /**
@@ -13,6 +14,8 @@ import info.anodsplace.ktx.hashCodeOf
  * *
  * @date 02/05/2017.
  */
+
+data class TagSnackbarAppInfo(val app: App) : ShowSnackbarData
 
 object TagSnackbar {
     private const val GREEN_BOOK = "📗"
@@ -26,8 +29,8 @@ object TagSnackbar {
         override fun hashCode(): Int = hashCodeOf(message, actionLabel, duration, withDismissAction)
         override fun equals(other: Any?): Boolean = (other as? AppListFilter.Installed)?.hashCode() == hashCode()
 
-        constructor(info: App, context: Context) : this(
-            message = context.getString(R.string.app_stored, info.title),
+        constructor(info: TagSnackbarAppInfo, context: Context) : this(
+            message = context.getString(R.string.app_stored, info.app.title),
             actionLabel = context.getString(R.string.action_tag, GREEN_BOOK)
         )
     }

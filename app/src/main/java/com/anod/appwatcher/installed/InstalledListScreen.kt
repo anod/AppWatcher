@@ -20,11 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
@@ -35,7 +37,8 @@ import info.anodsplace.framework.content.onScreenCommonAction
 @Composable
 fun InstalledListScreenScene(
     showAction: Boolean,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    navigateTo: (NavKey) -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: InstalledListViewModel = viewModel(
@@ -64,7 +67,7 @@ fun InstalledListScreenScene(
 
    LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action, navigateBack)
+            context.onScreenCommonAction(action, navigateBack, navigateTo = { navigateTo(it.asNavKey) })
         }
     }
 }

@@ -18,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
@@ -44,8 +43,9 @@ import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
-import info.anodsplace.framework.content.ShowToastActionDefaults
-import info.anodsplace.framework.content.StartActivityAction
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.showToastAction
+import info.anodsplace.framework.content.startActivityAction
 import info.anodsplace.graphics.toIcon
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -100,7 +100,6 @@ sealed interface WatchListEvent {
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
-    class SelectApp(val app: App) : WatchListEvent
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListEvent
     data object PinTagShortcut : WatchListEvent
 
@@ -110,31 +109,13 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
-sealed interface WatchListAction {
-    data class StartActivity(override val intent: Intent) : WatchListAction, StartActivityAction
-    class ShowToast(resId: Int, text: String, length: Int) : ShowToastActionDefaults(resId, text, length), WatchListAction
-    data class SelectApp(val app: App) : WatchListAction
-    data class NavigateTo(val navKey: NavKey): WatchListAction
-    data object NavigateBack : WatchListAction
-}
-
-private fun startActivityAction(intent: Intent): WatchListAction
-    = WatchListAction.StartActivity(intent)
-
-private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction
-    = WatchListAction.ShowToast(
-        resId = resId,
-        text = text,
-        length = length
-    )
-
 class WatchListStateViewModel(
     state: SavedStateHandle,
     tag: Tag,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
     wideLayout: FoldableDeviceLayout
-) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, WatchListAction>(), KoinComponent {
+) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
@@ -257,13 +238,13 @@ class WatchListStateViewModel(
             is WatchListEvent.FilterById -> viewState = viewState.copy(filterId = event.filterId)
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListEvent.ShowSearch -> viewState = viewState.copy(showSearch = event.show)
-            is WatchListEvent.SelectApp -> emitAction(WatchListAction.SelectApp(event.app))
-            WatchListEvent.OnBackPressed -> emitAction(WatchListAction.NavigateBack)
+            WatchListEvent.OnBackPressed -> emitAction(ScreenCommonAction.NavigateBack)
 
             is WatchListEvent.SearchSubmit -> {
                 val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
-                emitAction(WatchListAction.NavigateTo(
+                emitAction(
+                    ScreenCommonAction.NavigateTo(
                     SceneNavKey.Search(keyword = query, focus = true, initiateSearch = true)
                 ))
             }
@@ -283,15 +264,17 @@ class WatchListStateViewModel(
             ))
             WatchListEvent.Refresh -> refresh()
             is WatchListEvent.AppClick -> {
-                emitAction(WatchListAction.SelectApp(event.app))
+                emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
             }
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.EmptyButton -> {
                 when (event.idx) {
-                    1 -> emitAction(WatchListAction.NavigateTo(
+                    1 -> emitAction(
+                        ScreenCommonAction.NavigateTo(
                         SceneNavKey.Search(focus = true,)
                     ))
-                    2 -> emitAction(WatchListAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
+
+                    2 -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
                     3 -> emitAction(startActivityAction(
                         intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
                     ))
@@ -299,7 +282,8 @@ class WatchListStateViewModel(
             }
             is WatchListEvent.SectionHeaderClick -> {
                 when (event.type) {
-                    SectionHeader.RecentlyInstalled -> emitAction(WatchListAction.NavigateTo(
+                    SectionHeader.RecentlyInstalled -> emitAction(
+                        ScreenCommonAction.NavigateTo(
                         SceneNavKey.Installed(importMode = false)
                     ))
                     else -> { }

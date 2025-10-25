@@ -17,6 +17,7 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.updateRowId
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -26,6 +27,7 @@ import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.PaidHistoryFilter
 import kotlinx.coroutines.flow.Flow
@@ -42,22 +44,16 @@ data class HistoryListState(
     val authToken: String = "",
     val nameFilter: String = "",
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
-    val selectedApp: App? = null,
 )
-
-sealed interface HistoryListAction {
-    data object OnBackPress : HistoryListAction
-    class ShowTagSnackbar(val info: App) : HistoryListAction
-}
 
 sealed interface HistoryListEvent {
     data object OnBackPress : HistoryListEvent
     class OnNameFilter(val query: String) : HistoryListEvent
-    class SelectApp(val app: App?) : HistoryListEvent
+    class SelectApp(val app: App) : HistoryListEvent
     class SetWideLayout(val wideLayout: FoldableDeviceLayout) : HistoryListEvent
 }
 
-class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, HistoryListAction>(), KoinComponent {
+class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(
         private val wideLayout: FoldableDeviceLayout
@@ -117,11 +113,9 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
 
     override fun handleEvent(event: HistoryListEvent) {
         when (event) {
-            HistoryListEvent.OnBackPress -> emitAction(HistoryListAction.OnBackPress)
+            HistoryListEvent.OnBackPress -> emitAction(ScreenCommonAction.NavigateBack)
             is HistoryListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
-            is HistoryListEvent.SelectApp -> {
-                viewState = viewState.copy(selectedApp = event.app)
-            }
+            is HistoryListEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
             is HistoryListEvent.SetWideLayout -> {
                 viewState = viewState.copy(wideLayout = event.wideLayout)
             }

@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,7 +51,7 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
     val context = LocalContext.current
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action, navigateBack)
+            context.onScreenCommonAction(action, navigateBack, navigateTo = { /* no-op */ })
         }
     }
 }
@@ -61,7 +61,7 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
 fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, navigateBack: () -> Unit) {
     AppTheme {
         Surface {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
                     navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
