@@ -6,15 +6,14 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
-import com.anod.appwatcher.watchlist.MainActivity
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.text.Html
-import androidx.core.net.toUri
 
 /**
  * @author alex

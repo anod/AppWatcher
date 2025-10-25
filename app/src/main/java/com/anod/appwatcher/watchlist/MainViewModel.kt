@@ -54,14 +54,14 @@ sealed interface MainViewEvent {
     class SetAccount(val result: AccountSelectionResult) : MainViewEvent
     class NavigateToTag(val tag: Tag) : MainViewEvent
     class NotificationPermissionResult(val enabled: Boolean) : MainViewEvent
-    data object InitAccount : MainViewEvent
+    data object OnResume : MainViewEvent
     class DrawerState(val isOpen: Boolean) : MainViewEvent
 }
 
 sealed interface MainViewAction {
     class StartActivity(override val intent: Intent) : MainViewAction, StartActivityAction
     class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), MainViewAction
-    data object ChooseAccount : MainViewAction
+    data class ChooseAccount(val currentAccount: Account?) : MainViewAction
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
     data object RequestNotificationPermission : MainViewAction
     class NavigateToTag(val tag: Tag) : MainViewAction
@@ -119,6 +119,11 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                     viewState = viewState.copy(lastUpdate = prefs.lastUpdateTime)
                 }
         }
+
+        if (viewState.account == null) {
+            showAccountErrorToast("")
+            emitAction(MainViewAction.ChooseAccount(null))
+        }
     }
 
     override fun handleEvent(event: MainViewEvent) {
@@ -127,9 +132,10 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             is MainViewEvent.SetAccount -> {
                 when (event.result) {
                     AccountSelectionResult.Canceled -> if (viewState.account == null) {
-                        onAccountNotFound("")
+                        showAccountErrorToast("")
                     }
-                    is AccountSelectionResult.Error -> onAccountNotFound(event.result.errorMessage)
+
+                    is AccountSelectionResult.Error -> showAccountErrorToast(event.result.errorMessage)
                     is AccountSelectionResult.Success -> {
                         onAccountSelect(event.result.account)
                     }
@@ -141,14 +147,20 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             }
 
             is MainViewEvent.NavigateToTag -> emitAction(MainViewAction.NavigateToTag(tag = event.tag))
-            MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount)
+            MainViewEvent.ChooseAccount -> emitAction(MainViewAction.ChooseAccount(prefs.account?.toAndroidAccount()))
             is MainViewEvent.NotificationPermissionResult -> onNotificationResult(event.enabled)
-            is MainViewEvent.InitAccount -> initAccount()
+            is MainViewEvent.OnResume -> onResume()
             is MainViewEvent.DrawerState -> {
                 viewState = viewState.copy(isDrawerOpen = event.isOpen)
                 emitAction(MainViewAction.DrawerState(isOpen = event.isOpen))
             }
         }
+    }
+
+    private fun onResume() {
+        initAccount()
+        AppLog.d("mark updates as viewed.")
+        prefs.isLastUpdatesViewed = true
     }
 
     private fun initAccount() {
@@ -199,7 +211,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             } catch (e: Exception) {
                 viewState = viewState.copy(account = prefs.account, accountInitializedRetries = viewState.accountInitializedRetries - 1)
                 AppLog.e("Error retrieving authentication token ${e.message}")
-                onAccountNotFound("")
+                showAccountErrorToast("")
             }
         }
     }
@@ -210,7 +222,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
             .collect { }
     }
 
-    private fun onAccountNotFound(errorMessage: String) {
+    private fun showAccountErrorToast(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
                 emitAction(showToastAction(

@@ -1,6 +1,10 @@
 package com.anod.appwatcher.watchlist
 
+import android.accounts.Account
 import android.content.Context
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
@@ -14,9 +18,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AccountSelectionRequest
+import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
 import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
@@ -30,6 +38,9 @@ import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.permissions.toRequestInput
 
 @Composable
 fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -49,6 +60,16 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
     val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
     val drawerState = rememberDrawerState(initialValue = drawerValue)
     val context = LocalContext.current
+
+    val notificationPermissionRequest = rememberLauncherForActivityResult(AppPermissions.Request()) {
+        val enabled = it[AppPermission.PostNotification.value] ?: false
+        mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(enabled))
+    }
+
+    val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
+        mainViewModel.handleEvent(MainViewEvent.SetAccount(it))
+    }
+
     LaunchedEffect(true) {
         mainViewModel.viewActions.collect { action ->
             if (action is MainViewAction.DrawerState) {
@@ -58,7 +79,13 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
                     drawerState.close()
                 }
             } else {
-               onMainAction(action, context, navigateTo)
+                onMainAction(
+                    action = action,
+                    context = context,
+                    accountSelectionRequest = accountSelectionRequest,
+                    notificationPermissionRequest = notificationPermissionRequest,
+                    navigateTo = navigateTo
+                )
             }
         }
     }
@@ -89,9 +116,19 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
         onListEvent = listViewModel::handleEvent,
         installedApps = listViewModel.installedApps
     )
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        mainViewModel.handleEvent(MainViewEvent.OnResume)
+    }
 }
 
-private fun onMainAction(action: MainViewAction, context: Context, navigateTo: (NavKey) -> Unit) {
+private fun onMainAction(
+    action: MainViewAction,
+    context: Context,
+    accountSelectionRequest: ManagedActivityResultLauncher<Account?, AccountSelectionResult>,
+    notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>,
+    navigateTo: (NavKey) -> Unit
+) {
     when (action) {
         is MainViewAction.NavigateTo -> {
             when (action.id) {
@@ -104,8 +141,8 @@ private fun onMainAction(action: MainViewAction, context: Context, navigateTo: (
             }
         }
         is MainViewAction.NavigateToTag -> navigateTo(SceneNavKey.TagWatchList(tag = action.tag))
-        MainViewAction.RequestNotificationPermission -> {} //notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
-        MainViewAction.ChooseAccount -> {} //accountSelectionDialog.show()
+        MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+        is MainViewAction.ChooseAccount -> accountSelectionRequest.launch(action.currentAccount)
         is MainViewAction.ShowToast -> context.showToast(action)
         is MainViewAction.DrawerState -> { }
         is MainViewAction.StartActivity -> context.startActivity(action)
