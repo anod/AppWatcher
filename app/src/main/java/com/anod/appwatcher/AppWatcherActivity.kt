@@ -196,7 +196,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             val wideLayout by foldableDevice.layout.collectAsState()
             HistoryListScreenScene(
                 wideLayout = wideLayout,
-                navigateBack = { backStack.removeLastOrNull() }
+                navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.UserLog>(
@@ -240,6 +241,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             InstalledListScreenScene(
                 showAction = key.importMode,
                 navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.WishList>(

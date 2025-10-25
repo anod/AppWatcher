@@ -15,7 +15,7 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.toAndroidAccount
-import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SelectionState
@@ -41,7 +41,6 @@ data class InstalledListState(
     val selectionMode: Boolean = false,
     val titleFilter: String = "",
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
-    val selectedApp: App? = null,
     val importStatus: ImportStatus = ImportStatus.NotStarted,
     val selection: SelectionState = SelectionState(),
     val packageChanged: String = "",
@@ -57,7 +56,6 @@ sealed interface InstalledListEvent {
     class ChangeSort(val sortId: Int) : InstalledListEvent
     class SwitchImportMode(val selectionMode: Boolean) : InstalledListEvent
     class SetSelection(val all: Boolean) : InstalledListEvent
-    class SelectApp(val app: App?) : InstalledListEvent
     class AuthTokenError(val error: CheckTokenError) : InstalledListEvent
     object Import : InstalledListEvent
 }
@@ -114,17 +112,13 @@ class InstalledListViewModel(
                 viewState = viewState.copy(sortId = event.sortId)
             }
             is InstalledListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            InstalledListEvent.OnBackPressed -> onBackPressed()
+            InstalledListEvent.OnBackPressed -> emitAction(ScreenCommonAction.NavigateBack)
             is InstalledListEvent.SwitchImportMode -> {
                 switchImportMode(event.selectionMode)
             }
 
             is InstalledListEvent.SetSelection -> {
                 viewState = viewState.copy(selection = viewState.selection.selectAll(event.all))
-            }
-
-            is InstalledListEvent.SelectApp -> {
-                viewState = viewState.copy(selectedApp = event.app)
             }
 
             InstalledListEvent.Import -> import()
@@ -156,18 +150,6 @@ class InstalledListViewModel(
         }
     }
 
-    private fun onBackPressed() {
-        if (viewState.wideLayout.isWideLayout) {
-            if (viewState.selectedApp != null) {
-                handleEvent(InstalledListEvent.SelectApp(app = null))
-            } else {
-                emitAction(ScreenCommonAction.NavigateBack)
-            }
-        } else {
-            emitAction(ScreenCommonAction.NavigateBack)
-        }
-    }
-
     private fun handleListEvent(listEvent: WatchListEvent) {
         when (listEvent) {
             is WatchListEvent.AppClick -> {
@@ -176,7 +158,7 @@ class InstalledListViewModel(
                         togglePackage(listEvent.app.packageName)
                     }
                 } else {
-                    viewState = viewState.copy(selectedApp = listEvent.app)
+                    emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(selectedApp = listEvent.app)))
                 }
             }
             is WatchListEvent.AppLongClick -> {

@@ -1,5 +1,7 @@
 package com.anod.appwatcher.search
 
+import android.accounts.Account
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,15 +20,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -42,13 +42,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.ImageLoader
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AccountSelectionDialogData
+import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.navigation.SceneNavKey
-import com.anod.appwatcher.tags.TagSelectionDialog
-import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
+import com.anod.appwatcher.utils.PlainShowSnackbarData
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.Document
 import finsky.protos.AppDetails
@@ -56,9 +57,11 @@ import finsky.protos.DocDetails
 import finsky.protos.DocV2
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.startActivity
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent
 
 fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchViewState(
@@ -74,12 +77,15 @@ fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchVie
 fun SearchResultsScreenScene(initialState: SearchViewState, navigateBack: () -> Unit = {}) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(initialState))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
+        viewModel.handleEvent(SearchViewEvent.SetAccount(it))
+    }
     SearchResultsScreen(
         screenState = screenState,
         pagingDataFlow = { viewModel.pagingData },
         onEvent = viewModel::handleEvent,
         viewActions = viewModel.viewActions,
-        onShowAccountDialog = { /* accountSelectionDialog.show() */ },
+        onShowAccountDialog = { accountSelectionRequest.launch(it) },
         navigateBack = navigateBack
     )
 }
@@ -89,8 +95,8 @@ fun SearchResultsScreen(
     screenState: SearchViewState,
     pagingDataFlow: () -> Flow<PagingData<ListItem>>,
     onEvent: (SearchViewEvent) -> Unit,
-    viewActions: Flow<SearchViewAction>,
-    onShowAccountDialog: () -> Unit = { },
+    viewActions: Flow<ScreenCommonAction>,
+    onShowAccountDialog: (account: Account?) -> Unit = { },
     navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
@@ -152,51 +158,33 @@ fun SearchResultsScreen(
         }
     }
 
-    var showTagList: Pair<App, Boolean>? by remember { mutableStateOf(null) }
-    var deleteNoticeDocument: Document? by remember { mutableStateOf(null) }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = true, key2 = onShowAccountDialog) {
         viewActions.collect { action ->
-            when (action) {
-                SearchViewAction.ShowAccountDialog -> onShowAccountDialog()
-                is SearchViewAction.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(
-                        message = action.message,
-                        duration = action.duration
-                    )
-                    if (action.exitScreen) {
-                        navigateBack()
+            context.onScreenCommonAction(
+                action,
+                navigateBack = navigateBack,
+                navigateTo = { },
+                showSnackbar = {
+                    if (it is PlainShowSnackbarData) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = it.message,
+                                duration = it.duration
+                            )
+                            if (it.exitScreen) {
+                                navigateBack()
+                            }
+                        }
+                    }
+                },
+                showDialog = { dialogData ->
+                    if (dialogData is AccountSelectionDialogData) {
+                        onShowAccountDialog(dialogData.currentAccount)
                     }
                 }
-                is SearchViewAction.ShowTagSnackbar -> {
-                    val exitScreen = action.isShareSource
-                    val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
-                    if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = Pair(action.info, exitScreen)
-                    } else if (exitScreen) {
-                        navigateBack()
-                    }
-                }
-                is SearchViewAction.AlreadyWatchedNotice -> {
-                    deleteNoticeDocument = action.document
-                }
-                SearchViewAction.NavigateBack -> navigateBack()
-                is SearchViewAction.StartActivity -> context.startActivity(action)
-            }
+            )
         }
-    }
-
-    if (showTagList != null) {
-        val (appInfo, exitScreen) = showTagList!!
-        TagSelectionDialog(
-            appId = appInfo.appId,
-            appTitle = appInfo.title,
-            onDismissRequest = {
-                showTagList = null
-                if (exitScreen) {
-                    navigateBack()
-                }
-            }
-        )
     }
 }
 

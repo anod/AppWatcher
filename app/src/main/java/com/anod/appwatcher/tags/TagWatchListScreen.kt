@@ -24,8 +24,8 @@ import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.watchlist.WatchListAction
 import com.anod.appwatcher.watchlist.WatchListEvent
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import com.anod.appwatcher.watchlist.WatchListScreen
@@ -34,8 +34,7 @@ import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import com.anod.appwatcher.watchlist.WatchListTopBar
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.showToast
-import info.anodsplace.framework.content.startActivity
+import info.anodsplace.framework.content.onScreenCommonAction
 
 @Composable
 fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -88,14 +87,8 @@ fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigate
     }
 
     LaunchedEffect(true) {
-        viewModel.viewActions.collect {
-            when (it) {
-                is WatchListAction.SelectApp -> {}
-                is WatchListAction.ShowToast -> context.showToast(it)
-                is WatchListAction.StartActivity -> context.startActivity(it)
-                WatchListAction.NavigateBack -> navigateBack()
-                is WatchListAction.NavigateTo -> navigateTo(it.navKey)
-            }
+        viewModel.viewActions.collect { action ->
+            context.onScreenCommonAction(action = action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
         }
     }
 }

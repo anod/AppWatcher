@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -26,6 +27,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.tags.TagSnackbarAppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.androidVersions
@@ -36,8 +38,9 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.text.Html
@@ -52,8 +55,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.net.URLEncoder
 import java.util.Locale
-import androidx.core.net.toUri
-import info.anodsplace.framework.content.StartActivityAction
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -115,7 +116,7 @@ data class AppVersionInfo(
 
 sealed interface DetailsAction {
     class StartActivity(override val intent: Intent) : DetailsAction, StartActivityAction
-    class ShowTagSnackbar(val appInfo: App) : DetailsAction
+    class ShowTagSnackbar(val appInfo: TagSnackbarAppInfo) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App, val recentChange: AppChange) : DetailsAction
     class ShowToast(@param:StringRes override val resId: Int) : ShowToastActionDefaults(resId), DetailsAction
@@ -405,9 +406,11 @@ class DetailsViewModel(
                 AppListTable.ERROR_ALREADY_ADDED -> emitAction(action = showToastAction(resId = R.string.app_already_added))
                 else -> emitAction(
                     DetailsAction.ShowTagSnackbar(
-                        appInfo = App(
-                            document!!,
-                            uploadDateParserCache
+                        appInfo = TagSnackbarAppInfo(
+                            app = App(
+                                document!!,
+                                uploadDateParserCache
+                            )
                         )
                     )
                 )

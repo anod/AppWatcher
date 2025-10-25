@@ -2,8 +2,8 @@ package com.anod.appwatcher.search
 
 import android.accounts.Account
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
@@ -17,11 +17,13 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
+import com.anod.appwatcher.accounts.showAccountSelectionAction
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
@@ -30,12 +32,14 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.networkConnection
+import com.anod.appwatcher.utils.showSnackbarAction
 import finsky.api.DfeApi
-import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.StartActivityAction
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.showToastAction
+import info.anodsplace.framework.content.startActivityAction
 import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -56,29 +60,13 @@ sealed interface SearchStatus {
     data class SearchList(val query: String) : SearchStatus
 }
 
-sealed interface SearchViewAction {
-    class StartActivity(override val intent: Intent) : SearchViewAction, StartActivityAction
-    class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val exitScreen: Boolean = false) : SearchViewAction
-    data object ShowAccountDialog : SearchViewAction
-    class ShowTagSnackbar(val info: App, val isShareSource: Boolean) : SearchViewAction
-    class AlreadyWatchedNotice(val document: Document) : SearchViewAction
-    data object NavigateBack: SearchViewAction
-}
-
-private fun startActivityAction(intent: Intent): SearchViewAction {
-    return SearchViewAction.StartActivity(
-        intent = intent,
-    )
-}
-
 sealed interface SearchViewEvent {
     data object NoAccount : SearchViewEvent
     data object OnBackPressed : SearchViewEvent
     class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
-    class AccountSelectError(val errorMessage: String) : SearchViewEvent
-    class AccountSelected(val account: Account) : SearchViewEvent
+    class SetAccount(val result: AccountSelectionResult) : SearchViewEvent
     class SelectApp(val app: App?) : SearchViewEvent
 }
 
@@ -97,7 +85,7 @@ data class SearchViewState(
 
 class SearchViewModel(
     initialState: SearchViewState
-) : BaseFlowViewModel<SearchViewState, SearchViewEvent, SearchViewAction>(), KoinComponent {
+) : BaseFlowViewModel<SearchViewState, SearchViewEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(private val initialState: SearchViewState) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -138,13 +126,19 @@ class SearchViewModel(
 
     override fun handleEvent(event: SearchViewEvent) {
         when (event) {
-            SearchViewEvent.NoAccount -> emitAction(SearchViewAction.ShowAccountDialog)
+            SearchViewEvent.NoAccount -> emitAction(showAccountSelectionAction(prefs.account?.toAndroidAccount()))
             is SearchViewEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.wideLayout)
             is SearchViewEvent.SearchQueryChange -> viewState = viewState.copy(searchQuery = event.query)
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
-            is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
-            is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
-            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.NavigateBack)
+            is SearchViewEvent.SetAccount -> {
+                if (event.result is AccountSelectionResult.Error) {
+                    onAccountSelectError(event.result.errorMessage)
+                } else if (event.result is AccountSelectionResult.Success) {
+                    onAccountSelected(event.result.account)
+                }
+            }
+
+            SearchViewEvent.OnBackPressed -> emitAction(ScreenCommonAction.NavigateBack)
             is SearchViewEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
@@ -154,12 +148,15 @@ class SearchViewModel(
     private fun onAccountSelectError(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
-                emitAction(SearchViewAction.ShowSnackbar(message = errorMessage, duration = SnackbarDuration.Short, exitScreen = true))
+                emitAction(showToastAction(text = errorMessage, length = Toast.LENGTH_LONG))
+                emitAction(ScreenCommonAction.NavigateBack)
             } else {
-                emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, exitScreen = true))
+                emitAction(showToastAction(text = context.getString(R.string.failed_gain_access), length = Toast.LENGTH_LONG))
+                emitAction(ScreenCommonAction.NavigateBack)
             }
         } else {
-            emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, exitScreen = true))
+            emitAction(showToastAction(text = context.getString(R.string.check_connection), length = Toast.LENGTH_LONG))
+            emitAction(ScreenCommonAction.NavigateBack)
         }
     }
 
@@ -171,7 +168,7 @@ class SearchViewModel(
                 viewState = viewState.copy(searchStatus = searchStatus)
                 if (searchStatus is SearchStatus.NoNetwork) {
                     emitAction(
-                        SearchViewAction.ShowSnackbar(
+                        showSnackbarAction(
                             message = context.getString(R.string.check_connection),
                             duration = SnackbarDuration.Short,
                             exitScreen = false
@@ -179,7 +176,7 @@ class SearchViewModel(
                     )
                 } else if (searchStatus is SearchStatus.Error) {
                     emitAction(
-                        SearchViewAction.ShowSnackbar(
+                        showSnackbarAction(
                             message = context.getString(R.string.error_fetching_info),
                             duration = SnackbarDuration.Short,
                             exitScreen = false
@@ -227,7 +224,7 @@ class SearchViewModel(
                     resetPager()
                     emit(SearchStatus.SearchList(query = query))
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 if (!networkConnection.isNetworkAvailable) {
                     emit(SearchStatus.NoNetwork(query = query))
                 } else {
@@ -286,9 +283,11 @@ class SearchViewModel(
                 emitAction(startActivityAction(intent = e.intent)) //  TODO: finish = true
             } catch (e: Exception) {
                 if (networkConnection.isNetworkAvailable) {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, exitScreen = true))
+                    emitAction(showToastAction(text = context.getString(R.string.failed_gain_access), length = Toast.LENGTH_LONG))
+                    emitAction(ScreenCommonAction.NavigateBack)
                 } else {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, exitScreen = true))
+                    emitAction(showToastAction(text = context.getString(R.string.check_connection), length = Toast.LENGTH_LONG))
+                    emitAction(ScreenCommonAction.NavigateBack)
                 }
             }
         }

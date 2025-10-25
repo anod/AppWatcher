@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -39,20 +39,20 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
-import com.anod.appwatcher.tags.TagSelectionDialog
-import com.anod.appwatcher.tags.TagSnackbar
 import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.app.FoldableDeviceLayout
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit) {
+fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: HistoryListViewModel = viewModel(
         factory = HistoryListViewModel.Factory(
             wideLayout = wideLayout,
@@ -65,7 +65,8 @@ fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () ->
         onEvent = viewModel::handleEvent,
         pagingDataFlow = viewModel.pagingData,
         viewActions = viewModel.viewActions,
-        navigateBack = navigateBack
+        navigateBack = navigateBack,
+        navigateTo = navigateTo,
     )
 }
 
@@ -74,8 +75,9 @@ fun HistoryListScreen(
     screenState: HistoryListState,
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (HistoryListEvent) -> Unit,
-    viewActions: Flow<HistoryListAction>,
+    viewActions: Flow<ScreenCommonAction>,
     navigateBack: () -> Unit = {},
+    navigateTo: (NavKey) -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
@@ -134,30 +136,14 @@ fun HistoryListScreen(
         }
     }
 
-    var showTagList: App? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
-            when (action) {
-                is HistoryListAction.ShowTagSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(TagSnackbar.Visuals(action.info, context))
-                    if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = action.info
-                    }
-                }
-
-                HistoryListAction.OnBackPress -> navigateBack()
-            }
+            context.onScreenCommonAction(
+                action = action,
+                navigateBack = navigateBack,
+                navigateTo = { navigateTo(it.asNavKey) },
+            )
         }
-    }
-
-    if (showTagList != null) {
-        TagSelectionDialog(
-            appId = showTagList!!.appId,
-            appTitle = showTagList!!.title,
-            onDismissRequest = {
-                showTagList = null
-            }
-        )
     }
 }
 

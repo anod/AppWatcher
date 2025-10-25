@@ -3,9 +3,17 @@ package com.anod.appwatcher.navigation
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import info.anodsplace.framework.content.ScreenCommonNavKey
 import kotlinx.serialization.Serializable
 
-sealed interface SceneNavKey : NavKey {
+
+val ScreenCommonNavKey.asNavKey: NavKey
+    get() = when (this) {
+        is SceneNavKey -> this
+        else -> throw IllegalArgumentException("Unknown ScreenCommonNavKey: $this")
+    }
+
+sealed interface SceneNavKey : NavKey, ScreenCommonNavKey {
     @Serializable
     data object Main : SceneNavKey
 

@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,16 +38,14 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
-import com.anod.appwatcher.tags.TagSelectionDialog
-import com.anod.appwatcher.tags.TagSnackbar.Visuals
 import com.anod.appwatcher.utils.AppIconLoader
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.startActivity
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
@@ -75,7 +72,7 @@ fun WishListScreen(
     screenState: WishListState,
     pagingDataFlow: Flow<PagingData<ListItem>>,
     onEvent: (WishListEvent) -> Unit,
-    viewActions: Flow<WishListAction>,
+    viewActions: Flow<ScreenCommonAction>,
     navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
@@ -143,31 +140,16 @@ fun WishListScreen(
         }
     }
 
-    var showTagList: App? by remember { mutableStateOf(null) }
     LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
-            when (action) {
-                is WishListAction.ShowTagSnackbar -> {
-                    val result = snackbarHostState.showSnackbar(Visuals(action.info, context))
-                    if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = action.info
-                    }
-                }
-
-                is WishListAction.NavigateBack -> navigateBack()
-                is WishListAction.StartActivity -> context.startActivity(action)
-            }
+            context.onScreenCommonAction(
+                action,
+                navigateBack = navigateBack,
+                navigateTo = { /* No navigation keys yet */ },
+                showSnackbar = { },
+                showDialog = { /* No dialogs yet */ }
+            )
         }
-    }
-
-    if (showTagList != null) {
-        TagSelectionDialog(
-            appId = showTagList!!.appId,
-            appTitle = showTagList!!.title,
-            onDismissRequest = {
-                showTagList = null
-            }
-        )
     }
 }
 

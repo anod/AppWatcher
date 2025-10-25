@@ -47,7 +47,7 @@ fun UserLogScreenScene(navigateBack: () -> Unit) {
     val context = LocalContext.current
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action, navigateBack)
+            context.onScreenCommonAction(action, navigateBack, navigateTo = { /* no-op */ })
         }
     }
 }

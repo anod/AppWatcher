@@ -32,10 +32,12 @@ import com.anod.appwatcher.compose.RefreshIcon
 import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.onScreenCommonAction
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermission
@@ -91,13 +93,7 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
     }
     LaunchedEffect(true) {
         listViewModel.viewActions.collect { action ->
-            when (action) {
-                is WatchListAction.StartActivity -> context.startActivity(action)
-                is WatchListAction.ShowToast -> context.showToast(action)
-                is WatchListAction.SelectApp -> navigateTo(SceneNavKey.AppDetails(action.app))
-                WatchListAction.NavigateBack -> navigateBack()
-                is WatchListAction.NavigateTo -> navigateTo(action.navKey)
-            }
+            context.onScreenCommonAction(action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
         }
     }
     val pagingSourceConfig = WatchListPagingSource.Config(

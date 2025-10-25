@@ -364,7 +364,7 @@ private fun DetailsScreenContent(
                     val result =
                         snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
                     if (result == SnackbarResult.ActionPerformed) {
-                        showTagList = action.appInfo
+                        showTagList = action.appInfo.app
                     }
                 }
 

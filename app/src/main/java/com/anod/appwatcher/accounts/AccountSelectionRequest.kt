@@ -6,12 +6,24 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.ShowDialogData
 
 sealed interface AccountSelectionResult {
     class Success(val account: Account) : AccountSelectionResult
     data object Canceled : AccountSelectionResult
     class Error(val errorMessage: String) : AccountSelectionResult
 }
+
+data class AccountSelectionDialogData(
+    val currentAccount: Account?
+) : ShowDialogData
+
+fun showAccountSelectionAction(
+    currentAccount: Account?
+): ScreenCommonAction = ScreenCommonAction.ShowDialog(
+    AccountSelectionDialogData(currentAccount)
+)
 
 class AccountSelectionRequest : ActivityResultContract<Account?, AccountSelectionResult>() {
 

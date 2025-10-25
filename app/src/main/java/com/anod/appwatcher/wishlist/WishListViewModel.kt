@@ -1,6 +1,5 @@
 package com.anod.appwatcher.wishlist
 
-import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
@@ -24,13 +23,13 @@ import com.anod.appwatcher.search.updateRowId
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.prefs
-import com.anod.appwatcher.wishlist.WishListAction.StartActivity
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
-import info.anodsplace.framework.content.StartActivityAction
+import info.anodsplace.framework.content.ScreenCommonAction
+import info.anodsplace.framework.content.startActivityAction
 import info.anodsplace.playstore.AppDetailsFilter
 import info.anodsplace.playstore.AppNameFilter
 import kotlinx.coroutines.flow.Flow
@@ -49,12 +48,6 @@ data class WishListState(
     val isError: Boolean = false
 )
 
-sealed interface WishListAction {
-    class ShowTagSnackbar(val info: App) : WishListAction
-    class StartActivity(override val intent: Intent) : WishListAction, StartActivityAction
-    data object NavigateBack : WishListAction
-}
-
 sealed interface WishListEvent {
     data object OnBackPress : WishListEvent
     data object NoAccount : WishListEvent
@@ -65,7 +58,7 @@ sealed interface WishListEvent {
     class AuthTokenError(val error: CheckTokenError) : WishListEvent
 }
 
-class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, WishListAction>(), KoinComponent {
+class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(
         private val wideLayout: FoldableDeviceLayout
@@ -150,7 +143,7 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
 
     override fun handleEvent(event: WishListEvent) {
         when (event) {
-            WishListEvent.OnBackPress -> emitAction(WishListAction.NavigateBack)
+            WishListEvent.OnBackPress -> emitAction(ScreenCommonAction.NavigateBack)
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is WishListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
@@ -163,7 +156,7 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
             is WishListEvent.AuthTokenError -> {
                 viewState = viewState.copy(isError =  true)
                 if (event.error is CheckTokenError.RequiresInteraction) {
-                    emitAction(StartActivity(event.error.intent))
+                    emitAction(startActivityAction(event.error.intent))
                 }
             }
             WishListEvent.NoAccount -> {
