@@ -161,16 +161,16 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
             }
 
             is WishListEvent.AuthTokenError -> {
-                viewState.copy(isError =  true)
+                viewState = viewState.copy(isError =  true)
                 if (event.error is CheckTokenError.RequiresInteraction) {
                     emitAction(StartActivity(event.error.intent))
                 }
             }
             WishListEvent.NoAccount -> {
-                viewState.copy(isError =  true)
+                viewState = viewState.copy(isError =  true)
             }
 
-            WishListEvent.RetryClick -> viewState.copy(isError =  false)
+            WishListEvent.RetryClick -> viewState = viewState.copy(isError =  false)
         }
     }
 
