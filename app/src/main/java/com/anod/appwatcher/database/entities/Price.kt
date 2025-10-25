@@ -4,12 +4,14 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import com.anod.appwatcher.database.AppListTable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * @author Alex Gavrishev
  * @date 25/05/2018
  */
 @Parcelize
+@Serializable
 data class Price(
     @ColumnInfo(name = AppListTable.Columns.PRICE_TEXT)
     val text: String,

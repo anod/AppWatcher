@@ -1,5 +1,8 @@
 package com.anod.appwatcher.preferences
 
+import android.app.Activity.RESULT_OK
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +25,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,17 +37,102 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
+import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
+import com.anod.appwatcher.backup.ExportBackupTask
+import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.compose.AppTheme
+import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.IconShapeSelector
 import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.compose.key
+import info.anodsplace.framework.app.findActivity
 import info.anodsplace.framework.content.CreateDocument
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
+import info.anodsplace.permissions.AppPermission
+import info.anodsplace.permissions.AppPermissions
+import info.anodsplace.permissions.toRequestInput
 import org.koin.java.KoinJavaComponent
+
+@Composable
+fun SettingsScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+    val viewModel: SettingsViewModel = viewModel()
+    val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    val context = LocalContext.current
+    val notificationPermissionRequest = rememberLauncherForActivityResult(AppPermissions.Request()) {
+        val enabled = it[AppPermission.PostNotification.value] ?: false
+        viewModel.handleEvent(SettingsViewEvent.NotificationPermissionResult(enabled))
+        if (!enabled) {
+            viewModel.handleEvent(SettingsViewEvent.ShowAppSettings)
+        }
+    }
+    val gDriveErrorIntentRequest = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.handleEvent(SettingsViewEvent.GDriveActivityResult(it))
+    }
+    SettingsScreen(
+        screenState = screenState,
+        onEvent = viewModel::handleEvent
+    )
+    LaunchedEffect(true) {
+        viewModel.viewActions.collect { action ->
+            when (action) {
+                is SettingsViewAction.ExportResult -> onExportResult(action.result, context)
+                is SettingsViewAction.ImportResult -> onImportResult(action.result, context)
+                is SettingsViewAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
+                SettingsViewAction.Recreate -> {
+                    context.findActivity().setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
+                    context.findActivity().recreate()
+                    recreateWatchlist(context)
+                }
+                SettingsViewAction.Rebirth -> {
+                    ProcessPhoenix.triggerRebirth(context.applicationContext, Intent(context.applicationContext, AppWatcherActivity::class.java))
+                }
+                SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+                SettingsViewAction.NavigateBack -> navigateBack()
+                is SettingsViewAction.NavigateTo -> navigateTo(action.navKey)
+                is SettingsViewAction.ShowToast -> context.showToast(action)
+                is SettingsViewAction.StartActivity -> context.startActivity(action)
+            }
+        }
+    }
+}
+
+private fun recreateWatchlist(context: Context) {
+    val i = Intent(context, AppWatcherActivity::class.java)
+    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+    context.startActivity(i)
+}
+
+private fun onImportResult(result: Int, context: Context) {
+    when (result) {
+        -1 -> {
+            AppLog.d("Importing...")
+        }
+        else -> {
+            AppLog.d("Import finished with code: $result")
+            ImportBackupTask.showImportFinishToast(context, result)
+        }
+    }
+}
+
+private fun onExportResult(result: Int, context: Context) {
+    when (result) {
+        -1 -> {
+            AppLog.d("Exporting...")
+        }
+        else -> {
+            AppLog.d("Export finished with code: $result")
+            ExportBackupTask.showFinishToast(context, result)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +159,7 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.navdrawer_item_settings)) },
                     navigationIcon = {
-                        IconButton(onClick = { onEvent(SettingsViewEvent.OnBackNav) }) {
+                        IconButton(onClick = { onEvent(SettingsViewEvent.NavigateBack) }) {
                             Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                         }
                     },

@@ -6,12 +6,12 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
-import com.anod.appwatcher.watchlist.MainActivity
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.text.Html
 
@@ -92,9 +92,9 @@ class SyncNotification(private val context: ApplicationContext, private val noti
     private fun create(updatedApps: List<UpdatedApp>): Notification {
         val notificationIntent = Intent(context.actual, AppWatcherActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        val data = Uri.parse("com.anod.appwatcher://notification")
+        val data = "com.anod.appwatcher://notification".toUri()
         notificationIntent.data = data
-        notificationIntent.putExtra(MainActivity.EXTRA_FROM_NOTIFICATION, true)
+        notificationIntent.putExtra(AppWatcherActivity.EXTRA_FROM_NOTIFICATION, true)
         val contentIntent = PendingIntent.getActivity(context.actual, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val title = renderTitle(updatedApps)

@@ -5,7 +5,11 @@ import android.graphics.Rect
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.CheckTokenError
@@ -21,14 +25,15 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.reflect.KClass
 
 @Immutable
 data class InstalledListState(
@@ -55,10 +60,13 @@ sealed interface InstalledListEvent {
     class SelectApp(val app: App?) : InstalledListEvent
     class AuthTokenError(val error: CheckTokenError) : InstalledListEvent
     object Import : InstalledListEvent
-    object NoAccount : InstalledListEvent
 }
 
-class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<InstalledListState, InstalledListEvent, CommonActivityAction>(), KoinComponent {
+class InstalledListViewModel(
+    state: SavedStateHandle,
+    showAction: Boolean,
+    sortId: Int
+) : BaseFlowViewModel<InstalledListState, InstalledListEvent, ScreenCommonAction>(), KoinComponent {
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
@@ -66,10 +74,24 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
+    class Factory(
+        private val sortId: Int,
+        private val showAction: Boolean,
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+            return InstalledListViewModel(
+                state = extras.createSavedStateHandle(),
+                showAction = showAction,
+                sortId = sortId,
+            ) as T
+        }
+    }
+
     init {
         viewState = InstalledListState(
-            sortId = state.getInt("sort"),
-            selectionMode = state["showAction"] ?: false,
+            sortId = state.getInt("sort", sortId) ,
+            selectionMode = state["showAction"] ?: showAction,
             enablePullToRefresh = prefs.enablePullToRefresh
         )
         viewModelScope.launch {
@@ -108,27 +130,25 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             InstalledListEvent.Import -> import()
             is InstalledListEvent.AuthTokenError -> {
                 if (event.error is CheckTokenError.RequiresInteraction) {
-                    emitAction(CommonActivityAction.StartActivity(event.error.intent))
+                    emitAction(ScreenCommonAction.StartActivity(event.error.intent))
                 } else {
                     tokenErrorToast()
                 }
             }
-
-            InstalledListEvent.NoAccount -> tokenErrorToast()
         }
     }
 
     private fun tokenErrorToast() {
         if (networkConnection.isNetworkAvailable) {
             emitAction(
-                CommonActivityAction.ShowToast(
+                ScreenCommonAction.ShowToast(
                     resId = R.string.failed_gain_access,
                     length = Toast.LENGTH_SHORT
                 )
             )
         } else {
             emitAction(
-                CommonActivityAction.ShowToast(
+                ScreenCommonAction.ShowToast(
                     resId = R.string.check_connection,
                     length = Toast.LENGTH_SHORT
                 )
@@ -141,10 +161,10 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
             if (viewState.selectedApp != null) {
                 handleEvent(InstalledListEvent.SelectApp(app = null))
             } else {
-                emitAction(CommonActivityAction.Finish)
+                emitAction(ScreenCommonAction.NavigateBack)
             }
         } else {
-            emitAction(CommonActivityAction.Finish)
+            emitAction(ScreenCommonAction.NavigateBack)
         }
     }
 
@@ -182,19 +202,13 @@ class InstalledListViewModel(state: SavedStateHandle) : BaseFlowViewModel<Instal
     }
 
     private suspend fun checkAuthToken(): Boolean {
-        val account = prefs.account?.toAndroidAccount()
-        return if (account == null) {
-            handleEvent(InstalledListEvent.NoAccount)
-            false
-        } else {
-            when (val result = authToken.checkToken(account)) {
-                is CheckTokenResult.Error -> {
-                    handleEvent(InstalledListEvent.AuthTokenError(result.error))
-                    false
-                }
-
-                is CheckTokenResult.Success -> true
+        return when (val result = authToken.checkToken(prefs.account?.toAndroidAccount())) {
+            is CheckTokenResult.Error -> {
+                handleEvent(InstalledListEvent.AuthTokenError(result.error))
+                false
             }
+
+            is CheckTokenResult.Success -> true
         }
     }
 

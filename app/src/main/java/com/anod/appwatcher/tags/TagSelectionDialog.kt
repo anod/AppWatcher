@@ -9,8 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,14 +32,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
-import com.anod.appwatcher.compose.rememberViwModeStoreOwner
+import com.anod.appwatcher.compose.rememberViewModeStoreOwner
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.compose.CheckBoxItem
 import info.anodsplace.compose.CheckBoxLazyList
 
 @Composable
 fun TagSelectionDialog(appId: String, appTitle: String, onDismissRequest: () -> Unit) {
-    val storeOwner = rememberViwModeStoreOwner()
+    val storeOwner = rememberViewModeStoreOwner()
     val viewModel: TagsSelectionViewModel = viewModel(
         key = appId,
         viewModelStoreOwner = storeOwner,

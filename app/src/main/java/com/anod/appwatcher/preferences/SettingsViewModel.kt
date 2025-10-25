@@ -5,32 +5,34 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import androidx.work.Operation
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
+import com.anod.appwatcher.backup.gdrive.GDriveSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.Cleanup
-import com.anod.appwatcher.sync.SchedulesHistoryActivity
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdatedApp
-import com.anod.appwatcher.userLog.UserLogActivity
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.permissions.AppPermission
@@ -60,16 +62,16 @@ sealed interface SettingsViewEvent {
     class UpdateIconsShape(val newPath: String) : SettingsViewEvent
     class GDriveSyncToggle(val checked: Boolean) : SettingsViewEvent
     object GDriveSyncNow : SettingsViewEvent
+    class GDriveActivityResult(val activityResult: ActivityResult) : SettingsViewEvent
     class ChangeUpdatePolicy(val frequency: Int, val isWifiOnly: Boolean, val isRequiresCharging: Boolean) : SettingsViewEvent
     class UpdateCrashReports(val checked: Boolean) : SettingsViewEvent
     class SetRecreateFlag(val item: PreferenceItem, val enabled: Boolean, val update: (Boolean) -> Unit) : SettingsViewEvent
     class UpdateTheme(val newTheme: Int) : SettingsViewEvent
-    object OnBackNav : SettingsViewEvent
+    object NavigateBack : SettingsViewEvent
     object TestNotification : SettingsViewEvent
     object OssLicenses : SettingsViewEvent
     object OpenUserLog : SettingsViewEvent
     object OpenRefreshHistory : SettingsViewEvent
-    class GDriveLoginResult(val isSuccess: Boolean, val errorCode: Int) : SettingsViewEvent
     object NotificationPermissionRequest : SettingsViewEvent
     class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
     class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SettingsViewEvent
@@ -79,35 +81,23 @@ sealed interface SettingsViewEvent {
 }
 
 sealed interface SettingsViewAction {
-    class ActivityAction(val action: CommonActivityAction) : SettingsViewAction
-    object GDriveSignIn : SettingsViewAction
-    object GDriveSignOut : SettingsViewAction
+    data object NavigateBack : SettingsViewAction
+    data class StartActivity(override val intent: Intent) : SettingsViewAction, StartActivityAction
+    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
     object Recreate : SettingsViewAction
     object Rebirth : SettingsViewAction
     object RequestNotificationPermission : SettingsViewAction
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
+    data class NavigateTo(val navKey: NavKey) : SettingsViewAction
 }
 
-private val finishAction = SettingsViewAction.ActivityAction(CommonActivityAction.Finish)
-
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): SettingsViewAction.ActivityAction {
-    return SettingsViewAction.ActivityAction(
-        action = CommonActivityAction.StartActivity(
-            intent = intent,
-            addMultiWindowFlags = addMultiWindowFlags
-        )
-    )
-}
-
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction.ActivityAction {
-    return SettingsViewAction.ActivityAction(
-        action = CommonActivityAction.ShowToast(
-            resId = resId,
-            text = text,
-            length = length
-        )
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction {
+    return SettingsViewAction.ShowToast(
+        resId = resId,
+        text = text,
+        length = length
     )
 }
 
@@ -117,6 +107,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
     private val appScope: CoroutineScope by inject()
     private val context: Context by inject()
     private val notificationManager: NotificationManager by inject()
+    private val gDriveSignIn: GDriveSignIn by lazy { GDriveSignIn(ApplicationContext(application)) }
 
     init {
         viewState = SettingsViewState(
@@ -144,21 +135,23 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     }
                 }
             }
-            is SettingsViewEvent.GDriveLoginResult -> onGDriveLoginResult(event.isSuccess, event.errorCode)
             SettingsViewEvent.GDriveSyncNow -> gDriveSyncNow()
             is SettingsViewEvent.GDriveSyncToggle -> gDriveSyncToggle(event.checked)
-            SettingsViewEvent.OnBackNav -> emitAction(finishAction)
-            SettingsViewEvent.OpenRefreshHistory -> emitAction(startActivityAction(
-                Intent(application, SchedulesHistoryActivity::class.java),
-                addMultiWindowFlags = true
+            SettingsViewEvent.NavigateBack -> emitAction(SettingsViewAction.NavigateBack)
+            SettingsViewEvent.OpenRefreshHistory -> emitAction(
+                SettingsViewAction.NavigateTo(
+                    navKey = SceneNavKey.RefreshHistory
+                )
+            )
+
+            SettingsViewEvent.OpenUserLog -> emitAction(
+                SettingsViewAction.NavigateTo(
+                    navKey = SceneNavKey.UserLog
             ))
-            SettingsViewEvent.OpenUserLog -> emitAction(startActivityAction(
-                Intent(application, UserLogActivity::class.java),
-                addMultiWindowFlags = true
-            ))
-            SettingsViewEvent.OssLicenses -> emitAction(startActivityAction(
+
+            SettingsViewEvent.OssLicenses -> emitAction(
+                SettingsViewAction.StartActivity(
                 Intent(application, OssLicensesMenuActivity::class.java),
-                addMultiWindowFlags = true
             ))
             is SettingsViewEvent.SetRecreateFlag -> {
                 val result = setRecreateFlag(event.item, event.enabled)
@@ -179,9 +172,9 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     items = preferenceItems(prefs, inProgress = false, playServices, application)
                 )
             }
-            SettingsViewEvent.ShowAppSettings -> emitAction(startActivityAction(
+            SettingsViewEvent.ShowAppSettings -> emitAction(
+                SettingsViewAction.StartActivity(
                 intent = Intent().forAppInfo(application.packageName),
-                addMultiWindowFlags = true
             ))
             SettingsViewEvent.CheckNotificationPermission -> {
                 val areNotificationsEnabled = prefs.areNotificationsEnabled
@@ -202,6 +195,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             is SettingsViewEvent.SetWideLayout -> {
                 viewState = viewState.copy(wideLayout = event.wideLayout)
             }
+            is SettingsViewEvent.GDriveActivityResult -> onGDriveActivityResult(event.activityResult)
         }
     }
 
@@ -224,19 +218,46 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 isProgressVisible = true,
                 items = preferenceItems(prefs, inProgress = true, playServices, application)
             )
-            emitAction(SettingsViewAction.GDriveSignIn)
+            viewModelScope.launch {
+                try {
+                    gDriveSignIn.signIn()
+                    onGDriveLoginResult(true, -1)
+                } catch (e: Throwable) {
+                    when (e) {
+                        is GDriveSignIn.GoogleSignInRequestException -> emitAction(SettingsViewAction.GDriveErrorIntent(e.intent))
+                        is GDriveSignIn.GoogleSignInFailedException -> onGDriveLoginResult(false, e.resultCode)
+                        else -> onGDriveLoginResult(false, 0)
+                    }
+                }
+            }
         } else {
             prefs.isDriveSyncEnabled = false
             viewState = viewState.copy(
                 isProgressVisible = false,
                 items = preferenceItems(prefs, inProgress = false, playServices, application)
             )
-            emitAction(SettingsViewAction.GDriveSignOut)
+            viewModelScope.launch {
+                gDriveSignIn.signOut()
+            }
+        }
+    }
+
+    private fun onGDriveActivityResult(activityResult: ActivityResult): Unit {
+        viewModelScope.launch {
+            try {
+                gDriveSignIn.onActivityResult(activityResult.resultCode, activityResult.data)
+                onGDriveLoginResult(true, -1)
+            } catch (e: Throwable) {
+                when (e) {
+                    is GDriveSignIn.GoogleSignInFailedException -> onGDriveLoginResult(false, e.resultCode)
+                    else -> onGDriveLoginResult(false, 0)
+                }
+            }
         }
     }
 
     private fun gDriveSyncNow() {
-        val googleAccount = GoogleSignIn.getLastSignedInAccount(context)
+        val googleAccount = GDriveSignIn.getLastSignedInAccount(context)
         if (googleAccount != null) {
             appScope.launch {
                 try {

@@ -1,7 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
+
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.baselineprofile)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
     alias(libs.plugins.ktlint.gradle)
@@ -9,15 +14,21 @@ plugins {
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+    }
+}
+
 android {
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.anod.appwatcher"
-        minSdk = 27
+        minSdk = 31
         targetSdk = 36
-        versionCode = 16900
-        versionName = "1.6.9"
+        versionCode = 17000
+        versionName = "1.7.0"
     }
 
     buildFeatures {
@@ -44,13 +55,13 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            proguardFile(getDefaultProguardFile("proguard-android.txt"))
+            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
             proguardFile("proguard-project.txt")
         }
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFile(getDefaultProguardFile("proguard-android.txt"))
+            proguardFile(getDefaultProguardFile("proguard-android-optimize.txt"))
             proguardFile("proguard-project.pro")
             signingConfig = signingConfigs.getByName("release")
         }
@@ -66,10 +77,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
     }
 
     packaging {
@@ -96,20 +103,22 @@ dependencies {
     ktlintRuleset(libs.ktlint.compose)
     // AndroidX
     implementation(libs.androidx.appcompat) // AppCompatActivity
+    implementation(libs.androidx.activity)
     implementation(libs.androidx.palette)
     implementation(libs.work.runtime)
     implementation(libs.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
 
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.navigation3.adaptive)
 
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)
 
+    implementation(libs.kotlinx.serialization.json)
+
     // Compose
-    implementation(libs.androidx.activity.compose)
     implementation(libs.runtime.tracing)
 
     implementation(libs.ktor.client.core)

@@ -20,7 +20,7 @@ data class EditTagState(
 )
 
 sealed interface EditTagEvent {
-    class UpdateColor(@ColorInt val color: Int) : EditTagEvent
+    class UpdateColor(@param:ColorInt val color: Int) : EditTagEvent
     class SaveAndDismiss(val name: String) : EditTagEvent
     object Delete : EditTagEvent
     object Dismiss : EditTagEvent

@@ -24,17 +24,17 @@ import androidx.annotation.ColorInt
  */
 class ColorRoles(
     /** Returns the accent color, used as the main color from the color role.  */
-    @ColorInt val accent: Int,
+    @param:ColorInt val accent: Int,
     /**
      * Returns the on_accent color, used for content such as icons and text on top of the Accent
      * color.
      */
-    @ColorInt val onAccent: Int,
+    @param:ColorInt val onAccent: Int,
     /** Returns the accent_container color, used with less emphasis than the accent color.  */
-    @ColorInt val accentContainer: Int,
+    @param:ColorInt val accentContainer: Int,
     /**
      * Returns the on_accent_container color, used for content such as icons and text on top of the
      * accent_container color.
      */
-    @ColorInt val onAccentContainer: Int
+    @param:ColorInt val onAccentContainer: Int
 )

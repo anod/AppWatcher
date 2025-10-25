@@ -11,14 +11,13 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.anod.appwatcher.SettingsActivity
+import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import info.anodsplace.applog.AppLog
-import java.util.concurrent.TimeUnit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
+import java.util.concurrent.TimeUnit
 
 /**
  * @author Alex Gavrishev
@@ -55,7 +54,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
         AppLog.d("Scheduled call executed. Id: $id")
         AppLog.d("DriveSync perform upload")
 
-        val googleAccount = GoogleSignIn.getLastSignedInAccount(applicationContext)
+        val googleAccount = GDriveSignIn.getLastSignedInAccount(applicationContext)
         if (googleAccount == null) {
             AppLog.e("Account is null")
             return Result.failure()
@@ -67,7 +66,7 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
         } catch (e: Exception) {
             AppLog.e("UploadService::doWork - ${e.message}", e)
             DriveService.extractUserRecoverableException(e)?.let {
-                val settingActivity = Intent(applicationContext, SettingsActivity::class.java).apply {
+                val settingActivity = AppWatcherActivity.gDriveSignInIntent(applicationContext).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 GDriveSignIn.showResolutionNotification(

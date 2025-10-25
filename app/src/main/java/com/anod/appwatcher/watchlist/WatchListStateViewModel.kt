@@ -6,18 +6,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.AppWatcherActivity
-import com.anod.appwatcher.MarketSearchActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.toAndroidAccount
@@ -25,7 +27,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.installed.InstalledActivity
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -39,10 +41,11 @@ import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
+import info.anodsplace.framework.content.ShowToastActionDefaults
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.graphics.toIcon
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -61,6 +64,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.reflect.KClass
 
 @Immutable
 data class WatchListSharedState(
@@ -72,7 +76,6 @@ data class WatchListSharedState(
     val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
-    val selectedApp: App? = null,
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
@@ -84,7 +87,7 @@ data class WatchListSharedState(
 )
 
 sealed interface WatchListEvent {
-    data object NavigationButton : WatchListEvent
+    data object OnBackPressed : WatchListEvent
     data object PlayStoreMyApps : WatchListEvent
     data object Refresh : WatchListEvent
 
@@ -97,7 +100,7 @@ sealed interface WatchListEvent {
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
-    class SelectApp(val app: App?) : WatchListEvent
+    class SelectApp(val app: App) : WatchListEvent
     class UpdateSyncProgress(val syncProgress: SyncProgress) : WatchListEvent
     data object PinTagShortcut : WatchListEvent
 
@@ -107,27 +110,31 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
-private fun startActivityAction(intent: Intent, addMultiWindowFlags: Boolean = false): CommonActivityAction.StartActivity {
-    return CommonActivityAction.StartActivity(
-        intent = intent,
-        addMultiWindowFlags = addMultiWindowFlags
-    )
+sealed interface WatchListAction {
+    data class StartActivity(override val intent: Intent) : WatchListAction, StartActivityAction
+    class ShowToast(resId: Int, text: String, length: Int) : ShowToastActionDefaults(resId, text, length), WatchListAction
+    data class SelectApp(val app: App) : WatchListAction
+    data class NavigateTo(val navKey: NavKey): WatchListAction
+    data object NavigateBack : WatchListAction
 }
 
-private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): CommonActivityAction.ShowToast {
-    return CommonActivityAction.ShowToast(
+private fun startActivityAction(intent: Intent): WatchListAction
+    = WatchListAction.StartActivity(intent)
+
+private fun showToastAction(resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): WatchListAction
+    = WatchListAction.ShowToast(
         resId = resId,
         text = text,
         length = length
     )
-}
 
 class WatchListStateViewModel(
     state: SavedStateHandle,
+    tag: Tag,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
     wideLayout: FoldableDeviceLayout
-) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, CommonActivityAction>(), KoinComponent {
+) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, WatchListAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
@@ -138,21 +145,18 @@ class WatchListStateViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
-    companion object {
-        const val EXTRA_TAG = "extra_tag"
-        const val EXTRA_TAG_ID = "tag_id"
-        const val EXTRA_TAG_COLOR = "tag_color"
-    }
-
     class Factory(
         private val defaultFilterId: Int,
         private val wideLayout: FoldableDeviceLayout,
-        private val collectRecentlyInstalledApps: Boolean
-    ) : AbstractSavedStateViewModelFactory() {
+        private val collectRecentlyInstalledApps: Boolean,
+        private val initialTag: Tag
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(key: String, modelClass: Class<T>, handle: SavedStateHandle): T {
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
+            val state = extras.createSavedStateHandle()
             return WatchListStateViewModel(
-                state = handle,
+                state = state,
+                tag = initialTag,
                 defaultFilterId = defaultFilterId,
                 wideLayout = wideLayout,
                 collectRecentlyInstalledApps = collectRecentlyInstalledApps
@@ -164,13 +168,6 @@ class WatchListStateViewModel(
         val expandSearch = state.remove("expand_search") ?: false
         val fromNotification = state.remove("extra_noti") ?: false
         val filterId = if (fromNotification || expandSearch) defaultFilterId else state.getInt("tab_id", defaultFilterId)
-        val extraTag: Tag? = state[EXTRA_TAG]
-        val tag: Tag = if (extraTag == null) {
-            val extraTagId: Int = state[EXTRA_TAG_ID] ?: 0
-            if (extraTagId != 0) Tag(extraTagId, "", state[EXTRA_TAG_COLOR] ?: Tag.DEFAULT_COLOR) else Tag.empty
-        } else {
-            extraTag
-        }
         viewState = WatchListSharedState(
             tag = tag,
             sortId = prefs.sortIndex,
@@ -189,13 +186,18 @@ class WatchListStateViewModel(
             }
         }
 
+        if (viewState.tag.isEmpty) {
+            AppLog.d("mark updates as viewed.")
+            prefs.isLastUpdatesViewed = true
+        }
+
         if (!viewState.tag.isEmpty) {
             viewModelScope.launch {
                 db.tags()
                     .observeTag(viewState.tag.id)
                     .collect { tag ->
                         if (tag == null) {
-                            emitAction(CommonActivityAction.Finish)
+                            // TODO: emitAction(CommonActivityAction.Finish.toWatchListAction())
                         } else {
                             viewState = viewState.copy(
                                 tag = tag,
@@ -255,31 +257,15 @@ class WatchListStateViewModel(
             is WatchListEvent.FilterById -> viewState = viewState.copy(filterId = event.filterId)
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)
             is WatchListEvent.ShowSearch -> viewState = viewState.copy(showSearch = event.show)
-            is WatchListEvent.SelectApp -> viewState = viewState.copy(selectedApp = event.app)
-
-            WatchListEvent.NavigationButton -> {
-                if (viewState.showSearch) {
-                    viewState = viewState.copy(showSearch = false, titleFilter = "")
-                } else if (viewState.wideLayout.isWideLayout && viewState.selectedApp != null) {
-                    viewState = viewState.copy(selectedApp = null)
-                } else {
-                    emitAction(CommonActivityAction.Finish)
-                }
-            }
+            is WatchListEvent.SelectApp -> emitAction(WatchListAction.SelectApp(event.app))
+            WatchListEvent.OnBackPressed -> emitAction(WatchListAction.NavigateBack)
 
             is WatchListEvent.SearchSubmit -> {
                 val query = viewState.titleFilter
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
-                emitAction(
-                    startActivityAction(
-                        intent = MarketSearchActivity.intent(
-                            application,
-                            query,
-                            true,
-                            initiateSearch = true
-                        )
-                    )
-                )
+                emitAction(WatchListAction.NavigateTo(
+                    SceneNavKey.Search(keyword = query, focus = true, initiateSearch = true)
+                ))
             }
 
             is WatchListEvent.UpdateSyncProgress -> {
@@ -294,25 +280,18 @@ class WatchListStateViewModel(
             }
             WatchListEvent.PlayStoreMyApps -> emitAction(startActivityAction(
                 intent = Intent().forMyApps(true),
-                addMultiWindowFlags = true
             ))
             WatchListEvent.Refresh -> refresh()
             is WatchListEvent.AppClick -> {
-                viewState = viewState.copy(selectedApp = event.app)
+                emitAction(WatchListAction.SelectApp(event.app))
             }
             is WatchListEvent.AppLongClick -> {}
             is WatchListEvent.EmptyButton -> {
                 when (event.idx) {
-                    1 -> emitAction(startActivityAction(
-                        intent = MarketSearchActivity.intent(
-                            application,
-                            keyword = "",
-                            focus = true,
-                        )
+                    1 -> emitAction(WatchListAction.NavigateTo(
+                        SceneNavKey.Search(focus = true,)
                     ))
-                    2 -> emitAction(startActivityAction(
-                        intent = InstalledActivity.intent(importMode = true, application)
-                    ))
+                    2 -> emitAction(WatchListAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
                     3 -> emitAction(startActivityAction(
                         intent = Intent.makeMainActivity(ComponentName("com.android.vending", "com.android.vending.AssetBrowserActivity"))
                     ))
@@ -320,8 +299,8 @@ class WatchListStateViewModel(
             }
             is WatchListEvent.SectionHeaderClick -> {
                 when (event.type) {
-                    SectionHeader.RecentlyInstalled -> emitAction(startActivityAction(
-                        intent = InstalledActivity.intent(importMode = false, application)
+                    SectionHeader.RecentlyInstalled -> emitAction(WatchListAction.NavigateTo(
+                        SceneNavKey.Installed(importMode = false)
                     ))
                     else -> { }
                 }
@@ -332,7 +311,7 @@ class WatchListStateViewModel(
     }
 
     private fun pinTagShortcut() {
-        val intent = AppWatcherActivity.createTagShortcutIntent(viewState.tag.id, viewState.tag.color, application)
+        val intent = AppWatcherActivity.tagShortcutIntent(viewState.tag.id, viewState.tag.color, application)
         viewModelScope.launch {
             try {
                 val icon = createTagIcon()
@@ -344,7 +323,7 @@ class WatchListStateViewModel(
                 ))
             } catch (e: Exception) {
                 AppLog.e(e)
-                emitAction(CommonActivityAction.ShowToast(
+                emitAction(showToastAction(
                     resId = R.string.unable_pin_shortcut,
                     length = Toast.LENGTH_SHORT
                 ))
@@ -354,7 +333,7 @@ class WatchListStateViewModel(
 
     private suspend fun createTagIcon(): Icon = withContext(Dispatchers.Default) {
         val roles = MaterialColors.getColorRoles(viewState.tag.color, false)
-        val background = ColorDrawable(roles.accent)
+        val background = roles.accent.toDrawable()
         val foreground: Drawable = ContextCompat.getDrawable(application, R.drawable.shortcut_tag)!!
         foreground.setTint(roles.onAccent)
         return@withContext AdaptiveIconDrawable(background, foreground).toIcon(application)
@@ -366,14 +345,14 @@ class WatchListStateViewModel(
             appScope.launch {
                 try {
                     requestRefresh()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     if (networkConnection.isNetworkAvailable) {
-                        emitAction(CommonActivityAction.ShowToast(
+                        emitAction(showToastAction(
                             resId = R.string.failed_gain_access,
                             length = Toast.LENGTH_SHORT
                         ))
                     } else {
-                        emitAction(CommonActivityAction.ShowToast(
+                        emitAction(showToastAction(
                             resId = R.string.check_connection,
                             length = Toast.LENGTH_SHORT
                         ))

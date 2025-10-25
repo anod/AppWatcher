@@ -1,8 +1,6 @@
 // Copyright (c) 2020. Alex Gavrishev
 package com.anod.appwatcher.sync
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,66 +15,56 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BackArrowIconButton
-import com.anod.appwatcher.compose.BaseComposeActivity
-import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.New
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
-import info.anodsplace.framework.content.CommonActivityAction
-import info.anodsplace.framework.content.onCommonActivityAction
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toPersistentList
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import java.text.DateFormat
+import java.util.Date
 
-/**
- * @author Alex Gavrishev
- * @date 04/01/2018
- */
-class SchedulesHistoryActivity : BaseComposeActivity(), KoinComponent {
-    private val database: AppsDatabase by inject()
-    private val dateFormat = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            val schedules by database.schedules().load().collectAsState(initial = emptyList())
-            SchedulesHistoryScreen(
-                schedules = schedules.toPersistentList(),
-                dateFormat = dateFormat,
-                onActivityAction = { onCommonActivityAction(it) }
-            )
+@Composable
+fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
+    val viewModel: SchedulesHistoryViewModel = viewModel()
+    val viewState by viewModel.viewStates.collectAsState()
+    SchedulesHistoryScreen(
+        schedules = viewState.schedules,
+        dateFormat = viewState.dateFormat,
+        navigateBack = navigateBack
+    )
+    val context = LocalContext.current
+    LaunchedEffect(true) {
+        viewModel.viewActions.collect { action ->
+            context.onScreenCommonAction(action, navigateBack)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, onActivityAction: (CommonActivityAction) -> Unit) {
+fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, navigateBack: () -> Unit) {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
-                    navigationIcon = { BackArrowIconButton(onClick = { onActivityAction(CommonActivityAction.Finish) }) },
+                    navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
                 )
                 LazyColumn {
                     items(schedules.size) { index ->

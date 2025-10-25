@@ -12,17 +12,19 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.updateRowId
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.prefs
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.playstore.AppNameFilter
 import info.anodsplace.playstore.PaidHistoryFilter
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -43,8 +46,8 @@ data class HistoryListState(
 )
 
 sealed interface HistoryListAction {
+    data object OnBackPress : HistoryListAction
     class ShowTagSnackbar(val info: App) : HistoryListAction
-    class ActivityAction(val action: CommonActivityAction) : HistoryListAction
 }
 
 sealed interface HistoryListEvent {
@@ -69,12 +72,11 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
     private val dfeApi: DfeApi by inject()
     private val packageManager: PackageManager by inject()
     private val installedApps by lazy { InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager)) }
-    val authenticated: Boolean
-        get() = dfeApi.authenticated
+    private val authToken: AuthTokenBlocking by inject()
 
     init {
         viewState = HistoryListState(
-            wideLayout = wideLayout
+            wideLayout = wideLayout,
         )
     }
 
@@ -102,6 +104,7 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
         )
     }
         .flow
+        .onStart { authToken.checkToken(prefs.account?.toAndroidAccount()) }
         .cachedIn(viewModelScope)
         .combine(
             flow = viewStates.map { it.nameFilter }.distinctUntilChanged(),
@@ -114,7 +117,7 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
 
     override fun handleEvent(event: HistoryListEvent) {
         when (event) {
-            HistoryListEvent.OnBackPress -> emitAction(HistoryListAction.ActivityAction(CommonActivityAction.Finish))
+            HistoryListEvent.OnBackPress -> emitAction(HistoryListAction.OnBackPress)
             is HistoryListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is HistoryListEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)

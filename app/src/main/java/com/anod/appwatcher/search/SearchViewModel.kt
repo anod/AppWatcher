@@ -34,8 +34,8 @@ import finsky.api.DfeApi
 import finsky.api.Document
 import finsky.api.toDocument
 import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.CommonActivityAction
 import info.anodsplace.framework.content.InstalledApps
+import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.playstore.AppDetailsFilter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -57,19 +57,17 @@ sealed interface SearchStatus {
 }
 
 sealed interface SearchViewAction {
-    class ActivityAction(val action: CommonActivityAction) : SearchViewAction
-    class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val finish: Boolean = false) : SearchViewAction
+    class StartActivity(override val intent: Intent) : SearchViewAction, StartActivityAction
+    class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short, val exitScreen: Boolean = false) : SearchViewAction
     data object ShowAccountDialog : SearchViewAction
     class ShowTagSnackbar(val info: App, val isShareSource: Boolean) : SearchViewAction
     class AlreadyWatchedNotice(val document: Document) : SearchViewAction
+    data object NavigateBack: SearchViewAction
 }
 
-private fun startActivityAction(intent: Intent, finish: Boolean = false): SearchViewAction.ActivityAction {
-    return SearchViewAction.ActivityAction(
-        action = CommonActivityAction.StartActivity(
-            intent = intent,
-            finish = finish
-        )
+private fun startActivityAction(intent: Intent): SearchViewAction {
+    return SearchViewAction.StartActivity(
+        intent = intent,
     )
 }
 
@@ -146,26 +144,22 @@ class SearchViewModel(
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
             is SearchViewEvent.AccountSelectError -> onAccountSelectError(event.errorMessage)
             is SearchViewEvent.AccountSelected -> onAccountSelected(event.account)
-            SearchViewEvent.OnBackPressed -> onBackPressed()
+            SearchViewEvent.OnBackPressed -> emitAction(SearchViewAction.NavigateBack)
             is SearchViewEvent.SelectApp -> {
                 viewState = viewState.copy(selectedApp = event.app)
             }
         }
     }
 
-    private fun onBackPressed() {
-        emitAction(SearchViewAction.ActivityAction(CommonActivityAction.Finish))
-    }
-
     private fun onAccountSelectError(errorMessage: String) {
         if (networkConnection.isNetworkAvailable) {
             if (errorMessage.isNotBlank()) {
-                emitAction(SearchViewAction.ShowSnackbar(message = errorMessage, duration = SnackbarDuration.Short, finish = true))
+                emitAction(SearchViewAction.ShowSnackbar(message = errorMessage, duration = SnackbarDuration.Short, exitScreen = true))
             } else {
-                emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
+                emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, exitScreen = true))
             }
         } else {
-            emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+            emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, exitScreen = true))
         }
     }
 
@@ -180,7 +174,7 @@ class SearchViewModel(
                         SearchViewAction.ShowSnackbar(
                             message = context.getString(R.string.check_connection),
                             duration = SnackbarDuration.Short,
-                            finish = false
+                            exitScreen = false
                         )
                     )
                 } else if (searchStatus is SearchStatus.Error) {
@@ -188,7 +182,7 @@ class SearchViewModel(
                         SearchViewAction.ShowSnackbar(
                             message = context.getString(R.string.error_fetching_info),
                             duration = SnackbarDuration.Short,
-                            finish = false
+                            exitScreen = false
                         )
                     )
                 }
@@ -289,12 +283,12 @@ class SearchViewModel(
             try {
                 accountInitializer.initialize(account)
             } catch (e: AuthTokenStartIntent) {
-                emitAction(startActivityAction(intent = e.intent, finish = true))
+                emitAction(startActivityAction(intent = e.intent)) //  TODO: finish = true
             } catch (e: Exception) {
                 if (networkConnection.isNetworkAvailable) {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, finish = true))
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.failed_gain_access), duration = SnackbarDuration.Long, exitScreen = true))
                 } else {
-                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, finish = true))
+                    emitAction(SearchViewAction.ShowSnackbar(message = context.getString(R.string.check_connection), duration = SnackbarDuration.Short, exitScreen = true))
                 }
             }
         }

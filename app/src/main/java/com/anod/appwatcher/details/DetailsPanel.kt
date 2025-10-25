@@ -103,7 +103,7 @@ import com.anod.appwatcher.compose.TagIcon
 import com.anod.appwatcher.compose.TranslateIcon
 import com.anod.appwatcher.compose.UninstallIcon
 import com.anod.appwatcher.compose.WatchedIcon
-import com.anod.appwatcher.compose.rememberViwModeStoreOwner
+import com.anod.appwatcher.compose.rememberViewModeStoreOwner
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Price
@@ -113,12 +113,13 @@ import com.anod.appwatcher.utils.StoreIntent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.placeholder
 import info.anodsplace.compose.toAnnotatedString
-import info.anodsplace.framework.content.CommonActivityAction
+import info.anodsplace.framework.content.showToast
+import info.anodsplace.framework.content.startActivity
 import info.anodsplace.framework.text.Html
-import java.text.DateFormat
-import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import java.text.DateFormat
+import java.util.Date
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
@@ -126,8 +127,8 @@ private val iconSizeSmall = 32.dp
 private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
 @Composable
-fun DetailsPanel(app: App, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
-    val storeOwner = rememberViwModeStoreOwner()
+fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
+    val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",
@@ -150,14 +151,13 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit, onCommonActivityAction:
             modifier = Modifier.fillMaxSize(),
             viewActions = viewModel.viewActions,
             onDismissRequest = onDismissRequest,
-            onCommonActivityAction = onCommonActivityAction
         )
     }
 }
 
 @Composable
-fun DetailsDialog(app: App, onDismissRequest: () -> Unit, onCommonActivityAction: (action: CommonActivityAction) -> Unit) {
-    val storeOwner = rememberViwModeStoreOwner()
+fun DetailsDialog(app: App, onDismissRequest: () -> Unit) {
+    val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
         key = "details-${app.appId}-${app.rowId}",
@@ -179,7 +179,6 @@ fun DetailsDialog(app: App, onDismissRequest: () -> Unit, onCommonActivityAction
                 screenState = screenState,
                 viewActions = viewModel.viewActions,
                 onEvent = viewModel::handleEvent,
-                onCommonActivityAction = { onCommonActivityAction(it) },
                 onDismissRequest = onDismissRequest,
                 modifier = Modifier.fillMaxHeight(fraction = 0.9f)
             )
@@ -219,7 +218,6 @@ private fun DetailsScreenContent(
     onEvent: (DetailsEvent) -> Unit,
     viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
-    onCommonActivityAction: (CommonActivityAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(key1 = onEvent) {
@@ -344,7 +342,7 @@ private fun DetailsScreenContent(
 
     val context = LocalContext.current
     var showTagList: App? by remember { mutableStateOf(null) }
-    LaunchedEffect(key1 = onCommonActivityAction, key2 = onDismissRequest) {
+    LaunchedEffect(onDismissRequest) {
         viewActions.collect { action ->
             when (action) {
                 DetailsAction.Dismiss -> {
@@ -352,8 +350,8 @@ private fun DetailsScreenContent(
                 }
 
                 is DetailsAction.Share -> {
-                    onCommonActivityAction(
-                        CommonActivityAction.StartActivity(
+                    context.startActivity(
+                        DetailsAction.StartActivity(
                             intent = createAppChooser(
                                 action.app,
                                 action.recentChange,
@@ -362,8 +360,6 @@ private fun DetailsScreenContent(
                         )
                     )
                 }
-
-                is DetailsAction.ActivityAction -> onCommonActivityAction(action.action)
                 is DetailsAction.ShowTagSnackbar -> {
                     val result =
                         snackBarHostState.showSnackbar(TagSnackbar.Visuals(action.appInfo, context))
@@ -371,6 +367,9 @@ private fun DetailsScreenContent(
                         showTagList = action.appInfo
                     }
                 }
+
+                is DetailsAction.ShowToast -> context.showToast(action)
+                is DetailsAction.StartActivity -> context.startActivity(action)
             }
         }
     }
@@ -1041,7 +1040,6 @@ private fun DetailsScreenPreview() {
             modifier = Modifier,
             viewActions = flowOf(),
             onDismissRequest = { },
-            onCommonActivityAction = { }
         )
     }
 }
