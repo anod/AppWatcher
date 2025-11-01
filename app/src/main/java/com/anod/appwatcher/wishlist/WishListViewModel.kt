@@ -18,6 +18,7 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.updateRowId
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -44,7 +45,6 @@ import org.koin.core.component.inject
 data class WishListState(
     val nameFilter: String = "",
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
-    val selectedApp: App? = null,
     val isError: Boolean = false
 )
 
@@ -53,7 +53,7 @@ sealed interface WishListEvent {
     data object NoAccount : WishListEvent
     data object RetryClick : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
-    class SelectApp(val app: App?) : WishListEvent
+    class SelectApp(val app: App) : WishListEvent
     class SetWideLayout(val wideLayout: FoldableDeviceLayout) : WishListEvent
     class AuthTokenError(val error: CheckTokenError) : WishListEvent
 }
@@ -145,9 +145,7 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
         when (event) {
             WishListEvent.OnBackPress -> emitAction(ScreenCommonAction.NavigateBack)
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
-            is WishListEvent.SelectApp -> {
-                viewState = viewState.copy(selectedApp = event.app)
-            }
+            is WishListEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
 
             is WishListEvent.SetWideLayout -> {
                 viewState = viewState.copy(wideLayout = event.wideLayout)

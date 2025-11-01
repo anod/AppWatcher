@@ -28,6 +28,7 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.observePackages
+import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -67,7 +68,7 @@ sealed interface SearchViewEvent {
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
     class SetAccount(val result: AccountSelectionResult) : SearchViewEvent
-    class SelectApp(val app: App?) : SearchViewEvent
+    class SelectApp(val app: App) : SearchViewEvent
 }
 
 @Immutable
@@ -80,7 +81,6 @@ data class SearchViewState(
     val authenticated: Boolean = false,
     val searchStatus: SearchStatus = SearchStatus.Loading,
     val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
-    val selectedApp: App? = null
 )
 
 class SearchViewModel(
@@ -139,9 +139,7 @@ class SearchViewModel(
             }
 
             SearchViewEvent.OnBackPressed -> emitAction(ScreenCommonAction.NavigateBack)
-            is SearchViewEvent.SelectApp -> {
-                viewState = viewState.copy(selectedApp = event.app)
-            }
+            is SearchViewEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
         }
     }
 
