@@ -115,6 +115,7 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.adaptive)
+    implementation(libs.androidx.navigation3.viewmodel)
 
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)

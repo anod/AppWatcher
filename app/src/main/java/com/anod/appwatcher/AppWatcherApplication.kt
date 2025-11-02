@@ -2,9 +2,7 @@ package com.anod.appwatcher
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import android.os.StrictMode
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.room.Room
 import androidx.work.Configuration
 import com.anod.appwatcher.backup.createBackupModule
@@ -18,22 +16,18 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
 import info.anodsplace.applog.AndroidLogger
 import info.anodsplace.applog.AppLog
-import info.anodsplace.context.ApplicationInstance
-import java.io.IOException
-import java.net.UnknownHostException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import java.io.IOException
+import java.net.UnknownHostException
 
-class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstance, Configuration.Provider, KoinComponent {
+class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Provider, KoinComponent {
 
     override val workManagerConfiguration = Configuration.Builder().apply {
         setMinimumLoggingLevel(android.util.Log.DEBUG)
     }.build()
-
-    override val appCompatNightMode: Int
-        get() = get<Preferences>().appCompatNightMode
 
     val appsDatabase: AppsDatabase by lazy {
         Room.databaseBuilder(this, AppsDatabase::class.java, AppsDatabase.dbName)
@@ -72,7 +66,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
 
         val prefs = get<Preferences>()
         if (prefs.collectCrashReports) {
-            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+            FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
             AppLog.logger = FirebaseLogger()
             AppLog.instance.listener = this
         }
@@ -81,7 +75,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, ApplicationInstanc
             appsDatabase.invalidationTracker.addObserver(get<UploadServiceContentObserver>())
         }
 
-        AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
         SyncNotification(info.anodsplace.context.ApplicationContext(this), get()).createChannels()
     }
 

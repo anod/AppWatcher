@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -39,7 +38,6 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
@@ -75,7 +73,6 @@ data class WatchListSharedState(
     val showSearch: Boolean = false,
     val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
@@ -96,7 +93,6 @@ sealed interface WatchListEvent {
 
     class ChangeSort(val sortId: Int) : WatchListEvent
     class FilterByTitle(val query: String) : WatchListEvent
-    class SetWideLayout(val layout: FoldableDeviceLayout) : WatchListEvent
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
@@ -114,7 +110,6 @@ class WatchListStateViewModel(
     tag: Tag,
     defaultFilterId: Int,
     collectRecentlyInstalledApps: Boolean,
-    wideLayout: FoldableDeviceLayout
 ) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
@@ -128,7 +123,6 @@ class WatchListStateViewModel(
 
     class Factory(
         private val defaultFilterId: Int,
-        private val wideLayout: FoldableDeviceLayout,
         private val collectRecentlyInstalledApps: Boolean,
         private val initialTag: Tag
     ) : ViewModelProvider.Factory {
@@ -139,7 +133,6 @@ class WatchListStateViewModel(
                 state = state,
                 tag = initialTag,
                 defaultFilterId = defaultFilterId,
-                wideLayout = wideLayout,
                 collectRecentlyInstalledApps = collectRecentlyInstalledApps
             ) as T
         }
@@ -154,7 +147,6 @@ class WatchListStateViewModel(
             sortId = prefs.sortIndex,
             filterId = filterId,
             showSearch = expandSearch,
-            wideLayout = wideLayout,
             enablePullToRefresh = prefs.enablePullToRefresh,
             isRequestPinShortcutSupported = if (!tag.isEmpty) shortcutManager.isSupported else false
         )
@@ -233,7 +225,6 @@ class WatchListStateViewModel(
             }
 
             is WatchListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            is WatchListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
             is WatchListEvent.FilterById -> viewState = viewState.copy(filterId = event.filterId)
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)

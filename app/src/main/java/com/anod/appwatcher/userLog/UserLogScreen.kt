@@ -56,7 +56,7 @@ fun UserLogScreenScene(navigateBack: () -> Unit) {
 @Composable
 fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
     AppTheme(
-        theme = prefs.theme
+        theme = prefs.selectedTheme
     ) {
         Surface {
             Scaffold(

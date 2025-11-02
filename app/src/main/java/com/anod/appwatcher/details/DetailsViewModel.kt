@@ -27,6 +27,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.tags.TagSnackbarAppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -95,7 +96,8 @@ data class DetailsState(
     val remoteVersionInfo: AppVersionInfo? = null,
     val remoteCallFinished: Boolean = false,
     val packageInfo: InstalledApps.Info = InstalledApps.Info(0, ""),
-    val isSystemInDarkTheme: Boolean = false
+    val isSystemInDarkTheme: Boolean = false,
+    val theme: SelectedTheme = SelectedTheme()
 ) {
     val isWatched: Boolean
         get() = app != null && app.status != App.STATUS_DELETED && app.rowId > 0
@@ -150,13 +152,13 @@ class DetailsViewModel(
 
     class Factory(
         private val argApp: App,
-        private val isSystemInDarkTheme: Boolean
+        private val isSystemInDarkTheme: Boolean,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return DetailsViewModel(
                 argApp,
-                isSystemInDarkTheme
+                isSystemInDarkTheme,
             ) as T
         }
     }
@@ -168,7 +170,6 @@ class DetailsViewModel(
     private val iconLoader: AppIconLoader by inject()
     private val packageManager: PackageManager by inject()
     private val dfeApi: DfeApi by inject()
-
     val installedApps: InstalledApps = InstalledApps.PackageManager(packageManager)
 
     init {
@@ -181,7 +182,8 @@ class DetailsViewModel(
             title = app.title,
             isLocalApp = app.rowId == -1,
             packageInfo = installedApps.packageInfo(app.packageName),
-            isSystemInDarkTheme = isSystemInDarkTheme
+            isSystemInDarkTheme = isSystemInDarkTheme,
+            theme = prefs.selectedTheme
         )
 
         if (app.iconUrl.isNotEmpty()) {

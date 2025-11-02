@@ -7,7 +7,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
@@ -30,7 +29,6 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
@@ -53,7 +51,6 @@ data class SettingsViewState(
     val isProgressVisible: Boolean = false,
     val recreateWatchlistOnBack: Boolean = false,
     val areNotificationsEnabled: Boolean = false,
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout()
 )
 
 sealed interface SettingsViewEvent {
@@ -74,7 +71,6 @@ sealed interface SettingsViewEvent {
     object OpenRefreshHistory : SettingsViewEvent
     object NotificationPermissionRequest : SettingsViewEvent
     class NotificationPermissionResult(val granted: Boolean) : SettingsViewEvent
-    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SettingsViewEvent
     object ShowAppSettings : SettingsViewEvent
     object CheckNotificationPermission : SettingsViewEvent
     object DbCleanup : SettingsViewEvent
@@ -190,10 +186,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 viewModelScope.launch {
                     Cleanup(prefs, database = get()).perform(System.currentTimeMillis())
                 }
-            }
-
-            is SettingsViewEvent.SetWideLayout -> {
-                viewState = viewState.copy(wideLayout = event.wideLayout)
             }
             is SettingsViewEvent.GDriveActivityResult -> onGDriveActivityResult(event.activityResult)
         }
@@ -344,18 +336,17 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         if (prefs.themeIndex == newThemeIndex) {
             return
         }
-        val nightMode = prefs.uiMode
-        val theme = prefs.theme
+        val current = prefs.selectedTheme
         prefs.themeIndex = newThemeIndex
+        val new = prefs.selectedTheme
         var recreate = false
-        if (prefs.theme != theme) {
+        if (current.id != new.id) {
             recreate = true
         }
-        if (prefs.uiMode != nightMode) {
+        if (current.mode != new.mode) {
             recreate = true
         }
         if (recreate) {
-            AppCompatDelegate.setDefaultNightMode(prefs.appCompatNightMode)
             viewState = viewState.copy(recreateWatchlistOnBack = true)
             emitAction(SettingsViewAction.Recreate)
         }

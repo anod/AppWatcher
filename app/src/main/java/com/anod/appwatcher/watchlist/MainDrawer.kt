@@ -4,14 +4,19 @@ import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
@@ -45,7 +50,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
     ModalDrawerSheet(
-        windowInsets = WindowInsets.navigationBars
+        windowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Start.plus(WindowInsetsSides.Bottom))
     ) {
         Column(Modifier.verticalScroll(rememberScrollState())) {
             DrawerContent(
@@ -58,7 +63,10 @@ fun MainDrawer(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 
 @Composable
 private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
+    val startPaddingValues = WindowInsets.displayCutout.only(WindowInsetsSides.Start).asPaddingValues()
+    val contentPadding = WindowInsets.statusBars.only(WindowInsetsSides.Vertical).union(WindowInsets.displayCutout.only(WindowInsetsSides.Start)).asPaddingValues()
     DrawerHeader(
+        contentPadding = contentPadding,
         mainState = mainState,
         onMainEvent = onMainEvent
     )
@@ -72,12 +80,15 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
             onClick = {
                 onMainEvent(MainViewEvent.DrawerItemClick(item.id))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            modifier = Modifier
+                .padding(startPaddingValues)
+                .padding(NavigationDrawerItemDefaults.ItemPadding)
         )
     }
 
     HorizontalDivider(
         modifier = Modifier
+            .padding(startPaddingValues)
             .padding(horizontal = 24.dp)
             .fillMaxWidth()
     )
@@ -86,6 +97,7 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
         text = stringResource(id = R.string.tags),
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier
+            .padding(startPaddingValues)
             .padding(horizontal = 24.dp, vertical = 8.dp)
     )
 
@@ -99,7 +111,10 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
             onClick = {
                 onMainEvent(MainViewEvent.NavigateToTag(renderedTag))
             },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(42.dp)
+            modifier = Modifier
+                .padding(startPaddingValues)
+                .padding(NavigationDrawerItemDefaults.ItemPadding)
+                .height(42.dp)
         )
     }
 
@@ -110,20 +125,23 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
         onClick = {
             onMainEvent(MainViewEvent.AddNewTagDialog(show = true))
         },
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding).height(48.dp)
+        modifier = Modifier
+            .padding(startPaddingValues)
+            .padding(NavigationDrawerItemDefaults.ItemPadding)
+            .height(48.dp)
     )
 }
 
 @Composable
-private fun DrawerHeader(mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-    val inset = WindowInsets.statusBars.asPaddingValues()
+private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(horizontal = 24.dp)
-            .padding(top = inset.calculateTopPadding() + 12.dp, bottom = 12.dp)
+            .padding(vertical = 12.dp)
+            .padding(contentPadding)
     ) {
         Text(
             text = stringResource(id = R.string.app_name),

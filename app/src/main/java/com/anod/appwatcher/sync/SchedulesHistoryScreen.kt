@@ -35,7 +35,6 @@ import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
 import info.anodsplace.framework.content.onScreenCommonAction
-import kotlinx.collections.immutable.ImmutableList
 import java.text.DateFormat
 import java.util.Date
 
@@ -44,8 +43,7 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
     val viewModel: SchedulesHistoryViewModel = viewModel()
     val viewState by viewModel.viewStates.collectAsState()
     SchedulesHistoryScreen(
-        schedules = viewState.schedules,
-        dateFormat = viewState.dateFormat,
+        viewState = viewState,
         navigateBack = navigateBack
     )
     val context = LocalContext.current
@@ -58,19 +56,22 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, navigateBack: () -> Unit) {
-    AppTheme {
+fun SchedulesHistoryScreen(viewState: SchedulesHistoryState, navigateBack: () -> Unit) {
+    AppTheme(
+        theme = viewState.theme
+    ) {
         Surface {
             Column(modifier = Modifier.fillMaxSize()) {
                 CenterAlignedTopAppBar(
                     title = { Text(text = stringResource(id = R.string.refresh_history)) },
                     navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
                 )
+                val schedules = viewState.schedules
                 LazyColumn {
                     items(schedules.size) { index ->
                         ScheduleRow(
                             schedule = schedules[index],
-                            dateFormat = dateFormat
+                            dateFormat = viewState.dateFormat
                         )
                     }
                 }

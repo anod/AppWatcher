@@ -36,7 +36,6 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.showSnackbarAction
 import finsky.api.DfeApi
 import finsky.api.toDocument
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.showToastAction
@@ -64,7 +63,6 @@ sealed interface SearchStatus {
 sealed interface SearchViewEvent {
     data object NoAccount : SearchViewEvent
     data object OnBackPressed : SearchViewEvent
-    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
     class SetAccount(val result: AccountSelectionResult) : SearchViewEvent
@@ -79,8 +77,7 @@ data class SearchViewState(
     val initiateSearch: Boolean = false,
     val isPackageSearch: Boolean = false,
     val authenticated: Boolean = false,
-    val searchStatus: SearchStatus = SearchStatus.Loading,
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
+    val searchStatus: SearchStatus = SearchStatus.Loading
 )
 
 class SearchViewModel(
@@ -127,7 +124,6 @@ class SearchViewModel(
     override fun handleEvent(event: SearchViewEvent) {
         when (event) {
             SearchViewEvent.NoAccount -> emitAction(showAccountSelectionAction(prefs.account?.toAndroidAccount()))
-            is SearchViewEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.wideLayout)
             is SearchViewEvent.SearchQueryChange -> viewState = viewState.copy(searchQuery = event.query)
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
             is SearchViewEvent.SetAccount -> {

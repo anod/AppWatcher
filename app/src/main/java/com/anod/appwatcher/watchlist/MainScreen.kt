@@ -35,7 +35,6 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
 import info.anodsplace.framework.content.showToast
@@ -45,12 +44,11 @@ import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
 
 @Composable
-fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val mainViewModel: MainViewModel = viewModel()
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            wideLayout = wideLayout,
             collectRecentlyInstalledApps = prefs.showRecent,
             initialTag = Tag.empty
         ),

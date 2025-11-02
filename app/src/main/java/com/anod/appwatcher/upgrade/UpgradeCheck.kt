@@ -33,8 +33,8 @@ class UpgradeCheck(private val preferences: Preferences) {
         }
 
     companion object {
-        val upgrades = listOf(
-            Upgrade15500()
+        val upgrades = listOf<UpgradeTask>(
+            //Upgrade15500()
         )
     }
 }

@@ -11,15 +11,15 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
@@ -54,13 +54,17 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             val backStack = rememberNavBackStack(*elements)
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
             AppTheme(
-                theme = prefs.theme,
+                theme = prefs.selectedTheme,
                 transparentSystemUi = true
             ) {
                 NavDisplay(
                     backStack = backStack,
                     sceneStrategy = listDetailStrategy,
                     entryProvider = provideNavEntries(backStack),
+                    entryDecorators = listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator()
+                    ),
                     transitionSpec = {
                         // Slide in from right when navigating forward
                         slideInHorizontally(
@@ -150,10 +154,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             MainScreenScene(
                 prefs = prefs,
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
@@ -174,9 +176,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         ) { key ->
-            val wideLayout by foldableDevice.layout.collectAsState()
             SearchResultsScreenScene(
-                initialState = key.toViewState(wideLayout),
+                initialState = key.toViewState(),
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
@@ -194,9 +195,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             HistoryListScreenScene(
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
@@ -219,10 +218,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         ) { key ->
-            val wideLayout by foldableDevice.layout.collectAsState()
             TagWatchListScreenScene(
                 tag = key.tag,
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
@@ -249,10 +246,9 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             WishListScreenScene(
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
     }

@@ -45,19 +45,16 @@ import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun HistoryListScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: HistoryListViewModel = viewModel(
-        factory = HistoryListViewModel.Factory(
-            wideLayout = wideLayout,
-        ),
-        key = SceneNavKey.Main.toString()
+        factory = HistoryListViewModel.Factory(),
+        key = SceneNavKey.PurchaseHistory.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     HistoryListScreen(

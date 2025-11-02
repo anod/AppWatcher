@@ -25,7 +25,6 @@ import com.anod.appwatcher.utils.prefs
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.playstore.AppNameFilter
@@ -43,24 +42,21 @@ data class HistoryListState(
     val account: Account? = null,
     val authToken: String = "",
     val nameFilter: String = "",
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
 )
 
 sealed interface HistoryListEvent {
     data object OnBackPress : HistoryListEvent
     class OnNameFilter(val query: String) : HistoryListEvent
     class SelectApp(val app: App) : HistoryListEvent
-    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : HistoryListEvent
 }
 
-class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<HistoryListState, HistoryListEvent, ScreenCommonAction>(), KoinComponent {
+class HistoryListViewModel() : BaseFlowViewModel<HistoryListState, HistoryListEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(
-        private val wideLayout: FoldableDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return HistoryListViewModel(wideLayout) as T
+            return HistoryListViewModel() as T
         }
     }
 
@@ -71,9 +67,7 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
     private val authToken: AuthTokenBlocking by inject()
 
     init {
-        viewState = HistoryListState(
-            wideLayout = wideLayout,
-        )
+        viewState = HistoryListState()
     }
 
     private var _pagingData: Flow<PagingData<ListItem>>? = null
@@ -116,9 +110,6 @@ class HistoryListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel
             HistoryListEvent.OnBackPress -> emitAction(ScreenCommonAction.NavigateBack)
             is HistoryListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is HistoryListEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
-            is HistoryListEvent.SetWideLayout -> {
-                viewState = viewState.copy(wideLayout = event.wideLayout)
-            }
         }
     }
 

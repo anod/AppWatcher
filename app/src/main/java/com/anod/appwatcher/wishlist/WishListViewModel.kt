@@ -27,7 +27,6 @@ import com.anod.appwatcher.utils.prefs
 import finsky.api.DfeApi
 import finsky.api.FilterComposite
 import finsky.api.FilterPredicate
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.startActivityAction
@@ -44,7 +43,6 @@ import org.koin.core.component.inject
 @Immutable
 data class WishListState(
     val nameFilter: String = "",
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(),
     val isError: Boolean = false
 )
 
@@ -54,18 +52,16 @@ sealed interface WishListEvent {
     data object RetryClick : WishListEvent
     class OnNameFilter(val query: String) : WishListEvent
     class SelectApp(val app: App) : WishListEvent
-    class SetWideLayout(val wideLayout: FoldableDeviceLayout) : WishListEvent
     class AuthTokenError(val error: CheckTokenError) : WishListEvent
 }
 
-class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<WishListState, WishListEvent, ScreenCommonAction>(), KoinComponent {
+class WishListViewModel() : BaseFlowViewModel<WishListState, WishListEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(
-        private val wideLayout: FoldableDeviceLayout
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return WishListViewModel(wideLayout) as T
+            return WishListViewModel() as T
         }
     }
 
@@ -79,9 +75,7 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
         get() = dfeApi.authenticated
 
     init {
-        viewState = WishListState(
-            wideLayout = wideLayout
-        )
+        viewState = WishListState()
     }
 
     private var _pagingData: Flow<PagingData<ListItem>>? = null
@@ -146,10 +140,6 @@ class WishListViewModel(wideLayout: FoldableDeviceLayout) : BaseFlowViewModel<Wi
             WishListEvent.OnBackPress -> emitAction(ScreenCommonAction.NavigateBack)
             is WishListEvent.OnNameFilter -> viewState = viewState.copy(nameFilter = event.query)
             is WishListEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
-
-            is WishListEvent.SetWideLayout -> {
-                viewState = viewState.copy(wideLayout = event.wideLayout)
-            }
 
             is WishListEvent.AuthTokenError -> {
                 viewState = viewState.copy(isError =  true)

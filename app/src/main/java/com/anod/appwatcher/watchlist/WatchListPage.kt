@@ -126,7 +126,6 @@ fun WatchListPage(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = WindowInsets.navigationBars.asPaddingValues()
         ) {
             if (isEmpty) {
                 item(contentType = "empty-state") {

@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -39,31 +40,30 @@ import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun WishListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit) {
+fun WishListScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: WishListViewModel = viewModel(
-        factory = WishListViewModel.Factory(
-            wideLayout = wideLayout,
-        ),
+        factory = WishListViewModel.Factory(),
         key = SceneNavKey.WishList.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     WishListScreen(
         screenState = screenState,
-        onEvent = viewModel::handleEvent,
         pagingDataFlow = viewModel.pagingData,
+        onEvent = viewModel::handleEvent,
         viewActions = viewModel.viewActions,
-        navigateBack = navigateBack
+        navigateBack = navigateBack,
+        navigateTo = navigateTo
     )
 }
 
@@ -75,6 +75,7 @@ fun WishListScreen(
     viewActions: Flow<ScreenCommonAction>,
     navigateBack: () -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
+    navigateTo: (NavKey) -> Unit,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -145,7 +146,7 @@ fun WishListScreen(
             context.onScreenCommonAction(
                 action,
                 navigateBack = navigateBack,
-                navigateTo = { /* No navigation keys yet */ },
+                navigateTo = { navigateTo(it.asNavKey) },
                 showSnackbar = { },
                 showDialog = { /* No dialogs yet */ }
             )

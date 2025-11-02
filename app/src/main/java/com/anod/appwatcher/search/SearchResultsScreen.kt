@@ -55,7 +55,6 @@ import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.onScreenCommonAction
@@ -64,8 +63,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent
 
-fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchViewState(
-    wideLayout = wideLayout,
+fun SceneNavKey.Search.toViewState() = SearchViewState(
     searchQuery = this.keyword,
     initiateSearch = this.initiateSearch,
     isPackageSearch = this.isPackageSearch,

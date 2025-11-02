@@ -1,7 +1,6 @@
 package com.anod.appwatcher.installed
 
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.widget.Toast
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
@@ -24,7 +23,6 @@ import com.anod.appwatcher.utils.getInt
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.getInstalledPackagesCodes
@@ -40,7 +38,6 @@ data class InstalledListState(
     val sortId: Int,
     val selectionMode: Boolean = false,
     val titleFilter: String = "",
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
     val importStatus: ImportStatus = ImportStatus.NotStarted,
     val selection: SelectionState = SelectionState(),
     val packageChanged: String = "",
@@ -50,7 +47,6 @@ data class InstalledListState(
 
 sealed interface InstalledListEvent {
     object OnBackPressed : InstalledListEvent
-    class SetWideLayout(val layout: FoldableDeviceLayout) : InstalledListEvent
     class ListEvent(val event: WatchListEvent) : InstalledListEvent
     class FilterByTitle(val query: String) : InstalledListEvent
     class ChangeSort(val sortId: Int) : InstalledListEvent
@@ -106,7 +102,6 @@ class InstalledListViewModel(
 
     override fun handleEvent(event: InstalledListEvent) {
         when (event) {
-            is InstalledListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is InstalledListEvent.ListEvent -> handleListEvent(event.event)
             is InstalledListEvent.ChangeSort -> {
                 viewState = viewState.copy(sortId = event.sortId)
