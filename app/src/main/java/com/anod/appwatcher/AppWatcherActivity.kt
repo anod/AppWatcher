@@ -18,7 +18,6 @@ import androidx.core.os.bundleOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -60,7 +59,6 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             ) {
                 NavDisplay(
                     backStack = backStack,
-                    onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
                     sceneStrategy = listDetailStrategy,
                     entryProvider = provideNavEntries(backStack),
                     transitionSpec = {
@@ -143,10 +141,10 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         return elements
     }
 
-    private fun provideNavEntries(backStack: NavBackStack): (NavKey) -> NavEntry<NavKey> = entryProvider {
+    private fun provideNavEntries(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<SceneNavKey.Main>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Main,
+                sceneKey = "list-detail",
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -161,7 +159,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.AppDetails>(
-            metadata = ListDetailSceneStrategy.detailPane(sceneKey = SceneNavKey.AppDetails)
+            metadata = ListDetailSceneStrategy.detailPane(sceneKey = "list-detail")
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
@@ -170,7 +168,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         }
         entry<SceneNavKey.Search>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Search,
+                sceneKey = "list-detail",
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -182,16 +180,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
-        entry<SceneNavKey.Settings>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.Settings)
-        ) {
+        entry<SceneNavKey.Settings> {
             SettingsScreenScene(
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.PurchaseHistory>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.PurchaseHistory)
+            metadata = ListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
+                detailPlaceholder = {
+                    EmptyBoxSmile()
+                }
+            )
         ) {
             val wideLayout by foldableDevice.layout.collectAsState()
             HistoryListScreenScene(
@@ -200,23 +201,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 navigateTo = { backStack.add(it) }
             )
         }
-        entry<SceneNavKey.UserLog>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.UserLog)
-        ) {
+        entry<SceneNavKey.UserLog> {
             UserLogScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
-        entry<SceneNavKey.RefreshHistory>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.RefreshHistory)
-        ) {
+        entry<SceneNavKey.RefreshHistory> {
             SchedulesHistoryScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
         entry<SceneNavKey.TagWatchList>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.TagWatchList,
+                sceneKey = "list-detail",
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -232,7 +229,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         }
         entry<SceneNavKey.Installed>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Installed,
+                sceneKey = "list-detail",
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }
@@ -246,7 +243,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         }
         entry<SceneNavKey.WishList>(
             metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.WishList,
+                sceneKey = "list-detail",
                 detailPlaceholder = {
                     EmptyBoxSmile()
                 }

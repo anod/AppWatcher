@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.text.Spannable
 import android.text.format.Formatter
+import android.view.Window
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
@@ -16,13 +17,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBars
@@ -274,7 +278,11 @@ private fun DetailsScreenContent(
                 )
             }
 
-            Column {
+            Column(
+                modifier = Modifier.padding(
+                    WindowInsets.safeContent.asPaddingValues()
+                )
+            ) {
                 DetailsTopAppBar(
                     titleVisibility = collapsedFraction,
                     screenState = screenState,
@@ -962,7 +970,7 @@ private fun DetailsTopAppBar(
     }
 }
 
-@Preview
+@Preview()
 @Composable
 private fun DetailsScreenPreview() {
     val screenState = DetailsState(
