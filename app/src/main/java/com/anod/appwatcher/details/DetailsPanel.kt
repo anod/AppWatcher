@@ -146,7 +146,8 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
     AppTheme(
         theme = screenState.theme,
         customPrimaryColor = customPrimaryColor?.let { Color(it) },
-        useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default
+        useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default,
+        updateSystemBars = false
     ) {
         DetailsScreenContent(
             screenState = screenState,

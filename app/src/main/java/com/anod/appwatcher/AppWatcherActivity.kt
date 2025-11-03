@@ -8,9 +8,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -21,7 +26,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.history.HistoryListScreenScene
@@ -53,50 +57,47 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
             val backStack = rememberNavBackStack(*elements)
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-            AppTheme(
-                theme = prefs.selectedTheme,
-                transparentSystemUi = true
-            ) {
-                NavDisplay(
-                    backStack = backStack,
-                    sceneStrategy = listDetailStrategy,
-                    entryProvider = provideNavEntries(backStack),
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator()
-                    ),
-                    transitionSpec = {
-                        // Slide in from right when navigating forward
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(350)
-                        )
-                    },
-                    popTransitionSpec = {
-                        // Slide in from left when navigating back
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(350)
-                        )
-                    },
-                    predictivePopTransitionSpec = {
-                        // Slide in from left when navigating back
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(350)
-                        )
-                    }
-                )
-            }
+            val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
+            NavDisplay(
+                modifier = Modifier.padding(navBarPadding),
+                backStack = backStack,
+                sceneStrategy = listDetailStrategy,
+                entryProvider = provideNavEntries(backStack),
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                transitionSpec = {
+                    // Slide in from right when navigating forward
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { -it },
+                        animationSpec = tween(350)
+                    )
+                },
+                popTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(350)
+                    )
+                },
+                predictivePopTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(350)
+                    )
+                }
+            )
         }
     }
 

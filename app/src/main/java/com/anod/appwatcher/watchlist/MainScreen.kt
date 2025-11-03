@@ -25,6 +25,7 @@ import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.accounts.AccountSelectionResult
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
 import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
@@ -101,15 +102,20 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
         showOnDevice = prefs.showOnDevice,
         showRecentlyInstalled = prefs.showRecent
     )
-    MainScreen(
-        mainState = mainState,
-        drawerState = drawerState,
-        onMainEvent = mainViewModel::handleEvent,
-        listState = listState,
-        pagingSourceConfig = pagingSourceConfig,
-        onListEvent = listViewModel::handleEvent,
-        installedApps = listViewModel.installedApps
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        MainScreen(
+            mainState = mainState,
+            drawerState = drawerState,
+            onMainEvent = mainViewModel::handleEvent,
+            listState = listState,
+            pagingSourceConfig = pagingSourceConfig,
+            onListEvent = listViewModel::handleEvent,
+            installedApps = listViewModel.installedApps
+        )
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         mainViewModel.handleEvent(MainViewEvent.OnResume)
