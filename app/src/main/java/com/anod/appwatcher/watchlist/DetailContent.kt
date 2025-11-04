@@ -1,8 +1,10 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,7 +31,9 @@ fun DetailContent(app: App?, onDismissRequest: () -> Unit) {
 @Composable
 fun EmptyBoxSmile() {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Image(painter = painterResource(id = R.drawable.ic_empty_box_smile), contentDescription = null)

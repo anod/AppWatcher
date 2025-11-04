@@ -54,7 +54,6 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
         val elements = createInitialBackstack()
         setContent {
-
             val backStack = rememberNavBackStack(*elements)
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
             val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
