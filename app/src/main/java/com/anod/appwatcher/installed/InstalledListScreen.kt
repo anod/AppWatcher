@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
@@ -33,6 +34,7 @@ import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun InstalledListScreenScene(
@@ -62,7 +64,8 @@ fun InstalledListScreenScene(
         screenState = screenState,
         pagingSourceConfig = pagingSourceConfig,
         onEvent = viewModel::handleEvent,
-        installedApps = viewModel.installedApps
+        installedApps = viewModel.installedApps,
+        listCacheScope = viewModel.viewModelScope
     )
 
    LaunchedEffect(true) {
@@ -77,7 +80,8 @@ fun InstalledListScreen(
     screenState: InstalledListState,
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (InstalledListEvent) -> Unit,
-    installedApps: InstalledApps
+    installedApps: InstalledApps,
+    listCacheScope: CoroutineScope
 ) {
     Scaffold(
         topBar = {
@@ -125,7 +129,7 @@ fun InstalledListScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             val scope = rememberCoroutineScope()
             val pagerFactory: InstalledListPagerFactory = remember(pagingSourceConfig, scope) {
-                InstalledListPagerFactory(pagingSourceConfig, scope, installedApps)
+                InstalledListPagerFactory(pagingSourceConfig, scope, installedApps, listCacheScope)
             }
             pagerFactory.sortId = screenState.sortId
             pagerFactory.selectionMode = screenState.selectionMode

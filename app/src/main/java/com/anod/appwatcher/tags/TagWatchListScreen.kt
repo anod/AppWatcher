@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
@@ -33,6 +34,7 @@ import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import com.anod.appwatcher.watchlist.WatchListTopBar
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -66,7 +68,8 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
             screenState = screenState,
             pagingSourceConfig = pagingSourceConfig,
             onEvent = viewModel::handleEvent,
-            installedApps = viewModel.installedApps
+            installedApps = viewModel.installedApps,
+            listCacheScope = viewModel.viewModelScope
         )
 
         if (screenState.showAppTagDialog) {
@@ -96,7 +99,8 @@ fun TagWatchListScreen(
     screenState: WatchListSharedState,
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps
+    installedApps: InstalledApps,
+    listCacheScope: CoroutineScope
 ) {
     WatchListScreen(
         screenState = screenState,
@@ -111,7 +115,8 @@ fun TagWatchListScreen(
             )
         },
         installedApps = installedApps,
-        listContext = "tag-${screenState.tag.id}"
+        listContext = "tag-${screenState.tag.id}",
+        listCacheScope = listCacheScope
     )
 }
 

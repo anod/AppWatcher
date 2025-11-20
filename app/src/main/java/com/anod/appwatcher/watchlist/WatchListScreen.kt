@@ -21,13 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.applog.AppLog
-import info.anodsplace.compose.LifecycleEffect
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun WatchListScreen(
@@ -36,7 +35,8 @@ fun WatchListScreen(
     onEvent: (WatchListEvent) -> Unit,
     topBarContent: @Composable (subtitle: String?, filterId: Int) -> Unit,
     listContext: String,
-    installedApps: InstalledApps
+    installedApps: InstalledApps,
+    listCacheScope: CoroutineScope
 ) {
     var subtitle: String? by remember { mutableStateOf(null) }
     val filterPagesTitles = listOf(
@@ -86,7 +86,7 @@ fun WatchListScreen(
                 }
             }
             val pagerFactory = remember(pageConfig) {
-                AppsWatchListPagerFactory(pageConfig, installedApps = installedApps)
+                AppsWatchListPagerFactory(pageConfig, installedApps = installedApps, listCacheScope)
             }
             pagerFactory.filterQuery = screenState.titleFilter
             val items = pagerFactory.pagingData.collectAsLazyPagingItems()
@@ -103,16 +103,6 @@ fun WatchListScreen(
             LaunchedEffect(refreshKey) {
                 AppLog.d("Refresh RefreshKey:$refreshKey")
                 items.refresh()
-            }
-
-            LifecycleEffect { event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        AppLog.d("ON_RESUME $refreshKey")
-                        items.refresh()
-                    }
-                    else -> { }
-                }
             }
 
             WatchListPage(

@@ -4,13 +4,15 @@ import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.InstalledApps
+import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class AppsWatchListPagerFactory(
     pagingSourceConfig: WatchListPagingSource.Config,
-    private val installedApps: InstalledApps
-) : WatchListPagerFactory(pagingSourceConfig), KoinComponent {
+    private val installedApps: InstalledApps,
+    cacheScope: CoroutineScope
+) : WatchListPagerFactory(pagingSourceConfig, cacheScope), KoinComponent {
     private val database: AppsDatabase by inject()
     private val packageManager: PackageManager by inject()
 

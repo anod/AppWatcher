@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
@@ -43,6 +44,7 @@ import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -113,7 +115,8 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
             listState = listState,
             pagingSourceConfig = pagingSourceConfig,
             onListEvent = listViewModel::handleEvent,
-            installedApps = listViewModel.installedApps
+            installedApps = listViewModel.installedApps,
+            listCacheScope = listViewModel.viewModelScope
         )
     }
 
@@ -156,7 +159,8 @@ fun MainScreen(
     pagingSourceConfig: WatchListPagingSource.Config,
     onListEvent: (WatchListEvent) -> Unit,
     installedApps: InstalledApps,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    listCacheScope: CoroutineScope
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -200,7 +204,8 @@ fun MainScreen(
                 )
             },
             installedApps = installedApps,
-            listContext = "main"
+            listContext = "main",
+            listCacheScope = listCacheScope
         )
     }
 
