@@ -9,7 +9,6 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -20,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
@@ -37,14 +35,12 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -97,13 +93,7 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
             context.onScreenCommonAction(action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
         }
     }
-    val pagingSourceConfig = WatchListPagingSource.Config(
-        filterId = listState.filterId,
-        tagId = null,
-        showRecentlyDiscovered = prefs.showRecentlyDiscovered,
-        showOnDevice = prefs.showOnDevice,
-        showRecentlyInstalled = prefs.showRecent
-    )
+
     AppTheme(
         theme = prefs.selectedTheme,
         transparentSystemUi = true
@@ -113,10 +103,8 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
             drawerState = drawerState,
             onMainEvent = mainViewModel::handleEvent,
             listState = listState,
-            pagingSourceConfig = pagingSourceConfig,
+            listPagerFactory = listViewModel::listPagerFactory,
             onListEvent = listViewModel::handleEvent,
-            installedApps = listViewModel.installedApps,
-            listCacheScope = listViewModel.viewModelScope
         )
     }
 
@@ -156,58 +144,79 @@ fun MainScreen(
     mainState: MainViewState,
     onMainEvent: (MainViewEvent) -> Unit,
     listState: WatchListSharedState,
-    pagingSourceConfig: WatchListPagingSource.Config,
     onListEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps,
     drawerState: DrawerState,
-    listCacheScope: CoroutineScope
+    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
 ) {
-    ModalNavigationDrawer(
-        drawerContent = {
-            MainDrawer(
-                mainState = mainState,
-                onMainEvent = {
-                    if (it !is MainViewEvent.AddNewTagDialog) {
-                        onMainEvent(MainViewEvent.DrawerState(isOpen = false))
-                    }
-                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
-                        onListEvent(WatchListEvent.Refresh)
+//    ModalNavigationDrawer(
+//        drawerContent = {
+//            MainDrawer(
+//                mainState = mainState,
+//                onMainEvent = {
+//                    if (it !is MainViewEvent.AddNewTagDialog) {
+//                        onMainEvent(MainViewEvent.DrawerState(isOpen = false))
+//                    }
+//                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
+//                        onListEvent(WatchListEvent.Refresh)
+//                    } else {
+//                        onMainEvent(it)
+//                    }
+//                }
+//            )
+//        },
+//        gesturesEnabled = true,
+//        drawerState = drawerState
+//    ) {
+//        WatchListScreen(
+//            screenState = listState,
+//            listPagerFactory = listPagerFactory,
+//            onEvent = onListEvent,
+//            topBarContent = { subtitle, filterId ->
+//                MainTopBar(
+//                    listState = listState,
+//                    subtitle = subtitle,
+//                    filterId = filterId,
+//                    onListEvent = {
+//                        if (it is WatchListEvent.OnBackPressed) {
+//                            if (listState.showSearch) {
+//                                onListEvent(WatchListEvent.ShowSearch(show = false))
+//                            } else {
+//                                onMainEvent(MainViewEvent.DrawerState(isOpen = true))
+//                            }
+//                        } else {
+//                            onListEvent(it)
+//                        }
+//                    },
+//                )
+//            },
+//            listContext = "main",
+//        )
+//    }
+
+    WatchListScreen(
+        screenState = listState,
+        listPagerFactory = listPagerFactory,
+        onEvent = onListEvent,
+        topBarContent = { subtitle, filterId ->
+            MainTopBar(
+                listState = listState,
+                subtitle = subtitle,
+                filterId = filterId,
+                onListEvent = {
+                    if (it is WatchListEvent.OnBackPressed) {
+                        if (listState.showSearch) {
+                            onListEvent(WatchListEvent.ShowSearch(show = false))
+                        } else {
+                            onMainEvent(MainViewEvent.DrawerState(isOpen = true))
+                        }
                     } else {
-                        onMainEvent(it)
+                        onListEvent(it)
                     }
-                }
+                },
             )
         },
-        gesturesEnabled = true,
-        drawerState = drawerState
-    ) {
-        WatchListScreen(
-            screenState = listState,
-            pagingSourceConfig = pagingSourceConfig,
-            onEvent = onListEvent,
-            topBarContent = { subtitle, filterId ->
-                MainTopBar(
-                    listState = listState,
-                    subtitle = subtitle,
-                    filterId = filterId,
-                    onListEvent = {
-                        if (it is WatchListEvent.OnBackPressed) {
-                            if (listState.showSearch) {
-                                onListEvent(WatchListEvent.ShowSearch(show = false))
-                            } else {
-                                onMainEvent(MainViewEvent.DrawerState(isOpen = true))
-                            }
-                        } else {
-                            onListEvent(it)
-                        }
-                    },
-                )
-            },
-            installedApps = installedApps,
-            listContext = "main",
-            listCacheScope = listCacheScope
-        )
-    }
+        listContext = "main",
+    )
 
     if (mainState.showNewTagDialog) {
         EditTagDialog(

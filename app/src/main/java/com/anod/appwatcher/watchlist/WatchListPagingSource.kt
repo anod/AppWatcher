@@ -47,15 +47,18 @@ class WatchListPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
         AppLog.d("$params")
-        val offset = params.key ?: 0
+        val (offset, initialLimit) = calculateOffsetAndLimit(
+            key = params.key,
+            loadSize = params.loadSize,
+            showRecentlyInstalled = config.showRecentlyInstalled,
+        )
         val sortId = prefs.sortIndex
-        var limit = params.loadSize
+        var limit = initialLimit
         val items = mutableListOf<SectionItem>()
-        if (offset == 0) {
-            if (config.showRecentlyInstalled) {
-                items.add(SectionItem.Recent)
-                limit = max(0, limit - 1)
-            }
+        if (offset == 0 && config.showRecentlyInstalled) {
+            items.add(SectionItem.Recent)
+            // limit is already reduced in calculateOffsetAndLimit, but keep max guard
+            limit = max(0, limit)
         }
 
         val data = AppListTable.Queries.loadAppList(
@@ -95,30 +98,63 @@ class WatchListPagingSource(
             }
         }
 
-        val prevKey = when {
-            params.key == null -> null
-            (offset > 0 && offset < params.loadSize) -> 0
-            (offset - params.loadSize) < 0 -> null
-            else -> offset - params.loadSize
-        }
+        val (prevKey, nextKey) = calculateKeys(
+            key = params.key,
+            offset = offset,
+            loadSize = params.loadSize,
+            hasData = data.isNotEmpty()
+        )
         val page = LoadResult.Page(
             data = items,
             prevKey = prevKey,
-            nextKey = if (data.isEmpty()) null else offset + params.loadSize
+            nextKey = nextKey
         )
-        AppLog.d("Page prevKey=${page.prevKey} nextKey=${page.nextKey}, Params: Key=${params.key}")
+        AppLog.d("[Paging] prevKey=${page.prevKey} nextKey=${page.nextKey}, offsetKey=${params.key}, loadSize: ${params.loadSize}")
         return page
     }
 
     override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int {
         val anchorPosition = state.anchorPosition ?: 0
         val key = getRefreshKey(anchorPosition)
-        AppLog.d("Page getRefreshKey=$key")
+        AppLog.d("[Paging] getRefreshKey=$key")
         return key
     }
 
     companion object {
         const val PAGE_SIZE = 20
+
+        fun calculateOffsetAndLimit(
+            key: Int?,
+            loadSize: Int,
+            showRecentlyInstalled: Boolean,
+        ): Pair<Int, Int> {
+            val offset = key ?: 0
+            var limit = loadSize
+            if (offset == 0 && showRecentlyInstalled) {
+                limit = max(0, loadSize - 1)
+            }
+            return offset to limit
+        }
+
+        fun calculateKeys(
+            key: Int?,
+            offset: Int,
+            loadSize: Int,
+            hasData: Boolean,
+        ): Pair<Int?, Int?> {
+            val isMultiPageLoad = loadSize > PAGE_SIZE
+            val isInitialRefresh = isMultiPageLoad && key == offset
+
+            val prevKey = when {
+                key == null || isInitialRefresh -> null
+                offset <= 0 -> null
+                offset <= loadSize -> 0
+                else -> offset - loadSize
+            }
+            val nextKey = if (!hasData) null else offset + loadSize
+            return prevKey to nextKey
+        }
+
         fun getRefreshKey(position: Int): Int {
             val pages = position / PAGE_SIZE
             return pages * PAGE_SIZE

@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
@@ -27,14 +26,12 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListScreen
 import com.anod.appwatcher.watchlist.WatchListSharedState
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
 import com.anod.appwatcher.watchlist.WatchListTopBar
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -56,20 +53,10 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
         customPrimaryColor = customPrimaryColor,
         theme = viewModel.prefs.selectedTheme
     ) {
-        val pagingSourceConfig = WatchListPagingSource.Config(
-            filterId = screenState.filterId,
-            tagId = screenState.tag.id,
-            showRecentlyDiscovered = viewModel.prefs.showRecentlyDiscovered,
-            showOnDevice = false,
-            showRecentlyInstalled = false
-        )
-
         TagWatchListScreen(
             screenState = screenState,
-            pagingSourceConfig = pagingSourceConfig,
+            listPagerFactory = viewModel::listPagerFactory,
             onEvent = viewModel::handleEvent,
-            installedApps = viewModel.installedApps,
-            listCacheScope = viewModel.viewModelScope
         )
 
         if (screenState.showAppTagDialog) {
@@ -97,14 +84,12 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
 @Composable
 fun TagWatchListScreen(
     screenState: WatchListSharedState,
-    pagingSourceConfig: WatchListPagingSource.Config,
+    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
     onEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps,
-    listCacheScope: CoroutineScope
 ) {
     WatchListScreen(
         screenState = screenState,
-        pagingSourceConfig = pagingSourceConfig,
+        listPagerFactory = listPagerFactory,
         onEvent = onEvent,
         topBarContent = { subtitle, filterId ->
             TagWatchListTopBar(
@@ -114,9 +99,7 @@ fun TagWatchListScreen(
                 onEvent = onEvent,
             )
         },
-        installedApps = installedApps,
         listContext = "tag-${screenState.tag.id}",
-        listCacheScope = listCacheScope
     )
 }
 

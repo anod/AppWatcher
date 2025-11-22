@@ -25,6 +25,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -120,6 +121,26 @@ class WatchListStateViewModel(
     private val shortcutManager: PinShortcutManager by inject()
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
+
+    private val _pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
+    fun listPagerFactory(filterId: Int, tag: Tag): WatchListPagerFactory {
+        val pagingSourceConfig = WatchListPagingSource.Config(
+            filterId = filterId,
+            tagId = if (tag.isEmpty) null else tag.id,
+            showRecentlyDiscovered = prefs.showRecentlyDiscovered,
+            showOnDevice = if (filterId == Filters.ALL && tag.isEmpty) prefs.showOnDevice else false,
+            showRecentlyInstalled = if (filterId == Filters.ALL && tag.isEmpty) prefs.showRecent else false,
+        )
+        val configKey = pagingSourceConfig.hashCode()
+        AppLog.d("[Paging] listPagerFactory: $configKey")
+        if (_pagerFactories.containsKey(configKey)) {
+            AppLog.d("[Paging] listPagerFactory: $configKey, return existing ${_pagerFactories[configKey].hashCode()}")
+            return _pagerFactories[configKey]!!
+        }
+        _pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, installedApps = installedApps, viewModelScope)
+        AppLog.d("[Paging] listPagerFactory: $configKey, create new ${_pagerFactories[configKey].hashCode()}")
+        return _pagerFactories[configKey]!!
+    }
 
     class Factory(
         private val defaultFilterId: Int,

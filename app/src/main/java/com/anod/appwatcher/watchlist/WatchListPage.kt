@@ -107,10 +107,8 @@ fun WatchListPage(
     selectionMode: Boolean = false,
     recentlyInstalledApps: ImmutableList<App>? = null,
 ) {
-    val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
     val pullRefreshState = rememberPullToRefreshState()
-    val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
-    AppLog.d("isRefreshing: $isRefreshing, enablePullToRefresh: $enablePullToRefresh")
+    AppLog.d("[Paging] isRefreshing: $isRefreshing, enablePullToRefresh: $enablePullToRefresh")
     Box(Modifier
         .pullToRefresh(
             isRefreshing = isRefreshing,
@@ -120,26 +118,54 @@ fun WatchListPage(
         ),
         contentAlignment = Alignment.TopStart
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            if (isEmpty) {
-                item(contentType = "empty-state") {
-                    EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
-                }
-            } else {
-                items(
-                    count = items.itemCount,
-                    key = items.itemKey {
-                        when (it) {
-                            is SectionItem.Recent -> "$listContext-${it.sectionKey}-$recentlyInstalledAppsHashCode"
-                            else -> "$listContext-${it.sectionKey}"
-                        }
-                    },
-                    contentType = items.itemContentType { it.contentType }
-                ) { index ->
-                    val item = items[index]
-                    if (item != null) { // TODO: Preload?
+        WatchList(
+            items = items,
+            onEvent = onEvent,
+            listContext = listContext,
+            recentlyInstalledApps = recentlyInstalledApps,
+            selection = selection,
+            selectionMode = selectionMode
+        )
+        Indicator(
+            modifier = Modifier.align(Alignment.TopCenter),
+            isRefreshing = isRefreshing,
+            state = pullRefreshState
+        )
+    }
+}
+
+@Composable
+fun WatchList(
+    items: LazyPagingItems<SectionItem>,
+    onEvent: (WatchListEvent) -> Unit,
+    listContext: String,
+    recentlyInstalledApps: ImmutableList<App>? = null,
+    selection: SelectionState = SelectionState(),
+    selectionMode: Boolean = false,
+) {
+    val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
+    val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        if (isEmpty) {
+            item(contentType = "empty-state") {
+                EmptyItem(onEvent = onEvent, modifier = Modifier.padding(top = 128.dp))
+            }
+        } else {
+            items(
+                count = items.itemCount,
+                key = items.itemKey {
+                    when (it) {
+                        is SectionItem.Recent -> "$listContext-${it.sectionKey}-$recentlyInstalledAppsHashCode"
+                        else -> "$listContext-${it.sectionKey}"
+                    }
+                },
+                contentType = items.itemContentType { it.contentType }
+            ) { index ->
+                val item = items[index]
+                if (item != null) { // TODO: Preload?
+                    Box {
                         WatchListSectionItem(
                             modifier = Modifier.animateItem(),
                             item = item,
@@ -149,22 +175,19 @@ fun WatchListPage(
                             selectionMode = selectionMode,
                             recentlyInstalledApps = recentlyInstalledApps
                         )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(68.dp)
-                                .background(MaterialTheme.colorScheme.inverseOnSurface)
-                        )
+                        Text("ITEM: $index/${items.itemCount}", modifier = Modifier.background(Color.LightGray))
                     }
+
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(68.dp)
+                            .background(MaterialTheme.colorScheme.inverseOnSurface)
+                    )
                 }
             }
         }
-        Indicator(
-            modifier = Modifier.align(Alignment.TopCenter),
-            isRefreshing = isRefreshing,
-            state = pullRefreshState
-        )
     }
 }
 
