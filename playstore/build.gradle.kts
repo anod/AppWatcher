@@ -1,40 +1,36 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.multiplatform.android.library)
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
-}
-
-android {
-    compileSdk = 36
-
-    defaultConfig {
+    androidLibrary {
+        namespace = "info.anodsplace.playstore"
+        compileSdk = 36
         minSdk = 31
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        androidResources {
+            enable = true
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    sourceSets {
+        androidMain {
+            dependencies {
+                implementation(files("libs/keyczar-0.71g-090613.jar"))
+                // Update from 3.11.4 breaks parsing, may be needs to be regenerated
+                api("com.google.protobuf:protobuf-javalite:3.11.4")
+                implementation(libs.okhttp)
+
+                implementation(project(":lib:applog"))
+                implementation(project(":lib:framework"))
+                implementation(libs.coroutines.core)
+                implementation(libs.coroutines.android)
+            }
+        }
     }
-
-    namespace = "info.anodsplace.playstore"
-}
-
-dependencies {
-    implementation(files("libs/keyczar-0.71g-090613.jar"))
-    // Update from 3.11.4 breaks parsing, may be needs to be regenerated
-    api(group = "com.google.protobuf", name = "protobuf-javalite", version = "3.11.4")
-    implementation(libs.okhttp)
-
-    implementation(project(":lib:applog"))
-    implementation(project(":lib:framework"))
-    implementation(libs.coroutines.core)
-    implementation(libs.coroutines.android)
 }

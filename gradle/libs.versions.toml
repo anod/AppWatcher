@@ -130,7 +130,7 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
-android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-multiplatform-android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
