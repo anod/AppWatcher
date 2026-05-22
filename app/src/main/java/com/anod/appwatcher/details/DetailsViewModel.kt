@@ -27,6 +27,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.tags.TagSnackbarAppInfo
 import com.anod.appwatcher.utils.AppIconLoader
@@ -400,7 +401,7 @@ class DetailsViewModel(
             val result = if (document == null) {
                 AppListTable.ERROR_INSERT
             } else {
-                val info = App(document, uploadDateParserCache)
+                val info = document.toApp(uploadDateParserCache)
                 AppListTable.Queries.insertSafetly(info, database)
             }
             when (result) {
@@ -409,10 +410,7 @@ class DetailsViewModel(
                 else -> emitAction(
                     DetailsAction.ShowTagSnackbar(
                         appInfo = TagSnackbarAppInfo(
-                            app = App(
-                                document!!,
-                                uploadDateParserCache
-                            )
+                            app = document!!.toApp(uploadDateParserCache)
                         )
                     )
                 )
@@ -437,7 +435,7 @@ class DetailsViewModel(
                 document = document,
                 changelogs = mergeChangelogs(localChanges, recentChange),
                 changelogState = ChangelogLoadState.Complete,
-                app = if (viewState.rowId == -1) App(document, uploadDateParserCache) else viewState.app,
+                app = if (viewState.rowId == -1) document.toApp(uploadDateParserCache) else viewState.app,
                 title = viewState.app?.title ?: viewState.title,
                 remoteCallFinished = true,
                 remoteVersionInfo = AppVersionInfo(

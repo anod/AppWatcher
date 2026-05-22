@@ -4,6 +4,7 @@ import androidx.collection.SimpleArrayMap
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.Document
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,7 @@ class ImportInstalledTask(private val database: AppsDatabase, private val upload
         val result = SimpleArrayMap<String, Int>()
         val packages = database.apps().loadPackages(false).map { it.packageName }
         for (doc in documents) {
-            val info = App(doc, uploadDateParserCache)
+            val info = doc.toApp(uploadDateParserCache)
             val status = addSync(info, packages, database.apps(), database)
             result.put(info.packageName, status)
         }

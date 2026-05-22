@@ -24,6 +24,7 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Schedule
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -294,10 +295,9 @@ class UpdateCheck(
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
-            val newApp = App(
+            val newApp = marketDoc.toApp(
                 rowId = localApp.rowId,
                 status = App.STATUS_UPDATED,
-                doc = marketDoc,
                 uploadTime = uploadTime,
                 syncTime = System.currentTimeMillis(),
             )

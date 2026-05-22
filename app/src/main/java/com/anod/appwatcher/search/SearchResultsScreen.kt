@@ -47,6 +47,7 @@ import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PlainShowSnackbarData
@@ -340,7 +341,7 @@ private fun SearchSingleResultPreview() {
             build()
         }
     )
-    val app = App(doc, UploadDateParserCache())
+    val app = doc.toApp(UploadDateParserCache())
     AppTheme {
         SearchResultsScreen(
             screenState = SearchViewState(

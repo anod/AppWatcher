@@ -24,6 +24,7 @@ object UploadDateParserFactory {
     private val ru_ALL = Locale("ru", "")
     private val sv_ALL = Locale("sv", "")
     private val fr_CA = Locale("fr", "CA")
+    private val bg_ALL = Locale("bg", "")
     private val de_ALL = Locale("de", "")
     private val hu_ALL = Locale("hu", "")
     private val pt_BR = Locale("pt", "BR")
@@ -57,6 +58,10 @@ object UploadDateParserFactory {
 
             locale == fr_CA -> listOf(
                 CustomMonthDateFormat(FR_CA_SHORT_MONTHS, order = ORDER_DMY),
+            ) + defaultParsers
+
+            lang == bg_ALL.language -> listOf(
+                SimpleDateFormat("d.MM.yyyy 'г.'", locale),
             ) + defaultParsers
 
             lang == de_ALL.language -> listOf(

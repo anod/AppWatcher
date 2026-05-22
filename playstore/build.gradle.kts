@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -13,13 +14,18 @@ kotlin {
         androidResources {
             enable = true
         }
+        withJava()
         withHostTest {
             isIncludeAndroidResources = true
+        }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 
     sourceSets {
         androidMain {
+            kotlin.srcDir("src/androidMain/java")
             dependencies {
                 implementation(files("libs/keyczar-0.71g-090613.jar"))
                 // Update from 3.11.4 breaks parsing, may be needs to be regenerated
@@ -33,4 +39,8 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    failOnNoDiscoveredTests = false
 }

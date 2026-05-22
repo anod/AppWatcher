@@ -34,6 +34,43 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
     return App.fromLocalPackage(rowId, packageName, packageInfo.lastUpdateTime, packageInfo.versionCode, packageInfo.versionName ?: "", appTitle, launchComponent)
 }
 
+fun Document.toApp(uploadDateParserCache: UploadDateParserCache): App = toApp(extractUploadDate(uploadDateParserCache))
+
+private fun Document.toApp(parsedUploadTime: Long): App = toApp(
+    rowId = -1,
+    status = App.STATUS_NORMAL,
+    uploadTime = parsedUploadTime,
+    syncTime = if (parsedUploadTime > 0) parsedUploadTime else System.currentTimeMillis()
+)
+
+fun Document.toApp(
+    rowId: Int,
+    status: Int,
+    uploadTime: Long,
+    syncTime: Long
+): App = App(
+    rowId = rowId,
+    appId = docId,
+    status = status,
+    detailsUrl = detailsUrl,
+    packageName = appDetails.packageName ?: "",
+    title = title,
+    versionNumber = appDetails.versionCode,
+    versionName = appDetails.versionString ?: "",
+    creator = if (appDetails.developerName.isNullOrBlank()) creator else appDetails.developerName,
+    uploadDate = appDetails.uploadDate ?: "",
+    appType = appDetails.appType ?: "",
+    price = offer.let { offer ->
+        Price(
+            text = offer.formattedAmount ?: "", cur = offer.currencyCode ?: "", micros = offer.micros.toInt()
+        )
+    },
+    iconUrl = iconUrl ?: "",
+    uploadTime = uploadTime,
+    syncTime = syncTime,
+    recentFlag = true
+)
+
 @Entity(tableName = AppListTable.TABLE)
 @Serializable
 data class App(
@@ -132,39 +169,6 @@ data class App(
         appType = "",
         syncTime = syncTime,
         recentFlag = false
-    )
-
-    constructor(doc: Document, uploadDateParserCache: UploadDateParserCache) : this(doc, doc.extractUploadDate(uploadDateParserCache))
-
-    private constructor(doc: Document, parsedUploadTime: Long) : this(
-        rowId = -1,
-        status = STATUS_NORMAL,
-        doc = doc,
-        uploadTime = parsedUploadTime,
-        syncTime = if (parsedUploadTime > 0) parsedUploadTime else System.currentTimeMillis()
-    )
-
-    constructor(rowId: Int, status: Int, doc: Document, uploadTime: Long, syncTime: Long) : this(
-        rowId = rowId,
-        appId = doc.docId,
-        status = status,
-        detailsUrl = doc.detailsUrl,
-        packageName = doc.appDetails.packageName ?: "",
-        title = doc.title,
-        versionNumber = doc.appDetails.versionCode,
-        versionName = doc.appDetails.versionString ?: "",
-        creator = if (doc.appDetails.developerName.isNullOrBlank()) doc.creator else doc.appDetails.developerName,
-        uploadDate = doc.appDetails.uploadDate ?: "",
-        appType = doc.appDetails.appType ?: "",
-        price = doc.offer.let { offer ->
-            Price(
-                text = offer.formattedAmount ?: "", cur = offer.currencyCode ?: "", micros = offer.micros.toInt()
-            )
-        },
-        iconUrl = doc.iconUrl ?: "",
-        uploadTime = uploadTime,
-        syncTime = syncTime,
-        recentFlag = true
     )
 
     companion object {

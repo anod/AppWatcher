@@ -27,6 +27,7 @@ import com.anod.appwatcher.accounts.showAccountSelectionAction
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.database.observePackages
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.preferences.Preferences
@@ -210,7 +211,7 @@ class SearchViewModel(
                             listItem = ListItem(
                                 document = document,
                                 installedInfo = installedApps.packageInfo(document.docId),
-                                app = App(document, uploadDateParserCache)
+                                app = document.toApp(uploadDateParserCache)
                             )
                         )
                     )
