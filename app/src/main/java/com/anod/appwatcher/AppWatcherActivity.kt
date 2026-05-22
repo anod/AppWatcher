@@ -60,7 +60,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             NavDisplay(
                 modifier = Modifier.padding(navBarPadding),
                 backStack = backStack,
-                sceneStrategy = listDetailStrategy,
+                sceneStrategies = listOf(listDetailStrategy),
                 entryProvider = provideNavEntries(backStack),
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),

@@ -140,7 +140,7 @@ dependencies {
 
     implementation(libs.google.api.client)
     implementation(libs.google.api.client.android)
-    implementation("com.google.apis:google-api-services-drive:v3-rev20230520-2.0.0") {
+    implementation("com.google.apis:google-api-services-drive:v3-rev20260428-2.0.0") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }
