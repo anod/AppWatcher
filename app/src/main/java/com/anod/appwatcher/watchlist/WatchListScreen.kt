@@ -1,19 +1,30 @@
 package com.anod.appwatcher.watchlist
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
-import info.anodsplace.applog.AppLog
 
 @Composable
 fun WatchListScreen(
@@ -49,21 +60,19 @@ fun WatchListScreen(
         null
     }
 
-//    Scaffold(
-//        topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) },
-//        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
-//    ) { paddingValues ->
-//        HorizontalPager(
-//            state = pagerState,
-//            modifier = Modifier
-//                .padding(paddingValues)
-//                .padding(start = 1.dp, end = 1.dp),
-//            key = { filterIds[it] }
-//        ) { pageIndex ->
-    val pageIndex = 0
+    Scaffold(
+        topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) },
+        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
+    ) { paddingValues ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(start = 1.dp, end = 1.dp),
+            key = { filterIds[it] }
+        ) { pageIndex ->
             val filterId = remember(pageIndex) { filterIds[pageIndex] }
-    val pagerFactory = remember(listPagerFactory, filterId, screenState.tag) { listPagerFactory(filterId, screenState.tag) }
-    AppLog.d("[Paging] pagerFactory:${pagerFactory.hashCode()} filterId:$filterId, listPagerFactory:${listPagerFactory.hashCode()}, screenState:${screenState.tag}")
+            val pagerFactory = remember(listPagerFactory, filterId, screenState.tag) { listPagerFactory(filterId, screenState.tag) }
             pagerFactory.filterQuery = screenState.titleFilter
             val items = pagerFactory.pagingData.collectAsLazyPagingItems()
 
@@ -76,10 +85,18 @@ fun WatchListScreen(
                 )
             }
 
-            LaunchedEffect(refreshKey) {
-                AppLog.d("Refresh RefreshKey:$refreshKey")
-                items.refresh()
+            val refreshKeyToken = refreshKey.toString()
+            var appliedRefreshKey by rememberSaveable(filterId) { mutableStateOf<String?>(null) }
+            LaunchedEffect(refreshKeyToken) {
+                if (appliedRefreshKey == null) {
+                    appliedRefreshKey = refreshKeyToken
+                } else if (appliedRefreshKey != refreshKeyToken) {
+                    appliedRefreshKey = refreshKeyToken
+                    items.refresh()
+                }
             }
+
+            val pageListContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
 
             WatchListPage(
                 items = items,
@@ -87,10 +104,10 @@ fun WatchListScreen(
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 onEvent = onEvent,
                 recentlyInstalledApps = screenState.recentlyInstalledApps,
-                listContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
+                listContext = pageListContext
             )
-//        }
-//    }
+        }
+    }
 
     val latestOnEvent by rememberUpdatedState(onEvent)
     LaunchedEffect(pagerState.currentPage) {

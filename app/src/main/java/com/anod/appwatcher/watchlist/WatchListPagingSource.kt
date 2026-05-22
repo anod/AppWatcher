@@ -65,6 +65,11 @@ class WatchListPagingSource(
             sortId, config.showRecentlyDiscovered, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
+        var totalItems = countTotalItems(
+            offset = offset,
+            dataSize = data.size,
+            filteredSize = filtered.size
+        )
 
         items.addAll(filtered.map {
             SectionItem.App(
@@ -76,6 +81,7 @@ class WatchListPagingSource(
 
         if (filtered.isEmpty()) {
             if (params.key != null && config.showOnDevice) {
+                totalItems = LoadResult.Page.COUNT_UNDEFINED
                 val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
                 val allInstalledPackageNames = installed.map { it.pkg.name }
                 val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
@@ -102,21 +108,45 @@ class WatchListPagingSource(
             key = params.key,
             offset = offset,
             loadSize = params.loadSize,
-            hasData = data.isNotEmpty()
+            loadedDataSize = data.size,
+            limit = limit
+        )
+        val itemsBefore = if (totalItems == LoadResult.Page.COUNT_UNDEFINED) {
+            LoadResult.Page.COUNT_UNDEFINED
+        } else {
+            calculateItemsBefore(offset, config.showRecentlyInstalled)
+        }
+        val itemsAfter = calculateItemsAfter(
+            totalItems = totalItems,
+            itemsBefore = itemsBefore,
+            loadedItems = items.size
         )
         val page = LoadResult.Page(
             data = items,
             prevKey = prevKey,
-            nextKey = nextKey
+            nextKey = nextKey,
+            itemsBefore = itemsBefore,
+            itemsAfter = itemsAfter
         )
-        AppLog.d("[Paging] prevKey=${page.prevKey} nextKey=${page.nextKey}, offsetKey=${params.key}, loadSize: ${params.loadSize}")
+        AppLog.d("[Paging] prevKey=${page.prevKey} nextKey=${page.nextKey}, offsetKey=${params.key}, loadSize: ${params.loadSize}, itemsBefore=$itemsBefore, itemsAfter=$itemsAfter")
         return page
+    }
+
+    private suspend fun countTotalItems(offset: Int, dataSize: Int, filteredSize: Int): Int {
+        if (config.filterId != Filters.ALL) {
+            return LoadResult.Page.COUNT_UNDEFINED
+        }
+        val appsCount = AppListTable.Queries.countAppList(config.tagId, filterQuery, database.apps())
+        if (offset == 0 && config.showRecentlyInstalled && dataSize == 0 && filteredSize == 0) {
+            return 2
+        }
+        return appsCount + if (config.showRecentlyInstalled) 1 else 0
     }
 
     override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int {
         val anchorPosition = state.anchorPosition ?: 0
-        val key = getRefreshKey(anchorPosition)
-        AppLog.d("[Paging] getRefreshKey=$key")
+        val key = getRefreshKey(anchorPosition, config.showRecentlyInstalled)
+        AppLog.d("[Paging] getRefreshKey=$key anchorPosition=$anchorPosition")
         return key
     }
 
@@ -140,24 +170,41 @@ class WatchListPagingSource(
             key: Int?,
             offset: Int,
             loadSize: Int,
-            hasData: Boolean,
+            loadedDataSize: Int,
+            limit: Int = loadSize,
         ): Pair<Int?, Int?> {
-            val isMultiPageLoad = loadSize > PAGE_SIZE
-            val isInitialRefresh = isMultiPageLoad && key == offset
-
             val prevKey = when {
-                key == null || isInitialRefresh -> null
                 offset <= 0 -> null
                 offset <= loadSize -> 0
                 else -> offset - loadSize
             }
-            val nextKey = if (!hasData) null else offset + loadSize
+            val nextKey = if (loadedDataSize < limit) null else offset + loadSize
             return prevKey to nextKey
         }
 
-        fun getRefreshKey(position: Int): Int {
-            val pages = position / PAGE_SIZE
+        fun getRefreshKey(position: Int, showRecentlyInstalled: Boolean = false): Int {
+            val appPosition = if (showRecentlyInstalled) {
+                max(0, position - 1)
+            } else {
+                position
+            }
+            val pages = appPosition / PAGE_SIZE
             return pages * PAGE_SIZE
+        }
+
+        fun calculateItemsBefore(offset: Int, showRecentlyInstalled: Boolean): Int {
+            return offset + if (showRecentlyInstalled && offset > 0) 1 else 0
+        }
+
+        fun calculateItemsAfter(
+            totalItems: Int,
+            itemsBefore: Int,
+            loadedItems: Int,
+        ): Int {
+            if (totalItems == LoadResult.Page.COUNT_UNDEFINED || itemsBefore == LoadResult.Page.COUNT_UNDEFINED) {
+                return LoadResult.Page.COUNT_UNDEFINED
+            }
+            return max(0, totalItems - itemsBefore - loadedItems)
         }
     }
 }

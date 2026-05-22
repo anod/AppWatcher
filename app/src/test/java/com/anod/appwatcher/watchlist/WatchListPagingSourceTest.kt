@@ -54,7 +54,7 @@ class WatchListPagingSourceTest {
             key = null,
             offset = 0,
             loadSize = 20,
-            hasData = true,
+            loadedDataSize = 20,
         )
         assertEquals(null, prev)
         assertEquals(20, next)
@@ -66,7 +66,7 @@ class WatchListPagingSourceTest {
             key = 20,
             offset = 20,
             loadSize = 20,
-            hasData = true,
+            loadedDataSize = 20,
         )
         // Single-page load with key != null, offset == loadSize: prevKey points to 0, nextKey advances by loadSize.
         assertEquals(0, prev)
@@ -79,7 +79,7 @@ class WatchListPagingSourceTest {
             key = 40,
             offset = 40,
             loadSize = 20,
-            hasData = false,
+            loadedDataSize = 0,
         )
         // When there is no more data, nextKey is null but prevKey still steps back by loadSize.
         assertEquals(20, prev)
@@ -94,15 +94,52 @@ class WatchListPagingSourceTest {
         assertEquals(120, refreshKey)
 
         // Simulate initial load after navigating back with a large loadSize used by Paging.
-        // Since key == offset and loadSize > PAGE_SIZE, this is treated as a refresh window
-        // with no previous page (prevKey = null) and nextKey advancing by loadSize.
+        // Since this is a deep refresh window, prevKey must still allow prepending earlier pages.
         val (firstPrev, firstNext) = WatchListPagingSource.calculateKeys(
             key = refreshKey,
             offset = refreshKey,
             loadSize = 60,
-            hasData = true,
+            loadedDataSize = 60,
         )
-        assertEquals(null, firstPrev)
+        assertEquals(60, firstPrev)
         assertEquals(180, firstNext)
+    }
+
+    @Test
+    fun `calculateKeys deep multi-page refresh keeps previous key`() {
+        val (prev, next) = WatchListPagingSource.calculateKeys(
+            key = 80,
+            offset = 80,
+            loadSize = 60,
+            loadedDataSize = 60,
+        )
+        assertEquals(20, prev)
+        assertEquals(140, next)
+    }
+
+    @Test
+    fun `calculateKeys partial last page has no next`() {
+        val (prev, next) = WatchListPagingSource.calculateKeys(
+            key = 120,
+            offset = 120,
+            loadSize = 60,
+            loadedDataSize = 15,
+        )
+        assertEquals(60, prev)
+        assertEquals(null, next)
+    }
+
+    @Test
+    fun `getRefreshKey accounts for recent header`() {
+        assertEquals(0, WatchListPagingSource.getRefreshKey(1, showRecentlyInstalled = true))
+        assertEquals(0, WatchListPagingSource.getRefreshKey(20, showRecentlyInstalled = true))
+        assertEquals(20, WatchListPagingSource.getRefreshKey(21, showRecentlyInstalled = true))
+    }
+
+    @Test
+    fun `calculateItemsBefore accounts for recent header after first page`() {
+        assertEquals(0, WatchListPagingSource.calculateItemsBefore(0, showRecentlyInstalled = true))
+        assertEquals(21, WatchListPagingSource.calculateItemsBefore(20, showRecentlyInstalled = true))
+        assertEquals(20, WatchListPagingSource.calculateItemsBefore(20, showRecentlyInstalled = false))
     }
 }

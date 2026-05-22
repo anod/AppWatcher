@@ -165,19 +165,15 @@ fun WatchList(
             ) { index ->
                 val item = items[index]
                 if (item != null) { // TODO: Preload?
-                    Box {
-                        WatchListSectionItem(
-                            modifier = Modifier.animateItem(),
-                            item = item,
-                            index = index,
-                            onEvent = onEvent,
-                            selection = selection,
-                            selectionMode = selectionMode,
-                            recentlyInstalledApps = recentlyInstalledApps
-                        )
-                        Text("ITEM: $index/${items.itemCount}", modifier = Modifier.background(Color.LightGray))
-                    }
-
+                    WatchListSectionItem(
+                        modifier = Modifier.animateItem(),
+                        item = item,
+                        index = index,
+                        onEvent = onEvent,
+                        selection = selection,
+                        selectionMode = selectionMode,
+                        recentlyInstalledApps = recentlyInstalledApps
+                    )
                 } else {
                     Box(
                         modifier = Modifier

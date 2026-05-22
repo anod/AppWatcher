@@ -9,6 +9,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -148,75 +149,50 @@ fun MainScreen(
     drawerState: DrawerState,
     listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
 ) {
-//    ModalNavigationDrawer(
-//        drawerContent = {
-//            MainDrawer(
-//                mainState = mainState,
-//                onMainEvent = {
-//                    if (it !is MainViewEvent.AddNewTagDialog) {
-//                        onMainEvent(MainViewEvent.DrawerState(isOpen = false))
-//                    }
-//                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
-//                        onListEvent(WatchListEvent.Refresh)
-//                    } else {
-//                        onMainEvent(it)
-//                    }
-//                }
-//            )
-//        },
-//        gesturesEnabled = true,
-//        drawerState = drawerState
-//    ) {
-//        WatchListScreen(
-//            screenState = listState,
-//            listPagerFactory = listPagerFactory,
-//            onEvent = onListEvent,
-//            topBarContent = { subtitle, filterId ->
-//                MainTopBar(
-//                    listState = listState,
-//                    subtitle = subtitle,
-//                    filterId = filterId,
-//                    onListEvent = {
-//                        if (it is WatchListEvent.OnBackPressed) {
-//                            if (listState.showSearch) {
-//                                onListEvent(WatchListEvent.ShowSearch(show = false))
-//                            } else {
-//                                onMainEvent(MainViewEvent.DrawerState(isOpen = true))
-//                            }
-//                        } else {
-//                            onListEvent(it)
-//                        }
-//                    },
-//                )
-//            },
-//            listContext = "main",
-//        )
-//    }
-
-    WatchListScreen(
-        screenState = listState,
-        listPagerFactory = listPagerFactory,
-        onEvent = onListEvent,
-        topBarContent = { subtitle, filterId ->
-            MainTopBar(
-                listState = listState,
-                subtitle = subtitle,
-                filterId = filterId,
-                onListEvent = {
-                    if (it is WatchListEvent.OnBackPressed) {
-                        if (listState.showSearch) {
-                            onListEvent(WatchListEvent.ShowSearch(show = false))
-                        } else {
-                            onMainEvent(MainViewEvent.DrawerState(isOpen = true))
-                        }
-                    } else {
-                        onListEvent(it)
+    ModalNavigationDrawer(
+        drawerContent = {
+            MainDrawer(
+                mainState = mainState,
+                onMainEvent = {
+                    if (it !is MainViewEvent.AddNewTagDialog) {
+                        onMainEvent(MainViewEvent.DrawerState(isOpen = false))
                     }
-                },
+                    if (it is MainViewEvent.DrawerItemClick && it.id == DrawerItem.Id.Refresh) {
+                        onListEvent(WatchListEvent.Refresh)
+                    } else {
+                        onMainEvent(it)
+                    }
+                }
             )
         },
-        listContext = "main",
-    )
+        gesturesEnabled = true,
+        drawerState = drawerState
+    ) {
+        WatchListScreen(
+            screenState = listState,
+            listPagerFactory = listPagerFactory,
+            onEvent = onListEvent,
+            topBarContent = { subtitle, filterId ->
+                MainTopBar(
+                    listState = listState,
+                    subtitle = subtitle,
+                    filterId = filterId,
+                    onListEvent = {
+                        if (it is WatchListEvent.OnBackPressed) {
+                            if (listState.showSearch) {
+                                onListEvent(WatchListEvent.ShowSearch(show = false))
+                            } else {
+                                onMainEvent(MainViewEvent.DrawerState(isOpen = true))
+                            }
+                        } else {
+                            onListEvent(it)
+                        }
+                    },
+                )
+            },
+            listContext = "main",
+        )
+    }
 
     if (mainState.showNewTagDialog) {
         EditTagDialog(
