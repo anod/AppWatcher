@@ -11,19 +11,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.details.DetailsPanel
+import com.anod.appwatcher.preferences.SelectedTheme
 
 @Composable
-fun DetailContent(app: App?, onDismissRequest: () -> Unit) {
-    Surface {
-        if (app == null) {
+fun DetailContent(app: App?, theme: SelectedTheme, onDismissRequest: () -> Unit) {
+    if (app == null) {
+        DetailPlaceholder(theme = theme)
+    } else {
+        DetailsPanel(
+            app = app,
+            onDismissRequest = onDismissRequest,
+        )
+    }
+}
+
+@Composable
+fun DetailPlaceholder(theme: SelectedTheme) {
+    AppTheme(
+        theme = theme,
+        updateSystemBars = false
+    ) {
+        Surface {
             EmptyBoxSmile()
-        } else {
-            DetailsPanel(
-                app = app,
-                onDismissRequest = onDismissRequest,
-            )
         }
     }
 }

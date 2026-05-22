@@ -38,9 +38,11 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
@@ -51,20 +53,25 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun WishListScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun WishListScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: WishListViewModel = viewModel(
         factory = WishListViewModel.Factory(),
         key = SceneNavKey.WishList.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-    WishListScreen(
-        screenState = screenState,
-        pagingDataFlow = viewModel.pagingData,
-        onEvent = viewModel::handleEvent,
-        viewActions = viewModel.viewActions,
-        navigateBack = navigateBack,
-        navigateTo = navigateTo
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        WishListScreen(
+            screenState = screenState,
+            pagingDataFlow = viewModel.pagingData,
+            onEvent = viewModel::handleEvent,
+            viewActions = viewModel.viewActions,
+            navigateBack = navigateBack,
+            navigateTo = navigateTo
+        )
+    }
 }
 
 @Composable

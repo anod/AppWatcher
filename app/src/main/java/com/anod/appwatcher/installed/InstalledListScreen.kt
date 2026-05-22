@@ -25,6 +25,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
@@ -38,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun InstalledListScreenScene(
+    prefs: Preferences,
     showAction: Boolean,
     navigateBack: () -> Unit,
     navigateTo: (NavKey) -> Unit
@@ -60,13 +62,18 @@ fun InstalledListScreenScene(
         showRecentlyInstalled = false
     )
 
-    InstalledListScreen(
-        screenState = screenState,
-        pagingSourceConfig = pagingSourceConfig,
-        onEvent = viewModel::handleEvent,
-        installedApps = viewModel.installedApps,
-        listCacheScope = viewModel.viewModelScope
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        InstalledListScreen(
+            screenState = screenState,
+            pagingSourceConfig = pagingSourceConfig,
+            onEvent = viewModel::handleEvent,
+            installedApps = viewModel.installedApps,
+            listCacheScope = viewModel.viewModelScope
+        )
+    }
 
    LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->

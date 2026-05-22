@@ -51,7 +51,8 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
     }
     AppTheme(
         customPrimaryColor = customPrimaryColor,
-        theme = viewModel.prefs.selectedTheme
+        theme = viewModel.prefs.selectedTheme,
+        transparentSystemUi = true
     ) {
         TagWatchListScreen(
             screenState = screenState,

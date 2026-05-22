@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -31,19 +30,22 @@ import com.anod.appwatcher.compose.BackArrowIconButton
 import com.anod.appwatcher.compose.ShareIconButton
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.framework.content.onScreenCommonAction
-import info.anodsplace.notification.NotificationManager
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import org.koin.java.KoinJavaComponent
 
 @Composable
-fun UserLogScreenScene(navigateBack: () -> Unit) {
+fun UserLogScreenScene(prefs: Preferences, navigateBack: () -> Unit) {
     val viewModel: UserLogViewModel = viewModel()
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-    UserLogScreen(
-        screenState = screenState,
-        onEvent = viewModel::handleEvent
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        UserLogScreen(
+            screenState = screenState,
+            onEvent = viewModel::handleEvent
+        )
+    }
     val context = LocalContext.current
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
@@ -54,29 +56,25 @@ fun UserLogScreenScene(navigateBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
-    AppTheme(
-        theme = prefs.selectedTheme
-    ) {
-        Surface {
-            Scaffold(
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = { Text(text = stringResource(id = R.string.user_log)) },
-                        navigationIcon = {
-                            BackArrowIconButton(onClick = { onEvent(UserLogEvent.OnBackNav) })
-                        },
-                        actions = {
-                            ShareIconButton(onClick = { onEvent(UserLogEvent.Share) })
-                        },
-                    )
-                }
-            ) { contentPadding ->
-                UserLogMessages(
-                    messages = screenState.messages,
-                    contentPadding = contentPadding
+fun UserLogScreen(screenState: UserLogState, onEvent: (UserLogEvent) -> Unit) {
+    Surface {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { Text(text = stringResource(id = R.string.user_log)) },
+                    navigationIcon = {
+                        BackArrowIconButton(onClick = { onEvent(UserLogEvent.OnBackNav) })
+                    },
+                    actions = {
+                        ShareIconButton(onClick = { onEvent(UserLogEvent.Share) })
+                    },
                 )
             }
+        ) { contentPadding ->
+            UserLogMessages(
+                messages = screenState.messages,
+                contentPadding = contentPadding
+            )
         }
     }
 }
@@ -127,8 +125,6 @@ fun UserLogMessageItem(position: Int, size: Int, message: Message) {
 @Preview
 @Composable
 private fun UserLogScreenPreview() {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     UserLogScreen(
         screenState = UserLogState(
             messages =
@@ -163,7 +159,6 @@ private fun UserLogScreenPreview() {
 10-05 22:44:09.141 D/KeyguardUpdateMonitor( 2562): handleBatteryUpdate
             """.trimIndent().split("\n").map { UserLogMessage.from(it) }.toPersistentList()
         ),
-        onEvent = {},
-        prefs = Preferences(context, NotificationManager.NoOp(), scope)
+        onEvent = {}
     )
 }

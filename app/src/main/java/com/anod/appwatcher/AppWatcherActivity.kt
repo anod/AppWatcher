@@ -39,7 +39,7 @@ import com.anod.appwatcher.tags.TagWatchListScreenScene
 import com.anod.appwatcher.userLog.UserLogScreenScene
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
-import com.anod.appwatcher.watchlist.EmptyBoxSmile
+import com.anod.appwatcher.watchlist.DetailPlaceholder
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.wishlist.WishListScreenScene
 import info.anodsplace.framework.app.addMultiWindowFlags
@@ -150,7 +150,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) {
@@ -165,6 +165,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
+                theme = prefs.selectedTheme,
                 onDismissRequest = { backStack.removeLastOrNull() },
             )
         }
@@ -172,17 +173,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
             SearchResultsScreenScene(
                 initialState = key.toViewState(),
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
         entry<SceneNavKey.Settings> {
             SettingsScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
@@ -191,17 +194,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) {
             HistoryListScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.UserLog> {
             UserLogScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
@@ -214,7 +219,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
@@ -228,11 +233,12 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
             InstalledListScreenScene(
+                prefs = prefs,
                 showAction = key.importMode,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
@@ -242,11 +248,12 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) {
             WishListScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )

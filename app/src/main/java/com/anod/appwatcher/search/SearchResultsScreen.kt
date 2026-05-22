@@ -49,6 +49,7 @@ import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PlainShowSnackbarData
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -73,20 +74,25 @@ fun SceneNavKey.Search.toViewState() = SearchViewState(
 )
 
 @Composable
-fun SearchResultsScreenScene(initialState: SearchViewState, navigateBack: () -> Unit = {}) {
+fun SearchResultsScreenScene(initialState: SearchViewState, prefs: Preferences, navigateBack: () -> Unit = {}) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(initialState))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
         viewModel.handleEvent(SearchViewEvent.SetAccount(it))
     }
-    SearchResultsScreen(
-        screenState = screenState,
-        pagingDataFlow = { viewModel.pagingData },
-        onEvent = viewModel::handleEvent,
-        viewActions = viewModel.viewActions,
-        onShowAccountDialog = { accountSelectionRequest.launch(it) },
-        navigateBack = navigateBack
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        SearchResultsScreen(
+            screenState = screenState,
+            pagingDataFlow = { viewModel.pagingData },
+            onEvent = viewModel::handleEvent,
+            viewActions = viewModel.viewActions,
+            onShowAccountDialog = { accountSelectionRequest.launch(it) },
+            navigateBack = navigateBack
+        )
+    }
 }
 
 @Composable

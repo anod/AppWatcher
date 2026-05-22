@@ -177,14 +177,14 @@ fun AppTheme(
             setSystemUiColors(
                 statusBarColor = Color.Transparent,
                 statusBarDarkIcons = !darkTheme,
-                navigationBarColor = Color.Transparent,
+                navigationBarColor = colorScheme.surface,
                 navigationBarDarkIcons = !darkTheme
             )
         } else {
             setSystemUiColors(
                 statusBarColor = statusBarColor,
                 statusBarDarkIcons = isAppearanceLightStatusBars,
-                navigationBarColor = Color.Transparent,
+                navigationBarColor = colorScheme.surface,
                 navigationBarDarkIcons = !darkTheme
             )
         }

@@ -42,10 +42,15 @@ import java.util.Date
 fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
     val viewModel: SchedulesHistoryViewModel = viewModel()
     val viewState by viewModel.viewStates.collectAsState()
-    SchedulesHistoryScreen(
-        viewState = viewState,
-        navigateBack = navigateBack
-    )
+    AppTheme(
+        theme = viewState.theme,
+        transparentSystemUi = true
+    ) {
+        SchedulesHistoryScreen(
+            viewState = viewState,
+            navigateBack = navigateBack
+        )
+    }
     val context = LocalContext.current
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
@@ -57,23 +62,19 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchedulesHistoryScreen(viewState: SchedulesHistoryState, navigateBack: () -> Unit) {
-    AppTheme(
-        theme = viewState.theme
-    ) {
-        Surface {
-            Column(modifier = Modifier.fillMaxSize()) {
-                CenterAlignedTopAppBar(
-                    title = { Text(text = stringResource(id = R.string.refresh_history)) },
-                    navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
-                )
-                val schedules = viewState.schedules
-                LazyColumn {
-                    items(schedules.size) { index ->
-                        ScheduleRow(
-                            schedule = schedules[index],
-                            dateFormat = viewState.dateFormat
-                        )
-                    }
+    Surface {
+        Column(modifier = Modifier.fillMaxSize()) {
+            CenterAlignedTopAppBar(
+                title = { Text(text = stringResource(id = R.string.refresh_history)) },
+                navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
+            )
+            val schedules = viewState.schedules
+            LazyColumn {
+                items(schedules.size) { index ->
+                    ScheduleRow(
+                        schedule = schedules[index],
+                        dateFormat = viewState.dateFormat
+                    )
                 }
             }
         }
