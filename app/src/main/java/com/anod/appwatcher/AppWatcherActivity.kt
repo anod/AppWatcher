@@ -8,11 +8,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -23,11 +25,14 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.history.HistoryListScreenScene
 import com.anod.appwatcher.installed.InstalledListScreenScene
+import com.anod.appwatcher.navigation.ResizableListDetailSceneStrategy
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.rememberResizableListDetailSceneStrategy
 import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
 import com.anod.appwatcher.search.toViewState
@@ -52,7 +57,28 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         val elements = createInitialBackstack()
         setContent {
             val backStack = rememberNavBackStack(*elements)
-            val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
+            val listDetailStrategy = rememberResizableListDetailSceneStrategy<NavKey>(
+                sceneContainer = { content ->
+                    AppTheme(
+                        theme = prefs.selectedTheme,
+                        updateSystemBars = false
+                    ) {
+                        content()
+                    }
+                },
+                paneExpansionDragHandle = { paneExpansionState, modifier ->
+                    val interactionSource = remember { MutableInteractionSource() }
+                    VerticalDragHandle(
+                        modifier = modifier
+                            .paneExpansionDraggable(
+                                state = paneExpansionState,
+                                minTouchTargetSize = 48.dp,
+                                interactionSource = interactionSource,
+                            ),
+                        interactionSource = interactionSource,
+                    )
+                }
+            )
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
                 backStack = backStack,
@@ -143,7 +169,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
     private fun provideNavEntries(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<SceneNavKey.Main>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
@@ -157,7 +183,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.AppDetails>(
-            metadata = ListDetailSceneStrategy.detailPane(sceneKey = "list-detail")
+            metadata = ResizableListDetailSceneStrategy.detailPane(sceneKey = "list-detail")
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
@@ -166,7 +192,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.Search>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
@@ -187,7 +213,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.PurchaseHistory>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
@@ -212,7 +238,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.TagWatchList>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
@@ -226,7 +252,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.Installed>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
@@ -241,7 +267,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             )
         }
         entry<SceneNavKey.WishList>(
-            metadata = ListDetailSceneStrategy.listPane(
+            metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
                     DetailPlaceholder(theme = prefs.selectedTheme)
