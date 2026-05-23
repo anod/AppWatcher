@@ -1,15 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.android.test)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.baselineprofile)
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
 }
 
 android {

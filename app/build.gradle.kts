@@ -1,9 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
 
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.baselineprofile)
@@ -12,12 +9,6 @@ plugins {
     alias(libs.plugins.ktlint.gradle)
     id("kotlin-parcelize")
     id("com.google.android.gms.oss-licenses-plugin")
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_11
-    }
 }
 
 android {
