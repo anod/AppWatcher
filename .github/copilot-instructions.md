@@ -13,6 +13,12 @@
 - On Windows, use `.\gradlew.bat` instead of `./gradlew`.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
+## Worktree workflow
+
+- Work only in a dedicated git worktree for every task; keep the main checkout on `master` for coordination and branch management.
+- When the task branch/PR has been merged, remove the task worktree and prune stale worktree metadata.
+- If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
+
 ## Architecture
 
 - Multi-module Android app: `:app` is the Compose app, `:playstore` wraps Play Store/DFE APIs as KMP Android, and shared code is under `:lib:*` (`applog`, `compose`, `context`, `framework`, `graphics`, `ktx`, `notification`, `permissions`, `playservices`, `viewmodel`).
