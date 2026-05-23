@@ -8,7 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.prefs
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -16,7 +18,8 @@ import org.koin.core.component.inject
 @Immutable
 data class EditTagState(
     val tag: Tag,
-    val showPickColor: Boolean = false
+    val showPickColor: Boolean = false,
+    val theme: SelectedTheme = SelectedTheme()
 )
 
 sealed interface EditTagEvent {
@@ -44,7 +47,8 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
 
     init {
         viewState = EditTagState(
-            tag = tag
+            tag = tag,
+            theme = prefs.selectedTheme
         )
     }
 

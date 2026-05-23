@@ -47,7 +47,9 @@ import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PlainShowSnackbarData
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -55,7 +57,6 @@ import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.DocDetails
 import finsky.protos.DocV2
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.onScreenCommonAction
@@ -64,8 +65,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent
 
-fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchViewState(
-    wideLayout = wideLayout,
+fun SceneNavKey.Search.toViewState() = SearchViewState(
     searchQuery = this.keyword,
     initiateSearch = this.initiateSearch,
     isPackageSearch = this.isPackageSearch,
@@ -74,20 +74,25 @@ fun SceneNavKey.Search.toViewState(wideLayout: FoldableDeviceLayout) = SearchVie
 )
 
 @Composable
-fun SearchResultsScreenScene(initialState: SearchViewState, navigateBack: () -> Unit = {}) {
+fun SearchResultsScreenScene(initialState: SearchViewState, prefs: Preferences, navigateBack: () -> Unit = {}) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(initialState))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
         viewModel.handleEvent(SearchViewEvent.SetAccount(it))
     }
-    SearchResultsScreen(
-        screenState = screenState,
-        pagingDataFlow = { viewModel.pagingData },
-        onEvent = viewModel::handleEvent,
-        viewActions = viewModel.viewActions,
-        onShowAccountDialog = { accountSelectionRequest.launch(it) },
-        navigateBack = navigateBack
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        SearchResultsScreen(
+            screenState = screenState,
+            pagingDataFlow = { viewModel.pagingData },
+            onEvent = viewModel::handleEvent,
+            viewActions = viewModel.viewActions,
+            onShowAccountDialog = { accountSelectionRequest.launch(it) },
+            navigateBack = navigateBack
+        )
+    }
 }
 
 @Composable
@@ -342,7 +347,7 @@ private fun SearchSingleResultPreview() {
             build()
         }
     )
-    val app = App(doc, UploadDateParserCache())
+    val app = doc.toApp(UploadDateParserCache())
     AppTheme {
         SearchResultsScreen(
             screenState = SearchViewState(

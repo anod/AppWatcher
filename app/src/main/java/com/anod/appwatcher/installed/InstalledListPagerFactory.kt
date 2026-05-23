@@ -16,8 +16,9 @@ import org.koin.core.parameter.parametersOf
 class InstalledListPagerFactory(
     pagingSourceConfig: WatchListPagingSource.Config,
     coroutineScope: CoroutineScope,
-    private val installedApps: InstalledApps
-) : WatchListPagerFactory(pagingSourceConfig), KoinComponent {
+    private val installedApps: InstalledApps,
+    cacheScope: CoroutineScope
+) : WatchListPagerFactory(pagingSourceConfig, cacheScope), KoinComponent {
 
     private val packageManager: PackageManager by inject()
     private val database: AppsDatabase by inject()

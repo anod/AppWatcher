@@ -7,23 +7,114 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindowProvider
-import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.isLightColor
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.CustomThemeColor
 import info.anodsplace.framework.app.CustomThemeColors
 import info.anodsplace.framework.app.WindowCustomTheme
-import info.anodsplace.framework.app.findActivity
 import info.anodsplace.framework.app.findWindow
+
+private val LightThemeColors = lightColorScheme(
+    primary = Color(0xFF2196F3),
+    onPrimary = Color(0xFFffffff),
+    primaryContainer = Color(0xFFbde9ff),
+    onPrimaryContainer = Color(0xFF001f2a),
+    secondary = Color(0xFF005db7),
+    onSecondary = Color(0xFFffffff),
+    secondaryContainer = Color(0xFFd6e3ff),
+    onSecondaryContainer = Color(0xFF001b3d),
+    tertiary = Color(0xFF2b5bb5),
+    onTertiary = Color(0xFFffffff),
+    tertiaryContainer = Color(0xFFd9e2ff),
+    onTertiaryContainer = Color(0xFF001945),
+    error = Color(0xFFba1a1a),
+    onError = Color(0xFFffffff),
+    errorContainer = Color(0xFFffdad6),
+    onErrorContainer = Color(0xFF410002),
+
+    background = Color(0xFFfafcff),
+    onBackground = Color(0xFF001f2a),
+
+    surface = Color(0xFFfafcff),
+    onSurface = Color(0xFF001f2a),
+
+    surfaceVariant = Color(0xFFdce4e9),
+    onSurfaceVariant = Color(0xFF40484c),
+    outline = Color(0xFF70787d)
+)
+
+private val DarkSurface = Color(0xFF263238)
+private val DarkThemeColors = darkColorScheme(
+    primary = Color(0xFF67d3ff),
+    onPrimary = Color(0xFF003546),
+    primaryContainer = Color(0xFF004d64),
+    onPrimaryContainer = Color(0xFFbde9ff),
+    secondary = Color(0xFF8ccdff),
+    onSecondary = Color(0xFF00344e),
+    secondaryContainer = Color(0xFF004b6f),
+    onSecondaryContainer = Color(0xFFcae6ff),
+    tertiary = Color(0xFF8ecdff),
+    onTertiary = Color(0xFFffffff),
+    tertiaryContainer = Color(0xFFcae6ff),
+    onTertiaryContainer = Color(0xFF001e30),
+    error = Color(0xFFffb4ab),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000a),
+    onErrorContainer = Color(0xFFffdad6),
+
+    background = DarkSurface,
+    onBackground = Color(0xFFbde9ff),
+
+    surface = DarkSurface,
+    onSurface = Color(0xFFffffff),
+
+    surfaceVariant = Color(0xFF40484c),
+    onSurfaceVariant = Color(0xFFc0c8cd),
+    outline = Color(0xFF8a9297)
+)
+
+private val BlackThemeColors = darkColorScheme(
+    primary = Color(0xFF67d3ff),
+    onPrimary = Color(0xFF003546),
+    primaryContainer = Color(0xFF004d64),
+    onPrimaryContainer = Color(0xFFbde9ff),
+    secondary = Color(0xFF8ccdff),
+    onSecondary = Color(0xFF00344e),
+    secondaryContainer = Color(0xFF004b6f),
+    onSecondaryContainer = Color(0xFFcae6ff),
+    tertiary = Color(0xFF8ecdff),
+    onTertiary = Color(0xFFffffff),
+    tertiaryContainer = Color(0xFFcae6ff),
+    onTertiaryContainer = Color(0xFF001e30),
+    error = Color(0xFFffb4ab),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000a),
+    onErrorContainer = Color(0xFFffdad6),
+
+    background = Color.Black,
+    onBackground = Color(0xFFbde9ff),
+
+    surface = Color.Black,
+    onSurface = Color(0xFFffffff),
+
+    surfaceVariant = Color(0xFF40484c),
+    onSurfaceVariant = Color(0xFFc0c8cd),
+    outline = Color(0xFF8a9297)
+)
 
 private val AppTypography = Typography()
 val Amber800 = Color(0xFFFF8F00)
@@ -35,8 +126,8 @@ val AppShapes = Shapes(
 )
 
 @Composable
-fun darkTheme(theme: Int): ColorScheme {
-    return if (theme == Preferences.THEME_BLACK) {
+fun dynamicDarkTheme(isBlack: Boolean): ColorScheme {
+    return if (isBlack) {
         dynamicDarkColorScheme(LocalContext.current).copy(
             background = Color.Black,
             surface = Color.Black,
@@ -48,15 +139,19 @@ fun darkTheme(theme: Int): ColorScheme {
 
 @Composable
 fun AppTheme(
-    theme: Int = Preferences.THEME_DEFAULT,
-    darkTheme: Boolean = theme == Preferences.THEME_BLACK || isSystemInDarkTheme(),
+    theme: SelectedTheme = SelectedTheme(),
     customPrimaryColor: Color? = null,
     updateSystemBars: Boolean = true,
     useSurfaceAsPrimary: Boolean = false,
     transparentSystemUi: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    var colorScheme = if (darkTheme) darkTheme(theme) else dynamicLightColorScheme(LocalContext.current)
+    val darkTheme = theme.isDark || (theme.isSystem && isSystemInDarkTheme())
+    var colorScheme = if (darkTheme) {
+        dynamicDarkTheme(theme.isBlack)
+    } else {
+        dynamicLightColorScheme(LocalContext.current)
+    }
 
     var statusBarColor = colorScheme.surface
     var isAppearanceLightStatusBars = !darkTheme
@@ -69,7 +164,7 @@ fun AppTheme(
             onPrimaryContainer = Color(roles.onAccentContainer)
         )
         statusBarColor = colorScheme.primary
-        isAppearanceLightStatusBars = statusBarColor.isLightColor
+        isAppearanceLightStatusBars = !colorScheme.onPrimary.isLightColor
     } else if (useSurfaceAsPrimary) {
         colorScheme = colorScheme.copy(
             primary = colorScheme.surface,
@@ -81,15 +176,15 @@ fun AppTheme(
         if (transparentSystemUi) {
             setSystemUiColors(
                 statusBarColor = Color.Transparent,
-                statusBarDarkIcons = !darkTheme,
-                navigationBarColor = Color.Transparent,
+                statusBarDarkIcons = isAppearanceLightStatusBars,
+                navigationBarColor = colorScheme.surface,
                 navigationBarDarkIcons = !darkTheme
             )
         } else {
             setSystemUiColors(
                 statusBarColor = statusBarColor,
                 statusBarDarkIcons = isAppearanceLightStatusBars,
-                navigationBarColor = Color.Transparent,
+                navigationBarColor = colorScheme.surface,
                 navigationBarDarkIcons = !darkTheme
             )
         }
@@ -111,21 +206,24 @@ fun setSystemUiColors(
     navigationBarDarkIcons: Boolean
 ): Boolean {
     val window = findWindow() ?: return false
-    val activity = LocalContext.current.findActivity()
-    WindowCustomTheme.apply(
-        themeColors = CustomThemeColors(
-            statusBarColor = CustomThemeColor(
-                colorInt = statusBarColor.toArgb(),
-                isLight = statusBarDarkIcons
+    val view = LocalView.current
+    AppLog.d("statusBarColor ${statusBarColor.toArgb().toHexString()}, statusBarDarkIcons: $statusBarDarkIcons")
+    SideEffect {
+        WindowCustomTheme.apply(
+            themeColors = CustomThemeColors(
+                statusBarColor = CustomThemeColor(
+                    colorInt = statusBarColor.toArgb(),
+                    isLight = statusBarDarkIcons
+                ),
+                navigationBarColor = CustomThemeColor(
+                    colorInt = navigationBarColor.toArgb(),
+                    isLight = navigationBarDarkIcons
+                )
             ),
-            navigationBarColor = CustomThemeColor(
-                colorInt = navigationBarColor.toArgb(),
-                isLight = navigationBarDarkIcons
-            )
-        ),
-        window = window,
-        activity = activity
-    )
+            window = window,
+            view = view
+        )
+    }
     return true
 }
 

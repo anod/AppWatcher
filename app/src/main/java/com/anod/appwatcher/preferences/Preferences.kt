@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatDelegate
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.graphics.AdaptiveIcon
@@ -13,6 +12,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+
+data class SelectedTheme(val id: Int = Preferences.THEME_DEFAULT, val mode: Int = Preferences.THEME_MODE_SYSTEM) {
+    val isBlack: Boolean = id == Preferences.THEME_BLACK
+    val isDark: Boolean = isBlack || mode == Preferences.THEME_MODE_DARK
+    val isSystem: Boolean = mode == Preferences.THEME_MODE_SYSTEM
+}
 
 class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
@@ -140,14 +145,17 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         get() = preferences.getBoolean("show-recently-updated", true)
         set(value) = preferences.edit().putBoolean("show-recently-updated", value).apply()
 
-    var uiMode: Int
+    val selectedTheme: SelectedTheme
+        get() = SelectedTheme(themeIndex, themeMode)
+
+    private var uiMode: Int
         get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO)
         set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
-    val appCompatNightMode: Int
-        get() = uiModeMap[uiMode] ?: AppCompatDelegate.MODE_NIGHT_NO
+    private val themeMode: Int
+        get() = uiModeMap[uiMode] ?: THEME_MODE_LIGHT
 
-    var theme: Int
+    private var theme: Int
         get() = preferences.getInt(THEME, THEME_DEFAULT)
         set(theme) = preferences.edit().putInt(THEME, theme).apply()
 
@@ -216,6 +224,10 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         const val THEME_DEFAULT = 0
         const val THEME_BLACK = 1
 
+        const val THEME_MODE_SYSTEM = -1
+        const val THEME_MODE_LIGHT = 1
+        const val THEME_MODE_DARK = 2
+
         private val themesCombined = arrayOf(
             "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_DEFAULT",
             "${UiModeManager.MODE_NIGHT_AUTO}-$THEME_BLACK",
@@ -233,9 +245,9 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         )
 
         private val uiModeMap = mapOf(
-            UiModeManager.MODE_NIGHT_AUTO to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            UiModeManager.MODE_NIGHT_NO to AppCompatDelegate.MODE_NIGHT_NO,
-            UiModeManager.MODE_NIGHT_YES to AppCompatDelegate.MODE_NIGHT_YES
+            UiModeManager.MODE_NIGHT_AUTO to THEME_MODE_SYSTEM,
+            UiModeManager.MODE_NIGHT_NO to THEME_MODE_LIGHT,
+            UiModeManager.MODE_NIGHT_YES to THEME_MODE_DARK
         )
 
         private val themeIds = arrayOf(

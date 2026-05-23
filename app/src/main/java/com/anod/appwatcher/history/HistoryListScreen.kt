@@ -38,36 +38,40 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.anod.appwatcher.R
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.ListItem
 import com.anod.appwatcher.search.MarketAppItem
 import com.anod.appwatcher.search.RetryButton
 import com.anod.appwatcher.utils.AppIconLoader
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.flow.Flow
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun HistoryListScreenScene(wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun HistoryListScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: HistoryListViewModel = viewModel(
-        factory = HistoryListViewModel.Factory(
-            wideLayout = wideLayout,
-        ),
-        key = SceneNavKey.Main.toString()
+        factory = HistoryListViewModel.Factory(),
+        key = SceneNavKey.PurchaseHistory.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
-    HistoryListScreen(
-        screenState = screenState,
-        onEvent = viewModel::handleEvent,
-        pagingDataFlow = viewModel.pagingData,
-        viewActions = viewModel.viewActions,
-        navigateBack = navigateBack,
-        navigateTo = navigateTo,
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        HistoryListScreen(
+            screenState = screenState,
+            onEvent = viewModel::handleEvent,
+            pagingDataFlow = viewModel.pagingData,
+            viewActions = viewModel.viewActions,
+            navigateBack = navigateBack,
+            navigateTo = navigateTo,
+        )
+    }
 }
 
 @Composable

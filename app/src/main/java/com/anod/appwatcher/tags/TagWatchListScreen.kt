@@ -23,29 +23,29 @@ import com.anod.appwatcher.compose.SortMenuItem
 import com.anod.appwatcher.compose.TagAppIconButton
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
-import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import com.anod.appwatcher.watchlist.WatchListPagingSource
+import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListScreen
 import com.anod.appwatcher.watchlist.WatchListSharedState
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
+import com.anod.appwatcher.watchlist.WatchListTagFilter
 import com.anod.appwatcher.watchlist.WatchListTopBar
-import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
 
 @Composable
-fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
-    val viewModel: WatchListStateViewModel = viewModel(factory =
-        WatchListStateViewModel.Factory(
-            defaultFilterId = Filters.ALL,
-            wideLayout = wideLayout,
-            collectRecentlyInstalledApps = false,
-            initialTag = tag
-        ),
-        key = SceneNavKey.TagWatchList.toString()
+fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+    val viewModel: WatchListStateViewModel = viewModel(
+        factory =
+            WatchListStateViewModel.Factory(
+                defaultFilterId = Filters.ALL,
+                initialTag = tag,
+                tagFilter = if (tag.isEmpty) WatchListTagFilter.Untagged else WatchListTagFilter.Tag(tag.id),
+                showOnDeviceApps = false,
+                showRecentlyInstalledApps = false,
+            ),
+        key = "TagWatchList-${tag.hashCode()}",
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
@@ -54,21 +54,13 @@ fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigate
     }
     AppTheme(
         customPrimaryColor = customPrimaryColor,
-        theme = viewModel.prefs.theme
+        theme = viewModel.prefs.selectedTheme,
+        transparentSystemUi = true
     ) {
-        val pagingSourceConfig = WatchListPagingSource.Config(
-            filterId = screenState.filterId,
-            tagId = screenState.tag.id,
-            showRecentlyDiscovered = viewModel.prefs.showRecentlyDiscovered,
-            showOnDevice = false,
-            showRecentlyInstalled = false
-        )
-
         TagWatchListScreen(
             screenState = screenState,
-            pagingSourceConfig = pagingSourceConfig,
+            listPagerFactory = viewModel::listPagerFactory,
             onEvent = viewModel::handleEvent,
-            installedApps = viewModel.installedApps
         )
 
         if (screenState.showAppTagDialog) {
@@ -96,13 +88,12 @@ fun TagWatchListScreenScene(wideLayout: FoldableDeviceLayout, tag: Tag, navigate
 @Composable
 fun TagWatchListScreen(
     screenState: WatchListSharedState,
-    pagingSourceConfig: WatchListPagingSource.Config,
+    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
     onEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps
 ) {
     WatchListScreen(
         screenState = screenState,
-        pagingSourceConfig = pagingSourceConfig,
+        listPagerFactory = listPagerFactory,
         onEvent = onEvent,
         topBarContent = { subtitle, filterId ->
             TagWatchListTopBar(
@@ -112,8 +103,7 @@ fun TagWatchListScreen(
                 onEvent = onEvent,
             )
         },
-        installedApps = installedApps,
-        listContext = "tag-${screenState.tag.id}"
+        listContext = "tag-${screenState.tag.id}",
     )
 }
 

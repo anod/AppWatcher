@@ -4,7 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Schedule
+import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.ScreenCommonAction
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -18,6 +20,7 @@ import java.util.Locale
 
 @Immutable
 data class SchedulesHistoryState(
+    val theme: SelectedTheme = SelectedTheme(),
     val schedules: ImmutableList<Schedule> = persistentListOf(),
     val dateFormat: DateFormat = SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault())
 )
@@ -30,7 +33,9 @@ class SchedulesHistoryViewModel : BaseFlowViewModel<SchedulesHistoryState, Sched
     private val database: AppsDatabase by inject()
 
     init {
-        viewState = SchedulesHistoryState()
+        viewState = SchedulesHistoryState(
+            theme = prefs.selectedTheme,
+        )
         viewModelScope.launch {
             database.schedules().load().collect { schedules ->
                 viewState = viewState.copy(schedules = schedules.toPersistentList())

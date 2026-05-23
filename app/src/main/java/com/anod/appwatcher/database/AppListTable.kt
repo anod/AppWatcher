@@ -39,6 +39,9 @@ interface AppListTable {
     @RawQuery(observedEntities = [(App::class), (AppChange::class), (AppTag::class)])
     suspend fun load(query: SupportSQLiteQuery): List<AppListItem>
 
+    @RawQuery
+    suspend fun count(query: SupportSQLiteQuery): Int
+
     @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} == :appId")
     fun observeApp(appId: String): Flow<App?>
 
@@ -201,6 +204,32 @@ interface AppListTable {
         ): List<AppListItem> {
             val query = createAppsListQuery(sortId, orderByRecentlyDiscovered, tagId, titleFilter, offset)
             return table.load(SimpleSQLiteQuery(query.first, query.second))
+        }
+
+        suspend fun countAppList(
+            tagId: Int?,
+            titleFilter: String,
+            table: AppListTable
+        ): Int {
+            val query = createAppsListCountQuery(tagId, titleFilter)
+            return table.count(SimpleSQLiteQuery(query.first, query.second))
+        }
+
+        private fun createAppsListCountQuery(
+            tagId: Int?,
+            titleFilter: String
+        ): Pair<String, Array<String>> {
+            val appTagsTable = when (tagId) {
+                null -> ""
+                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
+                else -> "INNER JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
+            }
+            val selection = createSelection(tagId, titleFilter, null)
+            val sql =
+                "SELECT COUNT(DISTINCT $TABLE.${BaseColumns._ID}) " +
+                    "FROM $TABLE " + appTagsTable +
+                    "WHERE ${selection.first} "
+            return Pair(sql, selection.second)
         }
 
         private fun createAppsListQuery(

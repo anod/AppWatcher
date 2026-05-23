@@ -16,16 +16,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.ClickableText
@@ -127,7 +133,7 @@ private val iconSizeSmall = 32.dp
 private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
 @Composable
-fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
+fun DetailsPanel(app: App, onDismissRequest: () -> Unit, updateSystemBars: Boolean = false) {
     val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
@@ -141,9 +147,10 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
         derivedStateOf { screenState.customPrimaryColor }
     }
     AppTheme(
+        theme = screenState.theme,
         customPrimaryColor = customPrimaryColor?.let { Color(it) },
-        updateSystemBars = false,
-        useSurfaceAsPrimary = true
+        useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default,
+        updateSystemBars = updateSystemBars,
     ) {
         DetailsScreenContent(
             screenState = screenState,
@@ -151,6 +158,7 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             viewActions = viewModel.viewActions,
             onDismissRequest = onDismissRequest,
+            contentWindowInsets = WindowInsets()
         )
     }
 }
@@ -170,8 +178,8 @@ fun DetailsDialog(app: App, onDismissRequest: () -> Unit) {
         derivedStateOf { screenState.customPrimaryColor }
     }
     AppTheme(
+        theme = screenState.theme,
         customPrimaryColor = customPrimaryColor?.let { Color(it) },
-        updateSystemBars = false,
         useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default
     ) {
         Dialog(onDismissRequest = onDismissRequest) {
@@ -219,6 +227,7 @@ private fun DetailsScreenContent(
     viewActions: Flow<DetailsAction>,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    contentWindowInsets: WindowInsets = WindowInsets.statusBars,
 ) {
     LaunchedEffect(key1 = onEvent) {
         onEvent(DetailsEvent.LoadChangelog)
@@ -252,10 +261,18 @@ private fun DetailsScreenContent(
 
     val collapsedFraction = scrollBehavior.state.collapsedFraction
 
+    val contentInset = WindowInsets.statusBars
+        .union(WindowInsets.captionBar)
+        .union(WindowInsets.displayCutout)
+        .asPaddingValues()
+    val horizontalCutoutInset = WindowInsets.displayCutout
+        .only(WindowInsetsSides.Horizontal)
+        .asPaddingValues()
+    val bgHeightDP = remember(actualHeaderHeightDp, contentInset) { 64.dp + actualHeaderHeightDp + contentInset.calculateTopPadding() }
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = contentWindowInsets
     ) { paddingValues ->
         Box(
             modifier = Modifier.padding(paddingValues)
@@ -268,13 +285,17 @@ private fun DetailsScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp + actualHeaderHeightDp)
+                        .height(bgHeightDP)
                         .align(Alignment.TopStart)
                         .background(color = surfaceColor)
                 )
             }
 
-            Column {
+            Column(
+                modifier = Modifier.padding(
+                    contentInset
+                )
+            ) {
                 DetailsTopAppBar(
                     titleVisibility = collapsedFraction,
                     screenState = screenState,
@@ -333,7 +354,8 @@ private fun DetailsScreenContent(
                     content = { PlayStoreAppIcon() },
                     modifier = Modifier
                         .alpha(1.0f - collapsedFraction)
-                        .padding(top = 64.dp + actualHeaderHeightDp - 24.dp, end = 16.dp)
+                        .padding(horizontalCutoutInset)
+                        .padding(top = bgHeightDP - 24.dp, end = 16.dp)
                         .align(Alignment.TopEnd)
                 )
             }
@@ -962,14 +984,14 @@ private fun DetailsTopAppBar(
     }
 }
 
-@Preview
+@Preview()
 @Composable
 private fun DetailsScreenPreview() {
     val screenState = DetailsState(
         appId = "test.id",
-        title = "Test title long app name",
         rowId = 22,
         detailsUrl = "open",
+        appLoadingState = AppLoadingState.Loaded,
         app = App(
             rowId = 22,
             appId = "appId2",
@@ -987,6 +1009,7 @@ private fun DetailsScreenPreview() {
             status = 0,
             syncTime = 0
         ),
+        title = "Test title long app name",
         changelogState = ChangelogLoadState.Complete,
         changelogs = listOf(
             AppChange(
@@ -1028,8 +1051,7 @@ private fun DetailsScreenPreview() {
                 noNewDetails = true
             )
         ),
-        appLoadingState = AppLoadingState.Loaded,
-        customPrimaryColor = Color.Blue.toArgb()
+        customPrimaryColor = Color.Blue.toArgb(),
     )
     AppTheme(
         customPrimaryColor = Color.Blue
@@ -1054,9 +1076,9 @@ private fun VersionInfoPreview() {
             VersionDetails(
                 screenState = DetailsState(
                     appId = "test.id",
-                    title = "Test title long app name",
                     rowId = 22,
                     detailsUrl = "open",
+                    appLoadingState = AppLoadingState.Loaded,
                     app = App(
                         rowId = 22,
                         appId = "appId2",
@@ -1074,15 +1096,15 @@ private fun VersionInfoPreview() {
                         status = 0,
                         syncTime = 0
                     ),
+                    title = "Test title long app name",
                     changelogState = ChangelogLoadState.Complete,
                     changelogs = listOf(),
-                    appLoadingState = AppLoadingState.Loaded,
                     remoteVersionInfo = AppVersionInfo(
                         isBeta = true,
                         installationSize = 9000000,
                         targetSdkVersion = 33,
                         starRating = 5.0f
-                    )
+                    ),
                 )
             )
         }

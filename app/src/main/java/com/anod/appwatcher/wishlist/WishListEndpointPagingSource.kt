@@ -1,6 +1,7 @@
 package com.anod.appwatcher.wishlist
 
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.search.ListEndpointPagingSource
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.DfeApi
@@ -15,7 +16,7 @@ class WishListEndpointPagingSource(
 ) : ListEndpointPagingSource(
     listType = DfeListType.ALL,
     installedApps = installedApps,
-    appAdapter = { document -> App(document, uploadDateParserCache) }
+    appAdapter = { document -> document.toApp(uploadDateParserCache) }
 ) {
     override suspend fun execute(nextPageUrl: String): ResponseWrapper {
         return dfeApi.wishlist(nextPageUrl)

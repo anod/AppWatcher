@@ -8,26 +8,31 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.BaseComposeActivity
 import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.history.HistoryListScreenScene
 import com.anod.appwatcher.installed.InstalledListScreenScene
+import com.anod.appwatcher.navigation.ResizableListDetailSceneStrategy
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.rememberResizableListDetailSceneStrategy
 import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
 import com.anod.appwatcher.search.toViewState
@@ -36,7 +41,7 @@ import com.anod.appwatcher.tags.TagWatchListScreenScene
 import com.anod.appwatcher.userLog.UserLogScreenScene
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.DetailContent
-import com.anod.appwatcher.watchlist.EmptyBoxSmile
+import com.anod.appwatcher.watchlist.DetailPlaceholder
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.wishlist.WishListScreenScene
 import info.anodsplace.framework.app.addMultiWindowFlags
@@ -51,50 +56,69 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
         val elements = createInitialBackstack()
         setContent {
-
             val backStack = rememberNavBackStack(*elements)
-            val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-            AppTheme(
-                theme = prefs.theme,
-                transparentSystemUi = true
-            ) {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { keysToRemove -> repeat(keysToRemove) { backStack.removeLastOrNull() } },
-                    sceneStrategy = listDetailStrategy,
-                    entryProvider = provideNavEntries(backStack),
-                    transitionSpec = {
-                        // Slide in from right when navigating forward
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = tween(350)
-                        )
-                    },
-                    popTransitionSpec = {
-                        // Slide in from left when navigating back
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(350)
-                        )
-                    },
-                    predictivePopTransitionSpec = {
-                        // Slide in from left when navigating back
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = tween(350)
-                        ) togetherWith slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(350)
-                        )
+            val listDetailStrategy = rememberResizableListDetailSceneStrategy<NavKey>(
+                sceneContainer = { content ->
+                    AppTheme(
+                        theme = prefs.selectedTheme,
+                        updateSystemBars = false
+                    ) {
+                        content()
                     }
-                )
-            }
+                },
+                paneExpansionDragHandle = { paneExpansionState, modifier ->
+                    val interactionSource = remember { MutableInteractionSource() }
+                    VerticalDragHandle(
+                        modifier = modifier
+                            .paneExpansionDraggable(
+                                state = paneExpansionState,
+                                minTouchTargetSize = 48.dp,
+                                interactionSource = interactionSource,
+                            ),
+                        interactionSource = interactionSource,
+                    )
+                }
+            )
+            NavDisplay(
+                modifier = Modifier.fillMaxSize(),
+                backStack = backStack,
+                sceneStrategies = listOf(listDetailStrategy),
+                entryProvider = provideNavEntries(backStack),
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                transitionSpec = {
+                    // Slide in from right when navigating forward
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { -it },
+                        animationSpec = tween(350)
+                    )
+                },
+                popTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(350)
+                    )
+                },
+                predictivePopTransitionSpec = {
+                    // Slide in from left when navigating back
+                    slideInHorizontally(
+                        initialOffsetX = { -it },
+                        animationSpec = tween(350)
+                    ) togetherWith slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(350)
+                    )
+                }
+            )
         }
     }
 
@@ -143,119 +167,117 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         return elements
     }
 
-    private fun provideNavEntries(backStack: NavBackStack): (NavKey) -> NavEntry<NavKey> = entryProvider {
+    private fun provideNavEntries(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<SceneNavKey.Main>(
-            metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Main,
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             MainScreenScene(
                 prefs = prefs,
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.AppDetails>(
-            metadata = ListDetailSceneStrategy.detailPane(sceneKey = SceneNavKey.AppDetails)
+            metadata = ResizableListDetailSceneStrategy.detailPane(sceneKey = "list-detail")
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
+                theme = prefs.selectedTheme,
                 onDismissRequest = { backStack.removeLastOrNull() },
             )
         }
         entry<SceneNavKey.Search>(
-            metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Search,
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
-            val wideLayout by foldableDevice.layout.collectAsState()
             SearchResultsScreenScene(
-                initialState = key.toViewState(wideLayout),
+                initialState = key.toViewState(),
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
             )
         }
-        entry<SceneNavKey.Settings>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.Settings)
-        ) {
+        entry<SceneNavKey.Settings> {
             SettingsScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.PurchaseHistory>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.PurchaseHistory)
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
+                detailPlaceholder = {
+                    DetailPlaceholder(theme = prefs.selectedTheme)
+                }
+            )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             HistoryListScreenScene(
-                wideLayout = wideLayout,
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
-        entry<SceneNavKey.UserLog>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.UserLog)
-        ) {
+        entry<SceneNavKey.UserLog> {
             UserLogScreenScene(
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
-        entry<SceneNavKey.RefreshHistory>(
-            metadata = ListDetailSceneStrategy.extraPane(sceneKey = SceneNavKey.RefreshHistory)
-        ) {
+        entry<SceneNavKey.RefreshHistory> {
             SchedulesHistoryScreenScene(
                 navigateBack = { backStack.removeLastOrNull() }
             )
         }
         entry<SceneNavKey.TagWatchList>(
-            metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.TagWatchList,
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
-            val wideLayout by foldableDevice.layout.collectAsState()
             TagWatchListScreenScene(
                 tag = key.tag,
-                wideLayout = wideLayout,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.Installed>(
-            metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.Installed,
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) { key ->
             InstalledListScreenScene(
+                prefs = prefs,
                 showAction = key.importMode,
                 navigateBack = { backStack.removeLastOrNull() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.WishList>(
-            metadata = ListDetailSceneStrategy.listPane(
-                sceneKey = SceneNavKey.WishList,
+            metadata = ResizableListDetailSceneStrategy.listPane(
+                sceneKey = "list-detail",
                 detailPlaceholder = {
-                    EmptyBoxSmile()
+                    DetailPlaceholder(theme = prefs.selectedTheme)
                 }
             )
         ) {
-            val wideLayout by foldableDevice.layout.collectAsState()
             WishListScreenScene(
-                wideLayout = wideLayout,
+                prefs = prefs,
                 navigateBack = { backStack.removeLastOrNull() },
+                navigateTo = { backStack.add(it) }
             )
         }
     }

@@ -27,7 +27,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 17001
+        versionCode = 17002
         versionName = "1.7.0"
     }
 
@@ -112,8 +112,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
 
+    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.navigation3.adaptive)
+    implementation(libs.androidx.navigation3.viewmodel)
 
     implementation(libs.paging.common)
     implementation(libs.paging.compose.android)
@@ -138,7 +140,7 @@ dependencies {
 
     implementation(libs.google.api.client)
     implementation(libs.google.api.client.android)
-    implementation("com.google.apis:google-api-services-drive:v3-rev20230520-2.0.0") {
+    implementation("com.google.apis:google-api-services-drive:v3-rev20260428-2.0.0") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }

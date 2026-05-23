@@ -62,7 +62,7 @@ import info.anodsplace.permissions.toRequestInput
 import org.koin.java.KoinJavaComponent
 
 @Composable
-fun SettingsScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: SettingsViewModel = viewModel()
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
@@ -76,10 +76,15 @@ fun SettingsScreenScene(navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) 
     val gDriveErrorIntentRequest = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.handleEvent(SettingsViewEvent.GDriveActivityResult(it))
     }
-    SettingsScreen(
-        screenState = screenState,
-        onEvent = viewModel::handleEvent
-    )
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        SettingsScreen(
+            screenState = screenState,
+            onEvent = viewModel::handleEvent
+        )
+    }
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
             when (action) {

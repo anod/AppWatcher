@@ -55,6 +55,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
 
     AppTheme(
+        theme = screenState.theme,
         customPrimaryColor = Color(screenState.tag.color),
         updateSystemBars = false
     ) {

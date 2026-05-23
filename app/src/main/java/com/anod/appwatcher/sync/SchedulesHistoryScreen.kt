@@ -35,7 +35,6 @@ import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
 import com.anod.appwatcher.utils.isLightColor
 import info.anodsplace.framework.content.onScreenCommonAction
-import kotlinx.collections.immutable.ImmutableList
 import java.text.DateFormat
 import java.util.Date
 
@@ -43,11 +42,15 @@ import java.util.Date
 fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
     val viewModel: SchedulesHistoryViewModel = viewModel()
     val viewState by viewModel.viewStates.collectAsState()
-    SchedulesHistoryScreen(
-        schedules = viewState.schedules,
-        dateFormat = viewState.dateFormat,
-        navigateBack = navigateBack
-    )
+    AppTheme(
+        theme = viewState.theme,
+        transparentSystemUi = true
+    ) {
+        SchedulesHistoryScreen(
+            viewState = viewState,
+            navigateBack = navigateBack
+        )
+    }
     val context = LocalContext.current
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
@@ -58,21 +61,20 @@ fun SchedulesHistoryScreenScene(navigateBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SchedulesHistoryScreen(schedules: ImmutableList<Schedule>, dateFormat: DateFormat, navigateBack: () -> Unit) {
-    AppTheme {
-        Surface {
-            Column(modifier = Modifier.fillMaxSize()) {
-                CenterAlignedTopAppBar(
-                    title = { Text(text = stringResource(id = R.string.refresh_history)) },
-                    navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
-                )
-                LazyColumn {
-                    items(schedules.size) { index ->
-                        ScheduleRow(
-                            schedule = schedules[index],
-                            dateFormat = dateFormat
-                        )
-                    }
+fun SchedulesHistoryScreen(viewState: SchedulesHistoryState, navigateBack: () -> Unit) {
+    Surface {
+        Column(modifier = Modifier.fillMaxSize()) {
+            CenterAlignedTopAppBar(
+                title = { Text(text = stringResource(id = R.string.refresh_history)) },
+                navigationIcon = { BackArrowIconButton(onClick = { navigateBack() }) },
+            )
+            val schedules = viewState.schedules
+            LazyColumn {
+                items(schedules.size) { index ->
+                    ScheduleRow(
+                        schedule = schedules[index],
+                        dateFormat = viewState.dateFormat
+                    )
                 }
             }
         }

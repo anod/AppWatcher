@@ -4,8 +4,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
+import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import com.anod.appwatcher.installed.InstalledPagingSource
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -18,7 +20,7 @@ abstract class FilterablePagingSource : PagingSource<Int, SectionItem>() {
     abstract var filterQuery: String
 }
 
-abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSource.Config) {
+abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSource.Config, private val cacheScope: CoroutineScope) {
     var filterQuery: String = ""
         set(value) {
             field = value
@@ -48,8 +50,8 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
         return Pager(
             config = PagingConfig(
                 pageSize = WatchListPagingSource.PAGE_SIZE,
-                enablePlaceholders = false,
-                initialLoadSize = WatchListPagingSource.PAGE_SIZE,
+                //enablePlaceholders = false,
+                //initialLoadSize = WatchListPagingSource.PAGE_SIZE,
                 maxSize = 1000
             ),
             initialKey = null,
@@ -64,6 +66,6 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
                 pagingData.insertSeparators { before, after ->
                     headerFactory.insertSeparator(before, after)
                 }
-            }
+            }.cachedIn(cacheScope)
     }
 }

@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -26,6 +25,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.BaseFlowViewModel
@@ -39,7 +39,6 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.app.FoldableDeviceLayout
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
@@ -75,7 +74,6 @@ data class WatchListSharedState(
     val showSearch: Boolean = false,
     val initialRefreshing: Boolean = false,
     val syncProgress: SyncProgress? = null,
-    val wideLayout: FoldableDeviceLayout = FoldableDeviceLayout(isWideLayout = false, hinge = Rect()),
     val showAppTagDialog: Boolean = false,
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
@@ -96,7 +94,6 @@ sealed interface WatchListEvent {
 
     class ChangeSort(val sortId: Int) : WatchListEvent
     class FilterByTitle(val query: String) : WatchListEvent
-    class SetWideLayout(val layout: FoldableDeviceLayout) : WatchListEvent
     class FilterById(val filterId: Int) : WatchListEvent
     class AddAppToTag(val show: Boolean) : WatchListEvent
     class EditTag(val show: Boolean) : WatchListEvent
@@ -109,12 +106,19 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
+sealed interface WatchListTagFilter {
+    data object None : WatchListTagFilter
+    data object Untagged : WatchListTagFilter
+    data class Tag(val id: Int) : WatchListTagFilter
+}
+
 class WatchListStateViewModel(
     state: SavedStateHandle,
     tag: Tag,
     defaultFilterId: Int,
-    collectRecentlyInstalledApps: Boolean,
-    wideLayout: FoldableDeviceLayout
+    private val tagFilter: WatchListTagFilter,
+    private val showOnDeviceApps: Boolean,
+    private val showRecentlyInstalledApps: Boolean,
 ) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
@@ -126,11 +130,37 @@ class WatchListStateViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
+    private val _pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
+    fun listPagerFactory(filterId: Int, tag: Tag): WatchListPagerFactory {
+        val tagId = when (tagFilter) {
+            WatchListTagFilter.None -> null
+            WatchListTagFilter.Untagged -> Tag.empty.id
+            is WatchListTagFilter.Tag -> tagFilter.id
+        }
+        val pagingSourceConfig = WatchListPagingSource.Config(
+            filterId = filterId,
+            tagId = tagId,
+            showRecentlyDiscovered = prefs.showRecentlyDiscovered,
+            showOnDevice = filterId == Filters.ALL && showOnDeviceApps,
+            showRecentlyInstalled = filterId == Filters.ALL && showRecentlyInstalledApps,
+        )
+        val configKey = pagingSourceConfig.hashCode()
+        AppLog.d("[Paging] listPagerFactory: $configKey")
+        if (_pagerFactories.containsKey(configKey)) {
+            AppLog.d("[Paging] listPagerFactory: $configKey, return existing ${_pagerFactories[configKey].hashCode()}")
+            return _pagerFactories[configKey]!!
+        }
+        _pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, installedApps = installedApps, viewModelScope)
+        AppLog.d("[Paging] listPagerFactory: $configKey, create new ${_pagerFactories[configKey].hashCode()}")
+        return _pagerFactories[configKey]!!
+    }
+
     class Factory(
         private val defaultFilterId: Int,
-        private val wideLayout: FoldableDeviceLayout,
-        private val collectRecentlyInstalledApps: Boolean,
-        private val initialTag: Tag
+        private val initialTag: Tag,
+        private val tagFilter: WatchListTagFilter,
+        private val showOnDeviceApps: Boolean,
+        private val showRecentlyInstalledApps: Boolean,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
@@ -139,8 +169,9 @@ class WatchListStateViewModel(
                 state = state,
                 tag = initialTag,
                 defaultFilterId = defaultFilterId,
-                wideLayout = wideLayout,
-                collectRecentlyInstalledApps = collectRecentlyInstalledApps
+                tagFilter = tagFilter,
+                showOnDeviceApps = showOnDeviceApps,
+                showRecentlyInstalledApps = showRecentlyInstalledApps
             ) as T
         }
     }
@@ -154,7 +185,6 @@ class WatchListStateViewModel(
             sortId = prefs.sortIndex,
             filterId = filterId,
             showSearch = expandSearch,
-            wideLayout = wideLayout,
             enablePullToRefresh = prefs.enablePullToRefresh,
             isRequestPinShortcutSupported = if (!tag.isEmpty) shortcutManager.isSupported else false
         )
@@ -210,7 +240,7 @@ class WatchListStateViewModel(
                 }
         }
 
-        if (collectRecentlyInstalledApps) {
+        if (showRecentlyInstalledApps) {
             viewModelScope.launch {
                 viewStates.map { "${it.refreshRequest}-${it.dbAppsChange}" }
                     .combine(packageChangedReceiver.observer.onStart { emit("") }) { viewStateChange, packageName -> "$viewStateChange-$packageName" }
@@ -233,7 +263,6 @@ class WatchListStateViewModel(
             }
 
             is WatchListEvent.FilterByTitle -> viewState = viewState.copy(titleFilter = event.query)
-            is WatchListEvent.SetWideLayout -> viewState = viewState.copy(wideLayout = event.layout)
             is WatchListEvent.AddAppToTag -> viewState = viewState.copy(showAppTagDialog = event.show)
             is WatchListEvent.FilterById -> viewState = viewState.copy(filterId = event.filterId)
             is WatchListEvent.EditTag -> viewState = viewState.copy(showEditTagDialog = event.show)

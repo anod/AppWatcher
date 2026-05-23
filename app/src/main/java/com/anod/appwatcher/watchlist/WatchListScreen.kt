@@ -1,38 +1,38 @@
 package com.anod.appwatcher.watchlist
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.anod.appwatcher.R
+import com.anod.appwatcher.database.entities.Tag
 import com.anod.appwatcher.model.Filters
-import info.anodsplace.applog.AppLog
-import info.anodsplace.compose.LifecycleEffect
-import info.anodsplace.framework.content.InstalledApps
 
 @Composable
 fun WatchListScreen(
     screenState: WatchListSharedState,
-    pagingSourceConfig: WatchListPagingSource.Config,
+    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
     onEvent: (WatchListEvent) -> Unit,
     topBarContent: @Composable (subtitle: String?, filterId: Int) -> Unit,
-    listContext: String,
-    installedApps: InstalledApps
+    listContext: String
 ) {
     var subtitle: String? by remember { mutableStateOf(null) }
     val filterPagesTitles = listOf(
@@ -62,7 +62,7 @@ fun WatchListScreen(
 
     Scaffold(
         topBar = { topBarContent(subtitle, filterIds[pagerState.currentPage]) },
-        contentWindowInsets = WindowInsets.statusBars
+        contentWindowInsets = WindowInsets.statusBars.union(WindowInsets.displayCutout.only(WindowInsetsSides.Start))
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
@@ -72,18 +72,7 @@ fun WatchListScreen(
             key = { filterIds[it] }
         ) { pageIndex ->
             val filterId = remember(pageIndex) { filterIds[pageIndex] }
-            val pageConfig by remember(pagingSourceConfig, filterId) {
-                derivedStateOf {
-                    pagingSourceConfig.copy(
-                        filterId = filterId,
-                        showOnDevice = if (filterId == Filters.ALL) pagingSourceConfig.showOnDevice else false,
-                        showRecentlyInstalled = if (filterId == Filters.ALL) pagingSourceConfig.showRecentlyInstalled else false,
-                    )
-                }
-            }
-            val pagerFactory = remember(pageConfig) {
-                AppsWatchListPagerFactory(pageConfig, installedApps = installedApps)
-            }
+            val pagerFactory = remember(listPagerFactory, filterId, screenState.tag) { listPagerFactory(filterId, screenState.tag) }
             pagerFactory.filterQuery = screenState.titleFilter
             val items = pagerFactory.pagingData.collectAsLazyPagingItems()
 
@@ -96,20 +85,18 @@ fun WatchListScreen(
                 )
             }
 
-            LaunchedEffect(refreshKey) {
-                AppLog.d("Refresh RefreshKey:$refreshKey")
-                items.refresh()
-            }
-
-            LifecycleEffect { event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        AppLog.d("ON_RESUME $refreshKey")
-                        items.refresh()
-                    }
-                    else -> { }
+            val refreshKeyToken = refreshKey.toString()
+            var appliedRefreshKey by rememberSaveable(filterId) { mutableStateOf<String?>(null) }
+            LaunchedEffect(refreshKeyToken) {
+                if (appliedRefreshKey == null) {
+                    appliedRefreshKey = refreshKeyToken
+                } else if (appliedRefreshKey != refreshKeyToken) {
+                    appliedRefreshKey = refreshKeyToken
+                    items.refresh()
                 }
             }
+
+            val pageListContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
 
             WatchListPage(
                 items = items,
@@ -117,7 +104,7 @@ fun WatchListScreen(
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 onEvent = onEvent,
                 recentlyInstalledApps = screenState.recentlyInstalledApps,
-                listContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
+                listContext = pageListContext
             )
         }
     }
@@ -136,7 +123,7 @@ fun WatchListScreen(
     }
 }
 
-private data class RefreshKey(
+data class RefreshKey(
     val titleFilter: String,
     val sortId: Int,
     val tagAppsChange: Int,

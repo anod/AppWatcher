@@ -25,6 +25,7 @@ import androidx.navigation3.runtime.NavKey
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.accounts.AccountSelectionResult
+import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.FilterMenuAction
 import com.anod.appwatcher.compose.OpenDrawerIcon
 import com.anod.appwatcher.compose.PlayStoreMyAppsIcon
@@ -35,8 +36,6 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
-import info.anodsplace.framework.app.FoldableDeviceLayout
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
@@ -45,14 +44,15 @@ import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.permissions.toRequestInput
 
 @Composable
-fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
+fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val mainViewModel: MainViewModel = viewModel()
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            wideLayout = wideLayout,
-            collectRecentlyInstalledApps = prefs.showRecent,
-            initialTag = Tag.empty
+            initialTag = Tag.empty,
+            tagFilter = WatchListTagFilter.None,
+            showOnDeviceApps = prefs.showOnDevice,
+            showRecentlyInstalledApps = prefs.showRecent,
         ),
         key = SceneNavKey.Main.toString()
     )
@@ -96,22 +96,20 @@ fun MainScreenScene(prefs: Preferences, wideLayout: FoldableDeviceLayout, naviga
             context.onScreenCommonAction(action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
         }
     }
-    val pagingSourceConfig = WatchListPagingSource.Config(
-        filterId = listState.filterId,
-        tagId = null,
-        showRecentlyDiscovered = prefs.showRecentlyDiscovered,
-        showOnDevice = prefs.showOnDevice,
-        showRecentlyInstalled = prefs.showRecent
-    )
-    MainScreen(
-        mainState = mainState,
-        drawerState = drawerState,
-        onMainEvent = mainViewModel::handleEvent,
-        listState = listState,
-        pagingSourceConfig = pagingSourceConfig,
-        onListEvent = listViewModel::handleEvent,
-        installedApps = listViewModel.installedApps
-    )
+
+    AppTheme(
+        theme = prefs.selectedTheme,
+        transparentSystemUi = true
+    ) {
+        MainScreen(
+            mainState = mainState,
+            drawerState = drawerState,
+            onMainEvent = mainViewModel::handleEvent,
+            listState = listState,
+            listPagerFactory = listViewModel::listPagerFactory,
+            onListEvent = listViewModel::handleEvent,
+        )
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         mainViewModel.handleEvent(MainViewEvent.OnResume)
@@ -149,10 +147,9 @@ fun MainScreen(
     mainState: MainViewState,
     onMainEvent: (MainViewEvent) -> Unit,
     listState: WatchListSharedState,
-    pagingSourceConfig: WatchListPagingSource.Config,
     onListEvent: (WatchListEvent) -> Unit,
-    installedApps: InstalledApps,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
 ) {
     ModalNavigationDrawer(
         drawerContent = {
@@ -175,7 +172,7 @@ fun MainScreen(
     ) {
         WatchListScreen(
             screenState = listState,
-            pagingSourceConfig = pagingSourceConfig,
+            listPagerFactory = listPagerFactory,
             onEvent = onListEvent,
             topBarContent = { subtitle, filterId ->
                 MainTopBar(
@@ -195,8 +192,7 @@ fun MainScreen(
                     },
                 )
             },
-            installedApps = installedApps,
-            listContext = "main"
+            listContext = "main",
         )
     }
 
