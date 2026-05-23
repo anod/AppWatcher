@@ -13,10 +13,17 @@
 - On Windows, use `.\gradlew.bat` instead of `./gradlew`.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
+## Release and open testing
+
+- Before creating an open testing release, bump `versionCode`, regenerate the release baseline profile with `:app:generateReleaseBaselineProfile` on a physical device, and include any changed generated baseline profile files.
+- Build the signed release Android App Bundle with `:app:bundleRelease`; open testing publishes the `.aab` from `app/build/outputs/bundle/release/`, not an APK or AAR.
+- Keep release signing, Play API, Firebase, and Google Services files out of git. Provide them as local files or Gradle properties at build/publish time without copying private values into tracked files or logs.
+- This repo does not configure a Play publishing Gradle plugin; upload the release `.aab` to the Play Console open testing track using the approved local Play publishing tooling or web UI.
+
 ## Worktree workflow
 
 - Work only in a dedicated git worktree for every task; keep the main checkout on `master` for coordination and branch management.
-- When the task branch/PR has been merged, remove the task worktree and prune stale worktree metadata.
+- When the task branch/PR has been merged, remove the task worktree with `git worktree remove <path>` and run `git worktree prune` to delete stale metadata.
 - If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
 
 ## Architecture
