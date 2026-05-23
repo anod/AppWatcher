@@ -17,6 +17,7 @@
 
 - Work only in a dedicated git worktree for every task; keep the main checkout on `master` for coordination and branch management.
 - When the task branch/PR has been merged, remove the task worktree and prune stale worktree metadata.
+- If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
 
 ## Architecture
 
