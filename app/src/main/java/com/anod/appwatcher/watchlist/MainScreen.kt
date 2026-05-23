@@ -49,8 +49,10 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
     val listViewModel: WatchListStateViewModel = viewModel(factory =
         WatchListStateViewModel.Factory(
             defaultFilterId = prefs.defaultMainFilterId,
-            collectRecentlyInstalledApps = prefs.showRecent,
-            initialTag = Tag.empty
+            initialTag = Tag.empty,
+            tagFilter = WatchListTagFilter.None,
+            showOnDeviceApps = prefs.showOnDevice,
+            showRecentlyInstalledApps = prefs.showRecent,
         ),
         key = SceneNavKey.Main.toString()
     )

@@ -16,13 +16,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -130,7 +133,7 @@ private val iconSizeSmall = 32.dp
 private val dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
 
 @Composable
-fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
+fun DetailsPanel(app: App, onDismissRequest: () -> Unit, updateSystemBars: Boolean = false) {
     val storeOwner = rememberViewModeStoreOwner()
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val viewModel: DetailsViewModel = viewModel(
@@ -147,7 +150,7 @@ fun DetailsPanel(app: App, onDismissRequest: () -> Unit) {
         theme = screenState.theme,
         customPrimaryColor = customPrimaryColor?.let { Color(it) },
         useSurfaceAsPrimary = screenState.appIconState != AppIconState.Default,
-        updateSystemBars = false
+        updateSystemBars = updateSystemBars,
     ) {
         DetailsScreenContent(
             screenState = screenState,
@@ -258,7 +261,13 @@ private fun DetailsScreenContent(
 
     val collapsedFraction = scrollBehavior.state.collapsedFraction
 
-    val contentInset = WindowInsets.statusBars.union(WindowInsets.captionBar).asPaddingValues()
+    val contentInset = WindowInsets.statusBars
+        .union(WindowInsets.captionBar)
+        .union(WindowInsets.displayCutout)
+        .asPaddingValues()
+    val horizontalCutoutInset = WindowInsets.displayCutout
+        .only(WindowInsetsSides.Horizontal)
+        .asPaddingValues()
     val bgHeightDP = remember(actualHeaderHeightDp, contentInset) { 64.dp + actualHeaderHeightDp + contentInset.calculateTopPadding() }
     Scaffold(
         modifier = modifier,
@@ -345,6 +354,7 @@ private fun DetailsScreenContent(
                     content = { PlayStoreAppIcon() },
                     modifier = Modifier
                         .alpha(1.0f - collapsedFraction)
+                        .padding(horizontalCutoutInset)
                         .padding(top = bgHeightDP - 24.dp, end = 16.dp)
                         .align(Alignment.TopEnd)
                 )

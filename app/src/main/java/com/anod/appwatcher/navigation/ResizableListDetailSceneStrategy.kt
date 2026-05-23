@@ -25,6 +25,7 @@ import androidx.compose.material3.adaptive.layout.calculateThreePaneScaffoldValu
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -251,8 +252,10 @@ private class ResizableThreePaneScaffoldScene<T : Any>(
             }
         }
 
-        sceneContainer {
-            ListDetailContent(scaffoldState)
+        CompositionLocalProvider(LocalListDetailPaneScaffold provides true) {
+            sceneContainer {
+                ListDetailContent(scaffoldState)
+            }
         }
     }
 

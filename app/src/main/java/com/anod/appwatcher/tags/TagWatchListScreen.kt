@@ -30,6 +30,7 @@ import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListScreen
 import com.anod.appwatcher.watchlist.WatchListSharedState
 import com.anod.appwatcher.watchlist.WatchListStateViewModel
+import com.anod.appwatcher.watchlist.WatchListTagFilter
 import com.anod.appwatcher.watchlist.WatchListTopBar
 import info.anodsplace.framework.content.onScreenCommonAction
 
@@ -39,8 +40,10 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
         factory =
             WatchListStateViewModel.Factory(
                 defaultFilterId = Filters.ALL,
-                collectRecentlyInstalledApps = false,
-                initialTag = tag
+                initialTag = tag,
+                tagFilter = if (tag.isEmpty) WatchListTagFilter.Untagged else WatchListTagFilter.Tag(tag.id),
+                showOnDeviceApps = false,
+                showRecentlyInstalledApps = false,
             ),
         key = "TagWatchList-${tag.hashCode()}",
     )

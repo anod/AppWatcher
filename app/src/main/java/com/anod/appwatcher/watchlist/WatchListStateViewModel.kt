@@ -106,11 +106,19 @@ sealed interface WatchListEvent {
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
 }
 
+sealed interface WatchListTagFilter {
+    data object None : WatchListTagFilter
+    data object Untagged : WatchListTagFilter
+    data class Tag(val id: Int) : WatchListTagFilter
+}
+
 class WatchListStateViewModel(
     state: SavedStateHandle,
     tag: Tag,
     defaultFilterId: Int,
-    collectRecentlyInstalledApps: Boolean,
+    private val tagFilter: WatchListTagFilter,
+    private val showOnDeviceApps: Boolean,
+    private val showRecentlyInstalledApps: Boolean,
 ) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(), KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
@@ -124,12 +132,17 @@ class WatchListStateViewModel(
 
     private val _pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
     fun listPagerFactory(filterId: Int, tag: Tag): WatchListPagerFactory {
+        val tagId = when (tagFilter) {
+            WatchListTagFilter.None -> null
+            WatchListTagFilter.Untagged -> Tag.empty.id
+            is WatchListTagFilter.Tag -> tagFilter.id
+        }
         val pagingSourceConfig = WatchListPagingSource.Config(
             filterId = filterId,
-            tagId = if (tag.isEmpty) null else tag.id,
+            tagId = tagId,
             showRecentlyDiscovered = prefs.showRecentlyDiscovered,
-            showOnDevice = if (filterId == Filters.ALL && tag.isEmpty) prefs.showOnDevice else false,
-            showRecentlyInstalled = if (filterId == Filters.ALL && tag.isEmpty) prefs.showRecent else false,
+            showOnDevice = filterId == Filters.ALL && showOnDeviceApps,
+            showRecentlyInstalled = filterId == Filters.ALL && showRecentlyInstalledApps,
         )
         val configKey = pagingSourceConfig.hashCode()
         AppLog.d("[Paging] listPagerFactory: $configKey")
@@ -144,8 +157,10 @@ class WatchListStateViewModel(
 
     class Factory(
         private val defaultFilterId: Int,
-        private val collectRecentlyInstalledApps: Boolean,
-        private val initialTag: Tag
+        private val initialTag: Tag,
+        private val tagFilter: WatchListTagFilter,
+        private val showOnDeviceApps: Boolean,
+        private val showRecentlyInstalledApps: Boolean,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
@@ -154,7 +169,9 @@ class WatchListStateViewModel(
                 state = state,
                 tag = initialTag,
                 defaultFilterId = defaultFilterId,
-                collectRecentlyInstalledApps = collectRecentlyInstalledApps
+                tagFilter = tagFilter,
+                showOnDeviceApps = showOnDeviceApps,
+                showRecentlyInstalledApps = showRecentlyInstalledApps
             ) as T
         }
     }
@@ -223,7 +240,7 @@ class WatchListStateViewModel(
                 }
         }
 
-        if (collectRecentlyInstalledApps) {
+        if (showRecentlyInstalledApps) {
             viewModelScope.launch {
                 viewStates.map { "${it.refreshRequest}-${it.dbAppsChange}" }
                     .combine(packageChangedReceiver.observer.onStart { emit("") }) { viewStateChange, packageName -> "$viewStateChange-$packageName" }

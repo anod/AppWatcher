@@ -14,6 +14,8 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.details.DetailsPanel
+import com.anod.appwatcher.navigation.LocalListDetailPaneScaffold
+import com.anod.appwatcher.navigation.shouldUpdateDetailSystemBars
 import com.anod.appwatcher.preferences.SelectedTheme
 
 @Composable
@@ -24,6 +26,7 @@ fun DetailContent(app: App?, theme: SelectedTheme, onDismissRequest: () -> Unit)
         DetailsPanel(
             app = app,
             onDismissRequest = onDismissRequest,
+            updateSystemBars = shouldUpdateDetailSystemBars(LocalListDetailPaneScaffold.current),
         )
     }
 }
