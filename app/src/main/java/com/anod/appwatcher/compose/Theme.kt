@@ -164,7 +164,7 @@ fun AppTheme(
             onPrimaryContainer = Color(roles.onAccentContainer)
         )
         statusBarColor = colorScheme.primary
-        isAppearanceLightStatusBars = statusBarColor.isLightColor
+        isAppearanceLightStatusBars = !colorScheme.onPrimary.isLightColor
     } else if (useSurfaceAsPrimary) {
         colorScheme = colorScheme.copy(
             primary = colorScheme.surface,
@@ -176,7 +176,7 @@ fun AppTheme(
         if (transparentSystemUi) {
             setSystemUiColors(
                 statusBarColor = Color.Transparent,
-                statusBarDarkIcons = !darkTheme,
+                statusBarDarkIcons = isAppearanceLightStatusBars,
                 navigationBarColor = colorScheme.surface,
                 navigationBarDarkIcons = !darkTheme
             )

@@ -8,10 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -56,9 +53,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         setContent {
             val backStack = rememberNavBackStack(*elements)
             val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-            val navBarPadding = WindowInsets.navigationBars.asPaddingValues()
             NavDisplay(
-                modifier = Modifier.padding(navBarPadding),
+                modifier = Modifier.fillMaxSize(),
                 backStack = backStack,
                 sceneStrategies = listOf(listDetailStrategy),
                 entryProvider = provideNavEntries(backStack),
