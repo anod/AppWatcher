@@ -101,6 +101,7 @@ class WatchListPagingSource(
                     }
             } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent) {
                 items.add(SectionItem.Empty)
+                totalItems = items.size
             }
         }
 
@@ -137,9 +138,6 @@ class WatchListPagingSource(
             return LoadResult.Page.COUNT_UNDEFINED
         }
         val appsCount = AppListTable.Queries.countAppList(config.tagId, filterQuery, database.apps())
-        if (offset == 0 && config.showRecentlyInstalled && dataSize == 0 && filteredSize == 0) {
-            return 2
-        }
         return appsCount + if (config.showRecentlyInstalled) 1 else 0
     }
 
@@ -178,7 +176,7 @@ class WatchListPagingSource(
                 offset <= loadSize -> 0
                 else -> offset - loadSize
             }
-            val nextKey = if (loadedDataSize < limit) null else offset + loadSize
+            val nextKey = if (loadedDataSize < limit) null else offset + limit
             return prevKey to nextKey
         }
 
@@ -187,6 +185,13 @@ class WatchListPagingSource(
                 max(0, position - 1)
             } else {
                 position
+            }
+            if (showRecentlyInstalled) {
+                val firstPageAppCount = PAGE_SIZE - 1
+                if (appPosition < firstPageAppCount) {
+                    return 0
+                }
+                return firstPageAppCount + ((appPosition - firstPageAppCount) / PAGE_SIZE) * PAGE_SIZE
             }
             val pages = appPosition / PAGE_SIZE
             return pages * PAGE_SIZE

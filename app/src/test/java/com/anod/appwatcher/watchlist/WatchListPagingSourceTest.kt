@@ -61,6 +61,19 @@ class WatchListPagingSourceTest {
     }
 
     @Test
+    fun `calculateKeys first page with recent header advances by reduced limit`() {
+        val (prev, next) = WatchListPagingSource.calculateKeys(
+            key = null,
+            offset = 0,
+            loadSize = 20,
+            loadedDataSize = 19,
+            limit = 19,
+        )
+        assertEquals(null, prev)
+        assertEquals(19, next)
+    }
+
+    @Test
     fun `calculateKeys middle page has prev and next`() {
         val (prev, next) = WatchListPagingSource.calculateKeys(
             key = 20,
@@ -132,14 +145,16 @@ class WatchListPagingSourceTest {
     @Test
     fun `getRefreshKey accounts for recent header`() {
         assertEquals(0, WatchListPagingSource.getRefreshKey(1, showRecentlyInstalled = true))
-        assertEquals(0, WatchListPagingSource.getRefreshKey(20, showRecentlyInstalled = true))
-        assertEquals(20, WatchListPagingSource.getRefreshKey(21, showRecentlyInstalled = true))
+        assertEquals(19, WatchListPagingSource.getRefreshKey(20, showRecentlyInstalled = true))
+        assertEquals(19, WatchListPagingSource.getRefreshKey(21, showRecentlyInstalled = true))
+        assertEquals(39, WatchListPagingSource.getRefreshKey(40, showRecentlyInstalled = true))
     }
 
     @Test
     fun `calculateItemsBefore accounts for recent header after first page`() {
         assertEquals(0, WatchListPagingSource.calculateItemsBefore(0, showRecentlyInstalled = true))
-        assertEquals(21, WatchListPagingSource.calculateItemsBefore(20, showRecentlyInstalled = true))
+        assertEquals(20, WatchListPagingSource.calculateItemsBefore(19, showRecentlyInstalled = true))
+        assertEquals(40, WatchListPagingSource.calculateItemsBefore(39, showRecentlyInstalled = true))
         assertEquals(20, WatchListPagingSource.calculateItemsBefore(20, showRecentlyInstalled = false))
     }
 }
