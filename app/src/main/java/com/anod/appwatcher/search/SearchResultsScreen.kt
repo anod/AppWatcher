@@ -173,9 +173,10 @@ fun SearchResultsScreen(
     }
 
     val scope = rememberCoroutineScope()
+    val currentOnShowAccountDialog by rememberUpdatedState(onShowAccountDialog)
     val currentNavigateBack by rememberUpdatedState(navigateBack)
     val currentNavigateTo by rememberUpdatedState(navigateTo)
-    LaunchedEffect(key1 = true, key2 = onShowAccountDialog) {
+    LaunchedEffect(key1 = viewActions) {
         viewActions.collect { action ->
             context.onScreenCommonAction(
                 action,
@@ -196,7 +197,7 @@ fun SearchResultsScreen(
                 },
                 showDialog = { dialogData ->
                     if (dialogData is AccountSelectionDialogData) {
-                        onShowAccountDialog(dialogData.currentAccount)
+                        currentOnShowAccountDialog(dialogData.currentAccount)
                     }
                 }
             )
