@@ -205,6 +205,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 initialState = key.toViewState(),
                 prefs = prefs,
                 navigateBack = { backStack.navigateBackOrFinish() },
+                navigateTo = { backStack.add(it) },
             )
         }
         entry<SceneNavKey.Settings> {
