@@ -27,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -46,9 +48,9 @@ import com.anod.appwatcher.accounts.AccountSelectionDialogData
 import com.anod.appwatcher.accounts.AccountSelectionRequest
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.SearchTopBar
-import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.navigation.SceneNavKey
+import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PlainShowSnackbarData
@@ -74,7 +76,12 @@ fun SceneNavKey.Search.toViewState() = SearchViewState(
 )
 
 @Composable
-fun SearchResultsScreenScene(initialState: SearchViewState, prefs: Preferences, navigateBack: () -> Unit = {}) {
+fun SearchResultsScreenScene(
+    initialState: SearchViewState,
+    prefs: Preferences,
+    navigateBack: () -> Unit = {},
+    navigateTo: (NavKey) -> Unit = {}
+) {
     val viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory(initialState))
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
@@ -90,7 +97,8 @@ fun SearchResultsScreenScene(initialState: SearchViewState, prefs: Preferences, 
             onEvent = viewModel::handleEvent,
             viewActions = viewModel.viewActions,
             onShowAccountDialog = { accountSelectionRequest.launch(it) },
-            navigateBack = navigateBack
+            navigateBack = navigateBack,
+            navigateTo = navigateTo
         )
     }
 }
@@ -103,6 +111,7 @@ fun SearchResultsScreen(
     viewActions: Flow<ScreenCommonAction>,
     onShowAccountDialog: (account: Account?) -> Unit = { },
     navigateBack: () -> Unit = {},
+    navigateTo: (NavKey) -> Unit = {},
     appIconLoader: AppIconLoader = KoinJavaComponent.getKoin().get(),
 ) {
     val context = LocalContext.current
@@ -164,12 +173,14 @@ fun SearchResultsScreen(
     }
 
     val scope = rememberCoroutineScope()
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
     LaunchedEffect(key1 = true, key2 = onShowAccountDialog) {
         viewActions.collect { action ->
             context.onScreenCommonAction(
                 action,
-                navigateBack = navigateBack,
-                navigateTo = { },
+                navigateBack = currentNavigateBack,
+                navigateTo = { currentNavigateTo(it.asNavKey) },
                 showSnackbar = {
                     if (it is PlainShowSnackbarData) {
                         scope.launch {
@@ -178,7 +189,7 @@ fun SearchResultsScreen(
                                 duration = it.duration
                             )
                             if (it.exitScreen) {
-                                navigateBack()
+                                currentNavigateBack()
                             }
                         }
                     }
