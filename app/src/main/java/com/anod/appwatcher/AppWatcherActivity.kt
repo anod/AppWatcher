@@ -57,6 +57,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         val elements = createInitialBackstack()
         setContent {
             val backStack = rememberNavBackStack(*elements)
+            val navigateBack = { backStack.navigateBackOrFinish() }
             val listDetailStrategy = rememberResizableListDetailSceneStrategy<NavKey>(
                 sceneContainer = { content ->
                     AppTheme(
@@ -82,6 +83,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
                 backStack = backStack,
+                onBack = navigateBack,
                 sceneStrategies = listOf(listDetailStrategy),
                 entryProvider = provideNavEntries(backStack),
                 entryDecorators = listOf(
@@ -178,7 +180,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) {
             MainScreenScene(
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
         }
@@ -188,7 +190,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             DetailContent(
                 app = key.selectedApp,
                 theme = prefs.selectedTheme,
-                onDismissRequest = { backStack.removeLastOrNull() },
+                onDismissRequest = { backStack.navigateBackOrFinish() },
             )
         }
         entry<SceneNavKey.Search>(
@@ -202,13 +204,13 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             SearchResultsScreenScene(
                 initialState = key.toViewState(),
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
             )
         }
         entry<SceneNavKey.Settings> {
             SettingsScreenScene(
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
         }
@@ -222,19 +224,19 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) {
             HistoryListScreenScene(
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
         }
         entry<SceneNavKey.UserLog> {
             UserLogScreenScene(
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() }
+                navigateBack = { backStack.navigateBackOrFinish() }
             )
         }
         entry<SceneNavKey.RefreshHistory> {
             SchedulesHistoryScreenScene(
-                navigateBack = { backStack.removeLastOrNull() }
+                navigateBack = { backStack.navigateBackOrFinish() }
             )
         }
         entry<SceneNavKey.TagWatchList>(
@@ -247,7 +249,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) { key ->
             TagWatchListScreenScene(
                 tag = key.tag,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
         }
@@ -262,7 +264,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             InstalledListScreenScene(
                 prefs = prefs,
                 showAction = key.importMode,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
         }
@@ -276,9 +278,17 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) {
             WishListScreenScene(
                 prefs = prefs,
-                navigateBack = { backStack.removeLastOrNull() },
+                navigateBack = { backStack.navigateBackOrFinish() },
                 navigateTo = { backStack.add(it) }
             )
+        }
+    }
+
+    private fun NavBackStack<NavKey>.navigateBackOrFinish() {
+        if (size > 1) {
+            removeLastOrNull()
+        } else {
+            finish()
         }
     }
 
