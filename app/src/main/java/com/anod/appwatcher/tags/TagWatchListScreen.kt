@@ -101,8 +101,7 @@ fun TagWatchListScreen(screenState: WatchListSharedState, listPagerFactory: (fil
                 subtitle = subtitle,
                 onEvent = onEvent,
             )
-        },
-        listContext = "tag-${screenState.tag.id}",
+        }
     )
 }
 

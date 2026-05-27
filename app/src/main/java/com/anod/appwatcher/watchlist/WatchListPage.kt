@@ -104,7 +104,6 @@ fun WatchListPage(
     items: LazyPagingItems<SectionItem>,
     isRefreshing: Boolean,
     enablePullToRefresh: Boolean,
-    listContext: String,
     onEvent: (WatchListEvent) -> Unit,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
@@ -124,7 +123,6 @@ fun WatchListPage(
         WatchList(
             items = items,
             onEvent = onEvent,
-            listContext = listContext,
             recentlyInstalledApps = recentlyInstalledApps,
             selection = selection,
             selectionMode = selectionMode
@@ -141,13 +139,11 @@ fun WatchListPage(
 fun WatchList(
     items: LazyPagingItems<SectionItem>,
     onEvent: (WatchListEvent) -> Unit,
-    listContext: String,
     recentlyInstalledApps: ImmutableList<App>? = null,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
 ) {
     val isEmpty = items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1
-    val recentlyInstalledAppsHashCode = remember(recentlyInstalledApps) { recentlyInstalledApps?.hashCode() ?: 0 }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = WindowInsets.navigationBars.asPaddingValues()
@@ -160,10 +156,7 @@ fun WatchList(
             items(
                 count = items.itemCount,
                 key = items.itemKey {
-                    when (it) {
-                        is SectionItem.Recent -> "$listContext-${it.sectionKey}-$recentlyInstalledAppsHashCode"
-                        else -> "$listContext-${it.sectionKey}"
-                    }
+                    it.sectionKey
                 },
                 contentType = items.itemContentType { it.contentType }
             ) { index ->

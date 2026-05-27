@@ -32,7 +32,6 @@ fun WatchListScreen(
     listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
     onEvent: (WatchListEvent) -> Unit,
     topBarContent: @Composable (subtitle: String?, filterId: Int) -> Unit,
-    listContext: String
 ) {
     var subtitle: String? by remember { mutableStateOf(null) }
     val filterPagesTitles = listOf(
@@ -80,8 +79,7 @@ fun WatchListScreen(
                 RefreshKey(
                     titleFilter = screenState.titleFilter,
                     tagAppsChange = screenState.tagAppsChange,
-                    sortId = screenState.sortId,
-                    dbAppsChange = screenState.dbAppsChange
+                    sortId = screenState.sortId
                 )
             }
 
@@ -96,15 +94,12 @@ fun WatchListScreen(
                 }
             }
 
-            val pageListContext = "$listContext-rr:${screenState.refreshRequest}-f:$filterId-rk:$refreshKey"
-
             WatchListPage(
                 items = items,
                 isRefreshing = screenState.syncProgress?.isRefreshing == true,
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 onEvent = onEvent,
-                recentlyInstalledApps = screenState.recentlyInstalledApps,
-                listContext = pageListContext
+                recentlyInstalledApps = screenState.recentlyInstalledApps
             )
         }
     }
@@ -123,6 +118,6 @@ fun WatchListScreen(
     }
 }
 
-data class RefreshKey(val titleFilter: String, val sortId: Int, val tagAppsChange: Int, val dbAppsChange: Int) {
-    override fun toString() = "$titleFilter-$sortId-$tagAppsChange-$dbAppsChange"
+data class RefreshKey(val titleFilter: String, val sortId: Int, val tagAppsChange: Int) {
+    override fun toString() = "$titleFilter-$sortId-$tagAppsChange"
 }

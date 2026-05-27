@@ -169,8 +169,7 @@ fun InstalledListScreen(
                 enablePullToRefresh = screenState.enablePullToRefresh,
                 selection = screenState.selection,
                 selectionMode = screenState.selectionMode,
-                onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) },
-                listContext = "installed"
+                onEvent = { event -> onEvent(InstalledListEvent.ListEvent(event)) }
             )
         }
     }
