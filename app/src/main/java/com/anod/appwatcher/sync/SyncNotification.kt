@@ -70,8 +70,8 @@ class SyncNotification(private val context: ApplicationContext, private val noti
         prices.setShowBadge(true)
 
         val authentication = NotificationChannel(AUTHENTICATION_ID, context.getString(R.string.channel_authentication), NotificationManager.IMPORTANCE_DEFAULT)
-        prices.description = context.getString(R.string.channel_authentication_description)
-        prices.setShowBadge(true)
+        authentication.description = context.getString(R.string.channel_authentication_description)
+        authentication.setShowBadge(true)
         notificationManager.createNotificationChannels(listOf(updates, prices, authentication))
     }
 
