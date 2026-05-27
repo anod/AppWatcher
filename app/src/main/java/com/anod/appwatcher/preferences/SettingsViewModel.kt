@@ -71,9 +71,7 @@ sealed interface SettingsViewEvent {
 
 sealed interface SettingsViewAction {
     data object NavigateBack : SettingsViewAction
-    data class StartActivity(override val intent: Intent) :
-        SettingsViewAction,
-        StartActivityAction
+    data class StartActivity(override val intent: Intent) : SettingsViewAction, StartActivityAction
     class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) :
         ShowToastActionDefaults(resId, text, length),
         SettingsViewAction

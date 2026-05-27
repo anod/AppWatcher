@@ -113,9 +113,7 @@ data class AppVersionInfo(val isBeta: Boolean, val installationSize: Long, val t
 }
 
 sealed interface DetailsAction {
-    class StartActivity(override val intent: Intent) :
-        DetailsAction,
-        StartActivityAction
+    class StartActivity(override val intent: Intent) : DetailsAction, StartActivityAction
     class ShowTagSnackbar(val appInfo: TagSnackbarAppInfo) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App, val recentChange: AppChange) : DetailsAction

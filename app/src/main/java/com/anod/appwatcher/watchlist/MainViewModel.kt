@@ -59,9 +59,7 @@ sealed interface MainViewEvent {
 }
 
 sealed interface MainViewAction {
-    class StartActivity(override val intent: Intent) :
-        MainViewAction,
-        StartActivityAction
+    class StartActivity(override val intent: Intent) : MainViewAction, StartActivityAction
     class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) :
         ShowToastActionDefaults(resId, text, length),
         MainViewAction
