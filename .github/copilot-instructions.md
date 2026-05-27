@@ -13,6 +13,13 @@
 - On Windows, use `.\gradlew.bat` instead of `./gradlew`.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
+## Crashlytics investigation
+
+- For Crashlytics issue URLs, extract the issue id from `/issues/{issue-id}` and the event id from the `sessionEventKey` query parameter.
+- Use Firebase Console or authenticated local tooling to inspect issue and event details. Keep Firebase project ids, app ids, OAuth tokens, raw logs, and private Crashlytics URLs out of commits, PR descriptions, and public docs.
+- The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. If REST API access is needed, use the current local Firebase CLI auth token without printing or copying token values.
+- Inspect the issue title, fatal exception, app version, device/OS, stack trace, breadcrumbs, and logs. Verify the inferred app flow against app logs; if logs do not identify the triggering UI action, add a targeted `AppLog` at the app-owned boundary that launches the crashing flow.
+
 ## Release and open testing
 
 - "Prepare the branch for release" means preparing a publishable Play/open-testing version, not installing on a device. Before creating an open testing release, bump `versionCode`, regenerate the release baseline profile with `:app:generateReleaseBaselineProfile` on a physical device, and include any changed generated baseline profile files.

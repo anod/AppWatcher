@@ -25,7 +25,7 @@ import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.sync.UpdatedApp
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.context.ApplicationContext
@@ -138,10 +138,13 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     navKey = SceneNavKey.UserLog
                 ))
 
-            SettingsViewEvent.OssLicenses -> emitAction(
-                SettingsViewAction.StartActivity(
-                    Intent(application, OssLicensesMenuActivity::class.java),
-                ))
+            SettingsViewEvent.OssLicenses -> {
+                AppLog.i("Open source licenses selected", "Settings")
+                emitAction(
+                    SettingsViewAction.StartActivity(
+                        Intent(application, OssLicensesMenuActivity::class.java),
+                    ))
+            }
             is SettingsViewEvent.SetRecreateFlag -> {
                 val result = setRecreateFlag(event.item, event.enabled)
                 event.update(result)
