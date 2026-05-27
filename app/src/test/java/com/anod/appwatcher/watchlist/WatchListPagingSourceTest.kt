@@ -1,7 +1,12 @@
+// Copyright (c) 2026. Alex Gavrishev
 package com.anod.appwatcher.watchlist
 
+import androidx.paging.PagingState
+import com.anod.appwatcher.model.Filters
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.coroutines.EmptyCoroutineContext
 
 // Unit tests for WatchListPagingSource helper logic.
 class WatchListPagingSourceTest {
@@ -156,5 +161,53 @@ class WatchListPagingSourceTest {
         assertEquals(20, WatchListPagingSource.calculateItemsBefore(19, showRecentlyInstalled = true))
         assertEquals(40, WatchListPagingSource.calculateItemsBefore(39, showRecentlyInstalled = true))
         assertEquals(20, WatchListPagingSource.calculateItemsBefore(20, showRecentlyInstalled = false))
+    }
+
+    @Test
+    fun `pager factory invalidates active paging source`() {
+        val source = TestPagingSource()
+        var invalidated = false
+        source.registerInvalidatedCallback {
+            invalidated = true
+        }
+
+        val factory = TestPagerFactory()
+        factory.attach(source)
+        factory.invalidatePagingSource()
+
+        assertEquals(true, invalidated)
+    }
+
+    private class TestPagerFactory : WatchListPagerFactory(
+        pagingSourceConfig = WatchListPagingSource.Config(
+            filterId = Filters.ALL,
+            tagId = null,
+            showRecentlyDiscovered = false,
+            showOnDevice = false,
+            showRecentlyInstalled = false,
+        ),
+        cacheScope = CoroutineScope(EmptyCoroutineContext)
+    ) {
+        fun attach(source: TestPagingSource) {
+            pagingSource = source
+        }
+
+        override fun createPagingSource(): FilterablePagingSource = TestPagingSource()
+
+        override fun createSectionHeaderFactory(): SectionHeaderFactory = SectionHeaderFactory.Empty()
+    }
+
+    private class TestPagingSource : FilterablePagingSource() {
+        override var filterQuery: String = ""
+
+        override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? = null
+
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
+            return LoadResult.Page(
+                data = emptyList(),
+                prevKey = null,
+                nextKey = null
+            )
+        }
     }
 }
