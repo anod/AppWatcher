@@ -543,20 +543,23 @@ private fun VersionInfoCell(
     leadingIcon: @Composable (() -> Unit)? = null,
     placeholder: Boolean = false
 ) {
-    Column(
-        modifier = modifier
-            .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
-            .padding(horizontal = 4.dp)
-            .placeholder(
-                visible = placeholder,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                shape = MaterialTheme.shapes.small
-            )
+    val contentModifier = Modifier
+        .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
+        .padding(horizontal = 4.dp)
+        .placeholder(
+            visible = placeholder,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+            shape = MaterialTheme.shapes.small
+        )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         HorizontalDivider()
         if (leadingIcon != null) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = contentModifier,
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -570,6 +573,7 @@ private fun VersionInfoCell(
         } else {
             Text(
                 text = text,
+                modifier = contentModifier,
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center
             )

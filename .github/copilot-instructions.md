@@ -24,7 +24,7 @@
 
 - "Prepare the branch for release" means preparing a publishable Play/open-testing version, not installing on a device. Before creating an open testing release, bump `versionCode`, regenerate the release baseline profile with `:app:generateReleaseBaselineProfile` on a physical device, and include any changed generated baseline profile files.
 - Build the signed release Android App Bundle with `:app:bundleRelease`; open testing publishes the `.aab` from `app/build/outputs/bundle/release/`, not an APK or AAR.
-- Keep release signing, Play API, Firebase, and Google Services files out of git. Before release builds, check the user's Gradle user home `gradle.properties` (the `GRADLE_USER_HOME` directory, defaulting to `~/.gradle` or `%USERPROFILE%\.gradle` on Windows) for release signing settings such as `APPWATCHER_KEYSTORE_FILE`, `APPWATCHER_KEYSTORE_PASSWORD`, `APPWATCHER_KEY_ALIAS`, and `APPWATCHER_KEY_PASSWORD`; do not print private values in logs or copy them into tracked files.
+- Keep release signing, Play API, Firebase, and Google Services files out of git. Release builds read the private Google Services file directly from `APPWATCHER_GOOGLE_SERVICES_FILE` in the user's Gradle user home `gradle.properties` (the `GRADLE_USER_HOME` directory, defaulting to `~/.gradle` or `%USERPROFILE%\.gradle` on Windows), alongside signing settings such as `APPWATCHER_KEYSTORE_FILE`, `APPWATCHER_KEYSTORE_PASSWORD`, `APPWATCHER_KEY_ALIAS`, and `APPWATCHER_KEY_PASSWORD`; do not print private values in logs or copy them into tracked files.
 - This repo does not configure a Play publishing Gradle plugin; upload the release `.aab` to the Play Console open testing track using the approved local Play publishing tooling or web UI.
 
 ## Worktree workflow

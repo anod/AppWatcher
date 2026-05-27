@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.google.android.gms.common.AccountPicker
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.ShowDialogData
 
@@ -28,7 +29,18 @@ fun showAccountSelectionAction(
 class AccountSelectionRequest : ActivityResultContract<Account?, AccountSelectionResult>() {
 
     override fun createIntent(context: Context, input: Account?): Intent {
-        val intent = AccountManager.newChooseAccountIntent(
+        val googlePlayServicesIntent = AccountPicker.newChooseAccountIntent(
+            AccountPicker.AccountChooserOptions.Builder()
+                .setSelectedAccount(input)
+                .setAllowableAccountsTypes(listOf(AuthTokenBlocking.ACCOUNT_TYPE))
+                .setAlwaysShowAccountPicker(true)
+                .build()
+        )
+        if (googlePlayServicesIntent.resolveActivity(context.packageManager) != null) {
+            return googlePlayServicesIntent
+        }
+
+        return AccountManager.newChooseAccountIntent(
             input,
             null,
             arrayOf(AuthTokenBlocking.ACCOUNT_TYPE),
@@ -37,7 +49,6 @@ class AccountSelectionRequest : ActivityResultContract<Account?, AccountSelectio
             null,
             null
         )
-        return intent
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): AccountSelectionResult {

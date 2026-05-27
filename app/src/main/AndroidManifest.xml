@@ -5,6 +5,7 @@
     <queries>
         <package android:name="com.google.android.webview" />
         <package android:name="com.google.android.webview.beta" />
+        <package android:name="com.google.android.gms" />
 
         <intent>
             <action android:name="android.intent.action.MAIN" />
