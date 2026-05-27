@@ -37,7 +37,8 @@ App Watcher checks daily the list for updates in Play Store and will notify you 
     - Define a valid SDK location
       1. Create local.properties file
       2. Set sdk.dir path (Example: `sdk.dir=~/Library/Android/sdk`)
-    - Move and rename `google-services.json.debug` into `app/google-services.json`
+    - For debug builds, move and rename `google-services.json.debug` into `app/google-services.json`
+    - For release builds, keep private files out of git. Gradle reads the release Google Services file directly from `APPWATCHER_GOOGLE_SERVICES_FILE` in the user's Gradle user home `gradle.properties`, alongside signing values `APPWATCHER_KEYSTORE_FILE`, `APPWATCHER_KEYSTORE_PASSWORD`, `APPWATCHER_KEY_ALIAS`, and `APPWATCHER_KEY_PASSWORD`.
 
 3. Build
 

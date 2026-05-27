@@ -1,3 +1,4 @@
+import com.google.gms.googleservices.GoogleServicesTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -28,6 +29,7 @@ android {
         targetSdk = 36
         versionCode = 17005
         versionName = "1.7.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -136,6 +138,7 @@ dependencies {
     implementation(libs.play.services.oss.licenses)
     implementation(libs.play.services.identity)
     implementation(libs.play.services.auth)
+    implementation(libs.play.services.basement)
 
     implementation(libs.google.api.client)
     implementation(libs.google.api.client.android)
@@ -168,6 +171,12 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
 
     testImplementation(libs.junit)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.uiautomator)
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:compose"))
@@ -181,8 +190,20 @@ dependencies {
     implementation(project(":playstore"))
 
     debugImplementation(libs.leakcanary.android)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
 // ADD THIS AT THE BOTTOM
 apply(plugin = "com.google.gms.google-services")
 apply(plugin = "com.google.firebase.crashlytics")
+
+val releaseGoogleServicesFile = providers.gradleProperty("APPWATCHER_GOOGLE_SERVICES_FILE")
+    .map { file(it) }
+
+afterEvaluate {
+    listOf("processReleaseGoogleServices", "processBenchmarkGoogleServices").forEach { taskName ->
+        tasks.named<GoogleServicesTask>(taskName).configure {
+            googleServicesJsonFiles.set(releaseGoogleServicesFile.map { listOf(it) })
+        }
+    }
+}
