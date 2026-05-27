@@ -13,28 +13,28 @@
 - On Windows, use `.\gradlew.bat` instead of `./gradlew`.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
-  ## Crashlytics investigation
+## Crashlytics investigation
 
-  - For Crashlytics issue URLs, extract the issue id from `/issues/<id>` and the event id from the `sessionEventKey` query parameter.
-  - Release crashes for `com.anod.appwatcher` are in Firebase project `canvas-hybrid-424`, app id `1:1051401061041:android:96a9959552ef2e5d`.
-  - The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. Use `firebase login` or `firebase login --reauth`, run a harmless CLI command such as `firebase projects:list`, then call the Crashlytics v1alpha REST API with the current OAuth access token from the Firebase CLI config. Keep tokens in shell variables only; do not print, log, or copy token values into tracked files.
-  - PowerShell template for issue/event details:
-    ```powershell
-    $project = "canvas-hybrid-424"
-    $app = "1:1051401061041:android:96a9959552ef2e5d"
-    $issue = "<issue-id>"
-    $event = "<sessionEventKey>"
-    firebase projects:list --json > $null
-    $config = Get-Content "$env:USERPROFILE\.config\configstore\firebase-tools.json" | ConvertFrom-Json
-    $headers = @{ Authorization = "Bearer $($config.tokens.access_token)" }
-    Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue"
-    Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue/events/$event"
-    ```
-  - Inspect the issue title, fatal exception, app version, device/OS, stack trace, breadcrumbs, and logs. Verify the inferred app flow against app logs; if logs do not identify the triggering UI action, add a targeted `AppLog` at the app-owned boundary that launches the crashing flow.
+- For Crashlytics issue URLs, extract the issue id from `/issues/<id>` and the event id from the `sessionEventKey` query parameter.
+- Release crashes for `com.anod.appwatcher` are in Firebase project `canvas-hybrid-424`, app id `1:1051401061041:android:96a9959552ef2e5d`.
+- The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. Use `firebase login` or `firebase login --reauth`, run a harmless CLI command such as `firebase projects:list`, then call the Crashlytics v1alpha REST API with the current OAuth access token from the Firebase CLI config. Keep tokens in shell variables only; do not print, log, or copy token values into tracked files.
+- PowerShell template for issue/event details:
+  ```powershell
+  $project = "canvas-hybrid-424"
+  $app = "1:1051401061041:android:96a9959552ef2e5d"
+  $issue = "<issue-id>"
+  $event = "<sessionEventKey>"
+  firebase projects:list --json > $null
+  $config = Get-Content "$env:USERPROFILE\.config\configstore\firebase-tools.json" | ConvertFrom-Json
+  $headers = @{ Authorization = "Bearer $($config.tokens.access_token)" }
+  Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue"
+  Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue/events/$event"
+  ```
+- Inspect the issue title, fatal exception, app version, device/OS, stack trace, breadcrumbs, and logs. Verify the inferred app flow against app logs; if logs do not identify the triggering UI action, add a targeted `AppLog` at the app-owned boundary that launches the crashing flow.
 
-  ## Release and open testing
+## Release and open testing
 
-  - "Prepare the branch for release" means preparing a publishable Play/open-testing version, not installing on a device. Before creating an open testing release, bump `versionCode`, regenerate the release baseline profile with `:app:generateReleaseBaselineProfile` on a physical device, and include any changed generated baseline profile files.
+- "Prepare the branch for release" means preparing a publishable Play/open-testing version, not installing on a device. Before creating an open testing release, bump `versionCode`, regenerate the release baseline profile with `:app:generateReleaseBaselineProfile` on a physical device, and include any changed generated baseline profile files.
 - Build the signed release Android App Bundle with `:app:bundleRelease`; open testing publishes the `.aab` from `app/build/outputs/bundle/release/`, not an APK or AAR.
 - Keep release signing, Play API, Firebase, and Google Services files out of git. Before release builds, check the user's Gradle user home `gradle.properties` (the `GRADLE_USER_HOME` directory, defaulting to `~/.gradle` or `%USERPROFILE%\.gradle` on Windows) for release signing settings such as `APPWATCHER_KEYSTORE_FILE`, `APPWATCHER_KEYSTORE_PASSWORD`, `APPWATCHER_KEY_ALIAS`, and `APPWATCHER_KEY_PASSWORD`; do not print private values in logs or copy them into tracked files.
 - This repo does not configure a Play publishing Gradle plugin; upload the release `.aab` to the Play Console open testing track using the approved local Play publishing tooling or web UI.
