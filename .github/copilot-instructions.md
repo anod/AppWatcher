@@ -15,7 +15,7 @@
 
 ## Crashlytics investigation
 
-- For Crashlytics issue URLs, extract the issue id from `/issues/<id>` and the event id from the `sessionEventKey` query parameter.
+- For Crashlytics issue URLs, extract the issue id from `/issues/{issue-id}` and the event id from the `sessionEventKey` query parameter.
 - Release crashes for `com.anod.appwatcher` are in Firebase project `canvas-hybrid-424`, app id `1:1051401061041:android:96a9959552ef2e5d`.
 - The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. Use `firebase login` or `firebase login --reauth`, run a harmless CLI command such as `firebase projects:list`, then call the Crashlytics v1alpha REST API with the current OAuth access token from the Firebase CLI config. Keep tokens in shell variables only; do not print, log, or copy token values into tracked files.
 - PowerShell template for issue/event details:
