@@ -143,12 +143,9 @@ class UpdateCheck(
         val now = System.currentTimeMillis()
         preferences.lastUpdateTime = now
 
-        if (!manualSync
-            &&
-            updatedApps.isNotEmpty()
-            &&
-            (updatedApps.firstOrNull { it.isNewUpdate } != null)
-            &&
+        if (!manualSync &&
+            updatedApps.isNotEmpty() &&
+            (updatedApps.firstOrNull { it.isNewUpdate } != null) &&
             lastUpdatesViewed) {
             preferences.isLastUpdatesViewed = false
         }

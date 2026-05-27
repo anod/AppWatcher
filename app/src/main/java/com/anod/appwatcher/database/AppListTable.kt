@@ -280,6 +280,7 @@ interface AppListTable {
                 Preferences.SORT_DATE_DESC -> filter.add(Columns.UPLOAD_TIMESTAMP + " DESC")
                 else -> filter.add(Columns.TITLE + " COLLATE NOCASE ASC")
             }
+            filter.add("$TABLE.${BaseColumns._ID} ASC")
             return filter.joinToString(", ")
         }
 

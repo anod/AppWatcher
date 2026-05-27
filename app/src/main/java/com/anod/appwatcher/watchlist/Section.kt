@@ -70,7 +70,7 @@ sealed interface SectionItem {
 
     @Immutable
     class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
-        override val sectionKey = "ondevice-{appListItem.app.rowId}:${hashCode()}"
+        override val sectionKey = "ondevice-${appListItem.app.rowId}:${hashCode()}"
         override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 

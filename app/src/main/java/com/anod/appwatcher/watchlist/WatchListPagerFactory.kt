@@ -42,6 +42,10 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
     abstract fun createPagingSource(): FilterablePagingSource
     abstract fun createSectionHeaderFactory(): SectionHeaderFactory
 
+    fun invalidatePagingSource() {
+        pagingSource?.invalidate()
+    }
+
     private fun createPager(): Flow<PagingData<SectionItem>> {
         headerFactory = createSectionHeaderFactory()
 

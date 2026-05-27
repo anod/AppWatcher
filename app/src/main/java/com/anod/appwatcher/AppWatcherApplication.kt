@@ -89,12 +89,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
         }
     }
 
-    private fun isNetworkError(tr: Throwable): Boolean = tr is DfeError
-        ||
-        tr is UnknownHostException
-        ||
-        (tr is IOException && tr.message?.contains("NetworkError") == true)
-        ||
+    private fun isNetworkError(tr: Throwable): Boolean = tr is DfeError ||
+        tr is UnknownHostException ||
+        (tr is IOException && tr.message?.contains("NetworkError") == true) ||
         networkConnection.isNetworkException(tr)
 
     private inner class FirebaseLogger : AndroidLogger() {

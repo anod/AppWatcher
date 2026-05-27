@@ -234,8 +234,11 @@ class WatchListStateViewModel(
                 .drop(1)
                 .map { (System.currentTimeMillis() / 1000).toInt() }
                 .filter { it > 0 }
-                .onEach { delay(600) }
                 .flowOn(Dispatchers.Default)
+                .onEach {
+                    invalidatePagingSources()
+                    delay(600)
+                }
                 .collect {
                     viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
                 }
@@ -390,5 +393,11 @@ class WatchListStateViewModel(
         )
         installedApps.reset()
         SyncScheduler(application).execute().first()
+    }
+
+    private fun invalidatePagingSources() {
+        pagerFactories.values.toList().forEach { pagerFactory ->
+            pagerFactory.invalidatePagingSource()
+        }
     }
 }

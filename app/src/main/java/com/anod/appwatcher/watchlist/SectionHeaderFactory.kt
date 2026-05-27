@@ -72,8 +72,7 @@ class DefaultSectionHeaderFactory(private var showRecentlyDiscovered: Boolean) :
                     val beforeItem = before.appListItem
                     val afterItem = after.appListItem
                     if (
-                        beforeItem.app.status == App.STATUS_UPDATED
-                        &&
+                        beforeItem.app.status == App.STATUS_UPDATED &&
                         afterItem.app.status == App.STATUS_NORMAL
                     ) {
                         if (showRecentlyDiscovered && afterItem.recentFlag) {
@@ -81,10 +80,8 @@ class DefaultSectionHeaderFactory(private var showRecentlyDiscovered: Boolean) :
                         }
                         return SectionItem.Header(SectionHeader.Watching)
                     } else if (
-                        showRecentlyDiscovered
-                        &&
-                        beforeItem.app.status == App.STATUS_NORMAL
-                        &&
+                        showRecentlyDiscovered &&
+                        beforeItem.app.status == App.STATUS_NORMAL &&
                         afterItem.app.status == App.STATUS_NORMAL
                     ) {
                         if (beforeItem.recentFlag && !afterItem.recentFlag) {
