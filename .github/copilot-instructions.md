@@ -16,20 +16,8 @@
 ## Crashlytics investigation
 
 - For Crashlytics issue URLs, extract the issue id from `/issues/{issue-id}` and the event id from the `sessionEventKey` query parameter.
-- Release crashes for `com.anod.appwatcher` are in Firebase project `canvas-hybrid-424`, app id `1:1051401061041:android:96a9959552ef2e5d`.
-- The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. Use `firebase login` or `firebase login --reauth`, run a harmless CLI command such as `firebase projects:list`, then call the Crashlytics v1alpha REST API with the current OAuth access token from the Firebase CLI config. Keep tokens in shell variables only; do not print, log, or copy token values into tracked files.
-- PowerShell template for issue/event details:
-  ```powershell
-  $project = "canvas-hybrid-424"
-  $app = "1:1051401061041:android:96a9959552ef2e5d"
-  $issue = "<issue-id>"
-  $event = "<sessionEventKey>"
-  firebase projects:list --json > $null
-  $config = Get-Content "$env:USERPROFILE\.config\configstore\firebase-tools.json" | ConvertFrom-Json
-  $headers = @{ Authorization = "Bearer $($config.tokens.access_token)" }
-  Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue"
-  Invoke-RestMethod -Headers $headers -Uri "https://firebasecrashlytics.googleapis.com/v1alpha/projects/$project/apps/$app/issues/$issue/events/$event"
-  ```
+- Use Firebase Console or authenticated local tooling to inspect issue and event details. Keep Firebase project ids, app ids, OAuth tokens, raw logs, and private Crashlytics URLs out of commits, PR descriptions, and public docs.
+- The Firebase CLI only exposes Crashlytics mapping/symbol upload commands, not issue/event reads. If REST API access is needed, use the current local Firebase CLI auth token without printing or copying token values.
 - Inspect the issue title, fatal exception, app version, device/OS, stack trace, breadcrumbs, and logs. Verify the inferred app flow against app logs; if logs do not identify the triggering UI action, add a targeted `AppLog` at the app-owned boundary that launches the crashing flow.
 
 ## Release and open testing
