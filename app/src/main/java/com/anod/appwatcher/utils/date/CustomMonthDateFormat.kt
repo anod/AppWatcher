@@ -9,11 +9,7 @@ import java.util.Date
 /**
  * Parse "d MMM. y" and "d-MMM-y"
  */
-internal class CustomMonthDateFormat(
-    private val monthNames: Array<String>,
-    private val order: Array<STATE>,
-    private val clean: String = ""
-) : DateFormat() {
+internal class CustomMonthDateFormat(private val monthNames: Array<String>, private val order: Array<STATE>, private val clean: String = "") : DateFormat() {
 
     override fun format(date: Date, toAppendTo: StringBuffer, fieldPosition: FieldPosition): StringBuffer {
         val cal = Calendar.getInstance()

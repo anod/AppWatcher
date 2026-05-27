@@ -54,8 +54,8 @@ abstract class WatchListPagerFactory(val pagingSourceConfig: WatchListPagingSour
         return Pager(
             config = PagingConfig(
                 pageSize = WatchListPagingSource.PAGE_SIZE,
-                //enablePlaceholders = false,
-                //initialLoadSize = WatchListPagingSource.PAGE_SIZE,
+                // enablePlaceholders = false,
+                // initialLoadSize = WatchListPagingSource.PAGE_SIZE,
                 maxSize = 1000
             ),
             initialKey = null,

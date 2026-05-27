@@ -8,24 +8,20 @@ import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class AppsWatchListPagerFactory(
-    pagingSourceConfig: WatchListPagingSource.Config,
-    private val installedApps: InstalledApps,
-    cacheScope: CoroutineScope
-) : WatchListPagerFactory(pagingSourceConfig, cacheScope), KoinComponent {
+class AppsWatchListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, private val installedApps: InstalledApps, cacheScope: CoroutineScope) :
+    WatchListPagerFactory(pagingSourceConfig, cacheScope),
+    KoinComponent {
     private val database: AppsDatabase by inject()
     private val packageManager: PackageManager by inject()
 
-    override fun createPagingSource(): WatchListPagingSource {
-        return WatchListPagingSource(
-            prefs = prefs,
-            config = pagingSourceConfig,
-            packageManager = packageManager,
-            database = database,
-            installedApps = installedApps
-        ).also {
-            it.filterQuery = filterQuery
-        }
+    override fun createPagingSource(): WatchListPagingSource = WatchListPagingSource(
+        prefs = prefs,
+        config = pagingSourceConfig,
+        packageManager = packageManager,
+        database = database,
+        installedApps = installedApps
+    ).also {
+        it.filterQuery = filterQuery
     }
 
     override fun createSectionHeaderFactory() = DefaultSectionHeaderFactory(pagingSourceConfig.showRecentlyDiscovered)

@@ -8,15 +8,15 @@ import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.ScreenCommonAction
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Immutable
 data class SchedulesHistoryState(

@@ -73,12 +73,10 @@ data class SelectionState(
         return copy(selectedKeys = newSelectedKeys, selectedCount = newSelectedCount, defaultSelected = false)
     }
 
-    fun toggleKey(key: String, selectExtra: SelectionStateKeyExtras = emptyMap()): SelectionState {
-        return if (selectedKeys.containsKey(key)) {
-            selectKey(key, !selectedKeys[key]!!, selectExtra)
-        } else {
-            selectKey(key, !defaultSelected, selectExtra)
-        }
+    fun toggleKey(key: String, selectExtra: SelectionStateKeyExtras = emptyMap()): SelectionState = if (selectedKeys.containsKey(key)) {
+        selectKey(key, !selectedKeys[key]!!, selectExtra)
+    } else {
+        selectKey(key, !defaultSelected, selectExtra)
     }
 
     fun getExtra(key: String): SelectionStateKeyExtras {
@@ -109,9 +107,7 @@ data class SelectionState(
         return copy(extras = temp)
     }
 
-    fun setExtras(newExtras: Map<String, SelectionStateKeyExtras>): SelectionState {
-        return copy(extras = newExtras)
-    }
+    fun setExtras(newExtras: Map<String, SelectionStateKeyExtras>): SelectionState = copy(extras = newExtras)
 
     override val size: Int
         get() = if (defaultSelected) -1 else selectedKeys.size
@@ -139,30 +135,22 @@ data class SelectionState(
         return selectedCount == 0
     }
 
-    override fun iterator(): Iterator<String> {
-        return selectedKeys.keys.iterator()
-    }
+    override fun iterator(): Iterator<String> = selectedKeys.keys.iterator()
 
-    fun clear(): SelectionState {
-        return copy(
-            defaultSelected = false,
-            selectedCount = 0,
-            extras = emptyMap(),
-            selectedKeys = emptyMap()
-        )
-    }
+    fun clear(): SelectionState = copy(
+        defaultSelected = false,
+        selectedCount = 0,
+        extras = emptyMap(),
+        selectedKeys = emptyMap()
+    )
 }
 
-fun SelectionState.filter(selected: Boolean): List<String> {
-    return iterator()
-        .asSequence()
-        .filter { if (selected) contains(it) else !contains(it) }
-        .toList()
-}
+fun SelectionState.filter(selected: Boolean): List<String> = iterator()
+    .asSequence()
+    .filter { if (selected) contains(it) else !contains(it) }
+    .toList()
 
-fun SelectionState.filterWithExtra(extra: (SelectionStateKeyExtras) -> Boolean): List<String> {
-    return iterator()
-        .asSequence()
-        .filter { key -> extra(getExtra(key)) }
-        .toList()
-}
+fun SelectionState.filterWithExtra(extra: (SelectionStateKeyExtras) -> Boolean): List<String> = iterator()
+    .asSequence()
+    .filter { key -> extra(getExtra(key)) }
+    .toList()

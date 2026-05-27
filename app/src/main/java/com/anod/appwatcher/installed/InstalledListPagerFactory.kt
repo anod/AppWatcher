@@ -13,12 +13,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledListPagerFactory(
-    pagingSourceConfig: WatchListPagingSource.Config,
-    coroutineScope: CoroutineScope,
-    private val installedApps: InstalledApps,
-    cacheScope: CoroutineScope
-) : WatchListPagerFactory(pagingSourceConfig, cacheScope), KoinComponent {
+class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, coroutineScope: CoroutineScope, private val installedApps: InstalledApps, cacheScope: CoroutineScope) :
+    WatchListPagerFactory(pagingSourceConfig, cacheScope),
+    KoinComponent {
 
     private val packageManager: PackageManager by inject()
     private val database: AppsDatabase by inject()
@@ -36,17 +33,15 @@ class InstalledListPagerFactory(
             (pagingSource as? InstalledPagingSource)?.selectionMode = value
         }
 
-    override fun createPagingSource(): FilterablePagingSource {
-        return InstalledPagingSource(
-            changelogAdapter,
-            packageManager,
-            database,
-            installedApps
-        ).also {
-            it.sortId = sortId
-            it.selectionMode = selectionMode
-            it.filterQuery = filterQuery
-        }
+    override fun createPagingSource(): FilterablePagingSource = InstalledPagingSource(
+        changelogAdapter,
+        packageManager,
+        database,
+        installedApps
+    ).also {
+        it.sortId = sortId
+        it.selectionMode = selectionMode
+        it.filterQuery = filterQuery
     }
 
     override fun createSectionHeaderFactory() = SectionHeaderFactory.Empty()

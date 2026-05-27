@@ -41,10 +41,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Immutable
-data class WishListState(
-    val nameFilter: String = "",
-    val isError: Boolean = false
-)
+data class WishListState(val nameFilter: String = "", val isError: Boolean = false)
 
 sealed interface WishListEvent {
     data object OnBackPress : WishListEvent
@@ -55,14 +52,11 @@ sealed interface WishListEvent {
     class AuthTokenError(val error: CheckTokenError) : WishListEvent
 }
 
-class WishListViewModel() : BaseFlowViewModel<WishListState, WishListEvent, ScreenCommonAction>(), KoinComponent {
+class WishListViewModel : BaseFlowViewModel<WishListState, WishListEvent, ScreenCommonAction>(), KoinComponent {
 
-    class Factory(
-    ) : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return WishListViewModel() as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = WishListViewModel() as T
     }
 
     private val database: AppsDatabase by inject()
@@ -142,16 +136,16 @@ class WishListViewModel() : BaseFlowViewModel<WishListState, WishListEvent, Scre
             is WishListEvent.SelectApp -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
 
             is WishListEvent.AuthTokenError -> {
-                viewState = viewState.copy(isError =  true)
+                viewState = viewState.copy(isError = true)
                 if (event.error is CheckTokenError.RequiresInteraction) {
                     emitAction(startActivityAction(event.error.intent))
                 }
             }
             WishListEvent.NoAccount -> {
-                viewState = viewState.copy(isError =  true)
+                viewState = viewState.copy(isError = true)
             }
 
-            WishListEvent.RetryClick -> viewState = viewState.copy(isError =  false)
+            WishListEvent.RetryClick -> viewState = viewState.copy(isError = false)
         }
     }
 

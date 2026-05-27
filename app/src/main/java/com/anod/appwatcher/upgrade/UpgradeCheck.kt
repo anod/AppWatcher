@@ -34,7 +34,7 @@ class UpgradeCheck(private val preferences: Preferences) {
 
     companion object {
         val upgrades = listOf<UpgradeTask>(
-            //Upgrade15500()
+            // Upgrade15500()
         )
     }
 }

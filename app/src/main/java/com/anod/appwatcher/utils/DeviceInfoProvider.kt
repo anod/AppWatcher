@@ -21,9 +21,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.egl.EGLContext
 import javax.microedition.khronos.egl.EGLDisplay
 
-class DeviceConfiguration(
-    private val context: Context
-) : DfeDeviceConfiguration {
+class DeviceConfiguration(private val context: Context) : DfeDeviceConfiguration {
     private val metrics = context.resources.displayMetrics
     private val config = context.resources.configuration
     private val activityManager: ActivityManager? = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
@@ -87,9 +85,7 @@ class DeviceBuild : DfeDeviceBuild {
     override val abis: Array<String> = Build.SUPPORTED_ABIS
 }
 
-class DeviceInfoProvider(
-    private val context: Context
-): DfeDeviceInfoProvider {
+class DeviceInfoProvider(private val context: Context): DfeDeviceInfoProvider {
     companion object {
         private val GOOGLE_SERVICES_PACKAGE_ID = "com.google.android.gms"
         private val GOOGLE_VENDING_PACKAGE_ID = "com.android.vending"

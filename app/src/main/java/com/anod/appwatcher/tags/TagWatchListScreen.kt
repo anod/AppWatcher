@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -38,17 +39,19 @@ import info.anodsplace.framework.content.onScreenCommonAction
 fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val viewModel: WatchListStateViewModel = viewModel(
         factory =
-            WatchListStateViewModel.Factory(
-                defaultFilterId = Filters.ALL,
-                initialTag = tag,
-                tagFilter = if (tag.isEmpty) WatchListTagFilter.Untagged else WatchListTagFilter.Tag(tag.id),
-                showOnDeviceApps = false,
-                showRecentlyInstalledApps = false,
-            ),
+        WatchListStateViewModel.Factory(
+            defaultFilterId = Filters.ALL,
+            initialTag = tag,
+            tagFilter = if (tag.isEmpty) WatchListTagFilter.Untagged else WatchListTagFilter.Tag(tag.id),
+            showOnDeviceApps = false,
+            showRecentlyInstalledApps = false,
+        ),
         key = "TagWatchList-${tag.hashCode()}",
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
     val customPrimaryColor by remember(screenState) {
         derivedStateOf { Color(screenState.tag.color) }
     }
@@ -80,17 +83,13 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
 
     LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action = action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
+            context.onScreenCommonAction(action = action, navigateBack = currentNavigateBack, navigateTo = { currentNavigateTo(it.asNavKey) })
         }
     }
 }
 
 @Composable
-fun TagWatchListScreen(
-    screenState: WatchListSharedState,
-    listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory,
-    onEvent: (WatchListEvent) -> Unit,
-) {
+fun TagWatchListScreen(screenState: WatchListSharedState, listPagerFactory: (filterId: Int, tag: Tag) -> WatchListPagerFactory, onEvent: (WatchListEvent) -> Unit,) {
     WatchListScreen(
         screenState = screenState,
         listPagerFactory = listPagerFactory,

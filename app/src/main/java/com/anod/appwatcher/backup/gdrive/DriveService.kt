@@ -30,18 +30,14 @@ class DriveService(private val service: Drive) {
         : this(createService(credential, appName))
 
     companion object {
-        private fun createService(credential: HttpRequestInitializer, appName: String): Drive {
-            return Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
-                .setApplicationName(appName)
-                .build()
-        }
+        private fun createService(credential: HttpRequestInitializer, appName: String): Drive = Drive.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
+            .setApplicationName(appName)
+            .build()
 
-        fun extractUserRecoverableException(e: Exception): UserRecoverableAuthException? {
-            return if (e is UserRecoverableAuthIOException) {
-                e.cause
-            } else {
-                e as? UserRecoverableAuthException
-            }
+        fun extractUserRecoverableException(e: Exception): UserRecoverableAuthException? = if (e is UserRecoverableAuthIOException) {
+            e.cause
+        } else {
+            e as? UserRecoverableAuthException
         }
     }
 

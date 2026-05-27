@@ -23,12 +23,7 @@ private fun formatVersionText(
     return context.getString(R.string.version_text, versionName, versionNumber)
 }
 
-data class AppItemState(
-    val color: Color,
-    val text: String,
-    val installed: Boolean,
-    val showRecent: Boolean
-)
+data class AppItemState(val color: Color, val text: String, val installed: Boolean, val showRecent: Boolean)
 
 @Composable
 fun rememberAppItemState(

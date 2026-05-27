@@ -119,6 +119,10 @@
   <string name="open">Открыть</string>
   <string name="channel_app_updates">Обновления</string>
   <string name="channel_updates_description">Уведомления о новых версиях аппликации из списка</string>
+  <string name="channel_prices">Изменения цен</string>
+  <string name="channel_prices_description">Уведомления об изменениях цен для отслеживаемых приложений</string>
+  <string name="channel_authentication">Аутентификация</string>
+  <string name="channel_authentication_description">Уведомления о проблемах аутентификации</string>
   <string-array name="sort_titles">
     <item>Название ↓</item>
     <item>Название ↑</item>

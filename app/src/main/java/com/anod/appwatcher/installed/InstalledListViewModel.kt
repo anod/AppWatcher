@@ -26,12 +26,12 @@ import com.anod.appwatcher.watchlist.WatchListEvent
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.getInstalledPackagesCodes
+import kotlin.reflect.KClass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.reflect.KClass
 
 @Immutable
 data class InstalledListState(
@@ -56,11 +56,9 @@ sealed interface InstalledListEvent {
     object Import : InstalledListEvent
 }
 
-class InstalledListViewModel(
-    state: SavedStateHandle,
-    showAction: Boolean,
-    sortId: Int
-) : BaseFlowViewModel<InstalledListState, InstalledListEvent, ScreenCommonAction>(), KoinComponent {
+class InstalledListViewModel(state: SavedStateHandle, showAction: Boolean, sortId: Int) :
+    BaseFlowViewModel<InstalledListState, InstalledListEvent, ScreenCommonAction>(),
+    KoinComponent {
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
@@ -68,23 +66,18 @@ class InstalledListViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
-    class Factory(
-        private val sortId: Int,
-        private val showAction: Boolean,
-    ) : ViewModelProvider.Factory {
+    class Factory(private val sortId: Int, private val showAction: Boolean,) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
-            return InstalledListViewModel(
-                state = extras.createSavedStateHandle(),
-                showAction = showAction,
-                sortId = sortId,
-            ) as T
-        }
+        override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T = InstalledListViewModel(
+            state = extras.createSavedStateHandle(),
+            showAction = showAction,
+            sortId = sortId,
+        ) as T
     }
 
     init {
         viewState = InstalledListState(
-            sortId = state.getInt("sort", sortId) ,
+            sortId = state.getInt("sort", sortId),
             selectionMode = state["showAction"] ?: showAction,
             enablePullToRefresh = prefs.enablePullToRefresh
         )
@@ -178,15 +171,13 @@ class InstalledListViewModel(
         }
     }
 
-    private suspend fun checkAuthToken(): Boolean {
-        return when (val result = authToken.checkToken(prefs.account?.toAndroidAccount())) {
-            is CheckTokenResult.Error -> {
-                handleEvent(InstalledListEvent.AuthTokenError(result.error))
-                false
-            }
-
-            is CheckTokenResult.Success -> true
+    private suspend fun checkAuthToken(): Boolean = when (val result = authToken.checkToken(prefs.account?.toAndroidAccount())) {
+        is CheckTokenResult.Error -> {
+            handleEvent(InstalledListEvent.AuthTokenError(result.error))
+            false
         }
+
+        is CheckTokenResult.Success -> true
     }
 
     private fun togglePackage(packageName: String) {

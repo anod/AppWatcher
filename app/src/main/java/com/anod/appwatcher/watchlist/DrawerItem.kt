@@ -13,11 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.anod.appwatcher.R
 
 @Immutable
-data class DrawerItem(
-    val id: Id,
-    val icon: ImageVector,
-    @param:StringRes val title: Int
-) {
+data class DrawerItem(val id: Id, val icon: ImageVector, @param:StringRes val title: Int) {
     sealed interface Id {
         object Refresh : Id
         object Add : Id

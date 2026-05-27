@@ -94,12 +94,12 @@ fun MarketAppItem(
                             style = MaterialTheme.typography.bodySmall
                         )
                     } else {
-                        val context = LocalContext.current
-                        val offerText by remember(app.price) {
+                        val free = stringResource(R.string.free)
+                        val offerText by remember(app.price, free) {
                             mutableStateOf(
                                 when {
                                     app.price.micros == null -> ""
-                                    app.price.micros == 0 -> context.getString(R.string.free)
+                                    app.price.micros == 0 -> free
                                     else -> app.price.text
                                 }
                             )

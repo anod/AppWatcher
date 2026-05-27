@@ -49,11 +49,9 @@ interface TagsTable {
     suspend fun insert(name: String, color: Int): Long
 
     object Queries {
-        suspend fun delete(tag: Tag, db: AppsDatabase) {
-            return db.withTransaction {
-                db.tags().delete(tag.id)
-                db.appTags().delete(tag.id)
-            }
+        suspend fun delete(tag: Tag, db: AppsDatabase) = db.withTransaction {
+            db.tags().delete(tag.id)
+            db.appTags().delete(tag.id)
         }
 
         suspend fun insert(tag: Tag, db: AppsDatabase): Long {

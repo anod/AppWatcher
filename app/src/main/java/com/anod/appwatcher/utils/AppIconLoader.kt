@@ -49,9 +49,7 @@ interface AppIconLoader {
         override fun loadAppIntoImageView(app: App, iconView: ImageView, defaultRes: Int) {
         }
 
-        override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest {
-            return ImageRequest.Builder(context).data(imageUrl).build()
-        }
+        override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest = ImageRequest.Builder(context).data(imageUrl).build()
     }
 }
 
@@ -74,9 +72,7 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
     internal class PackageIconFetcher(private val context: Context, private val data: Uri, private val options: Options) : Fetcher {
 
         class Factory(private val context: Context) : Fetcher.Factory<Uri> {
-            override fun create(data: Uri, options: Options, imageLoader: ImageLoader): Fetcher? {
-                return if (data.scheme == SCHEME) PackageIconFetcher(context, data, options) else null
-            }
+            override fun create(data: Uri, options: Options, imageLoader: ImageLoader): Fetcher? = if (data.scheme == SCHEME) PackageIconFetcher(context, data, options) else null
         }
 
         private val packageManager: PackageManager = context.packageManager
@@ -121,14 +117,12 @@ class RealAppIconLoader(context: Context, private val prefs: Preferences, overri
         coilLoader.enqueue(request)
     }
 
-    override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest {
-        return ImageRequest.Builder(context).apply {
-            data(imageUrl.ifEmpty { null })
-            transformations(listOf(AdaptiveIconTransformation(context, iconPath, imageUrl)))
-            size(iconSize, iconSize)
-            customize(this)
-        }.build()
-    }
+    override fun request(imageUrl: String, customize: (ImageRequest.Builder) -> Unit): ImageRequest = ImageRequest.Builder(context).apply {
+        data(imageUrl.ifEmpty { null })
+        transformations(listOf(AdaptiveIconTransformation(context, iconPath, imageUrl)))
+        size(iconSize, iconSize)
+        customize(this)
+    }.build()
 
     companion object {
         const val SCHEME = "application.icon"

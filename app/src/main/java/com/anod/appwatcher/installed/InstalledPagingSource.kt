@@ -13,12 +13,8 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.ktx.dayStartAgoMillis
 
-class InstalledPagingSource(
-    private val changelogAdapter: ChangelogAdapter,
-    private val packageManager: PackageManager,
-    private val database: AppsDatabase,
-    private val installedApps: InstalledApps,
-) : FilterablePagingSource() {
+class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, private val packageManager: PackageManager, private val database: AppsDatabase, private val installedApps: InstalledApps,) :
+    FilterablePagingSource() {
     override var filterQuery: String = ""
     var sortId: Int = 0
     var selectionMode: Boolean = false

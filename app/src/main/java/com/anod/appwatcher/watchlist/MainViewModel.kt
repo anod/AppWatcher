@@ -60,7 +60,9 @@ sealed interface MainViewEvent {
 
 sealed interface MainViewAction {
     class StartActivity(override val intent: Intent) : MainViewAction, StartActivityAction
-    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), MainViewAction
+    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) :
+        ShowToastActionDefaults(resId, text, length),
+        MainViewAction
     data class ChooseAccount(val currentAccount: Account?) : MainViewAction
     class NavigateTo(val id: DrawerItem.Id) : MainViewAction
     data object RequestNotificationPermission : MainViewAction
@@ -68,15 +70,13 @@ sealed interface MainViewAction {
     class DrawerState(val isOpen: Boolean) : MainViewAction
 }
 
-private fun startActivityAction(intent: Intent): MainViewAction
-    = MainViewAction.StartActivity(intent)
+private fun startActivityAction(intent: Intent): MainViewAction = MainViewAction.StartActivity(intent)
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): MainViewAction
-    = MainViewAction.ShowToast(
-        resId = resId,
-        text = text,
-        length = length
-    )
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): MainViewAction = MainViewAction.ShowToast(
+    resId = resId,
+    text = text,
+    length = length
+)
 
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
     private val database: AppsDatabase by inject()

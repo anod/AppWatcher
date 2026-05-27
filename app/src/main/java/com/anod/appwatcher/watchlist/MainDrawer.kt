@@ -134,7 +134,6 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
 
 @Composable
 private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,7 +190,7 @@ private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
 
 @Preview(showSystemUi = true)
 @Composable
-private fun DrawerContentPreviewNoAccount() {
+private fun DrawerContentPreviewNoAccountPreview() {
     AppTheme {
         MainDrawer(
             mainState = MainViewState(),
@@ -202,7 +201,7 @@ private fun DrawerContentPreviewNoAccount() {
 
 @Preview(showSystemUi = true)
 @Composable
-private fun DrawerContentPreviewWithAccount() {
+private fun DrawerContentPreviewWithAccountPreview() {
     AppTheme {
         MainDrawer(
             mainState = MainViewState(

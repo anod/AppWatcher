@@ -344,12 +344,9 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             addMultiWindowFlags(context)
         }
 
-        private fun installedIntent(sortId: Int, showImportAction: Boolean, context: Context): Intent {
-            return Intent(context, AppWatcherActivity::class.java).apply {
-                putExtra(ARG_SORT, sortId)
-                putExtra(ARG_SHOW_ACTION, showImportAction)
-            }
+        private fun installedIntent(sortId: Int, showImportAction: Boolean, context: Context): Intent = Intent(context, AppWatcherActivity::class.java).apply {
+            putExtra(ARG_SORT, sortId)
+            putExtra(ARG_SHOW_ACTION, showImportAction)
         }
-
     }
 }

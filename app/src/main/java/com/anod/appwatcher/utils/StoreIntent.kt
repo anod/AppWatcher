@@ -2,8 +2,6 @@ package com.anod.appwatcher.utils
 
 import android.content.ComponentName
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import androidx.core.net.toUri
 
 /**
@@ -25,9 +23,9 @@ fun Intent.forPlayStore(pkg: String): Intent {
 fun Intent.forMyApps(update: Boolean): Intent {
     action = "com.google.android.finsky.VIEW_MY_DOWNLOADS"
     component = ComponentName(
-            "com.android.vending",
-            "com.android.vending.AssetBrowserActivity"
-        )
+        "com.android.vending",
+        "com.android.vending.AssetBrowserActivity"
+    )
     if (update) {
         this.putExtra("trigger_update_all", true)
     }

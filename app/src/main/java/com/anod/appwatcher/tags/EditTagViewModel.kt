@@ -16,11 +16,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Immutable
-data class EditTagState(
-    val tag: Tag,
-    val showPickColor: Boolean = false,
-    val theme: SelectedTheme = SelectedTheme()
-)
+data class EditTagState(val tag: Tag, val showPickColor: Boolean = false, val theme: SelectedTheme = SelectedTheme())
 
 sealed interface EditTagEvent {
     class UpdateColor(@param:ColorInt val color: Int) : EditTagEvent
@@ -38,9 +34,7 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
 
     class Factory(private val tag: Tag) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return EditTagViewModel(tag) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = EditTagViewModel(tag) as T
     }
 
     private val database: AppsDatabase by inject()

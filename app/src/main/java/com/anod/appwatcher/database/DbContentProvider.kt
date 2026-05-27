@@ -82,13 +82,9 @@ class DbContentProvider : ContentProvider() {
         val projection: Array<String> = emptyArray(),
     )
 
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
-        throw IllegalArgumentException("Unknown URI $uri")
-    }
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int = throw IllegalArgumentException("Unknown URI $uri")
 
-    override fun getType(uri: Uri): String? {
-        return null
-    }
+    override fun getType(uri: Uri): String? = null
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
         val query = matchQuery(uri) ?: throw IllegalArgumentException("Unknown URI $uri")

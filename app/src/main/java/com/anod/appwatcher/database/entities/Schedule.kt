@@ -45,19 +45,17 @@ data class Schedule(
         checked: Int = 0,
         found: Int = 0,
         unavailable: Int = 0
-    ): Schedule {
-        return Schedule(
-            id,
-            start,
-            System.currentTimeMillis(),
-            reason,
-            status,
-            checked,
-            found,
-            unavailable,
-            0
-        )
-    }
+    ): Schedule = Schedule(
+        id,
+        start,
+        System.currentTimeMillis(),
+        reason,
+        status,
+        checked,
+        found,
+        unavailable,
+        0
+    )
 
     fun result(): ScheduleResult = when (result) {
         STATUS_SUCCESS -> Success

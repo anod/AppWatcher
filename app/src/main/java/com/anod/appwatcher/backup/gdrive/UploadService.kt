@@ -14,10 +14,10 @@ import androidx.work.WorkerParameters
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
+import java.util.concurrent.TimeUnit
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
-import java.util.concurrent.TimeUnit
 
 /**
  * @author Alex Gavrishev

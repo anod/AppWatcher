@@ -18,9 +18,9 @@ import info.anodsplace.framework.content.InstalledPackageApp
 import info.anodsplace.framework.content.getAppTitle
 import info.anodsplace.framework.content.getLaunchComponent
 import info.anodsplace.framework.content.getPackageInfoOrNull
-import kotlinx.serialization.Serializable
 import java.text.DateFormat
 import java.util.Date
+import kotlinx.serialization.Serializable
 
 /**
  * @author Alex Gavrishev
@@ -212,8 +212,6 @@ data class App(
             )
         }
 
-        fun createDetailsUrl(packageName: String): String {
-            return "details?doc=$packageName"
-        }
+        fun createDetailsUrl(packageName: String): String = "details?doc=$packageName"
     }
 }

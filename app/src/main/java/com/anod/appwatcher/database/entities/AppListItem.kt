@@ -26,14 +26,12 @@ data class AppListItem(
     val recentFlag: Boolean
 )
 
-fun AppListItem.cleanChangeHtml(): String {
-    return if (changeDetails?.isNotBlank() == true) {
-        Html.parse(changeDetails).toString()
-            .replace(newLineRegex, "\n")
-            .removePrefix(app.versionName + "\n")
-            .removePrefix(app.versionName + ":\n")
-            .trim()
-    } else {
-        ""
-    }
+fun AppListItem.cleanChangeHtml(): String = if (changeDetails?.isNotBlank() == true) {
+    Html.parse(changeDetails).toString()
+        .replace(newLineRegex, "\n")
+        .removePrefix(app.versionName + "\n")
+        .removePrefix(app.versionName + ":\n")
+        .trim()
+} else {
+    ""
 }

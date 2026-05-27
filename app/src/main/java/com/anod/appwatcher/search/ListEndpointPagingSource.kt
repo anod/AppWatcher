@@ -11,22 +11,14 @@ import finsky.protos.ResponseWrapper
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 
-data class ListItem(
-    val document: Document,
-    val installedInfo: InstalledApps.Info,
-    val app: App
-) {
+data class ListItem(val document: Document, val installedInfo: InstalledApps.Info, val app: App) {
     val isInstalled = installedInfo.isInstalled
     val isWatched: Boolean
         get() = app.rowId > -1
     val stableKey = hashCode()
 }
 
-abstract class ListEndpointPagingSource(
-    private val listType: DfeListType,
-    private val installedApps: InstalledApps,
-    private val appAdapter: (Document) -> App
-) : PagingSource<String, ListItem>() {
+abstract class ListEndpointPagingSource(private val listType: DfeListType, private val installedApps: InstalledApps, private val appAdapter: (Document) -> App) : PagingSource<String, ListItem>() {
 
     private var isFirst = true
 

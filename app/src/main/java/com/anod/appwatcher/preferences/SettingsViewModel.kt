@@ -33,8 +33,6 @@ import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
-import info.anodsplace.permissions.AppPermission
-import info.anodsplace.permissions.AppPermissions
 import info.anodsplace.playservices.GooglePlayServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -46,12 +44,7 @@ import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
 @Immutable
-data class SettingsViewState(
-    val items: List<PreferenceItem>,
-    val isProgressVisible: Boolean = false,
-    val recreateWatchlistOnBack: Boolean = false,
-    val areNotificationsEnabled: Boolean = false,
-)
+data class SettingsViewState(val items: List<PreferenceItem>, val isProgressVisible: Boolean = false, val recreateWatchlistOnBack: Boolean = false, val areNotificationsEnabled: Boolean = false,)
 
 sealed interface SettingsViewEvent {
     class Export(val uri: Uri) : SettingsViewEvent
@@ -79,7 +72,9 @@ sealed interface SettingsViewEvent {
 sealed interface SettingsViewAction {
     data object NavigateBack : SettingsViewAction
     data class StartActivity(override val intent: Intent) : SettingsViewAction, StartActivityAction
-    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) : ShowToastActionDefaults(resId, text, length), SettingsViewAction
+    class ShowToast(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT) :
+        ShowToastActionDefaults(resId, text, length),
+        SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
     object Recreate : SettingsViewAction
     object Rebirth : SettingsViewAction
@@ -89,13 +84,11 @@ sealed interface SettingsViewAction {
     data class NavigateTo(val navKey: NavKey) : SettingsViewAction
 }
 
-private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction {
-    return SettingsViewAction.ShowToast(
-        resId = resId,
-        text = text,
-        length = length
-    )
-}
+private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction = SettingsViewAction.ShowToast(
+    resId = resId,
+    text = text,
+    length = length
+)
 
 class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent, SettingsViewAction>(), KoinComponent {
     private val application: Application by inject()
@@ -143,12 +136,12 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             SettingsViewEvent.OpenUserLog -> emitAction(
                 SettingsViewAction.NavigateTo(
                     navKey = SceneNavKey.UserLog
-            ))
+                ))
 
             SettingsViewEvent.OssLicenses -> emitAction(
                 SettingsViewAction.StartActivity(
-                Intent(application, OssLicensesMenuActivity::class.java),
-            ))
+                    Intent(application, OssLicensesMenuActivity::class.java),
+                ))
             is SettingsViewEvent.SetRecreateFlag -> {
                 val result = setRecreateFlag(event.item, event.enabled)
                 event.update(result)
@@ -158,8 +151,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             is SettingsViewEvent.UpdateIconsShape -> updateIconsShape(event.newPath)
             is SettingsViewEvent.UpdateTheme -> updateTheme(event.newTheme)
             SettingsViewEvent.NotificationPermissionRequest -> {
-                AppPermissions.isGranted(application, AppPermission.PostNotification)
-
                 emitAction(SettingsViewAction.RequestNotificationPermission)
             }
             is SettingsViewEvent.NotificationPermissionResult -> {
@@ -170,8 +161,8 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             }
             SettingsViewEvent.ShowAppSettings -> emitAction(
                 SettingsViewAction.StartActivity(
-                intent = Intent().forAppInfo(application.packageName),
-            ))
+                    intent = Intent().forAppInfo(application.packageName),
+                ))
             SettingsViewEvent.CheckNotificationPermission -> {
                 val areNotificationsEnabled = prefs.areNotificationsEnabled
                 if (areNotificationsEnabled != viewState.areNotificationsEnabled) {
@@ -234,7 +225,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         }
     }
 
-    private fun onGDriveActivityResult(activityResult: ActivityResult): Unit {
+    private fun onGDriveActivityResult(activityResult: ActivityResult) {
         viewModelScope.launch {
             try {
                 gDriveSignIn.onActivityResult(activityResult.resultCode, activityResult.data)

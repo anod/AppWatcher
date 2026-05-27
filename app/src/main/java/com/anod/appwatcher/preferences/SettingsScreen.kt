@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +46,9 @@ import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.utils.POST_NOTIFICATIONS_PERMISSION
+import com.anod.appwatcher.utils.isPostNotificationsPermissionRequired
+import com.anod.appwatcher.utils.postNotificationsPermissionRequestInput
 import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.IconShapeSelector
@@ -56,9 +60,7 @@ import info.anodsplace.framework.app.findActivity
 import info.anodsplace.framework.content.CreateDocument
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
-import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
-import info.anodsplace.permissions.toRequestInput
 import org.koin.java.KoinJavaComponent
 
 @Composable
@@ -66,8 +68,10 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
     val viewModel: SettingsViewModel = viewModel()
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val context = LocalContext.current
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
     val notificationPermissionRequest = rememberLauncherForActivityResult(AppPermissions.Request()) {
-        val enabled = it[AppPermission.PostNotification.value] ?: false
+        val enabled = it[POST_NOTIFICATIONS_PERMISSION] ?: false
         viewModel.handleEvent(SettingsViewEvent.NotificationPermissionResult(enabled))
         if (!enabled) {
             viewModel.handleEvent(SettingsViewEvent.ShowAppSettings)
@@ -99,9 +103,15 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
                 SettingsViewAction.Rebirth -> {
                     ProcessPhoenix.triggerRebirth(context.applicationContext, Intent(context.applicationContext, AppWatcherActivity::class.java))
                 }
-                SettingsViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
-                SettingsViewAction.NavigateBack -> navigateBack()
-                is SettingsViewAction.NavigateTo -> navigateTo(action.navKey)
+                SettingsViewAction.RequestNotificationPermission -> {
+                    if (isPostNotificationsPermissionRequired()) {
+                        notificationPermissionRequest.launch(postNotificationsPermissionRequestInput())
+                    } else {
+                        viewModel.handleEvent(SettingsViewEvent.NotificationPermissionResult(granted = true))
+                    }
+                }
+                SettingsViewAction.NavigateBack -> currentNavigateBack()
+                is SettingsViewAction.NavigateTo -> currentNavigateTo(action.navKey)
                 is SettingsViewAction.ShowToast -> context.showToast(action)
                 is SettingsViewAction.StartActivity -> context.startActivity(action)
             }

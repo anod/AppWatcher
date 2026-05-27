@@ -3,10 +3,10 @@ package com.anod.appwatcher.watchlist
 
 import androidx.paging.PagingState
 import com.anod.appwatcher.model.Filters
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.coroutines.EmptyCoroutineContext
 
 // Unit tests for WatchListPagingSource helper logic.
 class WatchListPagingSourceTest {
@@ -186,7 +186,7 @@ class WatchListPagingSourceTest {
             showOnDevice = false,
             showRecentlyInstalled = false,
         ),
-        cacheScope = CoroutineScope(EmptyCoroutineContext)
+        cacheScope = CoroutineScope(EmptyCoroutineContext),
     ) {
         fun attach(source: TestPagingSource) {
             pagingSource = source
@@ -202,12 +202,10 @@ class WatchListPagingSourceTest {
 
         override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int? = null
 
-        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
-            return LoadResult.Page(
-                data = emptyList(),
-                prevKey = null,
-                nextKey = null
-            )
-        }
+        override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> = LoadResult.Page(
+            data = emptyList(),
+            prevKey = null,
+            nextKey = null,
+        )
     }
 }

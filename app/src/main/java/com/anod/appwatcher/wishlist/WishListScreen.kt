@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,6 +87,8 @@ fun WishListScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
     var showSearchView by remember { mutableStateOf(false) }
     Scaffold(
         snackbarHost = {
@@ -152,8 +155,8 @@ fun WishListScreen(
         viewActions.collect { action ->
             context.onScreenCommonAction(
                 action,
-                navigateBack = navigateBack,
-                navigateTo = { navigateTo(it.asNavKey) },
+                navigateBack = currentNavigateBack,
+                navigateTo = { currentNavigateTo(it.asNavKey) },
                 showSnackbar = { },
                 showDialog = { /* No dialogs yet */ }
             )
