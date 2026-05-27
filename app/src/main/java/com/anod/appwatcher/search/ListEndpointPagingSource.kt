@@ -30,8 +30,8 @@ abstract class ListEndpointPagingSource(private val listType: DfeListType, priva
                 AppLog.d("ListPagingSource load: [${params.key}] null")
                 return LoadResult.Page(emptyList(), null, null)
             }
-            val nextPageUrl = params.key ?: ""
-            val response = execute(nextPageUrl = nextPageUrl).toListResponse(listType)
+            val requestedNextPageUrl = params.key ?: ""
+            val response = execute(nextPageUrl = requestedNextPageUrl).toListResponse(listType)
 
             val items = response.items.map {
                 val installedInfo = installedApps.packageInfo(it.docId)
@@ -43,11 +43,15 @@ abstract class ListEndpointPagingSource(private val listType: DfeListType, priva
             }
 
             isFirst = false
-            AppLog.d("ListPagingSource load: [${params.key}] $nextPageUrl")
+            val nextPageUrl = resolveNextPageUrl(
+                requestedNextPageUrl = requestedNextPageUrl,
+                responseNextPageUrl = response.nextPageUrl
+            )
+            AppLog.d("ListPagingSource load: [${params.key}] $requestedNextPageUrl -> $nextPageUrl")
             return LoadResult.Page(
                 data = items,
                 prevKey = null, // Only paging forward.
-                nextKey = response.nextPageUrl
+                nextKey = nextPageUrl
             )
         } catch (e: Exception) {
             AppLog.e(e)
@@ -56,4 +60,11 @@ abstract class ListEndpointPagingSource(private val listType: DfeListType, priva
     }
 
     override fun getRefreshKey(state: PagingState<String, ListItem>): String? = null
+
+    companion object {
+        internal fun resolveNextPageUrl(requestedNextPageUrl: String, responseNextPageUrl: String?): String? {
+            val nextPageUrl = responseNextPageUrl?.takeIf { it.isNotBlank() }
+            return nextPageUrl?.takeUnless { it == requestedNextPageUrl }
+        }
+    }
 }
