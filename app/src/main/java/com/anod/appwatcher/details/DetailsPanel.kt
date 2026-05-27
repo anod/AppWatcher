@@ -556,6 +556,7 @@ private fun VersionInfoCell(
         HorizontalDivider()
         if (leadingIcon != null) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {

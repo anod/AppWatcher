@@ -76,7 +76,7 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
         mainViewModel.handleEvent(MainViewEvent.SetAccount(it))
     }
 
-    LaunchedEffect(navigateTo) {
+    LaunchedEffect(mainViewModel) {
         mainViewModel.viewActions.collect { action ->
             if (action is MainViewAction.DrawerState) {
                 if (action.isOpen) {
@@ -90,7 +90,7 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
                     context = context,
                     accountSelectionRequest = accountSelectionRequest,
                     notificationPermissionRequest = notificationPermissionRequest,
-                    navigateTo = navigateTo,
+                    navigateTo = currentNavigateTo,
                     onNotificationPermissionResult = { mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(it)) }
                 )
             }
