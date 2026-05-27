@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:compose:compositionlocal-allowlist")
+
 package com.anod.appwatcher.navigation
 
 import androidx.compose.runtime.staticCompositionLocalOf

@@ -28,21 +28,13 @@ class WatchListPagingSource(
     private val itemFilter: AppListFilter = createFilter(config.filterId)
 
     @Immutable
-    data class Config(
-        val filterId: Int,
-        val tagId: Int?,
-        val showRecentlyDiscovered: Boolean,
-        val showOnDevice: Boolean,
-        val showRecentlyInstalled: Boolean,
-    )
+    data class Config(val filterId: Int, val tagId: Int?, val showRecentlyDiscovered: Boolean, val showOnDevice: Boolean, val showRecentlyInstalled: Boolean,)
 
-    private fun createFilter(filterId: Int): AppListFilter {
-        return when (filterId) {
-            Filters.INSTALLED -> AppListFilter.Installed(installedApps)
-            Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
-            Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
-            else -> AppListFilter.All()
-        }
+    private fun createFilter(filterId: Int): AppListFilter = when (filterId) {
+        Filters.INSTALLED -> AppListFilter.Installed(installedApps)
+        Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
+        Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
+        else -> AppListFilter.All()
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, SectionItem> {
@@ -151,11 +143,7 @@ class WatchListPagingSource(
     companion object {
         const val PAGE_SIZE = 20
 
-        fun calculateOffsetAndLimit(
-            key: Int?,
-            loadSize: Int,
-            showRecentlyInstalled: Boolean,
-        ): Pair<Int, Int> {
+        fun calculateOffsetAndLimit(key: Int?, loadSize: Int, showRecentlyInstalled: Boolean,): Pair<Int, Int> {
             val offset = key ?: 0
             var limit = loadSize
             if (offset == 0 && showRecentlyInstalled) {
@@ -197,15 +185,9 @@ class WatchListPagingSource(
             return pages * PAGE_SIZE
         }
 
-        fun calculateItemsBefore(offset: Int, showRecentlyInstalled: Boolean): Int {
-            return offset + if (showRecentlyInstalled && offset > 0) 1 else 0
-        }
+        fun calculateItemsBefore(offset: Int, showRecentlyInstalled: Boolean): Int = offset + if (showRecentlyInstalled && offset > 0) 1 else 0
 
-        fun calculateItemsAfter(
-            totalItems: Int,
-            itemsBefore: Int,
-            loadedItems: Int,
-        ): Int {
+        fun calculateItemsAfter(totalItems: Int, itemsBefore: Int, loadedItems: Int,): Int {
             if (totalItems == LoadResult.Page.COUNT_UNDEFINED || itemsBefore == LoadResult.Page.COUNT_UNDEFINED) {
                 return LoadResult.Page.COUNT_UNDEFINED
             }

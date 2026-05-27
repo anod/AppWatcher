@@ -126,15 +126,13 @@ val AppShapes = Shapes(
 )
 
 @Composable
-fun dynamicDarkTheme(isBlack: Boolean): ColorScheme {
-    return if (isBlack) {
-        dynamicDarkColorScheme(LocalContext.current).copy(
-            background = Color.Black,
-            surface = Color.Black,
-        )
-    } else {
-        dynamicDarkColorScheme(LocalContext.current)
-    }
+fun dynamicDarkTheme(isBlack: Boolean): ColorScheme = if (isBlack) {
+    dynamicDarkColorScheme(LocalContext.current).copy(
+        background = Color.Black,
+        surface = Color.Black,
+    )
+} else {
+    dynamicDarkColorScheme(LocalContext.current)
 }
 
 @Composable

@@ -23,12 +23,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Immutable
-data class AppsTagScreenState(
-    val tag: Tag,
-    val titleFilter: String = "",
-    val apps: List<App> = emptyList(),
-    val selection: SelectionState = SelectionState()
-)
+data class AppsTagScreenState(val tag: Tag, val titleFilter: String = "", val apps: List<App> = emptyList(), val selection: SelectionState = SelectionState())
 
 sealed interface AppsTagScreenEvent {
     data object Import : AppsTagScreenEvent
@@ -51,9 +46,7 @@ class AppsTagViewModel(tag: Tag) : BaseFlowViewModel<AppsTagScreenState, AppsTag
 
     class Factory(private val tag: Tag) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return AppsTagViewModel(tag) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = AppsTagViewModel(tag) as T
     }
 
     private val database: AppsDatabase by inject()

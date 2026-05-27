@@ -24,13 +24,7 @@ import org.koin.core.component.inject
 typealias TagAppItem = Pair<Tag, Boolean>
 
 @Immutable
-data class TagsSelectionState(
-    val appId: String,
-    val appTitle: String,
-    val items: List<CheckBoxItem> = emptyList(),
-    val tags: List<TagAppItem> = emptyList(),
-    val showAddTagDialog: Boolean = false
-)
+data class TagsSelectionState(val appId: String, val appTitle: String, val items: List<CheckBoxItem> = emptyList(), val tags: List<TagAppItem> = emptyList(), val showAddTagDialog: Boolean = false)
 
 sealed interface TagSelectionEvent {
     class UpdateTag(val key: String, val checked: Boolean) : TagSelectionEvent
@@ -42,9 +36,7 @@ class TagsSelectionViewModel(appId: String, appTitle: String) : BaseFlowViewMode
 
     class Factory(private val appId: String, private val appTitle: String) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return TagsSelectionViewModel(appId, appTitle) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = TagsSelectionViewModel(appId, appTitle) as T
     }
 
     private val database: AppsDatabase by inject()

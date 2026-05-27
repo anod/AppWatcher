@@ -38,13 +38,7 @@ sealed interface SearchTopBarEvent {
     object NavigationAction : SearchTopBarEvent
 }
 
-data class SearchTopBarState(
-    val title: String,
-    val subtitle: String? = null,
-    val searchQuery: String = "",
-    val showSearch: Boolean = false,
-    val initialSearchFocus: Boolean = false,
-)
+data class SearchTopBarState(val title: String, val subtitle: String? = null, val searchQuery: String = "", val showSearch: Boolean = false, val initialSearchFocus: Boolean = false,)
 
 @Composable
 fun SearchTopBar(

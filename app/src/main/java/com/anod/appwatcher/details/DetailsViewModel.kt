@@ -47,6 +47,8 @@ import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.framework.content.forUninstall
 import info.anodsplace.framework.text.Html
 import info.anodsplace.graphics.chooseDark
+import java.net.URLEncoder
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,8 +57,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.net.URLEncoder
-import java.util.Locale
 
 typealias TagMenuItem = Pair<Tag, Boolean>
 
@@ -108,28 +108,25 @@ data class DetailsState(
 }
 
 @Immutable
-data class AppVersionInfo(
-    val isBeta: Boolean,
-    val installationSize: Long,
-    val targetSdkVersion: Int,
-    val starRating: Float,
-) {
+data class AppVersionInfo(val isBeta: Boolean, val installationSize: Long, val targetSdkVersion: Int, val starRating: Float,) {
     val androidVersion: String? = androidVersions[targetSdkVersion]
 }
 
 sealed interface DetailsAction {
-    class StartActivity(override val intent: Intent) : DetailsAction, StartActivityAction
+    class StartActivity(override val intent: Intent) :
+        DetailsAction,
+        StartActivityAction
     class ShowTagSnackbar(val appInfo: TagSnackbarAppInfo) : DetailsAction
     object Dismiss : DetailsAction
     class Share(val app: App, val recentChange: AppChange) : DetailsAction
-    class ShowToast(@param:StringRes override val resId: Int) : ShowToastActionDefaults(resId), DetailsAction
+    class ShowToast(@param:StringRes override val resId: Int) :
+        ShowToastActionDefaults(resId),
+        DetailsAction
 }
 
-private fun startActivityAction(intent: Intent): DetailsAction
-     = DetailsAction.StartActivity(intent = intent)
+private fun startActivityAction(intent: Intent): DetailsAction = DetailsAction.StartActivity(intent = intent)
 
-private fun showToastAction(@StringRes resId: Int): DetailsAction
-    = DetailsAction.ShowToast(resId = resId)
+private fun showToastAction(@StringRes resId: Int): DetailsAction = DetailsAction.ShowToast(resId = resId)
 
 sealed interface DetailsEvent {
     class UpdateTag(val tagId: Int, val checked: Boolean) : DetailsEvent
@@ -146,22 +143,14 @@ sealed interface DetailsEvent {
     object Translate : DetailsEvent
 }
 
-class DetailsViewModel(
-    app: App,
-    isSystemInDarkTheme: Boolean
-): BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
+class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
 
-    class Factory(
-        private val argApp: App,
-        private val isSystemInDarkTheme: Boolean,
-    ) : ViewModelProvider.Factory {
+    class Factory(private val argApp: App, private val isSystemInDarkTheme: Boolean,) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return DetailsViewModel(
-                argApp,
-                isSystemInDarkTheme,
-            ) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = DetailsViewModel(
+            argApp,
+            isSystemInDarkTheme,
+        ) as T
     }
 
     private val context: Context by inject()
@@ -468,26 +457,24 @@ class DetailsViewModel(
         }
     }
 
-    private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> {
-        return when {
-            localChanges.isEmpty() -> {
-                if (!recentChange.isEmpty) {
-                    listOf(recentChange)
-                } else {
-                    listOf()
-                }
+    private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> = when {
+        localChanges.isEmpty() -> {
+            if (!recentChange.isEmpty) {
+                listOf(recentChange)
+            } else {
+                listOf()
             }
+        }
 
-            localChanges.first().versionCode == recentChange.versionCode -> {
-                listOf(recentChange, *localChanges.subList(1, localChanges.size).toTypedArray())
-            }
+        localChanges.first().versionCode == recentChange.versionCode -> {
+            listOf(recentChange, *localChanges.subList(1, localChanges.size).toTypedArray())
+        }
 
-            else -> {
-                if (recentChange.isEmpty) {
-                    localChanges
-                } else {
-                    listOf(recentChange, *localChanges.toTypedArray())
-                }
+        else -> {
+            if (recentChange.isEmpty) {
+                localChanges
+            } else {
+                listOf(recentChange, *localChanges.toTypedArray())
             }
         }
     }

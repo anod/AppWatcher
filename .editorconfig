@@ -29,6 +29,7 @@ ktlint_standard_chain-wrapping = disabled
 ktlint_standard_parameter-list-wrapping = enabled
 ktlint_standard_multiline-expression-wrapping = disabled
 ktlint_standard_discouraged-comment-location = disabled
+ktlint_standard_class-signature = disabled
 compose_disallow_unstable_collections = true
 compose_preview_naming_enabled = true
 compose_preview_naming_strategy = suffix

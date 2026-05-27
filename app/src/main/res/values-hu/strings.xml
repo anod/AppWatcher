@@ -114,6 +114,7 @@
     <string name="noti_action_update">Frissítés</string>
     <string name="play_store_my_apps">Play Store: Alkalmazásaim</string>
     <string name="navdrawer_item_wishlist">Kívánságlista</string>
+    <string name="navdrawer_item_purchases">Vásárlások</string>
     <string name="wishlist">Kívánságlista</string>
     <string name="add_new_tag">Add meg a címkenevet…</string>
     <string name="tags">Címkék</string>
@@ -171,12 +172,16 @@
     <string name="pref_privacy">Adatvédelem</string>
     <string name="crash_reports_title">Összeomlási jelentések</string>
     <string name="crash_reports_descr">Összeomlási jelentések összeállítása. Módosítva az alkalmazás újraindul.</string>
+    <string name="sort_by_name_asc">Név &#x2193;</string>
+    <string name="sort_by_name_desc">Név &#x2191;</string>
+    <string name="sort_by_date_asc">Dátum &#x2193;</string>
+    <string name="sort_by_date_desc">Dátum &#x2191;</string>
 
     <string-array name="sort_titles">
-        <item>Név &#x2193;</item>
-        <item>Név &#x2191;</item>
-        <item>Dátum &#x2191;</item>
-        <item>Dátum &#x2193;</item>
+        <item>@string/sort_by_name_asc</item>
+        <item>@string/sort_by_name_desc</item>
+        <item>@string/sort_by_date_asc</item>
+        <item>@string/sort_by_date_desc</item>
     </string-array>
 
     <string name="theme_system_dark">Rendszer (sötét)</string>
@@ -231,4 +236,16 @@
     <string name="number_selected">%d kiválasztva</string>
     <string name="back">vissza</string>
     <string name="no_gdrive_account">Nincs elérhető Google Drive fiók, jelentkezz be újra</string>
+    <string name="translate">Fordítás</string>
+    <string name="notifications_not_enabled">Az értesítések nincsenek engedélyezve, engedélyezd az automatikus ellenőrzéshez</string>
+    <string name="system">Rendszer</string>
+    <string name="all_selected">Mind kijelölve</string>
+    <string name="menu">Menü</string>
+    <string name="purchase_history">Vásárlási előzmények</string>
+    <string name="android_version">Android verzió</string>
+    <string name="target_sdk">Cél SDK\n</string>
+    <string name="discovered_date">Felfedezés dátuma</string>
+    <string name="selected">Kiválasztva</string>
+    <string name="pin_shortcut">Parancsikon kitűzése</string>
+    <string name="unable_pin_shortcut">Nem sikerült kitűzni a parancsikont</string>
 </resources>

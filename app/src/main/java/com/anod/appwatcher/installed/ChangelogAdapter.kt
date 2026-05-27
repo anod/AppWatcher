@@ -14,12 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class ChangelogAdapter(
-    private val viewModelScope: CoroutineScope,
-    private val database: AppsDatabase,
-    private val prefs: Preferences,
-    private val dfeApi: DfeApi
-) {
+class ChangelogAdapter(private val viewModelScope: CoroutineScope, private val database: AppsDatabase, private val prefs: Preferences, private val dfeApi: DfeApi) {
     private var job: Job? = null
     val changelogs = mutableMapOf<String, AppChange?>()
     val updated = MutableSharedFlow<Boolean>(0, extraBufferCapacity = 1)

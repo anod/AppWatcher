@@ -20,12 +20,8 @@ data class TagSnackbarAppInfo(val app: App) : ShowSnackbarData
 object TagSnackbar {
     private const val GREEN_BOOK = "📗"
 
-    class Visuals(
-        override val message: String,
-        override val actionLabel: String,
-        override val duration: SnackbarDuration = SnackbarDuration.Long,
-        override val withDismissAction: Boolean = true,
-    ) : SnackbarVisuals {
+    class Visuals(override val message: String, override val actionLabel: String, override val duration: SnackbarDuration = SnackbarDuration.Long, override val withDismissAction: Boolean = true,) :
+        SnackbarVisuals {
         override fun hashCode(): Int = hashCodeOf(message, actionLabel, duration, withDismissAction)
         override fun equals(other: Any?): Boolean = (other as? AppListFilter.Installed)?.hashCode() == hashCode()
 

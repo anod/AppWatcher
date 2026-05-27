@@ -60,12 +60,7 @@ class UpdateCheck(
     private val koin: Koin
 ) {
 
-    class SyncResult(
-        val success: Boolean,
-        val updates: List<UpdatedApp>,
-        val checked: Int,
-        val unavailable: Int
-    )
+    class SyncResult(val success: Boolean, val updates: List<UpdatedApp>, val checked: Int, val unavailable: Int)
 
     companion object {
         private const val ONE_SEC_IN_MILLIS = 1000
@@ -149,9 +144,12 @@ class UpdateCheck(
         preferences.lastUpdateTime = now
 
         if (!manualSync
-            && updatedApps.isNotEmpty()
-            && (updatedApps.firstOrNull { it.isNewUpdate } != null)
-            && lastUpdatesViewed) {
+            &&
+            updatedApps.isNotEmpty()
+            &&
+            (updatedApps.firstOrNull { it.isNewUpdate } != null)
+            &&
+            lastUpdatesViewed) {
             preferences.isLastUpdatesViewed = false
         }
 
@@ -373,17 +371,15 @@ class UpdateCheck(
         }
     }
 
-    private suspend fun refreshAuthToken(): Boolean {
-        return try {
-            authAccount.refresh()
-            true
-        } catch (e: AuthTokenStartIntent) {
-            AppLog.e("AuthToken: require interactive sing in")
-            false
-        } catch (e: Throwable) {
-            AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
-            false
-        }
+    private suspend fun refreshAuthToken(): Boolean = try {
+        authAccount.refresh()
+        true
+    } catch (e: AuthTokenStartIntent) {
+        AppLog.e("AuthToken: require interactive sing in")
+        false
+    } catch (e: Throwable) {
+        AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
+        false
     }
 
     private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {

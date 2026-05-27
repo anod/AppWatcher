@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,8 @@ fun InstalledListScreenScene(
     navigateTo: (NavKey) -> Unit
 ) {
     val context = LocalContext.current
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
     val viewModel: InstalledListViewModel = viewModel(
         factory = InstalledListViewModel.Factory(
             showAction = showAction,
@@ -75,9 +78,9 @@ fun InstalledListScreenScene(
         )
     }
 
-   LaunchedEffect(true) {
+    LaunchedEffect(true) {
         viewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action, navigateBack, navigateTo = { navigateTo(it.asNavKey) })
+            context.onScreenCommonAction(action, currentNavigateBack, navigateTo = { currentNavigateTo(it.asNavKey) })
         }
     }
 }
@@ -173,11 +176,4 @@ fun InstalledListScreen(
     }
 }
 
-private data class RefreshKey(
-    val changelogUpdated: Boolean,
-    val refreshRequest: Int,
-    val packageChanged: String,
-    val titleFilter: String,
-    val selectionMode: Boolean,
-    val sortId: Int
-)
+private data class RefreshKey(val changelogUpdated: Boolean, val refreshRequest: Int, val packageChanged: String, val titleFilter: String, val selectionMode: Boolean, val sortId: Int)

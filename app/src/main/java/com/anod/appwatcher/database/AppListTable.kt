@@ -58,9 +58,7 @@ interface AppListTable {
     )
     suspend fun _loadRowIds(packageNames: List<String>): List<PackageRowPair>
 
-    suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair> {
-        return packageNames.chunked({ _loadRowIds(it) })
-    }
+    suspend fun loadRowIds(packageNames: List<String>): List<PackageRowPair> = packageNames.chunked({ _loadRowIds(it) })
 
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
@@ -170,18 +168,14 @@ interface AppListTable {
             return@withContext AppListItemCursor(cursor)
         }
 
-        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> {
-            return loadAppList(sortId, false, null, titleFilter, table)
-        }
+        fun loadAppList(sortId: Int, titleFilter: String, table: AppListTable): Flow<List<AppListItem>> = loadAppList(sortId, false, null, titleFilter, table)
 
-        fun changes(table: AppListTable): Flow<List<Int>> {
-            return table.observeRows(
-                SimpleSQLiteQuery(
-                    "SELECT ${BaseColumns._ID} FROM ${AppListTable.TABLE} LIMIT 1",
-                    emptyArray()
-                )
+        fun changes(table: AppListTable): Flow<List<Int>> = table.observeRows(
+            SimpleSQLiteQuery(
+                "SELECT ${BaseColumns._ID} FROM ${AppListTable.TABLE} LIMIT 1",
+                emptyArray()
             )
-        }
+        )
 
         private fun loadAppList(
             sortId: Int,
@@ -206,19 +200,12 @@ interface AppListTable {
             return table.load(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        suspend fun countAppList(
-            tagId: Int?,
-            titleFilter: String,
-            table: AppListTable
-        ): Int {
+        suspend fun countAppList(tagId: Int?, titleFilter: String, table: AppListTable): Int {
             val query = createAppsListCountQuery(tagId, titleFilter)
             return table.count(SimpleSQLiteQuery(query.first, query.second))
         }
 
-        private fun createAppsListCountQuery(
-            tagId: Int?,
-            titleFilter: String
-        ): Pair<String, Array<String>> {
+        private fun createAppsListCountQuery(tagId: Int?, titleFilter: String): Pair<String, Array<String>> {
             val appTagsTable = when (tagId) {
                 null -> ""
                 Tag.empty.id -> "LEFT JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "

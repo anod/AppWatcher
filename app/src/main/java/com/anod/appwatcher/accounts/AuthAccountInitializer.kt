@@ -8,11 +8,7 @@ import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
 import java.math.BigInteger
 
-class AuthAccountInitializer(
-    private val preferences: Preferences,
-    private val authToken: AuthTokenBlocking,
-    private val dfeApi: DfeApi
-) {
+class AuthAccountInitializer(private val preferences: Preferences, private val authToken: AuthTokenBlocking, private val dfeApi: DfeApi) {
     suspend fun initialize(account: Account): AuthAccount {
         val existingAccount = preferences.account
         val tokenResult = try {
@@ -66,10 +62,14 @@ class AuthAccountInitializer(
         }
         val tokenInvalidated = if (tokenResult is CheckTokenResult.Success) tokenResult.invalidated else false
         return existingAccount == null
-            || existingAccount.deviceConfig.isEmpty()
-            || existingAccount.name != newAccount.name
-            || tokenInvalidated
-            || !canRequest()
+            ||
+            existingAccount.deviceConfig.isEmpty()
+            ||
+            existingAccount.name != newAccount.name
+            ||
+            tokenInvalidated
+            ||
+            !canRequest()
     }
 
     private suspend fun canRequest(): Boolean {

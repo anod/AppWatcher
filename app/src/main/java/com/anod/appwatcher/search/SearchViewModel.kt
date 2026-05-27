@@ -81,15 +81,11 @@ data class SearchViewState(
     val searchStatus: SearchStatus = SearchStatus.Loading
 )
 
-class SearchViewModel(
-    initialState: SearchViewState
-) : BaseFlowViewModel<SearchViewState, SearchViewEvent, ScreenCommonAction>(), KoinComponent {
+class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchViewState, SearchViewEvent, ScreenCommonAction>(), KoinComponent {
 
     class Factory(private val initialState: SearchViewState) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return SearchViewModel(initialState) as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = SearchViewModel(initialState) as T
     }
 
     private val context: Context by inject()
@@ -289,13 +285,11 @@ class SearchViewModel(
     }
 }
 
-fun PagingData<ListItem>.updateRowId(watchingPackages: Map<String, Int>): PagingData<ListItem> {
-    return map { listItem ->
-        val watchingPackageRowId = watchingPackages[listItem.app.packageName]
-        if (watchingPackageRowId != null && listItem.app.rowId != watchingPackageRowId) {
-            listItem.copy(app = listItem.app.copy(rowId = watchingPackageRowId))
-        } else {
-            listItem
-        }
+fun PagingData<ListItem>.updateRowId(watchingPackages: Map<String, Int>): PagingData<ListItem> = map { listItem ->
+    val watchingPackageRowId = watchingPackages[listItem.app.packageName]
+    if (watchingPackageRowId != null && listItem.app.rowId != watchingPackageRowId) {
+        listItem.copy(app = listItem.app.copy(rowId = watchingPackageRowId))
+    } else {
+        listItem
     }
 }

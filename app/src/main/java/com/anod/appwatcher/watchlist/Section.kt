@@ -24,9 +24,7 @@ sealed interface SectionItem {
     class Header(val type: SectionHeader) : SectionItem {
         override val sectionKey = "header:${hashCode()}"
         override val contentType = "Header"
-        override fun hashCode(): Int {
-            return hashCodeOf("SectionItem.Header", type)
-        }
+        override fun hashCode(): Int = hashCodeOf("SectionItem.Header", type)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? Header ?: return false
@@ -37,9 +35,7 @@ sealed interface SectionItem {
     object Recent : SectionItem {
         override val sectionKey = "recent:${hashCode()}"
         override val contentType = "Recent"
-        override fun hashCode(): Int {
-            return hashCodeOf("SectionItem.Recent")
-        }
+        override fun hashCode(): Int = hashCodeOf("SectionItem.Recent")
 
         override fun equals(other: Any?): Boolean {
             val item = other as? Recent ?: return false
@@ -50,9 +46,7 @@ sealed interface SectionItem {
     object Empty : SectionItem {
         override val sectionKey = "empty:${hashCode()}"
         override val contentType = "Empty"
-        override fun hashCode(): Int {
-            return hashCodeOf("SectionItem.Empty")
-        }
+        override fun hashCode(): Int = hashCodeOf("SectionItem.Empty")
 
         override fun equals(other: Any?): Boolean {
             val item = other as? Empty ?: return false
@@ -66,9 +60,7 @@ sealed interface SectionItem {
         override val contentType = "App"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int {
-            return hashCodeOf("SectionItem.App", appListItem, isLocal)
-        }
+        override fun hashCode(): Int = hashCodeOf("SectionItem.App", appListItem, isLocal)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? App ?: return false
@@ -82,9 +74,7 @@ sealed interface SectionItem {
         override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int {
-            return hashCodeOf("SectionItem.OnDevice", appListItem, showSelection)
-        }
+        override fun hashCode(): Int = hashCodeOf("SectionItem.OnDevice", appListItem, showSelection)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? OnDevice ?: return false

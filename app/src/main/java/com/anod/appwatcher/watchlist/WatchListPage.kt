@@ -639,12 +639,10 @@ private fun EmptyItem(
     }
 }
 
-private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppItemSelection {
-    return if (selectionMode) {
-        if (selection.contains(packageName)) AppItemSelection.Selected else AppItemSelection.NotSelected
-    } else {
-        AppItemSelection.None
-    }
+private fun getPackageSelection(packageName: String, selectionMode: Boolean, selection: SelectionState): AppItemSelection = if (selectionMode) {
+    if (selection.contains(packageName)) AppItemSelection.Selected else AppItemSelection.NotSelected
+} else {
+    AppItemSelection.None
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
@@ -838,7 +836,7 @@ private fun WatchListPreview() {
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun WatchListPreviewRecent() {
+private fun WatchListPreviewRecentPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )
@@ -926,7 +924,7 @@ private fun WatchListPreviewRecent() {
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun WatchListPreviewRecentLoading() {
+private fun WatchListPreviewRecentLoadingPreview() {
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )

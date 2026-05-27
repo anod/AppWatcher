@@ -43,11 +43,9 @@ interface ChangelogTable {
         "WHERE l.app_id IN (:appIds)")
     suspend fun _load(appIds: List<String>): List<AppChange>
 
-    suspend fun load(appIds: List<String>): List<AppChange> {
-        return appIds.chunked({
-            _load(it)
-        })
-    }
+    suspend fun load(appIds: List<String>): List<AppChange> = appIds.chunked({
+        _load(it)
+    })
 
     object Queries {
         suspend fun all(table: ChangelogTable): AppChangeCursor = withContext(Dispatchers.IO) {

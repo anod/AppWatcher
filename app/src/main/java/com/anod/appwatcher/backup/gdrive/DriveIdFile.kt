@@ -19,11 +19,7 @@ import kotlinx.coroutines.withContext
  * @author Alex Gavrishev
  * @date 26/06/2017
  */
-class DriveIdFile(
-    private val file: FileDescription,
-    private val driveClient: DriveService,
-    private val tempDir: File
-) {
+class DriveIdFile(private val file: FileDescription, private val driveClient: DriveService, private val tempDir: File) {
 
     constructor(file: FileDescription, driveClient: DriveService, context: Context)
         : this(file, driveClient, context.cacheDir)

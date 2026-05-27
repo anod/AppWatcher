@@ -46,6 +46,7 @@ import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.showToastAction
 import info.anodsplace.framework.content.startActivityAction
 import info.anodsplace.graphics.toIcon
+import kotlin.reflect.KClass
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +64,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.reflect.KClass
 
 @Immutable
 data class WatchListSharedState(
@@ -119,7 +119,8 @@ class WatchListStateViewModel(
     private val tagFilter: WatchListTagFilter,
     private val showOnDeviceApps: Boolean,
     private val showRecentlyInstalledApps: Boolean,
-) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(), KoinComponent {
+) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(),
+    KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
     private val db: AppsDatabase by inject()
@@ -130,7 +131,7 @@ class WatchListStateViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
-    private val _pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
+    private val pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
     fun listPagerFactory(filterId: Int, tag: Tag): WatchListPagerFactory {
         val tagId = when (tagFilter) {
             WatchListTagFilter.None -> null
@@ -146,13 +147,13 @@ class WatchListStateViewModel(
         )
         val configKey = pagingSourceConfig.hashCode()
         AppLog.d("[Paging] listPagerFactory: $configKey")
-        if (_pagerFactories.containsKey(configKey)) {
-            AppLog.d("[Paging] listPagerFactory: $configKey, return existing ${_pagerFactories[configKey].hashCode()}")
-            return _pagerFactories[configKey]!!
+        if (pagerFactories.containsKey(configKey)) {
+            AppLog.d("[Paging] listPagerFactory: $configKey, return existing ${pagerFactories[configKey].hashCode()}")
+            return pagerFactories[configKey]!!
         }
-        _pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, installedApps = installedApps, viewModelScope)
-        AppLog.d("[Paging] listPagerFactory: $configKey, create new ${_pagerFactories[configKey].hashCode()}")
-        return _pagerFactories[configKey]!!
+        pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, installedApps = installedApps, viewModelScope)
+        AppLog.d("[Paging] listPagerFactory: $configKey, create new ${pagerFactories[configKey].hashCode()}")
+        return pagerFactories[configKey]!!
     }
 
     class Factory(
@@ -274,8 +275,8 @@ class WatchListStateViewModel(
                 viewState = viewState.copy(showSearch = false, titleFilter = "")
                 emitAction(
                     ScreenCommonAction.NavigateTo(
-                    SceneNavKey.Search(keyword = query, focus = true, initiateSearch = true)
-                ))
+                        SceneNavKey.Search(keyword = query, focus = true, initiateSearch = true)
+                    ))
             }
 
             is WatchListEvent.UpdateSyncProgress -> {
@@ -300,8 +301,8 @@ class WatchListStateViewModel(
                 when (event.idx) {
                     1 -> emitAction(
                         ScreenCommonAction.NavigateTo(
-                        SceneNavKey.Search(focus = true,)
-                    ))
+                            SceneNavKey.Search(focus = true,)
+                        ))
 
                     2 -> emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.Installed(importMode = true)))
                     3 -> emitAction(startActivityAction(
@@ -313,8 +314,8 @@ class WatchListStateViewModel(
                 when (event.type) {
                     SectionHeader.RecentlyInstalled -> emitAction(
                         ScreenCommonAction.NavigateTo(
-                        SceneNavKey.Installed(importMode = false)
-                    ))
+                            SceneNavKey.Installed(importMode = false)
+                        ))
                     else -> { }
                 }
             }

@@ -16,12 +16,12 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import finsky.api.DfeError
 import info.anodsplace.applog.AndroidLogger
 import info.anodsplace.applog.AppLog
+import java.io.IOException
+import java.net.UnknownHostException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
-import java.io.IOException
-import java.net.UnknownHostException
 
 class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Provider, KoinComponent {
 
@@ -89,12 +89,13 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
         }
     }
 
-    private fun isNetworkError(tr: Throwable): Boolean {
-        return tr is DfeError
-            || tr is UnknownHostException
-            || (tr is IOException && tr.message?.contains("NetworkError") == true)
-            || networkConnection.isNetworkException(tr)
-    }
+    private fun isNetworkError(tr: Throwable): Boolean = tr is DfeError
+        ||
+        tr is UnknownHostException
+        ||
+        (tr is IOException && tr.message?.contains("NetworkError") == true)
+        ||
+        networkConnection.isNetworkException(tr)
 
     private inner class FirebaseLogger : AndroidLogger() {
         override fun println(priority: Int, tag: String, msg: String) {

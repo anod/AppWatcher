@@ -122,10 +122,10 @@ import info.anodsplace.compose.toAnnotatedString
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.framework.text.Html
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.text.DateFormat
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 private val iconSizeBig = 64.dp
 private val iconSizeSmall = 32.dp
@@ -543,41 +543,36 @@ private fun VersionInfoCell(
     leadingIcon: @Composable (() -> Unit)? = null,
     placeholder: Boolean = false
 ) {
-    HorizontalDivider()
-    if (leadingIcon != null) {
-        Row(
-            modifier = modifier
-                .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
-                .padding(horizontal = 4.dp)
-                .placeholder(
-                    visible = placeholder,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                    shape = MaterialTheme.shapes.small
-                ),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            leadingIcon()
+    Column(
+        modifier = modifier
+            .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
+            .padding(horizontal = 4.dp)
+            .placeholder(
+                visible = placeholder,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                shape = MaterialTheme.shapes.small
+            )
+    ) {
+        HorizontalDivider()
+        if (leadingIcon != null) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                leadingIcon()
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        } else {
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(start = 4.dp)
+                textAlign = TextAlign.Center
             )
         }
-    } else {
-        Text(
-            text = text,
-            modifier = modifier
-                .sizeIn(minWidth = 40.dp, maxWidth = 88.dp)
-                .padding(horizontal = 4.dp)
-                .placeholder(
-                    visible = placeholder,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                    shape = MaterialTheme.shapes.small
-                ),
-            style = MaterialTheme.typography.labelMedium,
-            textAlign = TextAlign.Center
-        )
     }
 }
 

@@ -21,25 +21,21 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GoogleSignInConnect
-import org.koin.java.KoinJavaComponent
 import java.util.Collections
 import java.util.concurrent.ExecutionException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import org.koin.java.KoinJavaComponent
 
-internal fun createGDriveSignInOptions(): GoogleSignInOptions {
-    return GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-        .requestEmail()
-        .build()
-}
+internal fun createGDriveSignInOptions(): GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
+    .requestEmail()
+    .build()
 
-internal fun createCredentials(context: Context, googleAccount: Account?): HttpRequestInitializer {
-    return GoogleAccountCredential
-        .usingOAuth2(context, Collections.singleton(DriveScopes.DRIVE_APPDATA))
-        .setSelectedAccount(googleAccount)
-}
+internal fun createCredentials(context: Context, googleAccount: Account?): HttpRequestInitializer = GoogleAccountCredential
+    .usingOAuth2(context, Collections.singleton(DriveScopes.DRIVE_APPDATA))
+    .setSelectedAccount(googleAccount)
 
 class GDriveSignIn(private val context: ApplicationContext) {
 
@@ -61,9 +57,7 @@ class GDriveSignIn(private val context: ApplicationContext) {
             notificationManager.notify(SyncNotification.GMS_NOTIFICATION_ID, notification)
         }
 
-        fun getLastSignedInAccount(context: Context): Account? {
-            return GoogleSignIn.getLastSignedInAccount(context)?.account
-        }
+        fun getLastSignedInAccount(context: Context): Account? = GoogleSignIn.getLastSignedInAccount(context)?.account
     }
 
     class GoogleSignInRequestException(val intent: Intent, val resultCode: Int) : Throwable()

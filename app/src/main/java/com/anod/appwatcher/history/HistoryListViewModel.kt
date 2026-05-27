@@ -38,11 +38,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Immutable
-data class HistoryListState(
-    val account: Account? = null,
-    val authToken: String = "",
-    val nameFilter: String = "",
-)
+data class HistoryListState(val account: Account? = null, val authToken: String = "", val nameFilter: String = "",)
 
 sealed interface HistoryListEvent {
     data object OnBackPress : HistoryListEvent
@@ -50,14 +46,11 @@ sealed interface HistoryListEvent {
     class SelectApp(val app: App) : HistoryListEvent
 }
 
-class HistoryListViewModel() : BaseFlowViewModel<HistoryListState, HistoryListEvent, ScreenCommonAction>(), KoinComponent {
+class HistoryListViewModel : BaseFlowViewModel<HistoryListState, HistoryListEvent, ScreenCommonAction>(), KoinComponent {
 
-    class Factory(
-    ) : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return HistoryListViewModel() as T
-        }
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T = HistoryListViewModel() as T
     }
 
     private val database: AppsDatabase by inject()

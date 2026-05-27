@@ -9,9 +9,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
 @Immutable
-data class UserLogState(
-    val messages: ImmutableList<Message> = persistentListOf()
-)
+data class UserLogState(val messages: ImmutableList<Message> = persistentListOf())
 
 sealed interface UserLogEvent {
     data object OnBackNav : UserLogEvent

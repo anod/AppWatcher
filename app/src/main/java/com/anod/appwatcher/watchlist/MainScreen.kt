@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
@@ -36,12 +37,13 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.tags.EditTagDialog
+import com.anod.appwatcher.utils.POST_NOTIFICATIONS_PERMISSION
+import com.anod.appwatcher.utils.isPostNotificationsPermissionRequired
+import com.anod.appwatcher.utils.postNotificationsPermissionRequestInput
 import info.anodsplace.framework.content.onScreenCommonAction
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
-import info.anodsplace.permissions.AppPermission
 import info.anodsplace.permissions.AppPermissions
-import info.anodsplace.permissions.toRequestInput
 
 @Composable
 fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
@@ -62,9 +64,11 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
     val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
     val drawerState = rememberDrawerState(initialValue = drawerValue)
     val context = LocalContext.current
+    val currentNavigateBack by rememberUpdatedState(navigateBack)
+    val currentNavigateTo by rememberUpdatedState(navigateTo)
 
     val notificationPermissionRequest = rememberLauncherForActivityResult(AppPermissions.Request()) {
-        val enabled = it[AppPermission.PostNotification.value] ?: false
+        val enabled = it[POST_NOTIFICATIONS_PERMISSION] ?: false
         mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(enabled))
     }
 
@@ -72,7 +76,7 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
         mainViewModel.handleEvent(MainViewEvent.SetAccount(it))
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(navigateTo) {
         mainViewModel.viewActions.collect { action ->
             if (action is MainViewAction.DrawerState) {
                 if (action.isOpen) {
@@ -86,14 +90,15 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
                     context = context,
                     accountSelectionRequest = accountSelectionRequest,
                     notificationPermissionRequest = notificationPermissionRequest,
-                    navigateTo = navigateTo
+                    navigateTo = navigateTo,
+                    onNotificationPermissionResult = { mainViewModel.handleEvent(MainViewEvent.NotificationPermissionResult(it)) }
                 )
             }
         }
     }
     LaunchedEffect(true) {
         listViewModel.viewActions.collect { action ->
-            context.onScreenCommonAction(action, navigateBack = navigateBack, navigateTo = { navigateTo(it.asNavKey) })
+            context.onScreenCommonAction(action, navigateBack = currentNavigateBack, navigateTo = { currentNavigateTo(it.asNavKey) })
         }
     }
 
@@ -121,7 +126,8 @@ private fun onMainAction(
     context: Context,
     accountSelectionRequest: ManagedActivityResultLauncher<Account?, AccountSelectionResult>,
     notificationPermissionRequest: ActivityResultLauncher<AppPermissions.Request.Input>,
-    navigateTo: (NavKey) -> Unit
+    navigateTo: (NavKey) -> Unit,
+    onNotificationPermissionResult: (Boolean) -> Unit
 ) {
     when (action) {
         is MainViewAction.NavigateTo -> {
@@ -135,13 +141,20 @@ private fun onMainAction(
             }
         }
         is MainViewAction.NavigateToTag -> navigateTo(SceneNavKey.TagWatchList(tag = action.tag))
-        MainViewAction.RequestNotificationPermission -> notificationPermissionRequest.launch(AppPermission.PostNotification.toRequestInput())
+        MainViewAction.RequestNotificationPermission -> {
+            if (isPostNotificationsPermissionRequired()) {
+                notificationPermissionRequest.launch(postNotificationsPermissionRequestInput())
+            } else {
+                onNotificationPermissionResult(true)
+            }
+        }
         is MainViewAction.ChooseAccount -> accountSelectionRequest.launch(action.currentAccount)
         is MainViewAction.ShowToast -> context.showToast(action)
         is MainViewAction.DrawerState -> { }
         is MainViewAction.StartActivity -> context.startActivity(action)
     }
 }
+
 @Composable
 fun MainScreen(
     mainState: MainViewState,

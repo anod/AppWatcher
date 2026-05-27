@@ -10,11 +10,7 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class InstalledTaskWorker(
-    private val packageManager: PackageManager,
-    private val sortId: Int,
-    private val titleFilter: String
-) {
+class InstalledTaskWorker(private val packageManager: PackageManager, private val sortId: Int, private val titleFilter: String) {
 
     suspend fun run(): List<InstalledPackageApp> = withContext(Dispatchers.Default) {
         val installedPackages = packageManager.getInstalledApps().toMutableList()

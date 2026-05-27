@@ -15,13 +15,9 @@ sealed interface AccountSelectionResult {
     class Error(val errorMessage: String) : AccountSelectionResult
 }
 
-data class AccountSelectionDialogData(
-    val currentAccount: Account?
-) : ShowDialogData
+data class AccountSelectionDialogData(val currentAccount: Account?) : ShowDialogData
 
-fun showAccountSelectionAction(
-    currentAccount: Account?
-): ScreenCommonAction = ScreenCommonAction.ShowDialog(
+fun showAccountSelectionAction(currentAccount: Account?): ScreenCommonAction = ScreenCommonAction.ShowDialog(
     AccountSelectionDialogData(currentAccount)
 )
 

@@ -12,11 +12,11 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.UserRecoverableAuthException
 import info.anodsplace.applog.AppLog
+import java.io.BufferedReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.BufferedReader
 
 /**
  * @author alex

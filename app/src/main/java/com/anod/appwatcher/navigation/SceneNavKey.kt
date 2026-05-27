@@ -6,25 +6,20 @@ import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.framework.content.ScreenCommonNavKey
 import kotlinx.serialization.Serializable
 
-
 val ScreenCommonNavKey.asNavKey: NavKey
     get() = when (this) {
         is SceneNavKey -> this
         else -> throw IllegalArgumentException("Unknown ScreenCommonNavKey: $this")
     }
 
-sealed interface SceneNavKey : NavKey, ScreenCommonNavKey {
+sealed interface SceneNavKey :
+    NavKey,
+    ScreenCommonNavKey {
     @Serializable
     data object Main : SceneNavKey
 
     @Serializable
-    data class Search(
-        val keyword: String = "",
-        val focus: Boolean = false,
-        val initiateSearch: Boolean = false,
-        val isPackageSearch: Boolean = false,
-        val isShareSource: Boolean = false
-    ) : SceneNavKey
+    data class Search(val keyword: String = "", val focus: Boolean = false, val initiateSearch: Boolean = false, val isPackageSearch: Boolean = false, val isShareSource: Boolean = false) : SceneNavKey
 
     @Serializable
     data object Settings : SceneNavKey
@@ -50,4 +45,3 @@ sealed interface SceneNavKey : NavKey, ScreenCommonNavKey {
     @Serializable
     data class AppDetails(val selectedApp: App) : SceneNavKey
 }
-

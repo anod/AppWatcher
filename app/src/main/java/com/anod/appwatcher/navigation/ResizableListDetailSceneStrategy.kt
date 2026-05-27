@@ -57,24 +57,22 @@ fun <T : Any> rememberResizableListDetailSceneStrategy(
     minPaneWidth: Dp = 320.dp,
     sceneContainer: @Composable (content: @Composable () -> Unit) -> Unit = { content -> content() },
     paneExpansionDragHandle: @Composable ThreePaneScaffoldScope.(PaneExpansionState, Modifier) -> Unit,
-): ResizableListDetailSceneStrategy<T> {
-    return remember(
-        backNavigationBehavior,
-        directive,
-        adaptStrategies,
-        minPaneWidth,
-        sceneContainer,
-        paneExpansionDragHandle,
-    ) {
-        ResizableListDetailSceneStrategy(
-            backNavigationBehavior = backNavigationBehavior,
-            directive = directive,
-            adaptStrategies = adaptStrategies,
-            minPaneWidth = minPaneWidth,
-            sceneContainer = sceneContainer,
-            paneExpansionDragHandle = paneExpansionDragHandle,
-        )
-    }
+): ResizableListDetailSceneStrategy<T> = remember(
+    backNavigationBehavior,
+    directive,
+    adaptStrategies,
+    minPaneWidth,
+    sceneContainer,
+    paneExpansionDragHandle,
+) {
+    ResizableListDetailSceneStrategy(
+        backNavigationBehavior = backNavigationBehavior,
+        directive = directive,
+        adaptStrategies = adaptStrategies,
+        minPaneWidth = minPaneWidth,
+        sceneContainer = sceneContainer,
+        paneExpansionDragHandle = paneExpansionDragHandle,
+    )
 }
 
 @ExperimentalMaterial3AdaptiveApi
@@ -148,10 +146,7 @@ class ResizableListDetailSceneStrategy<T : Any>(
         val role: ThreePaneScaffoldRole
     }
 
-    private class ListMetadata(
-        override val sceneKey: Any,
-        val detailPlaceholder: @Composable ThreePaneScaffoldScope.() -> Unit,
-    ) : PaneMetadata {
+    private class ListMetadata(override val sceneKey: Any, val detailPlaceholder: @Composable ThreePaneScaffoldScope.() -> Unit,) : PaneMetadata {
         override val role: ThreePaneScaffoldRole
             get() = ListDetailPaneScaffoldRole.List
     }
@@ -169,19 +164,14 @@ class ResizableListDetailSceneStrategy<T : Any>(
     companion object {
         private const val LIST_DETAIL_ROLE_KEY = "com.anod.appwatcher.navigation.ListDetailPaneScaffoldRole"
 
-        fun listPane(
-            sceneKey: Any = Unit,
-            detailPlaceholder: @Composable ThreePaneScaffoldScope.() -> Unit = {},
-        ): Map<String, Any> = mapOf(LIST_DETAIL_ROLE_KEY to ListMetadata(sceneKey, detailPlaceholder))
+        fun listPane(sceneKey: Any = Unit, detailPlaceholder: @Composable ThreePaneScaffoldScope.() -> Unit = {},): Map<String, Any> =
+            mapOf(LIST_DETAIL_ROLE_KEY to ListMetadata(sceneKey, detailPlaceholder))
 
-        fun detailPane(sceneKey: Any = Unit): Map<String, Any> =
-            mapOf(LIST_DETAIL_ROLE_KEY to DetailMetadata(sceneKey))
+        fun detailPane(sceneKey: Any = Unit): Map<String, Any> = mapOf(LIST_DETAIL_ROLE_KEY to DetailMetadata(sceneKey))
 
-        fun extraPane(sceneKey: Any = Unit): Map<String, Any> =
-            mapOf(LIST_DETAIL_ROLE_KEY to ExtraMetadata(sceneKey))
+        fun extraPane(sceneKey: Any = Unit): Map<String, Any> = mapOf(LIST_DETAIL_ROLE_KEY to ExtraMetadata(sceneKey))
 
-        private fun <T : Any> getPaneMetadata(entry: NavEntry<T>): PaneMetadata? =
-            entry.metadata[LIST_DETAIL_ROLE_KEY] as? PaneMetadata
+        private fun <T : Any> getPaneMetadata(entry: NavEntry<T>): PaneMetadata? = entry.metadata[LIST_DETAIL_ROLE_KEY] as? PaneMetadata
     }
 }
 
@@ -238,7 +228,7 @@ private class ResizableThreePaneScaffoldScene<T : Any>(
         LaunchedEffect(transitionState) {
             if (
                 transitionState is NavigationEventTransitionState.InProgress &&
-                    previousScaffoldValue != null
+                previousScaffoldValue != null
             ) {
                 scaffoldState.seekTo(
                     fraction = backProgressToStateProgress(
@@ -396,15 +386,12 @@ private class ResizableThreePaneScaffoldScene<T : Any>(
         return -1
     }
 
-    private fun calculateScaffoldValue(
-        destinationHistory: List<ThreePaneScaffoldDestinationItem<*>>
-    ): ThreePaneScaffoldValue =
-        calculateThreePaneScaffoldValue(
-            maxHorizontalPartitions = directive.maxHorizontalPartitions,
-            maxVerticalPartitions = directive.maxVerticalPartitions,
-            adaptStrategies = adaptStrategies,
-            destinationHistory = destinationHistory,
-        )
+    private fun calculateScaffoldValue(destinationHistory: List<ThreePaneScaffoldDestinationItem<*>>): ThreePaneScaffoldValue = calculateThreePaneScaffoldValue(
+        maxHorizontalPartitions = directive.maxHorizontalPartitions,
+        maxVerticalPartitions = directive.maxVerticalPartitions,
+        adaptStrategies = adaptStrategies,
+        destinationHistory = destinationHistory,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -436,16 +423,10 @@ private class ResizableThreePaneScaffoldScene<T : Any>(
         return result
     }
 
-    private class OnBackResult<T : Any>(
-        val previousScaffoldValue: ThreePaneScaffoldValue?,
-        val previousEntries: List<NavEntry<T>>,
-    )
+    private class OnBackResult<T : Any>(val previousScaffoldValue: ThreePaneScaffoldValue?, val previousEntries: List<NavEntry<T>>,)
 }
 
-private data class ThreePaneScaffoldSceneInfo(
-    val sceneKey: Any,
-    val sceneEntries: List<NavEntry<*>>,
-) : NavigationEventInfo()
+private data class ThreePaneScaffoldSceneInfo(val sceneKey: Any, val sceneEntries: List<NavEntry<*>>,) : NavigationEventInfo()
 
 @ExperimentalMaterial3AdaptiveApi
 private val ThreePaneScaffoldValue.paneCount: Int
@@ -468,16 +449,12 @@ private val ThreePaneScaffoldValue.expandedCount: Int
     }
 
 @ExperimentalMaterial3AdaptiveApi
-private fun backProgressToStateProgress(
-    progress: Float,
-    scaffoldValue: ThreePaneScaffoldValue,
-): Float =
-    THREE_PANE_SCAFFOLD_PREDICTIVE_BACK_EASING.transform(progress) *
-        when (scaffoldValue.expandedCount) {
-            1 -> SINGLE_PANE_PROGRESS_RATIO
-            2 -> DUAL_PANE_PROGRESS_RATIO
-            else -> TRIPLE_PANE_PROGRESS_RATIO
-        }
+private fun backProgressToStateProgress(progress: Float, scaffoldValue: ThreePaneScaffoldValue,): Float = THREE_PANE_SCAFFOLD_PREDICTIVE_BACK_EASING.transform(progress) *
+    when (scaffoldValue.expandedCount) {
+        1 -> SINGLE_PANE_PROGRESS_RATIO
+        2 -> DUAL_PANE_PROGRESS_RATIO
+        else -> TRIPLE_PANE_PROGRESS_RATIO
+    }
 
 private val THREE_PANE_SCAFFOLD_PREDICTIVE_BACK_EASING: Easing = CubicBezierEasing(0.1f, 0.1f, 0f, 1f)
 private const val SINGLE_PANE_PROGRESS_RATIO = 0.1f
