@@ -104,6 +104,9 @@ class SyncNotification(private val context: ApplicationContext, private val noti
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(contentIntent)
+            .setDeleteIntent(
+                markViewedPendingIntent(Uri.parse("com.anod.appwatcher://dismiss/"), NotificationActivity.ACTION_DISMISS)
+            )
             .setTicker(title)
 
         if (!DynamicColors.isDynamicColorAvailable()) {
@@ -141,7 +144,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
             context.actual
         )
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-            PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
+            markViewedPendingIntent(readIntent)
         )
     }
 
@@ -177,9 +180,15 @@ class SyncNotification(private val context: ApplicationContext, private val noti
             NotificationActivity.ACTION_MARK_VIEWED,
             context.actual)
         builder.addAction(R.drawable.ic_clear_white_24dp, context.getString(R.string.dismiss),
-            PendingIntent.getActivity(context.actual, 0, readIntent, PendingIntent.FLAG_IMMUTABLE)
+            markViewedPendingIntent(readIntent)
         )
     }
+
+    private fun markViewedPendingIntent(intent: Intent): PendingIntent =
+        PendingIntent.getActivity(context.actual, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+    private fun markViewedPendingIntent(uri: Uri, action: Int): PendingIntent =
+        markViewedPendingIntent(NotificationActivity.intent(uri, action, context.actual))
 
     private fun renderText(apps: List<UpdatedApp>): String {
         val count = apps.size
