@@ -31,7 +31,7 @@
 ## Worktree workflow
 
 - Work only in a dedicated git worktree for every task; keep the main checkout on `master` for coordination and branch management.
-- Create task git worktrees inside the repo's ignored `wt/` folder, for example `git worktree add -b <branch> wt/<branch> origin/master` (Windows: `wt\<branch>`).
+- Create task worktrees inside the main checkout's ignored `wt/` folder, for example `git worktree add -b <branch> wt/<branch> origin/master` (Windows: `wt\<branch>`).
 - After creating a task worktree, copy necessary ignored local build files from the main checkout into the same relative paths in the task worktree, especially `local.properties` and `app/google-services.json` when available.
 - When the task branch/PR has been merged, remove the task worktree with `git worktree remove <path>` and run `git worktree prune` to delete stale metadata.
 - If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
