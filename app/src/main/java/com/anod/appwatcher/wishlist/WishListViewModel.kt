@@ -86,8 +86,7 @@ class WishListViewModel : BaseFlowViewModel<WishListState, WishListEvent, Screen
             pageSize = 10,
             enablePlaceholders = false,
             initialLoadSize = 10,
-            prefetchDistance = 10 * 2,
-            maxSize = 200
+            prefetchDistance = 10 * 2
         )
     ) {
         WishListEndpointPagingSource(

@@ -257,6 +257,7 @@ fun SearchResultsPage(items: LazyPagingItems<ListItem>, onEvent: (SearchViewEven
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp),
+        contentPadding = WindowInsets.navigationBars.asPaddingValues()
     ) {
         items(
             count = items.itemCount,
