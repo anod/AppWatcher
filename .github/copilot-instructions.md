@@ -2,7 +2,8 @@
 
 ## Build, test, and lint
 
-- Setup: `git submodule update --init --recursive`, `local.properties` with `sdk.dir=...`, and `app/google-services.json` from `google-services.json.debug`.
+- Setup: initialize the `lib` submodule with `git submodule update --init --recursive`, create `local.properties` with `sdk.dir=...`, and provide debug Google Services config as `app/google-services.json` copied from `google-services.json.debug`.
+- In task worktrees, copy ignored local build inputs from the main checkout before building: `local.properties`, `app/google-services.json` when present, and any other required local/private files. Keep these files untracked and do not print their contents.
 - Commands:
   - Build debug APK: `./gradlew :app:assembleDebug`
   - Install/deploy debug APK to a connected device: `./gradlew :app:installDebug`
@@ -10,7 +11,7 @@
   - Run one test class/method: `./gradlew :app:testDebugUnitTest --tests "com.anod.appwatcher.watchlist.WatchListPagingSourceTest"`
   - Android lint: `./gradlew :app:lintDebug`
   - ktlint checks: `./gradlew ktlintCheck`
-- On Windows, use `.\gradlew.bat` instead of `./gradlew`.
+- On Windows, use `.\gradlew.bat` instead of `./gradlew`, and run it from the repository/worktree root.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
 ## Crashlytics investigation
@@ -30,6 +31,8 @@
 ## Worktree workflow
 
 - Work only in a dedicated git worktree for every task; keep the main checkout on `master` for coordination and branch management.
+- Create task git worktrees inside the repo's ignored `wt/` folder, for example `git worktree add -b <branch> wt/<branch> origin/master` (Windows: `wt\<branch>`).
+- After creating a task worktree, copy necessary ignored local build files from the main checkout into the same relative paths in the task worktree, especially `local.properties` and `app/google-services.json` when available.
 - When the task branch/PR has been merged, remove the task worktree with `git worktree remove <path>` and run `git worktree prune` to delete stale metadata.
 - If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
 
