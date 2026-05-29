@@ -22,7 +22,13 @@ sealed interface SectionItem {
 
     @Immutable
     class Header(val type: SectionHeader) : SectionItem {
-        override val sectionKey = "header:${hashCode()}"
+        override val sectionKey = when (type) {
+            SectionHeader.New -> "header:new"
+            SectionHeader.RecentlyDiscovered -> "header:recently-discovered"
+            SectionHeader.Watching -> "header:watching"
+            SectionHeader.RecentlyInstalled -> "header:recently-installed"
+            SectionHeader.OnDevice -> "header:on-device"
+        }
         override val contentType = "Header"
         override fun hashCode(): Int = hashCodeOf("SectionItem.Header", type)
 
@@ -33,7 +39,7 @@ sealed interface SectionItem {
     }
 
     object Recent : SectionItem {
-        override val sectionKey = "recent:${hashCode()}"
+        override val sectionKey = "recent"
         override val contentType = "Recent"
         override fun hashCode(): Int = hashCodeOf("SectionItem.Recent")
 
@@ -44,7 +50,7 @@ sealed interface SectionItem {
     }
 
     object Empty : SectionItem {
-        override val sectionKey = "empty:${hashCode()}"
+        override val sectionKey = "empty"
         override val contentType = "Empty"
         override fun hashCode(): Int = hashCodeOf("SectionItem.Empty")
 
@@ -56,7 +62,7 @@ sealed interface SectionItem {
 
     @Immutable
     class App(val appListItem: AppListItem, val isLocal: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
-        override val sectionKey = "app-${appListItem.app.rowId}:${hashCode()}"
+        override val sectionKey = "app-${appListItem.app.rowId}-${appListItem.app.packageName}"
         override val contentType = "App"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
@@ -70,7 +76,7 @@ sealed interface SectionItem {
 
     @Immutable
     class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
-        override val sectionKey = "ondevice-${appListItem.app.rowId}:${hashCode()}"
+        override val sectionKey = "ondevice-${appListItem.app.packageName}"
         override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 

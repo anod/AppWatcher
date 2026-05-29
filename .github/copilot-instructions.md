@@ -2,7 +2,7 @@
 
 ## Build, test, and lint
 
-- Setup: `git submodule update --init --recursive`, `local.properties` with `sdk.dir=...`, and `app/google-services.json` from `google-services.json.debug`.
+- Setup: initialize the `lib` submodule with `git submodule update --init --recursive`, create `local.properties` with `sdk.dir=...`, and provide debug Google Services config as `app/google-services.json` copied from `google-services.json.debug`.
 - In task worktrees, copy ignored local build inputs from the main checkout before building: `local.properties`, `app/google-services.json` when present, and any other required local/private files. Keep these files untracked and do not print their contents.
 - Commands:
   - Build debug APK: `./gradlew :app:assembleDebug`
@@ -11,7 +11,7 @@
   - Run one test class/method: `./gradlew :app:testDebugUnitTest --tests "com.anod.appwatcher.watchlist.WatchListPagingSourceTest"`
   - Android lint: `./gradlew :app:lintDebug`
   - ktlint checks: `./gradlew ktlintCheck`
-- On Windows, use `.\gradlew.bat` instead of `./gradlew`.
+- On Windows, use `.\gradlew.bat` instead of `./gradlew`, and run it from the repository/worktree root.
 - CI runs JDK 21, writes `app/google-services.json` from secrets, initializes submodules, and runs `./gradlew testDebugUnitTest`; test failures are `continue-on-error`, so inspect uploaded reports.
 
 ## Crashlytics investigation
