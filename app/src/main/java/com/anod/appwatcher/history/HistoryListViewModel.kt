@@ -77,8 +77,7 @@ class HistoryListViewModel : BaseFlowViewModel<HistoryListState, HistoryListEven
             pageSize = 17,
             enablePlaceholders = false,
             initialLoadSize = 17,
-            prefetchDistance = 17 * 2,
-            maxSize = 204
+            prefetchDistance = 17 * 2
         )
     ) {
         HistoryEndpointPagingSource(
