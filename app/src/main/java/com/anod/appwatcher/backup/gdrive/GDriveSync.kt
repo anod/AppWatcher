@@ -13,6 +13,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.UserRecoverableAuthException
 import info.anodsplace.applog.AppLog
 import java.io.BufferedReader
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,6 +33,8 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
             sLock.withLock {
                 return@withContext doSyncLocked(database)
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             AppLog.e("Sync failed: ${e.message}", "GDriveSync")
             throw SyncError(DriveService.extractUserRecoverableException(e), e)

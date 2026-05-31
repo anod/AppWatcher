@@ -34,6 +34,7 @@ import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GooglePlayServices
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -255,13 +256,21 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                         items = preferenceItems(prefs, inProgress = false, playServices, application)
                     )
                     emitAction(showToastAction(resId = R.string.sync_finish))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: GDriveSync.SyncError) {
+                    viewState = viewState.copy(isProgressVisible = false)
+                    emitAction(showToastAction(resId = R.string.sync_error))
+                    if (e.error?.intent != null) {
+                        AppLog.e("Google Drive sync requires interactive sign in: ${e.message}", "SettingsViewModel")
+                        emitAction(SettingsViewAction.GDriveErrorIntent(e.error.intent!!))
+                    } else {
+                        AppLog.e(e)
+                    }
                 } catch (e: Exception) {
                     AppLog.e(e)
                     viewState = viewState.copy(isProgressVisible = false)
                     emitAction(showToastAction(resId = R.string.sync_error))
-                    if (e is GDriveSync.SyncError && e.error?.intent != null) {
-                        emitAction(SettingsViewAction.GDriveErrorIntent(e.error.intent!!))
-                    }
                 }
             }
         } else {

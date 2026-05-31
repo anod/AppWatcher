@@ -15,6 +15,7 @@ import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.applog.AppLog
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CancellationException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.parametersOf
@@ -63,9 +64,16 @@ class UploadService(appContext: Context, params: WorkerParameters) : CoroutineWo
         val worker = get<GDriveUpload> { parametersOf(googleAccount) }
         try {
             worker.doUploadInBackground()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            AppLog.e("UploadService::doWork - ${e.message}", e)
-            DriveService.extractUserRecoverableException(e)?.let {
+            val recoverable = DriveService.extractUserRecoverableException(e)
+            if (recoverable == null) {
+                AppLog.e("UploadService::doWork - ${e.message}", e)
+            } else {
+                AppLog.e("UploadService::doWork requires interactive sign in: ${e.message}", TAG)
+            }
+            recoverable?.let {
                 val settingActivity = AppWatcherActivity.gDriveSignInIntent(applicationContext).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }

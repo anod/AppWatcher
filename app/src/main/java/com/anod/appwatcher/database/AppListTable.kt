@@ -93,7 +93,8 @@ interface AppListTable {
             "CASE WHEN :sortId = 0 THEN ${Columns.TITLE} COLLATE NOCASE END ASC, " +
             "CASE WHEN :sortId = 1 THEN ${Columns.TITLE} COLLATE NOCASE END DESC, " +
             "CASE WHEN :sortId = 2 THEN ${Columns.UPLOAD_TIMESTAMP} END ASC, " +
-            "CASE WHEN :sortId = 3 THEN ${Columns.UPLOAD_TIMESTAMP} END DESC "
+            "CASE WHEN :sortId = 3 THEN ${Columns.UPLOAD_TIMESTAMP} END DESC, " +
+            "$TABLE.${BaseColumns._ID} ASC "
     )
     fun loadAppList(includeDeleted: Boolean, sortId: Int, recentTime: Long): Cursor
 
@@ -206,38 +207,28 @@ interface AppListTable {
         }
 
         private fun createAppsListCountQuery(tagId: Int?, titleFilter: String): Pair<String, Array<String>> {
-            val appTagsTable = when (tagId) {
-                null -> ""
-                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
-                else -> "INNER JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
-            }
             val selection = createSelection(tagId, titleFilter, null)
             val sql =
                 "SELECT COUNT(DISTINCT $TABLE.${BaseColumns._ID}) " +
-                    "FROM $TABLE " + appTagsTable +
+                    "FROM $TABLE " +
                     "WHERE ${selection.first} "
             return Pair(sql, selection.second)
         }
 
-        private fun createAppsListQuery(
+        internal fun createAppsListQuery(
             sortId: Int,
             orderByRecentlyDiscovered: Boolean,
             tagId: Int?,
             titleFilter: String,
             offset: SqlOffset?
         ): Pair<String, Array<String>> {
-            val appTagsTable = when (tagId) {
-                null -> ""
-                Tag.empty.id -> "LEFT JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
-                else -> "INNER JOIN ${AppTagsTable.TABLE} ON ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} "
-            }
             val rangeSql = if (offset == null) "" else " LIMIT ? OFFSET ? "
             val selection = createSelection(tagId, titleFilter, offset)
 
             val sql =
                 "SELECT $TABLE.*, ${ChangelogTable.TableColumns.DETAILS}, ${ChangelogTable.TableColumns.NO_NEW_DETAILS}, " +
                     "CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
-                    "FROM $TABLE " + appTagsTable +
+                    "FROM $TABLE " +
                     "LEFT JOIN ${ChangelogTable.TABLE} ON ${TableColumns.APP_ID} == ${ChangelogTable.TableColumns.APP_ID} " +
                     "AND ${TableColumns.VERSION_NUMBER} == ${ChangelogTable.TableColumns.VERSION_CODE} " +
                     "WHERE ${selection.first} " +
@@ -293,9 +284,20 @@ interface AppListTable {
 
             if (tagId != null) {
                 if (tagId == Tag.empty.id) {
-                    selc.add(AppTagsTable.TableColumns.TAG_ID + " IS NULL")
+                    selc.add(
+                        "NOT EXISTS (" +
+                            "SELECT 1 FROM ${AppTagsTable.TABLE} " +
+                            "WHERE ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID}" +
+                            ")"
+                    )
                 } else {
-                    selc.add(AppTagsTable.TableColumns.TAG_ID + " = ?")
+                    selc.add(
+                        "EXISTS (" +
+                            "SELECT 1 FROM ${AppTagsTable.TABLE} " +
+                            "WHERE ${AppTagsTable.TableColumns.APP_ID} = ${TableColumns.APP_ID} " +
+                            "AND ${AppTagsTable.TableColumns.TAG_ID} = ?" +
+                            ")"
+                    )
                     args.add(tagId.toString())
                 }
             }
