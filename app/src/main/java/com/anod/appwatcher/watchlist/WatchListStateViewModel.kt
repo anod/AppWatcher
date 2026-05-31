@@ -78,10 +78,21 @@ data class WatchListSharedState(
     val showEditTagDialog: Boolean = false,
     val tagAppsChange: Int = 0,
     val dbAppsChange: Int = 0,
+    val listConfigChange: Int = 0,
     val recentlyInstalledApps: ImmutableList<App>? = null,
     val refreshRequest: Int = 0,
     val enablePullToRefresh: Boolean = false,
     val isRequestPinShortcutSupported: Boolean = false
+)
+
+@Immutable
+data class WatchListPreferences(
+    val defaultFilterId: Int = Filters.ALL,
+    val showOnDeviceApps: Boolean = false,
+    val showRecentlyInstalledApps: Boolean = true,
+    val showRecentlyDiscoveredApps: Boolean = true,
+    val enablePullToRefresh: Boolean = true,
+    val iconShape: String = "",
 )
 
 sealed interface WatchListEvent {
@@ -104,6 +115,7 @@ sealed interface WatchListEvent {
     class EmptyButton(val idx: Int) : WatchListEvent
     class AppLongClick(val app: App, val index: Int) : WatchListEvent
     class SectionHeaderClick(val type: SectionHeader) : WatchListEvent
+    class UpdatePreferences(val preferences: WatchListPreferences) : WatchListEvent
 }
 
 sealed interface WatchListTagFilter {
@@ -117,8 +129,8 @@ class WatchListStateViewModel(
     tag: Tag,
     defaultFilterId: Int,
     private val tagFilter: WatchListTagFilter,
-    private val showOnDeviceApps: Boolean,
-    private val showRecentlyInstalledApps: Boolean,
+    showOnDeviceApps: Boolean,
+    showRecentlyInstalledApps: Boolean,
 ) : BaseFlowViewModel<WatchListSharedState, WatchListEvent, ScreenCommonAction>(),
     KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
@@ -131,6 +143,14 @@ class WatchListStateViewModel(
 
     val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
+    private var watchListPreferences = WatchListPreferences(
+        defaultFilterId = defaultFilterId,
+        showOnDeviceApps = showOnDeviceApps,
+        showRecentlyInstalledApps = showRecentlyInstalledApps,
+        showRecentlyDiscoveredApps = prefs.showRecentlyDiscovered,
+        enablePullToRefresh = prefs.enablePullToRefresh,
+        iconShape = prefs.iconShape,
+    )
     private val pagerFactories: MutableMap<Int, WatchListPagerFactory> = mutableMapOf()
     fun listPagerFactory(filterId: Int, tag: Tag): WatchListPagerFactory {
         val tagId = when (tagFilter) {
@@ -141,9 +161,9 @@ class WatchListStateViewModel(
         val pagingSourceConfig = WatchListPagingSource.Config(
             filterId = filterId,
             tagId = tagId,
-            showRecentlyDiscovered = prefs.showRecentlyDiscovered,
-            showOnDevice = filterId == Filters.ALL && showOnDeviceApps,
-            showRecentlyInstalled = filterId == Filters.ALL && showRecentlyInstalledApps,
+            showRecentlyDiscovered = watchListPreferences.showRecentlyDiscoveredApps,
+            showOnDevice = filterId == Filters.ALL && watchListPreferences.showOnDeviceApps,
+            showRecentlyInstalled = filterId == Filters.ALL && watchListPreferences.showRecentlyInstalledApps,
         )
         val configKey = pagingSourceConfig.hashCode()
         AppLog.d("[Paging] listPagerFactory: $configKey")
@@ -179,14 +199,14 @@ class WatchListStateViewModel(
 
     init {
         val expandSearch = state.remove("expand_search") ?: false
-        val fromNotification = state.remove("extra_noti") ?: false
+        val fromNotification = state.remove(AppWatcherActivity.EXTRA_FROM_NOTIFICATION) ?: false
         val filterId = if (fromNotification || expandSearch) defaultFilterId else state.getInt("tab_id", defaultFilterId)
         viewState = WatchListSharedState(
             tag = tag,
             sortId = prefs.sortIndex,
             filterId = filterId,
             showSearch = expandSearch,
-            enablePullToRefresh = prefs.enablePullToRefresh,
+            enablePullToRefresh = watchListPreferences.enablePullToRefresh,
             isRequestPinShortcutSupported = if (!tag.isEmpty) shortcutManager.isSupported else false
         )
 
@@ -244,18 +264,22 @@ class WatchListStateViewModel(
                 }
         }
 
-        if (showRecentlyInstalledApps) {
-            viewModelScope.launch {
-                viewStates.map { "${it.refreshRequest}-${it.dbAppsChange}" }
-                    .combine(packageChangedReceiver.observer.onStart { emit("") }) { viewStateChange, packageName -> "$viewStateChange-$packageName" }
-                    .distinctUntilChanged()
-                    .map {
+        viewModelScope.launch {
+            viewStates.map { "${it.refreshRequest}-${it.dbAppsChange}-${it.listConfigChange}" }
+                .combine(packageChangedReceiver.observer.onStart { emit("") }) { viewStateChange, packageName -> "$viewStateChange-$packageName" }
+                .distinctUntilChanged()
+                .map {
+                    if (watchListPreferences.showRecentlyInstalledApps) {
                         recentlyInstalledAppsLoader.load(limit = 20)
+                    } else {
+                        emptyList()
                     }
-                    .collect {
-                        viewState = viewState.copy(recentlyInstalledApps = it.toPersistentList())
-                    }
-            }
+                }
+                .collect {
+                    viewState = viewState.copy(
+                        recentlyInstalledApps = if (watchListPreferences.showRecentlyInstalledApps) it.toPersistentList() else null
+                    )
+                }
         }
     }
 
@@ -296,6 +320,7 @@ class WatchListStateViewModel(
                 intent = Intent().forMyApps(true),
             ))
             WatchListEvent.Refresh -> refresh()
+            is WatchListEvent.UpdatePreferences -> updatePreferences(event.preferences)
             is WatchListEvent.AppClick -> {
                 emitAction(ScreenCommonAction.NavigateTo(SceneNavKey.AppDetails(event.app)))
             }
@@ -400,4 +425,33 @@ class WatchListStateViewModel(
             pagerFactory.invalidatePagingSource()
         }
     }
+
+    private fun updatePreferences(preferences: WatchListPreferences) {
+        if (watchListPreferences == preferences) {
+            return
+        }
+        val currentPreferences = watchListPreferences
+        watchListPreferences = preferences
+        invalidatePagingSources()
+        pagerFactories.clear()
+        viewState = watchListStateForPreferencesChange(
+            viewState = viewState,
+            currentPreferences = currentPreferences,
+            newPreferences = preferences
+        )
+    }
+}
+
+internal fun watchListStateForPreferencesChange(
+    viewState: WatchListSharedState,
+    currentPreferences: WatchListPreferences,
+    newPreferences: WatchListPreferences,
+): WatchListSharedState {
+    val defaultFilterChanged = currentPreferences.defaultFilterId != newPreferences.defaultFilterId
+    return viewState.copy(
+        filterId = if (defaultFilterChanged) newPreferences.defaultFilterId else viewState.filterId,
+        enablePullToRefresh = newPreferences.enablePullToRefresh,
+        listConfigChange = viewState.listConfigChange + 1,
+        recentlyInstalledApps = if (newPreferences.showRecentlyInstalledApps) viewState.recentlyInstalledApps else null,
+    )
 }

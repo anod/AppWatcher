@@ -48,18 +48,18 @@ import info.anodsplace.permissions.AppPermissions
 @Composable
 fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (NavKey) -> Unit) {
     val mainViewModel: MainViewModel = viewModel()
-    val listViewModel: WatchListStateViewModel = viewModel(factory =
-        WatchListStateViewModel.Factory(
-            defaultFilterId = prefs.defaultMainFilterId,
+    val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
+    val listViewModel: WatchListStateViewModel = viewModel(
+        factory = WatchListStateViewModel.Factory(
+            defaultFilterId = mainState.watchListPreferences.defaultFilterId,
             initialTag = Tag.empty,
             tagFilter = WatchListTagFilter.None,
-            showOnDeviceApps = prefs.showOnDevice,
-            showRecentlyInstalledApps = prefs.showRecent,
+            showOnDeviceApps = mainState.watchListPreferences.showOnDeviceApps,
+            showRecentlyInstalledApps = mainState.watchListPreferences.showRecentlyInstalledApps,
         ),
         key = SceneNavKey.Main.toString()
     )
 
-    val mainState by mainViewModel.viewStates.collectAsState(initial = mainViewModel.viewState)
     val listState by listViewModel.viewStates.collectAsState(initial = listViewModel.viewState)
     val drawerValue = if (mainState.isDrawerOpen) DrawerValue.Open else DrawerValue.Closed
     val drawerState = rememberDrawerState(initialValue = drawerValue)
@@ -96,10 +96,13 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
             }
         }
     }
-    LaunchedEffect(true) {
+    LaunchedEffect(listViewModel) {
         listViewModel.viewActions.collect { action ->
             context.onScreenCommonAction(action, navigateBack = currentNavigateBack, navigateTo = { currentNavigateTo(it.asNavKey) })
         }
+    }
+    LaunchedEffect(mainState.watchListPreferences) {
+        listViewModel.handleEvent(WatchListEvent.UpdatePreferences(mainState.watchListPreferences))
     }
 
     AppTheme(

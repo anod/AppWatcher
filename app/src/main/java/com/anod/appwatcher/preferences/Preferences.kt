@@ -134,16 +134,16 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         set(notify) = preferences.edit().putBoolean("notify-no-changes", notify).apply()
 
     var showRecent: Boolean
-        get() = preferences.getBoolean("show-recent", true)
-        set(value) = preferences.edit().putBoolean("show-recent", value).apply()
+        get() = preferences.getBoolean(SHOW_RECENT, true)
+        set(value) = preferences.edit().putBoolean(SHOW_RECENT, value).apply()
 
     var showOnDevice: Boolean
-        get() = preferences.getBoolean("show-on-device", false)
-        set(value) = preferences.edit().putBoolean("show-on-device", value).apply()
+        get() = preferences.getBoolean(SHOW_ON_DEVICE, false)
+        set(value) = preferences.edit().putBoolean(SHOW_ON_DEVICE, value).apply()
 
     var showRecentlyDiscovered: Boolean
-        get() = preferences.getBoolean("show-recently-updated", true)
-        set(value) = preferences.edit().putBoolean("show-recently-updated", value).apply()
+        get() = preferences.getBoolean(SHOW_RECENTLY_DISCOVERED, true)
+        set(value) = preferences.edit().putBoolean(SHOW_RECENTLY_DISCOVERED, value).apply()
 
     val selectedTheme: SelectedTheme
         get() = SelectedTheme(themeIndex, themeMode)
@@ -167,12 +167,12 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         }
 
     var defaultMainFilterId: Int
-        get() = preferences.getInt(FILTER_ID, Filters.ALL)
-        set(filterId) = preferences.edit().putInt(FILTER_ID, filterId).apply()
+        get() = preferences.getInt(DEFAULT_MAIN_FILTER_ID, Filters.ALL)
+        set(filterId) = preferences.edit().putInt(DEFAULT_MAIN_FILTER_ID, filterId).apply()
 
     var enablePullToRefresh: Boolean
-        get() = preferences.getBoolean("pull-to-refresh", true)
-        set(value) = preferences.edit().putBoolean("pull-to-refresh", value).apply()
+        get() = preferences.getBoolean(PULL_TO_REFRESH, true)
+        set(value) = preferences.edit().putBoolean(PULL_TO_REFRESH, value).apply()
 
     var collectCrashReports: Boolean
         get() = preferences.getBoolean("crash-reports", true)
@@ -183,8 +183,8 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         }
 
     var iconShape: String
-        get() = preferences.getString("adaptive-icon-shape", defaultSystemMask)!!
-        set(value) = preferences.edit().putString("adaptive-icon-shape", value).apply()
+        get() = preferences.getString(ICON_SHAPE, defaultSystemMask)!!
+        set(value) = preferences.edit().putString(ICON_SHAPE, value).apply()
 
     val defaultSystemMask: String by lazy {
         AdaptiveIcon.getSystemDefaultMask()
@@ -202,7 +202,12 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         private const val ACCOUNT_NAME = "account_name"
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"
-        private const val FILTER_ID = "default_main_filter_id"
+        const val DEFAULT_MAIN_FILTER_ID = "default_main_filter_id"
+        const val SHOW_RECENT = "show-recent"
+        const val SHOW_ON_DEVICE = "show-on-device"
+        const val SHOW_RECENTLY_DISCOVERED = "show-recently-updated"
+        const val PULL_TO_REFRESH = "pull-to-refresh"
+        const val ICON_SHAPE = "adaptive-icon-shape"
 
         const val SORT_NAME_ASC = 0
         const val SORT_NAME_DESC = 1
