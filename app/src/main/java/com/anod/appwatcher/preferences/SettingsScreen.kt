@@ -246,6 +246,11 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
 }
 
 fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (SettingsViewEvent) -> Unit) {
+    fun updateListPreference(update: (Boolean) -> Unit) {
+        val checked = (item as PreferenceItem.Switch).checked
+        onEvent(SettingsViewEvent.UpdateListPreference(checked, update))
+    }
+
     when (item.key) {
         "drive_sync" -> onEvent(SettingsViewEvent.GDriveSyncToggle((item as PreferenceItem.Switch).checked))
         "drive-sync-now" -> onEvent(SettingsViewEvent.GDriveSyncNow)
@@ -275,16 +280,16 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
             onEvent(SettingsViewEvent.UpdateCrashReports((item as PreferenceItem.Switch).checked))
         }
         Preferences.PULL_TO_REFRESH -> {
-            onEvent(SettingsViewEvent.UpdateListPreference(item) { prefs.enablePullToRefresh = it })
+            updateListPreference { prefs.enablePullToRefresh = it }
         }
         Preferences.SHOW_RECENT -> {
-            onEvent(SettingsViewEvent.UpdateListPreference(item) { prefs.showRecent = it })
+            updateListPreference { prefs.showRecent = it }
         }
         Preferences.SHOW_ON_DEVICE -> {
-            onEvent(SettingsViewEvent.UpdateListPreference(item) { prefs.showOnDevice = it })
+            updateListPreference { prefs.showOnDevice = it }
         }
         Preferences.SHOW_RECENTLY_DISCOVERED -> {
-            onEvent(SettingsViewEvent.UpdateListPreference(item) { prefs.showRecentlyDiscovered = it })
+            updateListPreference { prefs.showRecentlyDiscovered = it }
         }
         "default-filter" -> {
             prefs.defaultMainFilterId = (item as PreferenceItem.Pick).value.toInt()

@@ -56,7 +56,7 @@ sealed interface SettingsViewEvent {
     class GDriveActivityResult(val activityResult: ActivityResult) : SettingsViewEvent
     class ChangeUpdatePolicy(val frequency: Int, val isWifiOnly: Boolean, val isRequiresCharging: Boolean) : SettingsViewEvent
     class UpdateCrashReports(val checked: Boolean) : SettingsViewEvent
-    class UpdateListPreference(val item: PreferenceItem, val update: (Boolean) -> Unit) : SettingsViewEvent
+    class UpdateListPreference(val checked: Boolean, val update: (Boolean) -> Unit) : SettingsViewEvent
     class UpdateTheme(val newTheme: Int) : SettingsViewEvent
     object NavigateBack : SettingsViewEvent
     object TestNotification : SettingsViewEvent
@@ -146,7 +146,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     ))
             }
             is SettingsViewEvent.UpdateListPreference -> {
-                event.update((event.item as PreferenceItem.Switch).checked)
+                event.update(event.checked)
+                viewState = viewState.copy(
+                    items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
+                )
             }
             SettingsViewEvent.TestNotification -> testNotification()
             is SettingsViewEvent.UpdateCrashReports -> updateCrashReports(event.checked)
@@ -343,6 +346,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             viewState = viewState.copy(
                 items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
             )
+            emitAction(SettingsViewAction.Rebirth)
         }
     }
 
