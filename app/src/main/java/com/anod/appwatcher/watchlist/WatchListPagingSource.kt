@@ -57,11 +57,7 @@ class WatchListPagingSource(
             sortId, config.showRecentlyDiscovered, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
         )
         val filtered = data.filter { !itemFilter.filterRecord(it) }
-        var totalItems = countTotalItems(
-            offset = offset,
-            dataSize = data.size,
-            filteredSize = filtered.size
-        )
+        var totalItems = countTotalItems()
 
         items.addAll(filtered.map {
             SectionItem.App(
@@ -71,30 +67,13 @@ class WatchListPagingSource(
             )
         })
 
-        if (filtered.isEmpty()) {
-            if (params.key != null && config.showOnDevice) {
-                totalItems = LoadResult.Page.COUNT_UNDEFINED
-                val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
-                val allInstalledPackageNames = installed.map { it.pkg.name }
-                val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
-                allInstalledPackageNames
-                    .asSequence()
-                    .filterNot { watchingPackages.containsKey(it) }
-                    .map { packageManager.packageToApp(-1, it) }
-                    .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
-                    .forEach { item ->
-                        items.add(
-                            SectionItem.OnDevice(
-                                appListItem = item,
-                                showSelection = false,
-                                packageInfo = installedApps.packageInfo(item.app.packageName)
-                            )
-                        )
-                    }
-            } else if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent) {
-                items.add(SectionItem.Empty)
-                totalItems = items.size
-            }
+        if (config.showOnDevice && data.size < limit) {
+            items.addAll(loadOnDeviceItems(sortId))
+        }
+
+        if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent && items.size == 1) {
+            items.add(SectionItem.Empty)
+            totalItems = items.size
         }
 
         val (prevKey, nextKey) = calculateKeys(
@@ -125,12 +104,30 @@ class WatchListPagingSource(
         return page
     }
 
-    private suspend fun countTotalItems(offset: Int, dataSize: Int, filteredSize: Int): Int {
-        if (config.filterId != Filters.ALL) {
+    private suspend fun countTotalItems(): Int {
+        if (config.filterId != Filters.ALL || config.showOnDevice) {
             return LoadResult.Page.COUNT_UNDEFINED
         }
         val appsCount = AppListTable.Queries.countAppList(config.tagId, filterQuery, database.apps())
         return appsCount + if (config.showRecentlyInstalled) 1 else 0
+    }
+
+    private suspend fun loadOnDeviceItems(sortId: Int): List<SectionItem.OnDevice> {
+        val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
+        val allInstalledPackageNames = installed.map { it.pkg.name }
+        val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
+        return allInstalledPackageNames
+            .asSequence()
+            .filterNot { watchingPackages.containsKey(it) }
+            .map { packageManager.packageToApp(-1, it) }
+            .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
+            .map { item ->
+                SectionItem.OnDevice(
+                    appListItem = item,
+                    showSelection = false,
+                    packageInfo = installedApps.packageInfo(item.app.packageName)
+                )
+            }.toList()
     }
 
     override fun getRefreshKey(state: PagingState<Int, SectionItem>): Int {
