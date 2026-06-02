@@ -34,6 +34,7 @@ import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GooglePlayServices
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -44,7 +45,7 @@ import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
 @Immutable
-data class SettingsViewState(val items: List<PreferenceItem>, val isProgressVisible: Boolean = false, val recreateWatchlistOnBack: Boolean = false, val areNotificationsEnabled: Boolean = false,)
+data class SettingsViewState(val items: List<PreferenceItem>, val isProgressVisible: Boolean = false, val areNotificationsEnabled: Boolean = false,)
 
 sealed interface SettingsViewEvent {
     class Export(val uri: Uri) : SettingsViewEvent
@@ -55,7 +56,7 @@ sealed interface SettingsViewEvent {
     class GDriveActivityResult(val activityResult: ActivityResult) : SettingsViewEvent
     class ChangeUpdatePolicy(val frequency: Int, val isWifiOnly: Boolean, val isRequiresCharging: Boolean) : SettingsViewEvent
     class UpdateCrashReports(val checked: Boolean) : SettingsViewEvent
-    class SetRecreateFlag(val item: PreferenceItem, val enabled: Boolean, val update: (Boolean) -> Unit) : SettingsViewEvent
+    class UpdateListPreference(val checked: Boolean, val update: (Boolean) -> Unit) : SettingsViewEvent
     class UpdateTheme(val newTheme: Int) : SettingsViewEvent
     object NavigateBack : SettingsViewEvent
     object TestNotification : SettingsViewEvent
@@ -76,7 +77,6 @@ sealed interface SettingsViewAction {
         ShowToastActionDefaults(resId, text, length),
         SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
-    object Recreate : SettingsViewAction
     object Rebirth : SettingsViewAction
     object RequestNotificationPermission : SettingsViewAction
     class ExportResult(val result: Int) : SettingsViewAction
@@ -145,9 +145,11 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                         Intent(application, OssLicensesMenuActivity::class.java),
                     ))
             }
-            is SettingsViewEvent.SetRecreateFlag -> {
-                val result = setRecreateFlag(event.item, event.enabled)
-                event.update(result)
+            is SettingsViewEvent.UpdateListPreference -> {
+                event.update(event.checked)
+                viewState = viewState.copy(
+                    items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
+                )
             }
             SettingsViewEvent.TestNotification -> testNotification()
             is SettingsViewEvent.UpdateCrashReports -> updateCrashReports(event.checked)
@@ -257,13 +259,21 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                         items = preferenceItems(prefs, inProgress = false, playServices, application)
                     )
                     emitAction(showToastAction(resId = R.string.sync_finish))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: GDriveSync.SyncError) {
+                    viewState = viewState.copy(isProgressVisible = false)
+                    emitAction(showToastAction(resId = R.string.sync_error))
+                    if (e.error?.intent != null) {
+                        AppLog.e("Google Drive sync requires interactive sign in: ${e.message}", "SettingsViewModel")
+                        emitAction(SettingsViewAction.GDriveErrorIntent(e.error.intent!!))
+                    } else {
+                        AppLog.e(e)
+                    }
                 } catch (e: Exception) {
                     AppLog.e(e)
                     viewState = viewState.copy(isProgressVisible = false)
                     emitAction(showToastAction(resId = R.string.sync_error))
-                    if (e is GDriveSync.SyncError && e.error?.intent != null) {
-                        emitAction(SettingsViewAction.GDriveErrorIntent(e.error.intent!!))
-                    }
                 }
             }
         } else {
@@ -318,14 +328,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         }
     }
 
-    private fun setRecreateFlag(item: PreferenceItem, oldValue: Boolean): Boolean {
-        val newValue = (item as PreferenceItem.Switch).checked
-        if (!viewState.recreateWatchlistOnBack) {
-            viewState = viewState.copy(recreateWatchlistOnBack = oldValue != newValue)
-        }
-        return newValue
-    }
-
     private fun updateTheme(newThemeIndex: Int) {
         if (prefs.themeIndex == newThemeIndex) {
             return
@@ -341,8 +343,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             recreate = true
         }
         if (recreate) {
-            viewState = viewState.copy(recreateWatchlistOnBack = true)
-            emitAction(SettingsViewAction.Recreate)
+            viewState = viewState.copy(
+                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application)
+            )
+            emitAction(SettingsViewAction.Rebirth)
         }
     }
 
@@ -351,12 +355,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             return
         }
         prefs.iconShape = newIconShape
-        viewState = viewState.copy(recreateWatchlistOnBack = true)
     }
 
     private fun updateCrashReports(checked: Boolean) {
         prefs.collectCrashReports = checked
-        emitAction(SettingsViewAction.Recreate)
     }
 
     private fun testNotification() {

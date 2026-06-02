@@ -13,11 +13,8 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.utils.networkConnection
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import finsky.api.DfeError
 import info.anodsplace.applog.AndroidLogger
 import info.anodsplace.applog.AppLog
-import java.io.IOException
-import java.net.UnknownHostException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
@@ -79,8 +76,7 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
     }
 
     override fun onLogException(tr: Throwable) {
-        if (isNetworkError(tr) || tr is kotlinx.coroutines.CancellationException) {
-            // Ignore
+        if (CrashlyticsExceptionFilter.shouldIgnore(tr, networkConnection::isNetworkException)) {
             return
         }
 
@@ -88,11 +84,6 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
             FirebaseCrashlytics.getInstance().recordException(tr)
         }
     }
-
-    private fun isNetworkError(tr: Throwable): Boolean = tr is DfeError ||
-        tr is UnknownHostException ||
-        (tr is IOException && tr.message?.contains("NetworkError") == true) ||
-        networkConnection.isNetworkException(tr)
 
     private inner class FirebaseLogger : AndroidLogger() {
         override fun println(priority: Int, tag: String, msg: String) {

@@ -30,6 +30,7 @@ import info.anodsplace.ktx.Hash
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -41,6 +42,7 @@ data class MainViewState(
     val drawerItems: List<DrawerItem> = com.anod.appwatcher.watchlist.drawerItems,
     val account: AuthAccount? = null,
     val lastUpdate: Long = 0L,
+    val watchListPreferences: WatchListPreferences = WatchListPreferences(),
     val tags: TagCountList = emptyList(),
     val showNewTagDialog: Boolean = false,
     val isDrawerOpen: Boolean = false,
@@ -88,7 +90,8 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         viewState = MainViewState(
             account = prefs.account,
             accountInitializedRetries = 2,
-            lastUpdate = prefs.lastUpdateTime
+            lastUpdate = prefs.lastUpdateTime,
+            watchListPreferences = watchListPreferences(prefs)
         )
 
         viewModelScope.launch {
@@ -117,6 +120,16 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                 .distinctUntilChanged()
                 .collect {
                     viewState = viewState.copy(lastUpdate = prefs.lastUpdateTime)
+                }
+        }
+
+        viewModelScope.launch {
+            prefs.changes
+                .filter { it in watchListPreferenceKeys }
+                .map { watchListPreferences(prefs) }
+                .distinctUntilChanged()
+                .collect {
+                    viewState = viewState.copy(watchListPreferences = it)
                 }
         }
 
@@ -251,3 +264,21 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         }
     }
 }
+
+internal val watchListPreferenceKeys = setOf(
+    Preferences.DEFAULT_MAIN_FILTER_ID,
+    Preferences.SHOW_ON_DEVICE,
+    Preferences.SHOW_RECENT,
+    Preferences.SHOW_RECENTLY_DISCOVERED,
+    Preferences.PULL_TO_REFRESH,
+    Preferences.ICON_SHAPE
+)
+
+internal fun watchListPreferences(prefs: Preferences) = WatchListPreferences(
+    defaultFilterId = prefs.defaultMainFilterId,
+    showOnDeviceApps = prefs.showOnDevice,
+    showRecentlyInstalledApps = prefs.showRecent,
+    showRecentlyDiscoveredApps = prefs.showRecentlyDiscovered,
+    enablePullToRefresh = prefs.enablePullToRefresh,
+    iconShape = prefs.iconShape,
+)

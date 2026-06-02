@@ -17,4 +17,11 @@ class NotificationActivityTest {
         assertFalse(shouldMarkUpdatesViewed(NOTIFICATION_ACTION_PLAY_STORE))
         assertFalse(shouldMarkUpdatesViewed(NOTIFICATION_ACTION_MY_APPS))
     }
+
+    @Test
+    fun notificationLaunchMarksUpdatesViewed() {
+        assertTrue(shouldMarkUpdatesViewedFromNotification(fromNotification = true, isRestoredLaunch = false))
+        assertFalse(shouldMarkUpdatesViewedFromNotification(fromNotification = false, isRestoredLaunch = false))
+        assertFalse(shouldMarkUpdatesViewedFromNotification(fromNotification = true, isRestoredLaunch = true))
+    }
 }

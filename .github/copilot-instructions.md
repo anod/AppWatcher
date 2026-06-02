@@ -34,7 +34,8 @@
 - Create task worktrees inside the main checkout's ignored `wt/` folder, for example `git worktree add -b <branch> wt/<branch> origin/master` (Windows: `wt\<branch>`).
 - After creating a task worktree, copy necessary ignored local build files from the main checkout into the same relative paths in the task worktree, especially `local.properties` and `app/google-services.json` when available.
 - When the task branch/PR has been merged, remove the task worktree with `git worktree remove <path>` and run `git worktree prune` to delete stale metadata.
-- If a task changes a submodule pointer, commit and push the submodule repository first, then verify the exact SHA is fetchable from its remote before committing or opening/pushing the parent AppWatcher PR.
+- When changing files inside the `lib` submodule, treat `lib` as its own repository: commit the `lib` changes inside `lib`, push that commit to the submodule remote, and verify the exact pushed SHA is fetchable.
+- After the `lib` commit is pushed and verified, update the parent AppWatcher repository's `lib` gitlink/submodule pointer to that new commit, then include the pointer update in the parent AppWatcher commit/PR.
 
 ## Architecture
 

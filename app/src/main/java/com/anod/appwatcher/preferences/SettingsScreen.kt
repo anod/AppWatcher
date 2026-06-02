@@ -1,6 +1,5 @@
 package com.anod.appwatcher.preferences
 
-import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -56,7 +55,6 @@ import info.anodsplace.compose.Preference
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.compose.key
-import info.anodsplace.framework.app.findActivity
 import info.anodsplace.framework.content.CreateDocument
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
@@ -95,11 +93,6 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
                 is SettingsViewAction.ExportResult -> onExportResult(action.result, context)
                 is SettingsViewAction.ImportResult -> onImportResult(action.result, context)
                 is SettingsViewAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
-                SettingsViewAction.Recreate -> {
-                    context.findActivity().setResult(RESULT_OK, Intent().putExtra("recreateWatchlistOnBack", true))
-                    context.findActivity().recreate()
-                    recreateWatchlist(context)
-                }
                 SettingsViewAction.Rebirth -> {
                     ProcessPhoenix.triggerRebirth(context.applicationContext, Intent(context.applicationContext, AppWatcherActivity::class.java))
                 }
@@ -117,12 +110,6 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
             }
         }
     }
-}
-
-private fun recreateWatchlist(context: Context) {
-    val i = Intent(context, AppWatcherActivity::class.java)
-    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-    context.startActivity(i)
 }
 
 private fun onImportResult(result: Int, context: Context) {
@@ -259,6 +246,11 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
 }
 
 fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (SettingsViewEvent) -> Unit) {
+    fun updateListPreference(update: (Boolean) -> Unit) {
+        val checked = (item as PreferenceItem.Switch).checked
+        onEvent(SettingsViewEvent.UpdateListPreference(checked, update))
+    }
+
     when (item.key) {
         "drive_sync" -> onEvent(SettingsViewEvent.GDriveSyncToggle((item as PreferenceItem.Switch).checked))
         "drive-sync-now" -> onEvent(SettingsViewEvent.GDriveSyncNow)
@@ -287,17 +279,17 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
         "crash-reports" -> {
             onEvent(SettingsViewEvent.UpdateCrashReports((item as PreferenceItem.Switch).checked))
         }
-        "pull-to-refresh" -> {
-            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.enablePullToRefresh) { prefs.enablePullToRefresh = it })
+        Preferences.PULL_TO_REFRESH -> {
+            updateListPreference { prefs.enablePullToRefresh = it }
         }
-        "show-recent" -> {
-            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecent) { prefs.showRecent = it })
+        Preferences.SHOW_RECENT -> {
+            updateListPreference { prefs.showRecent = it }
         }
-        "show-on-device" -> {
-            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showOnDevice) { prefs.showOnDevice = it })
+        Preferences.SHOW_ON_DEVICE -> {
+            updateListPreference { prefs.showOnDevice = it }
         }
-        "show-recently-updated" -> {
-            onEvent(SettingsViewEvent.SetRecreateFlag(item, prefs.showRecentlyDiscovered) { prefs.showRecentlyDiscovered = it })
+        Preferences.SHOW_RECENTLY_DISCOVERED -> {
+            updateListPreference { prefs.showRecentlyDiscovered = it }
         }
         "default-filter" -> {
             prefs.defaultMainFilterId = (item as PreferenceItem.Pick).value.toInt()

@@ -44,8 +44,11 @@ import com.anod.appwatcher.watchlist.DetailContent
 import com.anod.appwatcher.watchlist.DetailPlaceholder
 import com.anod.appwatcher.watchlist.MainScreenScene
 import com.anod.appwatcher.wishlist.WishListScreenScene
+import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.app.addMultiWindowFlags
 import org.koin.core.component.KoinComponent
+
+internal fun shouldMarkUpdatesViewedFromNotification(fromNotification: Boolean, isRestoredLaunch: Boolean) = fromNotification && !isRestoredLaunch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
@@ -53,6 +56,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme_Main)
         super.onCreate(savedInstanceState)
+        markUpdatesViewedFromNotification(intent, isRestoredLaunch = savedInstanceState != null)
 
         val elements = createInitialBackstack()
         setContent {
@@ -122,6 +126,20 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 }
             )
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        markUpdatesViewedFromNotification(intent, isRestoredLaunch = false)
+    }
+
+    private fun markUpdatesViewedFromNotification(intent: Intent?, isRestoredLaunch: Boolean) {
+        if (!shouldMarkUpdatesViewedFromNotification(intent?.getBooleanExtra(EXTRA_FROM_NOTIFICATION, false) ?: false, isRestoredLaunch)) {
+            return
+        }
+        AppLog.d("mark updates as viewed from notification.")
+        prefs.isLastUpdatesViewed = true
     }
 
     private fun createInitialBackstack(): Array<NavKey> {

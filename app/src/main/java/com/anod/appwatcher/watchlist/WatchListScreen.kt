@@ -71,7 +71,7 @@ fun WatchListScreen(
             key = { filterIds[it] }
         ) { pageIndex ->
             val filterId = remember(pageIndex) { filterIds[pageIndex] }
-            val pagerFactory = remember(listPagerFactory, filterId, screenState.tag) { listPagerFactory(filterId, screenState.tag) }
+            val pagerFactory = remember(listPagerFactory, filterId, screenState.tag, screenState.listConfigChange) { listPagerFactory(filterId, screenState.tag) }
             pagerFactory.filterQuery = screenState.titleFilter
             val items = pagerFactory.pagingData.collectAsLazyPagingItems()
 
@@ -79,7 +79,8 @@ fun WatchListScreen(
                 RefreshKey(
                     titleFilter = screenState.titleFilter,
                     tagAppsChange = screenState.tagAppsChange,
-                    sortId = screenState.sortId
+                    sortId = screenState.sortId,
+                    listConfigChange = screenState.listConfigChange,
                 )
             }
 
@@ -118,6 +119,6 @@ fun WatchListScreen(
     }
 }
 
-data class RefreshKey(val titleFilter: String, val sortId: Int, val tagAppsChange: Int) {
-    override fun toString() = "$titleFilter-$sortId-$tagAppsChange"
+data class RefreshKey(val titleFilter: String, val sortId: Int, val tagAppsChange: Int, val listConfigChange: Int) {
+    override fun toString() = "$titleFilter-$sortId-$tagAppsChange-$listConfigChange"
 }
