@@ -11784,10 +11784,7 @@ PLcom/anod/appwatcher/database/AppListTable$DefaultImpls;->loadRowIds(Lcom/anod/
 PLcom/anod/appwatcher/database/AppListTable$Queries;-><clinit>()V
 PLcom/anod/appwatcher/database/AppListTable$Queries;-><init>()V
 PLcom/anod/appwatcher/database/AppListTable$Queries;->changes(Lcom/anod/appwatcher/database/AppListTable;)Lkotlinx/coroutines/flow/Flow;
-PLcom/anod/appwatcher/database/AppListTable$Queries;->createAppsListQuery(IZLjava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;)Lkotlin/Pair;
-PLcom/anod/appwatcher/database/AppListTable$Queries;->createSelection(Ljava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;)Lkotlin/Pair;
 PLcom/anod/appwatcher/database/AppListTable$Queries;->createSortOrder(IZ)Ljava/lang/String;
-PLcom/anod/appwatcher/database/AppListTable$Queries;->loadAppList(IZLjava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;Lcom/anod/appwatcher/database/AppListTable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 PLcom/anod/appwatcher/database/AppListTable$loadRowIds$2;-><init>(Lcom/anod/appwatcher/database/AppListTable;Lkotlin/coroutines/Continuation;)V
 PLcom/anod/appwatcher/database/AppListTable$loadRowIds$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
 PLcom/anod/appwatcher/database/AppListTable$loadRowIds$2;->invoke(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
@@ -11868,10 +11865,6 @@ PLcom/anod/appwatcher/database/DbContentProvider$Companion;-><init>()V
 PLcom/anod/appwatcher/database/DbContentProvider$Companion;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 PLcom/anod/appwatcher/database/DbContentProvider$dbSchemaManager$2;-><init>(Lcom/anod/appwatcher/database/DbContentProvider;)V
 PLcom/anod/appwatcher/database/SchedulesTable_Impl;->getRequiredConverters()Ljava/util/List;
-PLcom/anod/appwatcher/database/SqlOffset;-><clinit>()V
-PLcom/anod/appwatcher/database/SqlOffset;-><init>(II)V
-PLcom/anod/appwatcher/database/SqlOffset;->getLimit()I
-PLcom/anod/appwatcher/database/SqlOffset;->getOffset()I
 PLcom/anod/appwatcher/database/TagsTable_Impl;->-$$Nest$fget__db(Lcom/anod/appwatcher/database/TagsTable_Impl;)Landroidx/room/RoomDatabase;
 PLcom/anod/appwatcher/database/TagsTable_Impl;-><init>(Landroidx/room/RoomDatabase;)V
 PLcom/anod/appwatcher/database/TagsTable_Impl;->getRequiredConverters()Ljava/util/List;

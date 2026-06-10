@@ -6,7 +6,6 @@ import androidx.compose.runtime.Immutable
 import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.SqlOffset
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
@@ -16,6 +15,8 @@ import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class WatchListPagingSource(
     private val config: Config,
@@ -25,7 +26,15 @@ class WatchListPagingSource(
     private val installedApps: InstalledApps,
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
+        set(value) {
+            if (field != value) {
+                rowIdSnapshot = null
+            }
+            field = value
+        }
     private val itemFilter: AppListFilter = createFilter(config.filterId)
+    private val rowIdSnapshotMutex = Mutex()
+    private var rowIdSnapshot: List<Int>? = null
 
     @Immutable
     data class Config(val filterId: Int, val tagId: Int?, val showRecentlyDiscovered: Boolean, val showOnDevice: Boolean, val showRecentlyInstalled: Boolean,)
@@ -53,11 +62,15 @@ class WatchListPagingSource(
             limit = max(0, limit)
         }
 
-        val data = AppListTable.Queries.loadAppList(
-            sortId, config.showRecentlyDiscovered, config.tagId, filterQuery, SqlOffset(offset, limit), database.apps()
-        )
+        val rowIds = loadRowIdSnapshot(sortId)
+        val pageRowIds = if (offset >= rowIds.size) {
+            emptyList()
+        } else {
+            rowIds.subList(offset, minOf(rowIds.size, offset + limit))
+        }
+        val data = AppListTable.Queries.loadAppList(pageRowIds, database.apps())
         val filtered = data.filter { !itemFilter.filterRecord(it) }
-        var totalItems = countTotalItems()
+        var totalItems = countTotalItems(hasMissingSnapshotRows = data.size < pageRowIds.size)
 
         items.addAll(filtered.map {
             SectionItem.App(
@@ -67,7 +80,7 @@ class WatchListPagingSource(
             )
         })
 
-        if (config.showOnDevice && data.size < limit) {
+        if (config.showOnDevice && pageRowIds.size < limit) {
             items.addAll(loadOnDeviceItems(sortId))
         }
 
@@ -80,7 +93,7 @@ class WatchListPagingSource(
             key = params.key,
             offset = offset,
             loadSize = params.loadSize,
-            loadedDataSize = data.size,
+            loadedDataSize = pageRowIds.size,
             limit = limit
         )
         val itemsBefore = if (totalItems == LoadResult.Page.COUNT_UNDEFINED) {
@@ -104,12 +117,34 @@ class WatchListPagingSource(
         return page
     }
 
-    private suspend fun countTotalItems(): Int {
-        if (config.filterId != Filters.ALL || config.showOnDevice) {
+    private fun countTotalItems(hasMissingSnapshotRows: Boolean): Int {
+        if (config.filterId != Filters.ALL || config.showOnDevice || hasMissingSnapshotRows) {
             return LoadResult.Page.COUNT_UNDEFINED
         }
-        val appsCount = AppListTable.Queries.countAppList(config.tagId, filterQuery, database.apps())
-        return appsCount + if (config.showRecentlyInstalled) 1 else 0
+        return (rowIdSnapshot?.size ?: 0) + if (config.showRecentlyInstalled) 1 else 0
+    }
+
+    private suspend fun loadRowIdSnapshot(sortId: Int): List<Int> {
+        val existingSnapshot = rowIdSnapshot
+        if (existingSnapshot != null) {
+            return existingSnapshot
+        }
+        return rowIdSnapshotMutex.withLock {
+            val lockedSnapshot = rowIdSnapshot
+            if (lockedSnapshot != null) {
+                lockedSnapshot
+            } else {
+                AppListTable.Queries.loadAppListRows(
+                    sortId,
+                    config.showRecentlyDiscovered,
+                    config.tagId,
+                    filterQuery,
+                    database.apps()
+                ).also {
+                    rowIdSnapshot = it
+                }
+            }
+        }
     }
 
     private suspend fun loadOnDeviceItems(sortId: Int): List<SectionItem.OnDevice> {

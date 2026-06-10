@@ -25309,12 +25309,7 @@ Lcom/anod/appwatcher/database/AppListTable$Queries;
 SPLcom/anod/appwatcher/database/AppListTable$Queries;-><clinit>()V
 SPLcom/anod/appwatcher/database/AppListTable$Queries;-><init>()V
 SPLcom/anod/appwatcher/database/AppListTable$Queries;->changes(Lcom/anod/appwatcher/database/AppListTable;)Lkotlinx/coroutines/flow/Flow;
-SPLcom/anod/appwatcher/database/AppListTable$Queries;->countAppList(Ljava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/AppListTable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-SPLcom/anod/appwatcher/database/AppListTable$Queries;->createAppsListCountQuery(Ljava/lang/Integer;Ljava/lang/String;)Lkotlin/Pair;
-SPLcom/anod/appwatcher/database/AppListTable$Queries;->createAppsListQuery$app(IZLjava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;)Lkotlin/Pair;
-SPLcom/anod/appwatcher/database/AppListTable$Queries;->createSelection(Ljava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;)Lkotlin/Pair;
 SPLcom/anod/appwatcher/database/AppListTable$Queries;->createSortOrder(IZ)Ljava/lang/String;
-SPLcom/anod/appwatcher/database/AppListTable$Queries;->loadAppList(IZLjava/lang/Integer;Ljava/lang/String;Lcom/anod/appwatcher/database/SqlOffset;Lcom/anod/appwatcher/database/AppListTable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 Lcom/anod/appwatcher/database/AppListTable$loadRowIds$2;
 SPLcom/anod/appwatcher/database/AppListTable$loadRowIds$2;-><init>(Lcom/anod/appwatcher/database/AppListTable;Lkotlin/coroutines/Continuation;)V
 SPLcom/anod/appwatcher/database/AppListTable$loadRowIds$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
@@ -25326,8 +25321,6 @@ SPLcom/anod/appwatcher/database/AppListTable_Impl;-><clinit>()V
 SPLcom/anod/appwatcher/database/AppListTable_Impl;-><init>(Landroidx/room/RoomDatabase;)V
 SPLcom/anod/appwatcher/database/AppListTable_Impl;->_loadRowIds$lambda$0(Ljava/lang/String;Ljava/util/List;Landroidx/sqlite/SQLiteConnection;)Ljava/util/List;
 SPLcom/anod/appwatcher/database/AppListTable_Impl;->_loadRowIds(Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-SPLcom/anod/appwatcher/database/AppListTable_Impl;->count$lambda$1(Ljava/lang/String;Landroidx/room/RoomRawQuery;Landroidx/sqlite/SQLiteConnection;)I
-SPLcom/anod/appwatcher/database/AppListTable_Impl;->count(Landroidx/sqlite/db/SupportSQLiteQuery;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLcom/anod/appwatcher/database/AppListTable_Impl;->load$lambda$0(Ljava/lang/String;Landroidx/room/RoomRawQuery;Landroidx/sqlite/SQLiteConnection;)Ljava/util/List;
 SPLcom/anod/appwatcher/database/AppListTable_Impl;->load(Landroidx/sqlite/db/SupportSQLiteQuery;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLcom/anod/appwatcher/database/AppListTable_Impl;->loadRowIds(Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -25468,11 +25461,6 @@ Lcom/anod/appwatcher/database/SchedulesTable_Impl$Companion;
 SPLcom/anod/appwatcher/database/SchedulesTable_Impl$Companion;-><init>()V
 SPLcom/anod/appwatcher/database/SchedulesTable_Impl$Companion;-><init>(Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 SPLcom/anod/appwatcher/database/SchedulesTable_Impl$Companion;->getRequiredConverters()Ljava/util/List;
-Lcom/anod/appwatcher/database/SqlOffset;
-SPLcom/anod/appwatcher/database/SqlOffset;-><clinit>()V
-SPLcom/anod/appwatcher/database/SqlOffset;-><init>(II)V
-SPLcom/anod/appwatcher/database/SqlOffset;->getLimit()I
-SPLcom/anod/appwatcher/database/SqlOffset;->getOffset()I
 Lcom/anod/appwatcher/database/TagsTable;
 Lcom/anod/appwatcher/database/TagsTable_Impl;
 SPLcom/anod/appwatcher/database/TagsTable_Impl;-><clinit>()V

@@ -95,6 +95,71 @@ class WatchListPagingSourceRoomTest {
         assertEquals(null, secondPage.nextKey)
     }
 
+    @Test
+    fun pagingSourceKeepsStableRowsWhenStatusChangesMoveItemsAcrossOffsets() = runBlocking {
+        repeat(10) { index ->
+            insertApp(
+                appId = "updated-$index",
+                packageName = "updated.$index",
+                title = "Zzz Moved Later $index",
+                status = App.STATUS_UPDATED
+            )
+        }
+        repeat(100) { index ->
+            insertApp(appId = "normal-$index", packageName = "normal.$index", title = "Normal $index")
+        }
+        val pagingSource = createPagingSource(showOnDevice = false)
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 60, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        firstPage.data
+            .filterIsInstance<SectionItem.App>()
+            .filter { it.appListItem.app.status == App.STATUS_UPDATED }
+            .take(5)
+            .forEach {
+                db.apps().updateStatus(it.appListItem.app.rowId, App.STATUS_NORMAL)
+            }
+
+        val pages = mutableListOf(firstPage)
+        var nextKey = firstPage.nextKey
+        while (nextKey != null) {
+            val result = pagingSource.load(PagingSource.LoadParams.Append(key = nextKey, loadSize = 20, placeholdersEnabled = false))
+            val page = result as PagingSource.LoadResult.Page
+            pages.add(page)
+            nextKey = page.nextKey
+        }
+        val items = pages.flatMap { it.data }.filterIsInstance<SectionItem.App>()
+
+        assertEquals(110, items.size)
+        assertEquals(items.map { it.sectionKey }.toSet().size, items.size)
+    }
+
+    @Test
+    fun pagingSourceDoesNotRenderRowsDeletedAfterSnapshot() = runBlocking {
+        repeat(40) { index ->
+            insertApp(appId = "app-$index", packageName = "app.$index", title = "App $index")
+        }
+        val pagingSource = createPagingSource(showOnDevice = false)
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        val secondPageRow = AppListTable.Queries.loadAppListRows(
+            sortId = Preferences.SORT_NAME_ASC,
+            orderByRecentlyDiscovered = false,
+            tagId = null,
+            titleFilter = "",
+            table = db.apps()
+        )[20]
+        db.apps().updateStatus(secondPageRow, App.STATUS_DELETED)
+
+        val secondResult = pagingSource.load(PagingSource.LoadParams.Append(key = firstPage.nextKey!!, loadSize = 20, placeholdersEnabled = false))
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+
+        assertTrue(secondPage.data.filterIsInstance<SectionItem.App>().none { it.appListItem.app.rowId == secondPageRow })
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsBefore)
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsAfter)
+    }
+
     private fun createPagingSource(showOnDevice: Boolean) = WatchListPagingSource(
         config = WatchListPagingSource.Config(
             filterId = Filters.ALL,
@@ -119,7 +184,12 @@ class WatchListPagingSourceRoomTest {
         )
     )
 
-    private suspend fun insertApp(appId: String, packageName: String, title: String) {
+    private suspend fun insertApp(
+        appId: String,
+        packageName: String,
+        title: String,
+        status: Int = App.STATUS_NORMAL
+    ) {
         AppListTable.Queries.insert(
             App(
                 rowId = 0,
@@ -130,7 +200,7 @@ class WatchListPagingSourceRoomTest {
                 title = title,
                 creator = "creator",
                 iconUrl = "",
-                status = App.STATUS_NORMAL,
+                status = status,
                 uploadDate = "",
                 price = Price(text = "", cur = "", micros = 0),
                 detailsUrl = null,
