@@ -12,7 +12,7 @@ class DfeApiContext private constructor(
     loggingId: String
 ) {
     val hasAuth: Boolean
-        get() = authTokenProvider.authToken.isNotEmpty() && authTokenProvider.accountName.isNotEmpty()
+        get() = authTokenProvider.authData.let { it.authToken.isNotEmpty() && it.accountName.isNotEmpty() }
 
     private val headers: MutableMap<String, String> = mutableMapOf(
         "Accept-Language" to deviceInfo.locale.acceptLanguage,
@@ -39,22 +39,25 @@ class DfeApiContext private constructor(
         }
     }
 
-    internal fun createDefaultHeaders(): MutableMap<String, String> {
-        val authToken = authTokenProvider.authToken
-        if (authToken.isBlank()) {
+    internal fun createDefaultHeaders(identity: DfeDeviceIdentity? = null): MutableMap<String, String> {
+        val authData = authTokenProvider.authData
+        if (authData.authToken.isBlank()) {
             throw IllegalStateException("Auth token is empty")
         }
         synchronized(this) {
             val hashMap = this.headers.toMutableMap()
-            hashMap["X-DFE-Device-Id"] = authTokenProvider.gfsId.ifEmpty { deviceInfo.deviceId }
-            if (authTokenProvider.gfsToken.isNotBlank()) {
-                hashMap["X-DFE-Device-Checkin-Consistency-Token"] = authTokenProvider.gfsToken
+            hashMap["X-DFE-Device-Id"] = identity?.deviceId ?: authData.gfsId.ifEmpty { deviceInfo.deviceId }
+            val deviceCheckinConsistencyToken =
+                identity?.deviceCheckinConsistencyToken ?: authData.gfsToken
+            if (deviceCheckinConsistencyToken.isNotBlank()) {
+                hashMap["X-DFE-Device-Checkin-Consistency-Token"] = deviceCheckinConsistencyToken
             }
-            if (authTokenProvider.deviceConfigToken.isNotBlank()) {
-                hashMap["X-DFE-Device-Config-Token"] = authTokenProvider.deviceConfigToken
+            val deviceConfigToken = identity?.deviceConfigToken ?: authData.deviceConfigToken
+            if (deviceConfigToken.isNotBlank()) {
+                hashMap["X-DFE-Device-Config-Token"] = deviceConfigToken
             }
             hashMap["X-DFE-Network-Type"] = NetworkStateChangedReceiver.getCachedNetworkType(context).value.toString()
-            hashMap["Authorization"] = "GoogleLogin auth=${authToken}"
+            hashMap["Authorization"] = "GoogleLogin auth=${authData.authToken}"
             return hashMap
         }
     }
@@ -63,13 +66,14 @@ class DfeApiContext private constructor(
         return "[PlayDfeApiContext headers={${this.headers.map { "${it.key} = ${it.value}," }}]"
     }
 
-    fun createAuthHeaders(): MutableMap<String, String> {
+    fun createAuthHeaders(includeDeviceId: Boolean = true): MutableMap<String, String> {
+        val authData = authTokenProvider.authData
         return mutableMapOf(
             "app" to "com.google.android.gms",
             "User-Agent" to "GoogleAuth/1.4 (${deviceInfo.build.device} ${deviceInfo.build.id})",
         ).apply {
-            if (authTokenProvider.gfsId.isNotEmpty()) {
-                this["device"] = authTokenProvider.gfsId
+            if (includeDeviceId && authData.gfsId.isNotEmpty()) {
+                this["device"] = authData.gfsId
             }
         }
     }

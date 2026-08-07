@@ -1,5 +1,6 @@
 package com.anod.appwatcher
 
+import com.anod.appwatcher.accounts.AuthRecoveringDfeApi
 import com.anod.appwatcher.utils.DeviceInfoProvider
 import com.anod.appwatcher.utils.PlaystoreAuthTokenProvider
 import finsky.api.DfeApi
@@ -13,14 +14,18 @@ import org.koin.dsl.module
 fun createPlayStoreModule(): Module = module {
     singleOf(::DeviceInfoProvider) { bind<DfeDeviceInfoProvider>() }
     factory<DfeApi> {
-        DfeApiImpl(
-            http = get(),
-            context = get(),
-            authTokenProvider = PlaystoreAuthTokenProvider(
-                authTokenBlocking = get(),
-                preferences = get()
+        AuthRecoveringDfeApi(
+            delegate = DfeApiImpl(
+                http = get(),
+                context = get(),
+                authTokenProvider = PlaystoreAuthTokenProvider(
+                    authTokenBlocking = get(),
+                    preferences = get()
+                ),
+                deviceInfoProvider = get()
             ),
-            deviceInfoProvider = get()
+            authToken = get(),
+            preferences = get()
         )
     }
 }

@@ -9,10 +9,12 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
+import com.anod.appwatcher.accounts.AccountSessionBusyException
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.DeviceRegistrationException
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
@@ -27,6 +29,10 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.ktx.Hash
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -86,10 +92,13 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     private val authAccountInitializer: AuthAccountInitializer by inject()
     val authToken: AuthTokenBlocking by inject()
 
+    private var accountInitializationJob: Job? = null
+    private var pendingAccountInitialization: Account? = null
+
     init {
         viewState = MainViewState(
             account = prefs.account,
-            accountInitializedRetries = 2,
+            accountInitializedRetries = if (prefs.isDeviceRegistrationRequired) 0 else 2,
             lastUpdate = prefs.lastUpdateTime,
             watchListPreferences = watchListPreferences(prefs)
         )
@@ -133,9 +142,8 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                 }
         }
 
-        if (viewState.account == null) {
-            showAccountErrorToast("")
-            emitAction(MainViewAction.ChooseAccount(null))
+        if (viewState.account == null || prefs.isDeviceRegistrationRequired) {
+            requestDeviceRegistration()
         }
     }
 
@@ -150,7 +158,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
                     is AccountSelectionResult.Error -> showAccountErrorToast(event.result.errorMessage)
                     is AccountSelectionResult.Success -> {
-                        onAccountSelect(event.result.account)
+                        onAccountSelect(event.result.account, userInitiated = true)
                     }
                 }
             }
@@ -177,11 +185,22 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     }
 
     private fun initAccount() {
-        if (viewState.accountInitializedRetries < 1) {
+        val resumingInteractiveAuth = pendingAccountInitialization != null ||
+            prefs.isDeviceRegistrationAuthorized
+        if (
+            (!resumingInteractiveAuth && viewState.accountInitializedRetries < 1) ||
+            accountInitializationJob?.isActive == true
+        ) {
             return
         }
-        val account = prefs.account?.toAndroidAccount() ?: return
-        onAccountSelect(account)
+        val account = pendingAccountInitialization
+            ?: prefs.account?.toAndroidAccount()
+            ?: return
+        onAccountSelect(
+            account,
+            userInitiated = false,
+            resumingInteractiveAuth = resumingInteractiveAuth
+        )
     }
 
     private fun onNotificationResult(enabled: Boolean) {
@@ -201,12 +220,20 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         }
     }
 
-    private fun onAccountSelect(account: Account) {
+    private fun onAccountSelect(
+        account: Account,
+        userInitiated: Boolean,
+        resumingInteractiveAuth: Boolean = false
+    ) {
+        if (accountInitializationJob?.isActive == true) {
+            return
+        }
         val collectReports = prefs.collectCrashReports
         val initializer = authAccountInitializer
-        viewModelScope.launch {
+        accountInitializationJob = viewModelScope.launch {
             try {
-                val authAccount = initializer.initialize(account)
+                val authAccount = initializer.initialize(account, userInitiated)
+                pendingAccountInitialization = null
                 viewState = viewState.copy(account = authAccount, accountInitializedRetries = 0)
                 if (collectReports) {
                     FirebaseCrashlytics.getInstance().setUserId(Hash.sha256(account.name).encoded)
@@ -219,14 +246,45 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
                 }
                 upgradeCheck()
             } catch (e: AuthTokenStartIntent) {
+                currentCoroutineContext().ensureActive()
                 viewState = viewState.copy(account = prefs.account, accountInitializedRetries = viewState.accountInitializedRetries - 1)
-                emitAction(startActivityAction(e.intent))
+                if (resumingInteractiveAuth) {
+                    pendingAccountInitialization = null
+                    initializer.clearDeviceRegistrationAuthorization()
+                    showAccountErrorToast("")
+                } else {
+                    pendingAccountInitialization = account
+                    emitAction(startActivityAction(e.intent))
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: DeviceRegistrationException) {
+                currentCoroutineContext().ensureActive()
+                requestDeviceRegistration()
+            } catch (_: AccountSessionBusyException) {
+                currentCoroutineContext().ensureActive()
+                emitAction(showToastAction(
+                    resId = R.string.sync_in_progress_retry,
+                    length = Toast.LENGTH_LONG
+                ))
             } catch (e: Exception) {
+                currentCoroutineContext().ensureActive()
+                pendingAccountInitialization = null
                 viewState = viewState.copy(account = prefs.account, accountInitializedRetries = viewState.accountInitializedRetries - 1)
                 AppLog.e("Error retrieving authentication token ${e.message}")
                 showAccountErrorToast("")
             }
         }
+    }
+
+    private fun requestDeviceRegistration() {
+        pendingAccountInitialization = null
+        viewState = viewState.copy(
+            account = prefs.account,
+            accountInitializedRetries = 0
+        )
+        showAccountErrorToast("")
+        emitAction(MainViewAction.ChooseAccount(prefs.account?.toAndroidAccount()))
     }
 
     private suspend fun scheduleRefresh() {

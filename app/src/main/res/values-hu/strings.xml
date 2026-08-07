@@ -6,6 +6,7 @@
     <string name="menu_edit">Szerkesztés</string>
     <string name="menu_refresh">Ellenőrzés most</string>
     <string name="failed_gain_access">Válassz egy fiókot és engedélyezd a hozzáférést Ez szükséges a Google Play Áruházzal való kommunikációhoz.</string>
+    <string name="sync_in_progress_retry">Frissítés van folyamatban. Próbáld meg újra módosítani a fiókot, amikor befejeződött.</string>
     <string name="search_action">Keresés</string>
     <string name="search_for_app">Keress rá egy alkalmazásra és kattints rá a figyelőlistához való hozzáadáshoz.\n(Tipp: az alkalmazást közvetlenül is hozzáadhatod a Play Áruházból a \"Megosztás\" gombbal)</string>
     <string name="loading">Betöltés…</string>

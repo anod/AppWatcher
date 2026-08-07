@@ -6,6 +6,7 @@
     <string name="menu_edit">Edit</string>
     <string name="menu_refresh">Refresh</string>
     <string name="failed_gain_access">Please allow access and select an account. This required in order to communicate with Google Play Store.</string>
+    <string name="sync_in_progress_retry">A refresh is in progress. Try changing the account again when it finishes.</string>
     <string name="search_action">Search</string>
     <string name="search_for_app">Search for an application and click on it to add to the watch list.\n( Tip: you can add apps directly from Play Store using \"Share\" button )</string>
     <string name="loading">Loading…</string>

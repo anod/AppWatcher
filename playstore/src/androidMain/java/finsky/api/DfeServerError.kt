@@ -9,7 +9,14 @@ class DfeParseError(message: String, cause: Throwable? = null) : DfeError(messag
 
 }
 
-class DfeServerError(message: String) : DfeError(message) {
+class DfeServerError(
+    message: String,
+    val statusCode: Int? = null,
+    cause: Throwable? = null
+) : DfeError(message, cause) {
+    val isAuthenticationError: Boolean
+        get() = statusCode == 401 || statusCode == 403
+
     override fun toString(): String {
         return "DisplayErrorMessage[$message]"
     }

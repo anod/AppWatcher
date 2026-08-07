@@ -4,14 +4,20 @@ import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import com.anod.appwatcher.accounts.AuthAccount
+import com.anod.appwatcher.accounts.GfsIdResult
 import com.anod.appwatcher.model.Filters
+import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.AdaptiveIcon
 import info.anodsplace.notification.NotificationManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class SelectedTheme(val id: Int = Preferences.THEME_DEFAULT, val mode: Int = Preferences.THEME_MODE_SYSTEM) {
     val isBlack: Boolean = id == Preferences.THEME_BLACK
@@ -22,45 +28,123 @@ data class SelectedTheme(val id: Int = Preferences.THEME_DEFAULT, val mode: Int 
 class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
+    private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
+
+    @Volatile
+    private var accountSnapshot: AuthAccount? = null
 
     val changes: Flow<String> = _changes
 
     init {
+        migrateDeviceRegistrationPreferences(
+            legacyPreferences = preferences,
+            devicePreferences = devicePreferences,
+            isSameDeviceUpgrade = isSameDeviceUpgrade(context),
+            wasRestored = devicePreferences.getBoolean(RESTORED_FROM_BACKUP, false)
+        )
+        accountSnapshot = readAccount()
         preferences.registerOnSharedPreferenceChangeListener(this)
+        devicePreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
     var account: AuthAccount?
-        get() {
-            val name = preferences.getString(ACCOUNT_NAME, null) ?: return null
-            val type = preferences.getString(ACCOUNT_TYPE, null) ?: return null
-            val gfsId = preferences.getString(GFS_ID, "") ?: ""
-            val gfsToken = preferences.getString(GFS_TOKEN, "") ?: ""
-            val deviceConfig = preferences.getString(DEVICE_CONFIG, "") ?: ""
-            return AuthAccount(
-                name = name,
-                type = type,
-                gfsId = gfsId,
-                gfsIdToken = gfsToken,
-                deviceConfig = deviceConfig
-            )
-        }
+        get() = accountSnapshot
         set(value) {
-            val editor = preferences.edit()
-            if (value == null) {
-                editor.remove(ACCOUNT_NAME)
-                editor.remove(ACCOUNT_TYPE)
-                editor.remove(GFS_ID)
-                editor.remove(GFS_TOKEN)
-                editor.remove(DEVICE_CONFIG)
-            } else {
-                editor.putString(ACCOUNT_NAME, value.name)
-                editor.putString(ACCOUNT_TYPE, value.type)
-                editor.putString(GFS_ID, value.gfsId)
-                editor.putString(GFS_TOKEN, value.gfsIdToken)
-                editor.putString(DEVICE_CONFIG, value.deviceConfig)
-            }
-            editor.apply()
+            editAccount(
+                account = value,
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = null,
+                deviceConfigRevision = null
+            ).apply()
+            accountSnapshot = value
         }
+
+    val deviceIdentity: GfsIdResult
+        get() = accountSnapshot?.let { GfsIdResult(it.gfsId, it.gfsIdToken) } ?: GfsIdResult("", "")
+
+    val isDeviceRegistrationPending: Boolean
+        get() = devicePreferences.getBoolean(DEVICE_REGISTRATION_PENDING, false)
+
+    val isDeviceRegistrationAuthorized: Boolean
+        get() = devicePreferences.getBoolean(DEVICE_REGISTRATION_AUTHORIZED, false)
+
+    val deviceConfigRevision: Int
+        get() = devicePreferences.getInt(DEVICE_CONFIG_REVISION, 0)
+
+    val isDeviceRegistrationRequired: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM &&
+            accountSnapshot?.gfsId.isNullOrEmpty()
+
+    suspend fun saveAccount(
+        account: AuthAccount?,
+        deviceRegistrationPending: Boolean? = null,
+        deviceRegistrationAuthorized: Boolean? = null,
+        deviceConfigRevision: Int? = null
+    ): Boolean = withContext(Dispatchers.IO) {
+        val committed = editAccount(
+            account,
+            deviceRegistrationPending,
+            deviceRegistrationAuthorized,
+            deviceConfigRevision
+        ).commit()
+        if (committed) {
+            accountSnapshot = account
+        }
+        committed
+    }
+
+    suspend fun saveDeviceRegistrationPending(pending: Boolean): Boolean = withContext(Dispatchers.IO) {
+        devicePreferences.edit().putBoolean(DEVICE_REGISTRATION_PENDING, pending).commit()
+    }
+
+    suspend fun saveDeviceRegistrationAuthorization(authorized: Boolean): Boolean = withContext(Dispatchers.IO) {
+        devicePreferences.edit().putBoolean(DEVICE_REGISTRATION_AUTHORIZED, authorized).commit()
+    }
+
+    private fun editAccount(
+        account: AuthAccount?,
+        deviceRegistrationPending: Boolean?,
+        deviceRegistrationAuthorized: Boolean?,
+        deviceConfigRevision: Int?
+    ): SharedPreferences.Editor = devicePreferences.edit().apply {
+        if (account == null) {
+            remove(ACCOUNT_NAME)
+            remove(ACCOUNT_TYPE)
+            remove(GFS_ID)
+            remove(GFS_TOKEN)
+            remove(DEVICE_CONFIG)
+            remove(DEVICE_REGISTRATION_PENDING)
+            remove(DEVICE_REGISTRATION_AUTHORIZED)
+            remove(DEVICE_CONFIG_REVISION)
+        } else {
+            putString(ACCOUNT_NAME, account.name)
+            putString(ACCOUNT_TYPE, account.type)
+            putString(GFS_ID, account.gfsId)
+            putString(GFS_TOKEN, account.gfsIdToken)
+            putString(DEVICE_CONFIG, account.deviceConfig)
+        }
+        if (deviceRegistrationPending != null) {
+            putBoolean(DEVICE_REGISTRATION_PENDING, deviceRegistrationPending)
+        }
+        if (deviceRegistrationAuthorized != null) {
+            putBoolean(DEVICE_REGISTRATION_AUTHORIZED, deviceRegistrationAuthorized)
+        }
+        if (deviceConfigRevision != null) {
+            putInt(DEVICE_CONFIG_REVISION, deviceConfigRevision)
+        }
+    }
+
+    private fun readAccount(): AuthAccount? {
+        val name = devicePreferences.getString(ACCOUNT_NAME, null) ?: return null
+        val type = devicePreferences.getString(ACCOUNT_TYPE, null) ?: return null
+        return AuthAccount(
+            name = name,
+            type = type,
+            gfsId = normalizeDeviceId(devicePreferences.getString(GFS_ID, "") ?: ""),
+            gfsIdToken = devicePreferences.getString(GFS_TOKEN, "") ?: "",
+            deviceConfig = devicePreferences.getString(DEVICE_CONFIG, "") ?: ""
+        )
+    }
 
     var notificationDisabledToastCount: Int
         get() = preferences.getInt("noti_disabled_toasts", -0)
@@ -199,6 +283,9 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         private const val GFS_ID = "gfs_id"
         private const val GFS_TOKEN = "gfs_token"
         private const val DEVICE_CONFIG = "device_config"
+        private const val DEVICE_REGISTRATION_PENDING = "device_registration_pending"
+        private const val DEVICE_REGISTRATION_AUTHORIZED = "device_registration_authorized"
+        private const val DEVICE_CONFIG_REVISION = "device_config_revision"
         private const val ACCOUNT_NAME = "account_name"
         private const val ACCOUNT_TYPE = "account_type"
         private const val SORT_INDEX = "sort_index"
@@ -215,6 +302,8 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         const val SORT_DATE_DESC = 3
 
         private const val PREFS_NAME = "WatcherPrefs"
+        internal const val DEVICE_PREFS_NAME = "DeviceRegistration"
+        internal const val RESTORED_FROM_BACKUP = "restored_from_backup"
         private const val DRIVE_SYNC = "drive_sync"
         private const val DRIVE_SYNC_TIME = "drive_sync_time"
         private const val AUTOSYNC = "autosync"
@@ -262,6 +351,124 @@ class Preferences(context: Context, private val notificationManager: Notificatio
             THEME_DEFAULT,
             THEME_BLACK,
         )
+
+        internal fun migrateDeviceRegistrationPreferences(
+            legacyPreferences: SharedPreferences,
+            devicePreferences: SharedPreferences,
+            isSameDeviceUpgrade: Boolean,
+            wasRestored: Boolean
+        ) {
+            if (
+                isSameDeviceUpgrade &&
+                !wasRestored &&
+                legacyPreferences.contains(ACCOUNT_NAME) &&
+                !devicePreferences.contains(ACCOUNT_NAME)
+            ) {
+                val editor = devicePreferences.edit()
+                copyString(legacyPreferences, editor, ACCOUNT_NAME)
+                copyString(legacyPreferences, editor, ACCOUNT_TYPE)
+                copyDeviceId(legacyPreferences, editor)
+                copyString(legacyPreferences, editor, GFS_TOKEN)
+                copyString(legacyPreferences, editor, DEVICE_CONFIG)
+                copyBoolean(legacyPreferences, editor, DEVICE_REGISTRATION_PENDING)
+                copyBoolean(legacyPreferences, editor, DEVICE_REGISTRATION_AUTHORIZED)
+                copyInt(legacyPreferences, editor, DEVICE_CONFIG_REVISION)
+                if (!editor.commit()) {
+                    AppLog.e("Unable to migrate device registration preferences")
+                    return
+                }
+            }
+
+            val removed = legacyPreferences.edit()
+                .remove(ACCOUNT_NAME)
+                .remove(ACCOUNT_TYPE)
+                .remove(GFS_ID)
+                .remove(GFS_TOKEN)
+                .remove(DEVICE_CONFIG)
+                .remove(DEVICE_REGISTRATION_PENDING)
+                .remove(DEVICE_REGISTRATION_AUTHORIZED)
+                .remove(DEVICE_CONFIG_REVISION)
+                .commit()
+            if (!removed) {
+                AppLog.e("Unable to remove legacy device registration preferences")
+                return
+            }
+            if (wasRestored && !devicePreferences.edit().remove(RESTORED_FROM_BACKUP).commit()) {
+                AppLog.e("Unable to clear restored device registration state")
+            }
+        }
+
+        internal fun normalizeDeviceId(deviceId: String): String {
+            val normalized = deviceId.lowercase()
+            if (normalized.matches(Regex("[0-9a-f]{1,16}"))) {
+                return normalized.takeIf { id -> id.any { it != '0' } }.orEmpty()
+            }
+            if (normalized.matches(Regex("-[0-9a-f]{1,16}"))) {
+                val signedId = normalized.toLongOrNull(16) ?: return ""
+                return java.lang.Long.toHexString(signedId).takeUnless { it == "0" }.orEmpty()
+            }
+            return ""
+        }
+
+        private fun copyString(
+            source: SharedPreferences,
+            destination: SharedPreferences.Editor,
+            key: String
+        ) {
+            if (source.contains(key)) {
+                destination.putString(key, source.getString(key, null))
+            }
+        }
+
+        private fun copyBoolean(
+            source: SharedPreferences,
+            destination: SharedPreferences.Editor,
+            key: String
+        ) {
+            if (source.contains(key)) {
+                destination.putBoolean(key, source.getBoolean(key, false))
+            }
+        }
+
+        private fun copyDeviceId(
+            source: SharedPreferences,
+            destination: SharedPreferences.Editor
+        ) {
+            if (source.contains(GFS_ID)) {
+                destination.putString(
+                    GFS_ID,
+                    normalizeDeviceId(source.getString(GFS_ID, null).orEmpty())
+                )
+            }
+        }
+
+        private fun copyInt(
+            source: SharedPreferences,
+            destination: SharedPreferences.Editor,
+            key: String
+        ) {
+            if (source.contains(key)) {
+                destination.putInt(key, source.getInt(key, 0))
+            }
+        }
+
+        private fun isSameDeviceUpgrade(context: Context): Boolean {
+            val packageInfo = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.packageManager.getPackageInfo(
+                        context.packageName,
+                        PackageManager.PackageInfoFlags.of(0)
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    context.packageManager.getPackageInfo(context.packageName, 0)
+                }
+            } catch (error: PackageManager.NameNotFoundException) {
+                AppLog.e(error)
+                return false
+            }
+            return packageInfo.firstInstallTime < packageInfo.lastUpdateTime
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

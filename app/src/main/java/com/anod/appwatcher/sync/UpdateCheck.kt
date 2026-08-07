@@ -1,23 +1,21 @@
 package com.anod.appwatcher.sync
 
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.text.format.DateUtils
-import androidx.core.content.contentValuesOf
 import androidx.work.Data
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
+import com.anod.appwatcher.accounts.AuthTokenUnavailableException
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.AppListTable
+import com.anod.appwatcher.database.AppSyncUpdate
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.ChangelogTable
 import com.anod.appwatcher.database.Cleanup
-import com.anod.appwatcher.database.DbContentProvider
 import com.anod.appwatcher.database.SchedulesTable
 import com.anod.appwatcher.database.contentValues
 import com.anod.appwatcher.database.entities.App
@@ -31,14 +29,20 @@ import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
+import finsky.api.DfeServerError
 import finsky.api.Document
 import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.AppDetailsFilter
+import java.io.IOException
 import java.util.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
@@ -62,10 +66,22 @@ class UpdateCheck(
 
     class SyncResult(val success: Boolean, val updates: List<UpdatedApp>, val checked: Int, val unavailable: Int)
 
+    private data class PendingAppUpdate(
+        val rowId: Long,
+        val expectedAppId: String,
+        val expectedPackageName: String,
+        val values: ContentValues,
+        val changelog: ContentValues,
+        val updatedApp: UpdatedApp?
+    )
+
     companion object {
         private const val ONE_SEC_IN_MILLIS = 1000
         private const val BULK_SIZE = 20
+        private const val MAX_CHUNK_ATTEMPTS = 3
+        private const val CHUNK_RETRY_DELAY_MILLIS = 250L
         internal const val EXTRAS_MANUAL = "manual"
+        private val syncMutex = Mutex()
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
@@ -74,7 +90,11 @@ class UpdateCheck(
 
     private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
 
-    suspend fun perform(extras: Data): Int = withContext(Dispatchers.Default) {
+    suspend fun perform(extras: Data): Int = syncMutex.withLock {
+        performSerialized(extras)
+    }
+
+    private suspend fun performSerialized(extras: Data): Int = withContext(Dispatchers.Default) {
         val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
@@ -103,34 +123,45 @@ class UpdateCheck(
 
         AppLog.i("Perform synchronization", "UpdateCheck")
 
-        val refreshed = refreshAuthToken()
-        if (!refreshed) {
-            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED_NO_TOKEN), database)
-            AppLog.e("Cannot receive access token")
-            return@withContext -1
-        }
-
-        // Broadcast progress intent
-        val startIntent = Intent(SYNC_PROGRESS).apply {
-            `package` = context.actual.packageName
-        }
-        context.sendBroadcast(startIntent)
-
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
-        AppLog.d("Last update viewed: $lastUpdatesViewed")
-        SchedulesTable.Queries.save(schedule, database)
-
         val syncResult = try {
-            doSync(lastUpdatesViewed)
+            authAccount.withRefreshedAccount {
+                val startIntent = Intent(SYNC_PROGRESS).apply {
+                    `package` = context.actual.packageName
+                }
+                context.sendBroadcast(startIntent)
+
+                AppLog.d("Last update viewed: $lastUpdatesViewed")
+                SchedulesTable.Queries.save(schedule, database)
+
+                try {
+                    doSync(lastUpdatesViewed)
+                } catch (e: AuthTokenStartIntent) {
+                    throw e
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    AppLog.e("Error during synchronization ${e.message}", e)
+                    SyncResult(false, listOf(), 0, 0)
+                }
+            }
+        } catch (e: AuthTokenStartIntent) {
+            AppLog.e("AuthToken: require interactive sing in")
+            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED_NO_TOKEN, manualSync)
+        } catch (e: AuthTokenUnavailableException) {
+            AppLog.e("Cannot receive access token", e)
+            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED_NO_TOKEN, manualSync)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            AppLog.e("Error during synchronization ${e.message}", e)
-            SyncResult(false, listOf(), 0, 0)
+            AppLog.e("Play Store session refresh or sync setup failed: ${e.message}", e)
+            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED, manualSync)
         }
 
         if (syncResult.success) {
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
-            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED), database)
+            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED, manualSync)
         }
 
         val updatedApps: List<UpdatedApp> = syncResult.updates
@@ -152,16 +183,7 @@ class UpdateCheck(
 
         notifyIfNeeded(manualSync, updatedApps, schedule)
 
-        if (!manualSync) {
-            if (preferences.isDriveSyncEnabled) {
-                AppLog.d("DriveSyncEnabled = true")
-                performGDriveSync(preferences, now)
-            } else {
-                AppLog.d("DriveSyncEnabled = false, skipping...")
-            }
-
-            Cleanup(preferences, database).performIfNeeded(now)
-        }
+        performMaintenance(manualSync, now)
 
         AppLog.d("Finish::perform()")
         return@withContext updatedApps.size
@@ -177,49 +199,71 @@ class UpdateCheck(
             return SyncResult(true, listOf(), 0, 0)
         }
 
-        val updatedApps = mutableListOf<UpdatedApp>()
+        val localAppChunks = try {
+            apps.chunked(BULK_SIZE) { list ->
+                list.associateBy { it.app.packageName }
+            }
+        } finally {
+            apps.close()
+        }
         var unavailable = 0
-        apps.chunked(BULK_SIZE) { list ->
-            list.associateBy { it.app.packageName }
-        }.forEach { localApps ->
+        val fetchedChunks = fetchAllChunks(
+            chunks = localAppChunks,
+            maxAttempts = MAX_CHUNK_ATTEMPTS,
+            initialRetryDelayMillis = CHUNK_RETRY_DELAY_MILLIS
+        ) { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk... $docIds")
-            val documents = try {
-                dfeApi.details(docIds, includeDetails = true).filterDocuments(AppDetailsFilter.hasAppDetails)
-            } catch (e: Exception) {
-                AppLog.e("Fetching of bulk updates failed ${e.message ?: ""}", "UpdateCheck")
-                emptyList()
-            }
+            val documents = dfeApi.details(docIds, includeDetails = true)
+                .filterDocuments(AppDetailsFilter.hasAppDetails)
             unavailable += (docIds.size - documents.size)
             AppLog.i("Sent ${docIds.size}, received ${documents.size}", "UpdateCheck")
-            updateApps(documents, localApps, updatedApps, lastUpdatesViewed, context.contentResolver, database)
+            documents
         }
+        val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
+            prepareAppUpdates(documents, localApps, lastUpdatesViewed)
+        }
+        val updatedApps = applyAppUpdates(pendingUpdates, database)
 
-        apps.close()
-        AppLog.i("Sync finished for ${apps.count} apps", "UpdateCheck")
-        return SyncResult(true, updatedApps, apps.count, unavailable)
+        val checked = localAppChunks.sumOf { it.size }
+        AppLog.i("Sync finished for $checked apps", "UpdateCheck")
+        return SyncResult(true, updatedApps, checked, unavailable)
     }
 
-    private suspend fun updateApps(
+    private suspend fun finishFailedSync(
+        schedule: Schedule,
+        status: Int,
+        manualSync: Boolean
+    ): Int {
+        SchedulesTable.Queries.save(schedule.finish(status), database)
+        performMaintenance(manualSync, System.currentTimeMillis())
+        return -1
+    }
+
+    private suspend fun performMaintenance(manualSync: Boolean, now: Long) {
+        if (manualSync) {
+            return
+        }
+        if (preferences.isDriveSyncEnabled) {
+            AppLog.d("DriveSyncEnabled = true")
+            performGDriveSync(preferences, now)
+        } else {
+            AppLog.d("DriveSyncEnabled = false, skipping...")
+        }
+        Cleanup(preferences, database).performIfNeeded(now)
+    }
+
+    private fun prepareAppUpdates(
         documents: List<Document>,
         localApps: Map<String, AppListItem>,
-        updatedApps: MutableList<UpdatedApp>,
-        lastUpdatesViewed: Boolean,
-        contentResolver: ContentResolver,
-        db: AppsDatabase
-    ) {
-        val fetched = mutableMapOf<String, Boolean>()
-        val batch = mutableListOf<ContentValues>()
-        val changelog = mutableListOf<ContentValues>()
+        lastUpdatesViewed: Boolean
+    ): List<PendingAppUpdate> {
+        val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let { localItem ->
-                fetched[docId] = true
                 val (values, updatedApp) = updateApp(marketApp, localItem, lastUpdatesViewed)
-                if (values.size() > 0) {
-                    batch.add(values)
-                }
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
                 val noNewDetails = if (isNewVersion) {
@@ -227,65 +271,66 @@ class UpdateCheck(
                 } else {
                     localItem.noNewDetails
                 }
-                changelog.add(AppChange(
-                    docId,
-                    marketApp.appDetails.versionCode,
-                    marketApp.appDetails.versionString,
-                    recentChanges,
-                    marketApp.appDetails.uploadDate,
-                    noNewDetails).contentValues)
-                if (updatedApp != null) {
-                    updatedApps.add(updatedApp.copy(noNewDetails = noNewDetails))
+                if (values.size() > 0) {
+                    pendingUpdates.add(
+                        PendingAppUpdate(
+                            rowId = localItem.app.rowId.toLong(),
+                            expectedAppId = localItem.app.appId,
+                            expectedPackageName = localItem.app.packageName,
+                            values = values,
+                            changelog = AppChange(
+                                docId,
+                                marketApp.appDetails.versionCode,
+                                marketApp.appDetails.versionString,
+                                recentChanges,
+                                marketApp.appDetails.uploadDate,
+                                noNewDetails
+                            ).contentValues,
+                            updatedApp = updatedApp?.copy(noNewDetails = noNewDetails)
+                        )
+                    )
                 }
             }
         }
+        return pendingUpdates
+    }
 
-        if (batch.isNotEmpty()) {
-            db.applyBatchUpdates(contentResolver, batch) {
-                val rowId = it.getAsString(BaseColumns._ID)
-                DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
-            }
+    private suspend fun applyAppUpdates(
+        pendingUpdates: List<PendingAppUpdate>,
+        db: AppsDatabase
+    ): List<UpdatedApp> {
+        if (pendingUpdates.isEmpty()) {
+            return emptyList()
         }
 
-        if (changelog.isNotEmpty()) {
-            db.applyBatchInsert(contentResolver, changelog) {
-                DbContentProvider.changelogUri
-                    .buildUpon()
-                    .appendPath("apps")
-                    .appendPath(it.getAsString(ChangelogTable.Columns.APP_ID))
-                    .appendPath("v")
-                    .appendPath(it.getAsString(ChangelogTable.Columns.VERSION_CODE))
-                    .build()
+        db.applyAppSyncUpdates(
+            pendingUpdates.map { update ->
+                AppSyncUpdate(
+                    rowId = update.rowId,
+                    expectedAppId = update.expectedAppId,
+                    expectedPackageName = update.expectedPackageName,
+                    values = update.values,
+                    changelogValues = update.changelog
+                )
             }
-        }
-
-        // Reset not fetched app statuses
-        if (lastUpdatesViewed && fetched.size < localApps.size) {
-            val statusBatch = mutableListOf<ContentValues>()
-            localApps.values.forEach {
-                val app = it.app
-                if (fetched[app.appId] == null) {
-                    if (app.status == App.STATUS_UPDATED) {
-                        AppLog.d("Set not fetched app as viewed")
-                        statusBatch.add(contentValuesOf(
-                            BaseColumns._ID to app.rowId,
-                            AppListTable.Columns.STATUS to App.STATUS_NORMAL
-                        ))
-                    }
-                }
-            }
-            if (statusBatch.isNotEmpty()) {
-                db.applyBatchUpdates(contentResolver, statusBatch) {
-                    val rowId = it.getAsString(BaseColumns._ID)
-                    DbContentProvider.appsUri.buildUpon().appendPath(rowId).build()
-                }
-            }
-        }
+        )
+        return pendingUpdates.mapNotNull { it.updatedApp }
     }
 
     private fun updateApp(marketDoc: Document, localItem: AppListItem, lastUpdatesViewed: Boolean): Pair<ContentValues, UpdatedApp?> {
         val appDetails = marketDoc.appDetails
         val localApp = localItem.app
+
+        val values = ContentValues()
+        if (reconcileVersionRollback(appDetails.versionCode, localApp, values)) {
+            AppLog.w(
+                "Play Store version rolled back for ${localApp.packageName}: " +
+                    "${localApp.versionNumber} -> ${appDetails.versionCode}",
+                "UpdateCheck"
+            )
+            updateLocalApp(marketDoc, localApp, values)
+            return Pair(values, null)
+        }
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
@@ -301,7 +346,6 @@ class UpdateCheck(
             return Pair(newApp.contentValues, UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true))
         }
 
-        val values = ContentValues()
         var updatedApp: UpdatedApp? = null
         // Mark updated app as normal
         if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
@@ -368,17 +412,6 @@ class UpdateCheck(
         }
     }
 
-    private suspend fun refreshAuthToken(): Boolean = try {
-        authAccount.refresh()
-        true
-    } catch (e: AuthTokenStartIntent) {
-        AppLog.e("AuthToken: require interactive sing in")
-        false
-    } catch (e: Throwable) {
-        AppLog.e("AuthTokenBlocking request exception: " + e.message, e)
-        false
-    }
-
     private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {
         val uploadTime = marketApp.extractUploadDate(uploadDateParserCache)
         values.put(BaseColumns._ID, localApp.rowId)
@@ -406,3 +439,48 @@ class UpdateCheck(
         }
     }
 }
+
+internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, values: ContentValues): Boolean {
+    if (marketVersionCode >= localApp.versionNumber) {
+        return false
+    }
+    values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+    values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
+    return true
+}
+
+internal suspend fun <T, R> fetchAllChunks(
+    chunks: List<T>,
+    maxAttempts: Int = 3,
+    initialRetryDelayMillis: Long = 250L,
+    fetch: suspend (T) -> R
+): List<Pair<T, R>> {
+    require(maxAttempts > 0)
+    require(initialRetryDelayMillis >= 0)
+    val fetched = ArrayList<Pair<T, R>>(chunks.size)
+    for (chunk in chunks) {
+        var attempt = 1
+        while (true) {
+            try {
+                fetched.add(Pair(chunk, fetch(chunk)))
+                break
+            } catch (error: Exception) {
+                if (attempt >= maxAttempts || !isTransientChunkFailure(error)) {
+                    throw error
+                }
+                AppLog.w(
+                    "Retrying Play Store chunk after attempt $attempt: ${error.message}",
+                    "UpdateCheck"
+                )
+                delay(initialRetryDelayMillis * attempt)
+                attempt++
+            }
+        }
+    }
+    return fetched
+}
+
+private fun isTransientChunkFailure(error: Exception): Boolean =
+    error is IOException ||
+        (error is DfeServerError &&
+            (error.statusCode == 429 || error.statusCode?.let { it in 500..599 } == true))

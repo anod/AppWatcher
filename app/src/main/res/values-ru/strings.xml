@@ -4,6 +4,7 @@
     <string name="menu_add">Добавить</string>
     <string name="menu_refresh">Обновить</string>
     <string name="failed_gain_access">Пожалуйста разрешите доступ. Разрешение требуется для того, чтобы связаться с Google Play Маркет.</string>
+    <string name="sync_in_progress_retry">Идёт обновление. Попробуйте сменить аккаунт после его завершения.</string>
     <string name="search_action">Поиск</string>
     <string name="search_for_app">Найдите приложение и нажмите на него.\n
   ( Совет: Вы можете добавлять приложения непосредственно из Play Маркет с помощью кнопки \"Поделиться\" )</string>

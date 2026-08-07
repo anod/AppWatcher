@@ -135,21 +135,22 @@ class AppWatcherSmokeTest {
 
     companion object {
         private const val PREFS_NAME = "WatcherPrefs"
+        private const val DEVICE_PREFS_NAME = "DeviceRegistration"
         private lateinit var preferences: SharedPreferences
+        private lateinit var devicePreferences: SharedPreferences
         private var originalPrefs: Map<String, Any?> = emptyMap()
+        private var originalDevicePrefs: Map<String, Any?> = emptyMap()
 
         @JvmStatic
         @BeforeClass
         fun configureStableStartupState() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
             originalPrefs = HashMap<String, Any?>(preferences.all)
+            originalDevicePrefs = HashMap<String, Any?>(devicePreferences.all)
+            devicePreferences.edit().clear().commit()
             preferences.edit()
-                .remove("account_name")
-                .remove("account_type")
-                .remove("gfs_id")
-                .remove("gfs_token")
-                .remove("device_config")
                 .putInt("update_frequency", 0)
                 .putBoolean("crash-reports", false)
                 .commit()
@@ -158,8 +159,16 @@ class AppWatcherSmokeTest {
         @JvmStatic
         @AfterClass
         fun restoreStartupState() {
+            restorePreferences(preferences, originalPrefs)
+            restorePreferences(devicePreferences, originalDevicePrefs)
+        }
+
+        private fun restorePreferences(
+            preferences: SharedPreferences,
+            values: Map<String, Any?>
+        ) {
             val editor = preferences.edit().clear()
-            originalPrefs.forEach { (key, value) ->
+            values.forEach { (key, value) ->
                 when (value) {
                     is Boolean -> editor.putBoolean(key, value)
                     is Float -> editor.putFloat(key, value)

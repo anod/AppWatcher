@@ -35,6 +35,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.paging.LoadState
@@ -86,6 +88,9 @@ fun SearchResultsScreenScene(
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
     val accountSelectionRequest = rememberLauncherForActivityResult(AccountSelectionRequest()) {
         viewModel.handleEvent(SearchViewEvent.SetAccount(it))
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.handleEvent(SearchViewEvent.OnResume)
     }
     AppTheme(
         theme = prefs.selectedTheme,
@@ -156,7 +161,7 @@ fun SearchResultsScreen(
                 is SearchStatus.NoNetwork -> RetryButton(onRetryClick = { onEvent(SearchViewEvent.OnSearchEnter(searchStatus.query)) })
                 is SearchStatus.NoResults -> EmptyResult(query = searchStatus.query)
                 is SearchStatus.SearchList -> {
-                    val pagingData = remember(searchStatus.query) { pagingDataFlow() }
+                    val pagingData = remember(searchStatus.query, searchStatus.generation) { pagingDataFlow() }
                     val items = pagingData.collectAsLazyPagingItems()
                     val isError = items.loadState.source.refresh is LoadState.Error
                     val isEmpty = (items.loadState.source.refresh is LoadState.NotLoading && items.itemCount < 1)

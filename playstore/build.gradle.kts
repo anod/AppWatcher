@@ -38,6 +38,13 @@ kotlin {
                 implementation(libs.coroutines.android)
             }
         }
+        getByName("androidHostTest") {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.androidx.test.core)
+                implementation(libs.robolectric)
+            }
+        }
     }
 }
 

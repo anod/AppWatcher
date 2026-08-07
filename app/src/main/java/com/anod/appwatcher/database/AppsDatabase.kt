@@ -1,10 +1,8 @@
 package com.anod.appwatcher.database
 
-import android.content.ContentProviderOperation
-import android.content.ContentProviderResult
-import android.content.ContentResolver
 import android.content.ContentValues
-import android.net.Uri
+import android.database.sqlite.SQLiteDatabase
+import android.provider.BaseColumns
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
@@ -19,6 +17,14 @@ import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+data class AppSyncUpdate(
+    val rowId: Long,
+    val expectedAppId: String,
+    val expectedPackageName: String,
+    val values: ContentValues,
+    val changelogValues: ContentValues
+)
 
 /**
  * @author Alex Gavrishev
@@ -36,23 +42,39 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun appTags(): AppTagsTable
     abstract fun schedules(): SchedulesTable
 
-    suspend fun applyBatchUpdates(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
-        val operations = values.map {
-            ContentProviderOperation.newUpdate(uriMapper(it)).withValues(it).build()
-        }
-
-        return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
-        }
-    }
-
-    suspend fun applyBatchInsert(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
-        val operations = values.map {
-            ContentProviderOperation.newInsert(uriMapper(it)).withValues(it).build()
-        }
-
-        return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
+    suspend fun applyAppSyncUpdates(
+        updates: List<AppSyncUpdate>
+    ) = withContext(Dispatchers.IO) {
+        withTransaction {
+            val db = openHelper.writableDatabase
+            updates.forEach { update ->
+                val updated = db.update(
+                    AppListTable.TABLE,
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                    update.values,
+                    "${BaseColumns._ID}=? AND " +
+                        "${AppListTable.Columns.APP_ID}=? AND " +
+                        "${AppListTable.Columns.PACKAGE_NAME}=? AND " +
+                        "${AppListTable.Columns.STATUS}!=?",
+                    arrayOf<Any>(
+                        update.rowId,
+                        update.expectedAppId,
+                        update.expectedPackageName,
+                        App.STATUS_DELETED
+                    )
+                )
+                check(updated == 1) {
+                    "App row ${update.rowId} changed during synchronization"
+                }
+                val changelogRowId = db.insert(
+                    ChangelogTable.TABLE,
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                    update.changelogValues
+                )
+                check(changelogRowId != -1L) {
+                    "Unable to persist changelog for app row ${update.rowId}"
+                }
+            }
         }
     }
 

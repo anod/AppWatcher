@@ -88,7 +88,29 @@ interface DfeAuthProvider {
     val authToken: String
     val accountName: String
     val deviceConfigToken: String
+    val authData: DfeAuthData
+        get() = DfeAuthData(
+            gfsId = gfsId,
+            gfsToken = gfsToken,
+            authToken = authToken,
+            accountName = accountName,
+            deviceConfigToken = deviceConfigToken
+        )
 }
+
+data class DfeAuthData(
+    val gfsId: String,
+    val gfsToken: String,
+    val authToken: String,
+    val accountName: String,
+    val deviceConfigToken: String
+)
+
+data class DfeDeviceIdentity(
+    val deviceId: String,
+    val deviceCheckinConsistencyToken: String,
+    val deviceConfigToken: String = ""
+)
 
 interface DfeApi {
     val authenticated: Boolean
@@ -117,7 +139,7 @@ interface DfeApi {
 
     suspend fun checkIn(): AndroidCheckinResponse
 
-    suspend fun uploadDeviceConfig(): UploadDeviceConfigResponse
+    suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity? = null): UploadDeviceConfigResponse
 
     companion object {
         const val URL_BASE = "https://android.clients.google.com"
