@@ -14,7 +14,7 @@ kotlin {
 android {
     namespace = "info.anodpslace.appwatcher.baselineprofile"
     compileSdk {
-        version = release(36)
+        version = release(37)
     }
 
     compileOptions {
