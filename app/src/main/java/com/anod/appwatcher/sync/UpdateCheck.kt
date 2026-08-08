@@ -144,7 +144,7 @@ class UpdateCheck(
                 SyncResult(false, listOf(), 0, 0)
             }
         } catch (e: AuthTokenStartIntent) {
-            AppLog.e("AuthToken: require interactive sing in")
+            AppLog.e("AuthToken: require interactive sign in")
             return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED_NO_TOKEN, manualSync)
         } catch (e: AuthTokenUnavailableException) {
             AppLog.e("Cannot receive access token", e)
