@@ -95,19 +95,168 @@ class WatchListPagingSourceRoomTest {
         assertEquals(null, secondPage.nextKey)
     }
 
-    private fun createPagingSource(showOnDevice: Boolean) = WatchListPagingSource(
+    @Test
+    fun pagingSourceKeepsStableRowsWhenStatusChangesMoveItemsAcrossOffsets() = runBlocking {
+        repeat(10) { index ->
+            insertApp(
+                appId = "updated-$index",
+                packageName = "updated.$index",
+                title = "Zzz Moved Later $index",
+                status = App.STATUS_UPDATED
+            )
+        }
+        repeat(100) { index ->
+            insertApp(appId = "normal-$index", packageName = "normal.$index", title = "Normal $index")
+        }
+        val pagingSource = createPagingSource(showOnDevice = false)
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 60, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        firstPage.data
+            .filterIsInstance<SectionItem.App>()
+            .filter { it.appListItem.app.status == App.STATUS_UPDATED }
+            .take(5)
+            .forEach {
+                db.apps().updateStatus(it.appListItem.app.rowId, App.STATUS_NORMAL)
+            }
+        val unloadedRow = AppListTable.Queries.loadAppListRows(
+            sortId = Preferences.SORT_NAME_ASC,
+            orderByRecentlyDiscovered = false,
+            tagId = null,
+            titleFilter = "",
+            table = db.apps()
+        )[70]
+        db.apps().updateStatus(unloadedRow.rowId, App.STATUS_UPDATED)
+
+        val pages = mutableListOf(firstPage)
+        var nextKey = firstPage.nextKey
+        while (nextKey != null) {
+            val result = pagingSource.load(PagingSource.LoadParams.Append(key = nextKey, loadSize = 20, placeholdersEnabled = false))
+            val page = result as PagingSource.LoadResult.Page
+            pages.add(page)
+            nextKey = page.nextKey
+        }
+        val items = pages.flatMap { it.data }.filterIsInstance<SectionItem.App>()
+        val itemsWithHeaders = insertHeaders(items)
+
+        assertEquals(110, items.size)
+        assertEquals(items.map { it.sectionKey }.toSet().size, items.size)
+        assertEquals(App.STATUS_NORMAL, items.single { it.appListItem.app.rowId == unloadedRow.rowId }.appListItem.app.status)
+        assertEquals(itemsWithHeaders.map { it.sectionKey }.toSet().size, itemsWithHeaders.size)
+        assertEquals(1, itemsWithHeaders.count { it.sectionKey == "header:watching" })
+    }
+
+    @Test
+    fun pagingSourceDoesNotRenderRowsDeletedAfterSnapshot() = runBlocking {
+        repeat(40) { index ->
+            insertApp(appId = "app-$index", packageName = "app.$index", title = "App $index")
+        }
+        val pagingSource = createPagingSource(showOnDevice = false)
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        val secondPageRow = AppListTable.Queries.loadAppListRows(
+            sortId = Preferences.SORT_NAME_ASC,
+            orderByRecentlyDiscovered = false,
+            tagId = null,
+            titleFilter = "",
+            table = db.apps()
+        )[20]
+        db.apps().updateStatus(secondPageRow.rowId, App.STATUS_DELETED)
+
+        val secondResult = pagingSource.load(PagingSource.LoadParams.Append(key = firstPage.nextKey!!, loadSize = 20, placeholdersEnabled = false))
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+
+        assertTrue(secondPage.data.filterIsInstance<SectionItem.App>().none { it.appListItem.app.rowId == secondPageRow.rowId })
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsBefore)
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsAfter)
+    }
+
+    @Test
+    fun pagingSourceKeepsRecentSectionsStableWhenUnloadedRowChanges() = runBlocking {
+        repeat(5) { index ->
+            insertApp(
+                appId = "recent-$index",
+                packageName = "recent.$index",
+                title = "Recent $index",
+                syncTime = System.currentTimeMillis()
+            )
+        }
+        repeat(35) { index ->
+            insertApp(appId = "old-$index", packageName = "old.$index", title = "Old $index")
+        }
+        val pagingSource = createPagingSource(
+            showOnDevice = false,
+            showRecentlyDiscovered = true,
+        )
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        val unloadedRow = AppListTable.Queries.loadAppListRows(
+            sortId = Preferences.SORT_NAME_ASC,
+            orderByRecentlyDiscovered = true,
+            tagId = null,
+            titleFilter = "",
+            table = db.apps()
+        )[25]
+        db.openHelper.writableDatabase.execSQL(
+            "UPDATE ${AppListTable.TABLE} SET ${AppListTable.Columns.SYNC_TIMESTAMP} = ? WHERE _id = ?",
+            arrayOf<Any>(System.currentTimeMillis(), unloadedRow.rowId)
+        )
+
+        val secondResult = pagingSource.load(PagingSource.LoadParams.Append(key = firstPage.nextKey!!, loadSize = 20, placeholdersEnabled = false))
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+        val items = (firstPage.data + secondPage.data).filterIsInstance<SectionItem.App>()
+        val itemsWithHeaders = insertHeaders(items, showRecentlyDiscovered = true)
+
+        assertFalse(items.single { it.appListItem.app.rowId == unloadedRow.rowId }.appListItem.recentFlag)
+        assertEquals(itemsWithHeaders.map { it.sectionKey }.toSet().size, itemsWithHeaders.size)
+        assertEquals(1, itemsWithHeaders.count { it.sectionKey == "header:recently-discovered" })
+        assertEquals(1, itemsWithHeaders.count { it.sectionKey == "header:watching" })
+    }
+
+    @Test
+    fun pagingSourceKeepsSortStableForOnDeviceItems() = runBlocking {
+        repeat(20) { index ->
+            insertApp(
+                appId = "sort-$index",
+                packageName = "sort.watched.$index",
+                title = "Paging Sort Fixture Watched $index"
+            )
+        }
+        installPackage(packageName = "sort.device.alpha", title = "Paging Sort Fixture Alpha")
+        installPackage(packageName = "sort.device.zulu", title = "Paging Sort Fixture Zulu")
+        val preferences = createPreferences()
+        val pagingSource = createPagingSource(showOnDevice = true, preferences = preferences).also {
+            it.filterQuery = "Paging Sort Fixture"
+        }
+
+        val firstResult = pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        preferences.sortIndex = Preferences.SORT_NAME_DESC
+
+        val secondResult = pagingSource.load(PagingSource.LoadParams.Append(key = firstPage.nextKey!!, loadSize = 20, placeholdersEnabled = false))
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+
+        assertEquals(
+            listOf("sort.device.alpha", "sort.device.zulu"),
+            secondPage.data.filterIsInstance<SectionItem.OnDevice>().map { it.appListItem.app.packageName }
+        )
+    }
+
+    private fun createPagingSource(
+        showOnDevice: Boolean,
+        preferences: Preferences = createPreferences(),
+        showRecentlyDiscovered: Boolean = false,
+    ) = WatchListPagingSource(
         config = WatchListPagingSource.Config(
             filterId = Filters.ALL,
             tagId = null,
-            showRecentlyDiscovered = false,
+            showRecentlyDiscovered = showRecentlyDiscovered,
             showOnDevice = showOnDevice,
             showRecentlyInstalled = false,
         ),
-        prefs = Preferences(
-            context = context,
-            notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined)
-        ).also { it.sortIndex = Preferences.SORT_NAME_ASC },
+        prefs = preferences,
         packageManager = context.packageManager,
         database = db,
         installedApps = InstalledApps.StaticMap(
@@ -115,11 +264,43 @@ class WatchListPagingSourceRoomTest {
                 "local.only.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
                 "local.only.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
                 "boundary.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+                "sort.device.alpha" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+                "sort.device.zulu" to InstalledApps.Info(versionCode = 1, versionName = "1"),
             )
         )
     )
 
-    private suspend fun insertApp(appId: String, packageName: String, title: String) {
+    private fun createPreferences() = Preferences(
+        context = context,
+        notificationManager = NotificationManager.NoOp(),
+        appScope = CoroutineScope(Dispatchers.Unconfined)
+    ).also { it.sortIndex = Preferences.SORT_NAME_ASC }
+
+    private fun insertHeaders(
+        items: List<SectionItem.App>,
+        showRecentlyDiscovered: Boolean = false,
+    ): List<SectionItem> {
+        val headerFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered)
+        return buildList {
+            var before: SectionItem? = null
+            items.forEach { item ->
+                val header = headerFactory.insertSeparator(before, item)
+                if (header != null) {
+                    add(header)
+                }
+                add(item)
+                before = item
+            }
+        }
+    }
+
+    private suspend fun insertApp(
+        appId: String,
+        packageName: String,
+        title: String,
+        status: Int = App.STATUS_NORMAL,
+        syncTime: Long = 0,
+    ) {
         AppListTable.Queries.insert(
             App(
                 rowId = 0,
@@ -130,13 +311,13 @@ class WatchListPagingSourceRoomTest {
                 title = title,
                 creator = "creator",
                 iconUrl = "",
-                status = App.STATUS_NORMAL,
+                status = status,
                 uploadDate = "",
                 price = Price(text = "", cur = "", micros = 0),
                 detailsUrl = null,
                 uploadTime = 0,
                 appType = "",
-                syncTime = 0
+                syncTime = syncTime
             ),
             db
         )

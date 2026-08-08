@@ -52,11 +52,6 @@ class AppListTableRoomTest {
         assertEquals(listOf("alpha"), loadIds(tagId = null, titleFilter = "Alp"))
         assertEquals(listOf("beta"), loadIds(tagId = 2, titleFilter = "Bet"))
         assertEquals(listOf("gamma"), loadIds(tagId = Tag.empty.id, titleFilter = "Gam"))
-
-        assertEquals(3, count(tagId = null, titleFilter = ""))
-        assertEquals(1, count(tagId = 1, titleFilter = ""))
-        assertEquals(2, count(tagId = 2, titleFilter = ""))
-        assertEquals(1, count(tagId = Tag.empty.id, titleFilter = ""))
     }
 
     private suspend fun insertApp(appId: String, title: String, status: Int = App.STATUS_NORMAL) {
@@ -96,20 +91,17 @@ class AppListTableRoomTest {
         )
     }
 
-    private suspend fun loadIds(tagId: Int?, titleFilter: String): List<String> =
-        AppListTable.Queries.loadAppList(
+    private suspend fun loadIds(tagId: Int?, titleFilter: String): List<String> {
+        val rows = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
             orderByRecentlyDiscovered = false,
             tagId = tagId,
             titleFilter = titleFilter,
-            offset = null,
-            table = db.apps()
-        ).map { item -> item.app.appId }
-
-    private suspend fun count(tagId: Int?, titleFilter: String): Int =
-        AppListTable.Queries.countAppList(
-            tagId = tagId,
-            titleFilter = titleFilter,
             table = db.apps()
         )
+        return AppListTable.Queries.loadAppList(
+            rowIds = rows.map { it.rowId },
+            table = db.apps()
+        ).map { item -> item.app.appId }
+    }
 }

@@ -16,14 +16,15 @@ class AppListTableQueriesTest {
             sortId = Preferences.SORT_NAME_ASC,
             orderByRecentlyDiscovered = false,
             tagId = null,
-            titleFilter = "",
-            offset = SqlOffset(offset = 0, limit = 20)
+            titleFilter = ""
         )
 
         assertTrue(sql.contains("LEFT JOIN changelog ON app_list.app_id == changelog.app_id"))
         assertTrue(sql.contains("AND app_list.ver_num == changelog.code"))
         assertFalse(sql.contains("SELECT MAX("))
-        assertEquals(listOf(App.STATUS_DELETED.toString(), "20", "0"), args.toList())
+        assertFalse(sql.contains("LIMIT"))
+        assertFalse(sql.contains("OFFSET"))
+        assertEquals(listOf(App.STATUS_DELETED.toString()), args.toList())
     }
 
     @Test
@@ -33,8 +34,7 @@ class AppListTableQueriesTest {
             sortId = Preferences.SORT_NAME_ASC,
             orderByRecentlyDiscovered = false,
             tagId = tagId,
-            titleFilter = "",
-            offset = null
+            titleFilter = ""
         )
 
         assertFalse(sql.contains("INNER JOIN app_tags"))
@@ -43,13 +43,27 @@ class AppListTableQueriesTest {
     }
 
     @Test
+    fun `row snapshot query can order by recently discovered`() {
+        val (sql, args) = AppListTable.Queries.createAppsListRowsQuery(
+            sortId = Preferences.SORT_NAME_ASC,
+            orderByRecentlyDiscovered = true,
+            tagId = null,
+            titleFilter = ""
+        )
+
+        assertTrue(sql.contains("CASE WHEN sync_version >"))
+        assertTrue(sql.contains("THEN 1 ELSE 0 END DESC"))
+        assertFalse(sql.contains("recent_flag DESC"))
+        assertEquals(listOf(App.STATUS_DELETED.toString()), args.toList())
+    }
+
+    @Test
     fun `untagged list query uses not exists`() {
         val (sql, args) = AppListTable.Queries.createAppsListQuery(
             sortId = Preferences.SORT_NAME_ASC,
             orderByRecentlyDiscovered = false,
             tagId = Tag.empty.id,
-            titleFilter = "",
-            offset = null
+            titleFilter = ""
         )
 
         assertFalse(sql.contains("LEFT JOIN app_tags"))
