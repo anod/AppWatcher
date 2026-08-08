@@ -66,7 +66,7 @@ sealed interface SectionItem {
         override val contentType = "App"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int = hashCodeOf("SectionItem.App", appListItem, isLocal)
+        override fun hashCode(): Int = hashCodeOf("SectionItem.App", appListItem, isLocal, packageInfo)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? App ?: return false
@@ -80,7 +80,7 @@ sealed interface SectionItem {
         override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int = hashCodeOf("SectionItem.OnDevice", appListItem, showSelection)
+        override fun hashCode(): Int = hashCodeOf("SectionItem.OnDevice", appListItem, showSelection, packageInfo)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? OnDevice ?: return false

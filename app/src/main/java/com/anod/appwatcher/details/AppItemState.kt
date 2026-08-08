@@ -34,7 +34,7 @@ fun rememberAppItemState(
     primaryColor: Color = MaterialTheme.colorScheme.primary
 ): AppItemState {
     val context = LocalContext.current
-    return remember(app) {
+    return remember(app, recentFlag, packageInfo, textColor, primaryColor, context) {
         calcAppItemState(
             app, recentFlag, textColor, primaryColor, packageInfo, context
         )
