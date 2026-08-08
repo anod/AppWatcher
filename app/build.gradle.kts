@@ -27,7 +27,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 17009
+        versionCode = 17010
         versionName = "1.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -203,7 +203,11 @@ val releaseGoogleServicesFile = providers.gradleProperty("APPWATCHER_GOOGLE_SERV
     .map { file(it) }
 
 afterEvaluate {
-    listOf("processReleaseGoogleServices", "processBenchmarkGoogleServices").forEach { taskName ->
+    listOf(
+        "processReleaseGoogleServices",
+        "processBenchmarkGoogleServices",
+        "processNonMinifiedReleaseGoogleServices"
+    ).forEach { taskName ->
         tasks.named<GoogleServicesTask>(taskName).configure {
             googleServicesJsonFiles.set(releaseGoogleServicesFile.map { listOf(it) })
         }
