@@ -1,81 +1,67 @@
 ---
 name: code-review
-description: Code review guidance for the AppWatcher Android app. Use this when reviewing a pull request or code changes in this repository to focus on correctness, security, and AppWatcher's architecture and conventions.
+description: Review AppWatcher pull requests for correctness, security, and architectural fit. Use for code-review tasks to apply repository conventions and the maintainer's preferences for immutable, concise, reusable code with explicit dependencies and arguments.
 ---
 
 # AppWatcher code review
 
-Use this skill when reviewing pull requests or diffs in this repository. Prioritize high-signal feedback: correctness bugs, security/secret leaks, and violations of the architecture and conventions below. Do not raise style or formatting nitpicks — this project enforces a deliberate manual formatting style (see "Formatting policy").
+Read and apply `.github/copilot-instructions.md` first. It is authoritative for architecture, build commands, and repository conventions. This skill adds the review method and maintainer preferences; do not duplicate or override the repository instructions.
 
-## What to prioritize
+## Review method
 
-1. Correctness and regressions in changed code.
-2. Secret/private-file leaks (highest priority — see "Secrets and private files").
-3. Violations of the module boundaries and conventions listed below.
-4. Missing or incorrect Room migrations when the schema changes.
-5. Concurrency/lifecycle issues in Compose scenes and view models.
+1. Review the merge-base diff, then inspect the relevant callers, callees, tests, schemas, and configuration needed to understand each changed behavior.
+2. When the pull request links an issue, prior pull request, or CI failure, use the GitHub MCP server to read that context before judging the intended behavior.
+3. Report only issues introduced or made materially worse by the diff. Do not report unrelated pre-existing code.
+4. Prove a concrete failure mode before commenting. State the affected input or app flow, the impact, and the smallest sound fix direction.
+5. Prioritize correctness, data loss, security/private-data exposure, lifecycle/concurrency bugs, and architectural violations. Skip praise, summaries, speculative concerns, and formatting-only comments.
+6. Keep each comment concise and place it on the changed line that causes the issue. Combine comments with the same root cause.
 
-Skip or down-rank: wrapping, blank lines, import order, and other purely stylistic matters — the repo intentionally disables these checks.
+## Maintainer preferences
 
-## Secrets and private files
+### Immutability
 
-Flag as blocking if a change commits or prints any of these:
+- Prefer `val`, immutable data classes updated with `copy`, sealed interfaces, and `data object` singleton states/events.
+- Keep mutation private and narrowly scoped. Do not expose `MutableStateFlow`, `MutableSharedFlow`, mutable collections, or mutable implementation state; expose `StateFlow`, `Flow`, read-only collections, or immutable snapshots.
+- Use `ImmutableList`, `ImmutableSet`, `ImmutableMap`, and persistent collections for collection-bearing Compose state and reusable UI APIs. Convert once at the boundary rather than during recomposition.
+- Local mutable builders are acceptable when they do not escape and make an algorithm clearer or cheaper. Do not demand persistent collections for Room/network DTO construction or internal paging assembly.
+- Treat `@Immutable` as a contract: flag it when a property is mutable or exposes a type whose stability cannot be guaranteed.
 
-- `local.properties`, `app/google-services.json`, build outputs, or IDE settings.
-- Release signing, Play API, or Firebase values, including `APPWATCHER_GOOGLE_SERVICES_FILE`, `APPWATCHER_KEYSTORE_FILE`, `APPWATCHER_KEYSTORE_PASSWORD`, `APPWATCHER_KEY_ALIAS`, `APPWATCHER_KEY_PASSWORD`.
-- Firebase project/app ids, OAuth tokens, raw crash logs, or private Crashlytics URLs pasted into source, PR descriptions, or docs.
+### Concision, KTX, and reuse
 
-Verify new secrets are read from Gradle user home / environment, not tracked files.
+- Before accepting a new helper or verbose platform interop, search the feature, `app/.../utils`, `:lib:ktx`, `:lib:compose`, and `:lib:framework`. Prefer an existing Kotlin/AndroidX KTX API or repository extension over repeated Java-style boilerplate.
+- Reuse existing screen components, state/event/action types, paging factories, database queries, and conversion helpers instead of creating parallel implementations.
+- Put a genuinely shared helper in the lowest correct module, but never move app-specific behavior into `:lib:*`.
+- Concise means fewer concepts and less duplication, not clever chains, hidden work, broad abstractions, or compressed error handling. Do not request an extraction that has no clear reuse or domain meaning.
 
-## Architecture and module boundaries
+### Explicit dependencies and arguments
 
-- Multi-module app: `:app` (Compose app), `:playstore` (Play Store/DFE APIs as KMP Android), and `:lib:*` shared modules (`applog`, `compose`, `context`, `framework`, `graphics`, `ktx`, `notification`, `permissions`, `playservices`, `viewmodel`). Flag changes that leak app-specific concerns into `:lib:*` or bypass `:playstore` for Play Store/network calls.
-- `:playstore` intentionally keeps Kotlin sources under `src/androidMain/java`; don't "fix" the path without updating the MPP source-set wiring.
-- Compose BOM versions come from `lib:compose` via an API platform dependency; consuming modules should inherit versions rather than pin their own.
+- For every new or changed app-owned function or constructor, require all data, behavior, configuration, and dependency arguments explicitly. The only allowed default is the Compose convention `modifier: Modifier = Modifier`.
+- Flag defaults such as `null`, `false`, `0`, empty collections, ambient state, or `getKoin().get()` when they silently select behavior or hide a dependency. Make each call site choose explicitly.
+- Prefer constructor injection for plain classes and the existing `singleOf`/`factoryOf` Koin wiring. Existing Android-owned and view-model `KoinComponent` boundaries are acceptable; pass dependencies explicitly from those owners into reusable screens and helpers.
+- Flag service lookup (`getKoin`, `inject`, raw `Koin`) inside reusable or low-level composables/functions. `CompositionLocal` is for true UI ambient state such as context, density, theme, or pane scope, not app services.
 
 ## Compose scenes, screens, and view models
 
-- View models extend `BaseFlowViewModel<State, Event, Action>` (`app/src/main/java/com/anod/appwatcher/utils/BaseFlowViewModel.kt` or `lib/viewmodel/.../BaseFlowViewModel.kt`), expose `viewStates`, and emit one-shot `viewActions`. Follow nearby imports for which base class to use.
-- Scene composables collect `viewStates`, render a `*Screen`, and collect `viewActions` inside `LaunchedEffect`. Reusable `*Screen` functions should take immutable state and expose a single typed `onEvent` callback; keep dependency lookup and `viewActions` collection in the scene wrapper.
-- `viewActions` collectors must use stable `LaunchedEffect` keys (the view model or `Unit`). For changing callbacks (e.g. navigation lambdas), wrap with `rememberUpdatedState` and call the current value inside the collector — do NOT key the collector by the lambda. Flag collectors keyed on unstable lambdas.
-- Navigation uses AndroidX Navigation 3: `AppWatcherActivity` owns `NavDisplay`, `rememberNavBackStack`, and serializable `SceneNavKey` entries.
-
-## Theming
-
-- Each scene applies its own `AppTheme`. Flag any global theme wrapper added around `NavDisplay` or `AppWatcherActivity`.
-- Details/dialogs may apply nested `AppTheme` for custom app/tag colors, but avoid nested themes that both update system bars. In list-detail layouts, the detail pane must not fight the list scene for status bar ownership; standalone details/dialogs may own themed bars.
-- In list-detail detail panes, protect interactive/text content from `WindowInsets.displayCutout` while letting header background and app bar draw behind the cutout.
-- List/detail uses the custom `rememberResizableListDetailSceneStrategy` / `ResizableListDetailSceneStrategy` around `ListDetailPaneScaffold`. Preserve the themed scaffold background and `minPaneWidth` clamp when touching split-pane gaps or resize behavior.
+- Follow the nearby `BaseFlowViewModel<State, Event, Action>` pattern. A scene owns the view model, dependencies, `viewActions`, navigation, and activity APIs; a reusable `*Screen` receives immutable state, explicit dependencies, and one typed `onEvent`.
+- Collect one-shot actions in a `LaunchedEffect` keyed by the view model or `Unit`. Capture changing callbacks with `rememberUpdatedState`; never restart the collector because a lambda changed.
+- Flag effects that can launch duplicate collectors, state writes during composition, unstable/lazy-list keys, blocking work on the main thread, or coroutine code that swallows `CancellationException`.
+- Preserve scene-owned `AppTheme`, Navigation 3 ownership, list-detail background/min-width behavior, system-bar ownership, and display-cutout protection described in the repository instructions.
 
 ## Watchlist paging (high-risk area)
 
-- Watchlist screens share `WatchListPage`, `WatchListScreen`, `WatchListPagerFactory`, `SectionHeaderFactory`, and `WatchListPagingSource` (`app/src/main/java/com/anod/appwatcher/watchlist/WatchListPagingSource.kt`). Paging data is cached in the pager factory; section headers are inserted with `PagingData.insertSeparators`.
-- Paging uses a custom raw-query `PagingSource`, not Room-generated paging. Ordering must be deterministic with a stable row-id tie-breaker, and `AppListTable.Queries.changes(db.apps())` must invalidate cached pager factories when app rows mutate.
-- Duplicate Lazy/Paging keys usually mean duplicate data within one paging generation. Flag any "fix" that adds volatile values to Compose keys to hide duplicates; the real fix is at the ordering/invalidation/section-key layer.
-- `WatchListStateViewModel` takes `WatchListTagFilter.None`, `Untagged`, or `Tag(id)`, plus `showOnDeviceApps` and `showRecentlyInstalledApps`. Keep `Tag` for UI state/title/color and `WatchListTagFilter` for query semantics so "no tag filter" and explicit "untagged" stay distinct — flag code that conflates them.
+- Preserve deterministic raw-query ordering with the row-id tie-breaker, pager-cache invalidation from `AppListTable.Queries.changes(db.apps())`, and stable section keys.
+- Do not hide duplicate paging data with volatile Compose keys. Fix ordering, invalidation, separator construction, or the duplicated source rows.
+- Keep `WatchListTagFilter.None`, `Untagged`, and `Tag(id)` semantically distinct; use `Tag` only for UI metadata.
 
-## Data layer
+## Data, modules, and private inputs
 
-- Room schema is in `app/schemas`; migrations live in `AppsDatabase` (`app/src/main/java/com/anod/appwatcher/database/AppsDatabase.kt`); app list queries live in `AppListTable.Queries`. If an entity/schema changes, verify a matching migration and updated schema JSON.
-- Play Store documents are converted to entities outside Room entity constructors.
+- A Room schema change requires the matching `AppsDatabase` migration, schema JSON, and migration coverage. Keep app-list SQL in `AppListTable.Queries`; convert Play Store documents outside entity constructors.
+- Keep Play Store/DFE calls behind `:playstore`, app behavior in `:app`, and reusable platform/general code in the appropriate `:lib:*` module. Preserve the intentional `playstore/src/androidMain/java` source path and inherited Compose BOM.
+- Treat committed or printed local/Firebase/Play/signing inputs, tokens, private Crashlytics URLs/logs, `local.properties`, or `app/google-services.json` as blocking security findings.
+- For a `lib` gitlink update, verify the submodule commit exists on its remote and that the parent points to that exact commit.
 
-## Dependency injection
+## Tests and review threshold
 
-- The project uses `koin-core` only — there is no Koin Compose helper dependency. Flag added Koin-Compose usage.
-- Use `KoinComponent` with `by inject()` or `app/src/main/java/com/anod/appwatcher/utils/KoinExtensions.kt` in view models/services. Avoid Koin lookups inside low-level reusable composables unless nearby code already does so.
-- Pass dependencies and theme data explicitly into scene composables.
-
-## Submodule / `lib` pointer changes
-
-- `lib` is a git submodule. Changes to files under `lib` must be committed and pushed in the submodule repo first; the parent repo should then update the `lib` gitlink to the exact pushed SHA. Flag a parent-repo submodule pointer bump whose commit isn't shown as pushed/fetchable, and flag `lib` source edits committed only in the parent repo.
-
-## Formatting policy (do not nitpick)
-
-- Preserve existing Kotlin formatting. Do not request broad `ktlintFormat`/autoformat or collapsing of multiline constructor/property/data-class declarations.
-- `.editorconfig` intentionally disables several ktlint wrapping rules and sets `insert_final_newline = false`. Do not suggest re-enabling them, and do not ask for a trailing newline on files.
-- Declaration parameters/properties may stay on their own lines; short inheritance lists may stay inline; `&&`/`||` should not be split onto standalone lines.
-
-## Build and test expectations
-
-- CI runs on JDK 21 and executes `./gradlew testDebugUnitTest` (test failures are `continue-on-error`, so check reports rather than assuming green). Relevant local commands: `:app:assembleDebug`, `:app:testDebugUnitTest`, `:app:lintDebug`, `ktlintCheck`.
-- When behavior changes, check that unit tests were added or updated where the codebase already has coverage (e.g. `WatchListPagingSourceTest`).
+- Require focused tests for changed behavior when a practical test seam exists, especially paging order/invalidation, filters, migrations, parsing, and view-model state transitions. Inspect CI reports because unit-test failures are configured `continue-on-error`.
+- Do not comment on wrapping, blank lines, import order, final newlines, or the repository's intentional ktlint choices.
+- If a concern cannot be demonstrated from the diff and repository context, do not post it as a finding.
