@@ -77,9 +77,9 @@ class Preferences(context: Context, private val notificationManager: Notificatio
 
     suspend fun saveAccount(
         account: AuthAccount?,
-        deviceRegistrationPending: Boolean? = null,
-        deviceRegistrationAuthorized: Boolean? = null,
-        deviceConfigRevision: Int? = null
+        deviceRegistrationPending: Boolean?,
+        deviceRegistrationAuthorized: Boolean?,
+        deviceConfigRevision: Int?
     ): Boolean = withContext(Dispatchers.IO) {
         val committed = editAccount(
             account,

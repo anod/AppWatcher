@@ -11,8 +11,8 @@ class DfeParseError(message: String, cause: Throwable? = null) : DfeError(messag
 
 class DfeServerError(
     message: String,
-    val statusCode: Int? = null,
-    cause: Throwable? = null
+    val statusCode: Int?,
+    cause: Throwable?
 ) : DfeError(message, cause) {
     val isAuthenticationError: Boolean
         get() = statusCode == 401 || statusCode == 403

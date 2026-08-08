@@ -56,7 +56,7 @@ internal class AuthRecoveringDfeApi(
 
     override suspend fun checkIn(): AndroidCheckinResponse = delegate.checkIn()
 
-    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity?): UploadDeviceConfigResponse =
+    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity): UploadDeviceConfigResponse =
         withAuthenticationRecovery { delegate.uploadDeviceConfig(identity) }
 
     private suspend fun <T> withAuthenticationRecovery(request: suspend () -> T): T {

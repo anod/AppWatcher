@@ -137,7 +137,11 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
                 if (event.result is AccountSelectionResult.Error) {
                     onAccountSelectError(event.result.errorMessage)
                 } else if (event.result is AccountSelectionResult.Success) {
-                    onAccountSelected(event.result.account, userInitiated = true)
+                    onAccountSelected(
+                        account = event.result.account,
+                        userInitiated = true,
+                        resumingInteractiveAuth = false
+                    )
                 }
             }
 
@@ -293,7 +297,7 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
     private fun onAccountSelected(
         account: Account,
         userInitiated: Boolean,
-        resumingInteractiveAuth: Boolean = false
+        resumingInteractiveAuth: Boolean
     ) {
         if (accountInitializationJob?.isActive == true) {
             return

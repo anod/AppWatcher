@@ -5,8 +5,6 @@ import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import finsky.api.DfeDeviceIdentity
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 sealed class DeviceRegistrationException(message: String) : IllegalStateException(message)
@@ -20,18 +18,16 @@ class DeviceRegistrationRequiredException :
 internal class DeviceRegistration(
     private val preferences: Preferences,
     private val dfeApi: DfeApi,
-    private val sdkInt: Int = Build.VERSION.SDK_INT
+    private val sdkInt: Int
 ) {
     companion object {
         internal const val DEVICE_CONFIG_REVISION = 1
     }
 
-    private val registrationMutex = Mutex()
-
     suspend fun ensure(
         account: AuthAccount,
-        allowCheckIn: Boolean = false
-    ): AuthAccount = registrationMutex.withLock {
+        allowCheckIn: Boolean
+    ): AuthAccount {
         val persistedAccount = preferences.account
         check(
             persistedAccount == null ||
@@ -42,7 +38,7 @@ internal class DeviceRegistration(
         val activeAccount = persistedAccount ?: account
 
         if (sdkInt < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            return@withLock activeAccount
+            return activeAccount
         }
 
         var registeredAccount = activeAccount
@@ -70,6 +66,7 @@ internal class DeviceRegistration(
                     preferences.saveAccount(
                         checkedInAccount,
                         deviceRegistrationPending = false,
+                        deviceRegistrationAuthorized = null,
                         deviceConfigRevision = 0
                     )
                 ) {
@@ -87,6 +84,8 @@ internal class DeviceRegistration(
             check(
                 preferences.saveAccount(
                     registeredAccount,
+                    deviceRegistrationPending = null,
+                    deviceRegistrationAuthorized = null,
                     deviceConfigRevision = 0
                 )
             ) {
@@ -97,7 +96,8 @@ internal class DeviceRegistration(
         if (registeredAccount.deviceConfig.isEmpty()) {
             val identity = DfeDeviceIdentity(
                 deviceId = registeredAccount.gfsId,
-                deviceCheckinConsistencyToken = registeredAccount.gfsIdToken
+                deviceCheckinConsistencyToken = registeredAccount.gfsIdToken,
+                deviceConfigToken = ""
             )
             val configToken = dfeApi.uploadDeviceConfig(identity).uploadDeviceConfigToken
             check(configToken.isNotEmpty()) { "Device config token is empty" }
@@ -105,6 +105,8 @@ internal class DeviceRegistration(
             check(
                 preferences.saveAccount(
                     registeredAccount,
+                    deviceRegistrationPending = null,
+                    deviceRegistrationAuthorized = null,
                     deviceConfigRevision = DEVICE_CONFIG_REVISION
                 )
             ) {
@@ -112,6 +114,6 @@ internal class DeviceRegistration(
             }
         }
 
-        return@withLock registeredAccount
+        return registeredAccount
     }
 }

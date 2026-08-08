@@ -1,12 +1,8 @@
 package com.anod.appwatcher.database
 
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
-import android.provider.BaseColumns
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
-import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.App
@@ -15,16 +11,6 @@ import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-data class AppSyncUpdate(
-    val rowId: Long,
-    val expectedAppId: String,
-    val expectedPackageName: String,
-    val values: ContentValues,
-    val changelogValues: ContentValues
-)
 
 /**
  * @author Alex Gavrishev
@@ -41,42 +27,6 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun tags(): TagsTable
     abstract fun appTags(): AppTagsTable
     abstract fun schedules(): SchedulesTable
-
-    suspend fun applyAppSyncUpdates(
-        updates: List<AppSyncUpdate>
-    ) = withContext(Dispatchers.IO) {
-        withTransaction {
-            val db = openHelper.writableDatabase
-            updates.forEach { update ->
-                val updated = db.update(
-                    AppListTable.TABLE,
-                    SQLiteDatabase.CONFLICT_REPLACE,
-                    update.values,
-                    "${BaseColumns._ID}=? AND " +
-                        "${AppListTable.Columns.APP_ID}=? AND " +
-                        "${AppListTable.Columns.PACKAGE_NAME}=? AND " +
-                        "${AppListTable.Columns.STATUS}!=?",
-                    arrayOf<Any>(
-                        update.rowId,
-                        update.expectedAppId,
-                        update.expectedPackageName,
-                        App.STATUS_DELETED
-                    )
-                )
-                check(updated == 1) {
-                    "App row ${update.rowId} changed during synchronization"
-                }
-                val changelogRowId = db.insert(
-                    ChangelogTable.TABLE,
-                    SQLiteDatabase.CONFLICT_REPLACE,
-                    update.changelogValues
-                )
-                check(changelogRowId != -1L) {
-                    "Unable to persist changelog for app row ${update.rowId}"
-                }
-            }
-        }
-    }
 
     companion object {
         const val VERSION = 19

@@ -158,7 +158,11 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
 
                     is AccountSelectionResult.Error -> showAccountErrorToast(event.result.errorMessage)
                     is AccountSelectionResult.Success -> {
-                        onAccountSelect(event.result.account, userInitiated = true)
+                        onAccountSelect(
+                            account = event.result.account,
+                            userInitiated = true,
+                            resumingInteractiveAuth = false
+                        )
                     }
                 }
             }
@@ -223,7 +227,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     private fun onAccountSelect(
         account: Account,
         userInitiated: Boolean,
-        resumingInteractiveAuth: Boolean = false
+        resumingInteractiveAuth: Boolean
     ) {
         if (accountInitializationJob?.isActive == true) {
             return

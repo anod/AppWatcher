@@ -1,6 +1,7 @@
 package com.anod.appwatcher.accounts
 
 import android.accounts.Account
+import android.os.Build
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
@@ -10,30 +11,52 @@ import kotlinx.coroutines.sync.withLock
 class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
 class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
 
-class AuthAccountInitializer(private val preferences: Preferences, private val authToken: AuthTokenBlocking, private val dfeApi: DfeApi) {
-    private val deviceRegistration = DeviceRegistration(preferences, dfeApi)
-    private val accountMutex = Mutex()
+class PlaySessionCoordinator {
+    private val sessionMutex = Mutex()
 
-    suspend fun initialize(
-        account: Account,
-        userInitiated: Boolean = false
-    ): AuthAccount {
-        if (!userInitiated) {
-            return accountMutex.withLock {
-                initializeLocked(account, userInitiated = false)
-            }
-        }
-        if (!accountMutex.tryLock()) {
+    suspend fun <T> withSession(action: suspend () -> T): T = sessionMutex.withLock {
+        action()
+    }
+
+    suspend fun <T> withUserInitiatedSession(action: suspend () -> T): T {
+        if (!sessionMutex.tryLock()) {
             throw AccountSessionBusyException()
         }
         return try {
-            initializeLocked(account, userInitiated = true)
+            action()
         } finally {
-            accountMutex.unlock()
+            sessionMutex.unlock()
         }
     }
+}
 
-    private suspend fun initializeLocked(
+class AuthAccountInitializer(
+    private val preferences: Preferences,
+    private val authToken: AuthTokenBlocking,
+    private val dfeApi: DfeApi,
+    private val playSessionCoordinator: PlaySessionCoordinator
+) {
+    private val deviceRegistration = DeviceRegistration(
+        preferences = preferences,
+        dfeApi = dfeApi,
+        sdkInt = Build.VERSION.SDK_INT
+    )
+
+    suspend fun initialize(
+        account: Account,
+        userInitiated: Boolean
+    ): AuthAccount =
+        if (userInitiated) {
+            playSessionCoordinator.withUserInitiatedSession {
+                initializeInSession(account, userInitiated = true)
+            }
+        } else {
+            playSessionCoordinator.withSession {
+                initializeInSession(account, userInitiated = false)
+            }
+        }
+
+    private suspend fun initializeInSession(
         account: Account,
         userInitiated: Boolean
     ): AuthAccount {
@@ -58,7 +81,9 @@ class AuthAccountInitializer(private val preferences: Preferences, private val a
         check(
             preferences.saveAccount(
                 selectedAccount,
-                deviceRegistrationAuthorized = if (userInitiated) authorizeRegistration else null
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = if (userInitiated) authorizeRegistration else null,
+                deviceConfigRevision = null
             )
         ) {
             "Unable to persist selected account"
@@ -84,15 +109,16 @@ class AuthAccountInitializer(private val preferences: Preferences, private val a
     }
 
     suspend fun refresh() {
-        withRefreshedAccount { }
+        playSessionCoordinator.withSession {
+            refreshInSession()
+        }
     }
 
-    internal suspend fun <T> withRefreshedAccount(action: suspend (AuthAccount) -> T): T = accountMutex.withLock {
+    internal suspend fun refreshInSession(): AuthAccount {
         val account = preferences.account ?: throw IllegalStateException("Account should not be null")
         val androidAccount = account.toAndroidAccount()
         requireToken(authToken.refreshToken(androidAccount))
-        val refreshedAccount = deviceRegistration.ensure(account, allowCheckIn = false)
-        action(refreshedAccount)
+        return deviceRegistration.ensure(account, allowCheckIn = false)
     }
 
     private fun requireToken(result: CheckTokenResult) {

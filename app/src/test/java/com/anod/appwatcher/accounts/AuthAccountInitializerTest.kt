@@ -37,6 +37,8 @@ class AuthAccountInitializerTest {
         runBlocking {
             preferences.saveAccount(
                 completeAccount(),
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = null,
                 deviceConfigRevision = DeviceRegistration.DEVICE_CONFIG_REVISION
             )
         }
@@ -56,7 +58,8 @@ class AuthAccountInitializerTest {
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(tokenProvider),
-            dfeApi
+            dfeApi,
+            PlaySessionCoordinator()
         )
 
         initializer.refresh()
@@ -77,14 +80,15 @@ class AuthAccountInitializerTest {
             deviceConfig = ""
         )
         val dfeApi = FakeDfeApi().apply {
-            uploadFailures.add(finsky.api.DfeServerError("Unauthorized", statusCode = 401))
+            uploadFailures.add(finsky.api.DfeServerError("Unauthorized", statusCode = 401, cause = null))
         }
         val tokenProvider = RecordingTokenProvider("cached-token", "fresh-token")
         val authToken = AuthTokenBlocking.create(tokenProvider)
         val initializer = AuthAccountInitializer(
             preferences,
             authToken,
-            AuthRecoveringDfeApi(dfeApi, authToken, preferences)
+            AuthRecoveringDfeApi(dfeApi, authToken, preferences),
+            PlaySessionCoordinator()
         )
 
         initializer.initialize(
@@ -118,7 +122,8 @@ class AuthAccountInitializerTest {
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(tokenProvider),
-            dfeApi
+            dfeApi,
+            PlaySessionCoordinator()
         )
         val account = Account("new@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
 
@@ -140,16 +145,18 @@ class AuthAccountInitializerTest {
     @Test
     fun interactiveAccountSwitchFailsFastWhileSyncSessionIsActive() = runBlocking {
         val dfeApi = FakeDfeApi()
+        val playSessionCoordinator = PlaySessionCoordinator()
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a", "token-b")),
-            dfeApi
+            dfeApi,
+            playSessionCoordinator
         )
         val actionStarted = CompletableDeferred<Unit>()
         val finishAction = CompletableDeferred<Unit>()
 
         val session = async {
-            initializer.withRefreshedAccount {
+            playSessionCoordinator.withSession {
                 actionStarted.complete(Unit)
                 finishAction.await()
             }
@@ -178,11 +185,13 @@ class AuthAccountInitializerTest {
 
     @Test
     fun accountSwitchesReuseDeviceIdentityAcrossInitializers() = runBlocking {
+        val playSessionCoordinator = PlaySessionCoordinator()
         val accountBApi = FakeDfeApi()
         val accountBInitializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-b")),
-            accountBApi
+            accountBApi,
+            playSessionCoordinator
         )
 
         accountBInitializer.initialize(
@@ -197,7 +206,8 @@ class AuthAccountInitializerTest {
         val recreatedInitializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a")),
-            accountAApi
+            accountAApi,
+            playSessionCoordinator
         )
 
         recreatedInitializer.initialize(
@@ -216,7 +226,8 @@ class AuthAccountInitializerTest {
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(tokenProvider),
-            dfeApi
+            dfeApi,
+            PlaySessionCoordinator()
         )
 
         initializer.initialize(

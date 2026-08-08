@@ -39,7 +39,7 @@ class DfeApiContext private constructor(
         }
     }
 
-    internal fun createDefaultHeaders(identity: DfeDeviceIdentity? = null): MutableMap<String, String> {
+    internal fun createDefaultHeaders(identity: DfeDeviceIdentity?): MutableMap<String, String> {
         val authData = authTokenProvider.authData
         if (authData.authToken.isBlank()) {
             throw IllegalStateException("Auth token is empty")
@@ -66,7 +66,7 @@ class DfeApiContext private constructor(
         return "[PlayDfeApiContext headers={${this.headers.map { "${it.key} = ${it.value}," }}]"
     }
 
-    fun createAuthHeaders(includeDeviceId: Boolean = true): MutableMap<String, String> {
+    fun createAuthHeaders(includeDeviceId: Boolean): MutableMap<String, String> {
         val authData = authTokenProvider.authData
         return mutableMapOf(
             "app" to "com.google.android.gms",

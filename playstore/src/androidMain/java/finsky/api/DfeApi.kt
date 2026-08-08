@@ -109,7 +109,7 @@ data class DfeAuthData(
 data class DfeDeviceIdentity(
     val deviceId: String,
     val deviceCheckinConsistencyToken: String,
-    val deviceConfigToken: String = ""
+    val deviceConfigToken: String
 )
 
 interface DfeApi {
@@ -139,7 +139,7 @@ interface DfeApi {
 
     suspend fun checkIn(): AndroidCheckinResponse
 
-    suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity? = null): UploadDeviceConfigResponse
+    suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity): UploadDeviceConfigResponse
 
     companion object {
         const val URL_BASE = "https://android.clients.google.com"

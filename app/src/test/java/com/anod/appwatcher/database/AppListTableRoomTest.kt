@@ -60,7 +60,7 @@ class AppListTableRoomTest {
     }
 
     @Test
-    fun syncUpdatesRollBackWhenAnAppWasDeleted() = runBlocking {
+    fun syncUpdatesSkipDeletedAppWithoutRollingBackOthers() = runBlocking {
         insertApp(appId = "active", title = "Active")
         insertApp(appId = "deleted", title = "Deleted", status = App.STATUS_DELETED)
         val activeApp = db.apps().loadApp("active")!!
@@ -74,20 +74,18 @@ class AppListTableRoomTest {
             put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         }
 
-        try {
-            db.applyAppSyncUpdates(
-                listOf(
-                    syncUpdate(activeApp, activeValues),
-                    syncUpdate(deletedApp, deletedValues)
-                )
-            )
-            throw AssertionError("Expected synchronization conflict")
-        } catch (_: IllegalStateException) {
-        }
+        val appliedRowIds = AppListTable.Queries.applySyncUpdates(
+            listOf(
+                syncUpdate(activeApp, activeValues),
+                syncUpdate(deletedApp, deletedValues)
+            ),
+            db
+        )
 
-        assertEquals(App.STATUS_NORMAL, db.apps().loadAppRow(activeApp.rowId)?.status)
+        assertEquals(setOf(activeApp.rowId.toLong()), appliedRowIds)
+        assertEquals(App.STATUS_UPDATED, db.apps().loadAppRow(activeApp.rowId)?.status)
         assertEquals(App.STATUS_DELETED, db.apps().loadAppRow(deletedApp.rowId)?.status)
-        assertTrue(db.changelog().ofApp("active").isEmpty())
+        assertEquals(listOf(2), db.changelog().ofApp("active").map { it.versionCode })
         assertTrue(db.changelog().ofApp("deleted").isEmpty())
     }
 
@@ -101,7 +99,7 @@ class AppListTableRoomTest {
             put(AppListTable.Columns.VERSION_NUMBER, 2)
         }
 
-        db.applyAppSyncUpdates(listOf(syncUpdate(activeApp, values)))
+        AppListTable.Queries.applySyncUpdates(listOf(syncUpdate(activeApp, values)), db)
 
         assertEquals(App.STATUS_UPDATED, db.apps().loadAppRow(activeApp.rowId)?.status)
         assertEquals(2, db.apps().loadAppRow(activeApp.rowId)?.versionNumber)
@@ -109,7 +107,7 @@ class AppListTableRoomTest {
     }
 
     @Test
-    fun syncUpdatesRollBackWhenAppRowIdentityChanged() = runBlocking {
+    fun syncUpdatesSkipChangedIdentityWithoutRollingBackOthers() = runBlocking {
         insertApp(appId = "first", title = "First")
         insertApp(appId = "second", title = "Second")
         val firstApp = db.apps().loadApp("first")!!
@@ -133,20 +131,18 @@ class AppListTableRoomTest {
             arrayOf<Any>(secondApp.rowId)
         )
 
-        try {
-            db.applyAppSyncUpdates(
-                listOf(
-                    syncUpdate(firstApp, firstValues),
-                    syncUpdate(secondApp, secondValues)
-                )
-            )
-            throw AssertionError("Expected synchronization conflict")
-        } catch (_: IllegalStateException) {
-        }
+        val appliedRowIds = AppListTable.Queries.applySyncUpdates(
+            listOf(
+                syncUpdate(firstApp, firstValues),
+                syncUpdate(secondApp, secondValues)
+            ),
+            db
+        )
 
-        assertEquals(App.STATUS_NORMAL, db.apps().loadAppRow(firstApp.rowId)?.status)
+        assertEquals(setOf(firstApp.rowId.toLong()), appliedRowIds)
+        assertEquals(App.STATUS_UPDATED, db.apps().loadAppRow(firstApp.rowId)?.status)
         assertEquals("replacement", db.apps().loadAppRow(secondApp.rowId)?.appId)
-        assertTrue(db.changelog().ofApp("first").isEmpty())
+        assertEquals(listOf(2), db.changelog().ofApp("first").map { it.versionCode })
         assertTrue(db.changelog().ofApp("second").isEmpty())
     }
 

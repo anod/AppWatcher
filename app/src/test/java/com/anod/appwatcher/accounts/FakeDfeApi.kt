@@ -16,7 +16,7 @@ internal class FakeDfeApi : DfeApi {
     var checkInCalls = 0
     var uploadCalls = 0
     var detailsCalls = 0
-    val uploadIdentities = mutableListOf<DfeDeviceIdentity?>()
+    val uploadIdentities = mutableListOf<DfeDeviceIdentity>()
     val detailsFailures = ArrayDeque<Throwable>()
     val checkInFailures = ArrayDeque<Throwable>()
     val uploadFailures = ArrayDeque<Throwable>()
@@ -66,7 +66,7 @@ internal class FakeDfeApi : DfeApi {
         return checkInResponse
     }
 
-    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity?): UploadDeviceConfigResponse {
+    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity): UploadDeviceConfigResponse {
         uploadCalls++
         uploadIdentities.add(identity)
         if (uploadFailures.isNotEmpty()) {

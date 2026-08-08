@@ -52,12 +52,16 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
     override suspend fun details(appDetailsUrl: String): DetailsResponse {
-        val dfeRequest = createRequest(DfeApi.URL_FDFE + "/" + appDetailsUrl)
+        val dfeRequest = createRequest(
+            DfeApi.URL_FDFE + "/" + appDetailsUrl,
+            identity = null,
+            customizer = null
+        )
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.detailsResponse
     }
@@ -68,7 +72,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 .addAllDocid(docIds.map { it.packageName }.sorted())
                 .build()
 
-        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI) { builder ->
+        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI, identity = null) { builder ->
             builder.post(bulkDetailsRequest.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
 
@@ -89,7 +93,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
             .addQueryParameter("vc", updateVersionCode.toString())
             .build().toString()
 
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.deliveryResponse
     }
@@ -100,7 +104,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 createLibraryUrl(DfeApi.wishlistBackendId, libraryId, 7, null)
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
@@ -109,7 +113,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
             DfeApi.PURCHASE_HISTORY_URL + "?o=0"
         else
             DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
@@ -131,7 +135,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
         return newCall(dfeRequest) { AndroidCheckinResponse.parseFrom(it) }
     }
 
-    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity?): UploadDeviceConfigResponse {
+    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity): UploadDeviceConfigResponse {
         val request = UploadDeviceConfigRequest.newBuilder()
             .setDeviceConfiguration(apiContext.deviceInfo.configuration.toProto(apiContext.deviceInfo.build.abis))
             .build()
@@ -190,8 +194,8 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
 
     private fun createRequest(
         url: String,
-        identity: DfeDeviceIdentity? = null,
-        customizer: ((Request.Builder) -> Unit)? = null
+        identity: DfeDeviceIdentity?,
+        customizer: ((Request.Builder) -> Unit)?
     ): Request {
         return Request.Builder()
                 .url(url)

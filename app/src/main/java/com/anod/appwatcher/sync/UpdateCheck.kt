@@ -10,6 +10,7 @@ import androidx.work.Data
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.AuthTokenUnavailableException
+import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
 import com.anod.appwatcher.database.AppListTable
@@ -41,8 +42,6 @@ import java.util.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
@@ -61,6 +60,7 @@ class UpdateCheck(
     private val networkConnection: NetworkConnectivity,
     private val authAccount: AuthAccountInitializer,
     private val uploadDateParserCache: UploadDateParserCache,
+    private val playSessionCoordinator: PlaySessionCoordinator,
     private val koin: Koin
 ) {
 
@@ -78,10 +78,9 @@ class UpdateCheck(
     companion object {
         private const val ONE_SEC_IN_MILLIS = 1000
         private const val BULK_SIZE = 20
-        private const val MAX_CHUNK_ATTEMPTS = 3
+        internal const val MAX_CHUNK_ATTEMPTS = 3
         private const val CHUNK_RETRY_DELAY_MILLIS = 250L
         internal const val EXTRAS_MANUAL = "manual"
-        private val syncMutex = Mutex()
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
@@ -90,7 +89,7 @@ class UpdateCheck(
 
     private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
 
-    suspend fun perform(extras: Data): Int = syncMutex.withLock {
+    suspend fun perform(extras: Data): Int = playSessionCoordinator.withSession {
         performSerialized(extras)
     }
 
@@ -125,25 +124,24 @@ class UpdateCheck(
 
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
         val syncResult = try {
-            authAccount.withRefreshedAccount {
-                val startIntent = Intent(SYNC_PROGRESS).apply {
-                    `package` = context.actual.packageName
-                }
-                context.sendBroadcast(startIntent)
+            authAccount.refreshInSession()
+            val startIntent = Intent(SYNC_PROGRESS).apply {
+                `package` = context.actual.packageName
+            }
+            context.sendBroadcast(startIntent)
 
-                AppLog.d("Last update viewed: $lastUpdatesViewed")
-                SchedulesTable.Queries.save(schedule, database)
+            AppLog.d("Last update viewed: $lastUpdatesViewed")
+            SchedulesTable.Queries.save(schedule, database)
 
-                try {
-                    doSync(lastUpdatesViewed)
-                } catch (e: AuthTokenStartIntent) {
-                    throw e
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    AppLog.e("Error during synchronization ${e.message}", e)
-                    SyncResult(false, listOf(), 0, 0)
-                }
+            try {
+                doSync(lastUpdatesViewed)
+            } catch (e: AuthTokenStartIntent) {
+                throw e
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLog.e("Error during synchronization ${e.message}", e)
+                SyncResult(false, listOf(), 0, 0)
             }
         } catch (e: AuthTokenStartIntent) {
             AppLog.e("AuthToken: require interactive sing in")
@@ -303,18 +301,31 @@ class UpdateCheck(
             return emptyList()
         }
 
-        db.applyAppSyncUpdates(
-            pendingUpdates.map { update ->
-                AppSyncUpdate(
-                    rowId = update.rowId,
-                    expectedAppId = update.expectedAppId,
-                    expectedPackageName = update.expectedPackageName,
-                    values = update.values,
-                    changelogValues = update.changelog
-                )
-            }
+        val updates = pendingUpdates.map { update ->
+            AppSyncUpdate(
+                rowId = update.rowId,
+                expectedAppId = update.expectedAppId,
+                expectedPackageName = update.expectedPackageName,
+                values = update.values,
+                changelogValues = update.changelog
+            )
+        }
+        val appliedRowIds = AppListTable.Queries.applySyncUpdates(
+            updates,
+            db
         )
-        return pendingUpdates.mapNotNull { it.updatedApp }
+        val skippedRowIds = updates
+            .map { it.rowId }
+            .filterNot { it in appliedRowIds }
+        if (skippedRowIds.isNotEmpty()) {
+            AppLog.w(
+                "Skipped app rows changed during synchronization: ${skippedRowIds.joinToString()}",
+                "UpdateCheck"
+            )
+        }
+        return pendingUpdates
+            .filter { it.rowId in appliedRowIds }
+            .mapNotNull { it.updatedApp }
     }
 
     private fun updateApp(marketDoc: Document, localItem: AppListItem, lastUpdatesViewed: Boolean): Pair<ContentValues, UpdatedApp?> {
@@ -451,8 +462,8 @@ internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, val
 
 internal suspend fun <T, R> fetchAllChunks(
     chunks: List<T>,
-    maxAttempts: Int = 3,
-    initialRetryDelayMillis: Long = 250L,
+    maxAttempts: Int,
+    initialRetryDelayMillis: Long,
     fetch: suspend (T) -> R
 ): List<Pair<T, R>> {
     require(maxAttempts > 0)

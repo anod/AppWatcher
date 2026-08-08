@@ -52,11 +52,14 @@ class DeviceRegistrationTest {
         assertTrue(
             preferences.saveAccount(
                 account,
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = null,
                 deviceConfigRevision = DeviceRegistration.DEVICE_CONFIG_REVISION
             )
         )
 
-        val result = DeviceRegistration(preferences, dfeApi, sdkInt = 35).ensure(account)
+        val result = DeviceRegistration(preferences, dfeApi, sdkInt = 35)
+            .ensure(account, allowCheckIn = false)
 
         assertEquals(account, result)
         assertEquals(0, dfeApi.checkInCalls)
@@ -67,14 +70,22 @@ class DeviceRegistrationTest {
     fun legacyConfigTokenIsReboundWithoutNewCheckin() = runBlocking {
         val dfeApi = FakeDfeApi()
         val account = account(gfsId = "existing-id", gfsToken = "existing-checkin", deviceConfig = "legacy-config")
-        assertTrue(preferences.saveAccount(account, deviceConfigRevision = 0))
+        assertTrue(
+            preferences.saveAccount(
+                account,
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = null,
+                deviceConfigRevision = 0
+            )
+        )
 
-        val result = DeviceRegistration(preferences, dfeApi, sdkInt = 35).ensure(account)
+        val result = DeviceRegistration(preferences, dfeApi, sdkInt = 35)
+            .ensure(account, allowCheckIn = false)
 
         assertEquals(0, dfeApi.checkInCalls)
         assertEquals(1, dfeApi.uploadCalls)
         assertEquals(
-            DfeDeviceIdentity("existing-id", "existing-checkin"),
+            DfeDeviceIdentity("existing-id", "existing-checkin", ""),
             dfeApi.uploadIdentities.single()
         )
         assertEquals("config-token", result.deviceConfig)
@@ -92,7 +103,7 @@ class DeviceRegistrationTest {
         assertEquals("checkin-token", result.gfsIdToken)
         assertEquals("config-token", result.deviceConfig)
         assertEquals(
-            listOf(DfeDeviceIdentity("4d2", "checkin-token")),
+            listOf(DfeDeviceIdentity("4d2", "checkin-token", "")),
             dfeApi.uploadIdentities
         )
         assertEquals(result, preferences.account)
@@ -119,7 +130,7 @@ class DeviceRegistrationTest {
         assertEquals(1, dfeApi.checkInCalls)
 
         dfeApi.uploadFailure = null
-        val result = registration.ensure(pendingAccount!!)
+        val result = registration.ensure(pendingAccount!!, allowCheckIn = false)
 
         assertEquals("config-token", result.deviceConfig)
         assertEquals(1, dfeApi.checkInCalls)
@@ -127,17 +138,26 @@ class DeviceRegistrationTest {
     }
 
     @Test
-    fun concurrentRegistrationCreatesOnlyOneIdentity() = runBlocking {
+    fun sessionCoordinatorSerializesConcurrentRegistration() = runBlocking {
         val dfeApi = FakeDfeApi().apply {
             beforeCheckIn = { delay(50) }
         }
         val registration = DeviceRegistration(preferences, dfeApi, sdkInt = 35)
+        val playSessionCoordinator = PlaySessionCoordinator()
         val account = account()
 
         val results = coroutineScope {
             awaitAll(
-                async { registration.ensure(account, allowCheckIn = true) },
-                async { registration.ensure(account, allowCheckIn = true) }
+                async {
+                    playSessionCoordinator.withSession {
+                        registration.ensure(account, allowCheckIn = true)
+                    }
+                },
+                async {
+                    playSessionCoordinator.withSession {
+                        registration.ensure(account, allowCheckIn = true)
+                    }
+                }
             )
         }
 
@@ -168,7 +188,7 @@ class DeviceRegistrationTest {
 
         assertEquals("4d2", preferences.account?.gfsId)
         assertFalse(preferences.isDeviceRegistrationPending)
-        val result = registration.ensure(preferences.account!!)
+        val result = registration.ensure(preferences.account!!, allowCheckIn = false)
         assertEquals("4d2", result.gfsId)
         assertEquals(1, dfeApi.checkInCalls)
     }
@@ -191,7 +211,8 @@ class DeviceRegistrationTest {
         assertEquals(1, dfeApi.checkInCalls)
 
         try {
-            DeviceRegistration(preferences, dfeApi, sdkInt = 35).ensure(account)
+            DeviceRegistration(preferences, dfeApi, sdkInt = 35)
+                .ensure(account, allowCheckIn = false)
             throw AssertionError("Expected pending registration failure")
         } catch (_: DeviceRegistrationPendingException) {
         }
@@ -210,7 +231,8 @@ class DeviceRegistrationTest {
         val dfeApi = FakeDfeApi()
 
         try {
-            DeviceRegistration(preferences, dfeApi, sdkInt = 35).ensure(account())
+            DeviceRegistration(preferences, dfeApi, sdkInt = 35)
+                .ensure(account(), allowCheckIn = false)
             throw AssertionError("Expected registration requirement")
         } catch (_: DeviceRegistrationRequiredException) {
         }

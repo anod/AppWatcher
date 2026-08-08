@@ -51,7 +51,7 @@ class AuthRecoveringDfeApiTest {
         val authToken = AuthTokenBlocking.create(tokenProvider)
         authToken.refreshToken(Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE))
         val delegate = FakeDfeApi().apply {
-            detailsFailures.add(DfeServerError("Unauthorized", statusCode = 401))
+            detailsFailures.add(DfeServerError("Unauthorized", statusCode = 401, cause = null))
             detailsResponse = Details.DetailsResponse.getDefaultInstance()
         }
         val dfeApi = AuthRecoveringDfeApi(delegate, authToken, preferences)
