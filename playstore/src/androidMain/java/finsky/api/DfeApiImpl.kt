@@ -52,12 +52,16 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                     .build().toString()
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
     override suspend fun details(appDetailsUrl: String): DetailsResponse {
-        val dfeRequest = createRequest(DfeApi.URL_FDFE + "/" + appDetailsUrl)
+        val dfeRequest = createRequest(
+            DfeApi.URL_FDFE + "/" + appDetailsUrl,
+            identity = null,
+            customizer = null
+        )
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.detailsResponse
     }
@@ -68,7 +72,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 .addAllDocid(docIds.map { it.packageName }.sorted())
                 .build()
 
-        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI) { builder ->
+        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI, identity = null) { builder ->
             builder.post(bulkDetailsRequest.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
 
@@ -89,7 +93,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
             .addQueryParameter("vc", updateVersionCode.toString())
             .build().toString()
 
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         val responseWrapper = newCall(dfeRequest)
         return responseWrapper.payload.deliveryResponse
     }
@@ -100,7 +104,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 createLibraryUrl(DfeApi.wishlistBackendId, libraryId, 7, null)
             else
                 DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
@@ -109,7 +113,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
             DfeApi.PURCHASE_HISTORY_URL + "?o=0"
         else
             DfeApi.URL_FDFE + "/" + nextPageUrl
-        val dfeRequest = createRequest(url)
+        val dfeRequest = createRequest(url, identity = null, customizer = null)
         return newCall(dfeRequest)
     }
 
@@ -122,7 +126,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
             .url(URL_CHECK_IN)
             .apply {
                 post(checkin.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
-                apiContext.createAuthHeaders().forEach {
+                apiContext.createAuthHeaders(includeDeviceId = false).forEach {
                     addHeader(it.key, it.value)
                 }
                 addHeader("Host", "android.clients.google.com")
@@ -131,12 +135,12 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
         return newCall(dfeRequest) { AndroidCheckinResponse.parseFrom(it) }
     }
 
-    override suspend fun uploadDeviceConfig(): UploadDeviceConfigResponse {
+    override suspend fun uploadDeviceConfig(identity: DfeDeviceIdentity): UploadDeviceConfigResponse {
         val request = UploadDeviceConfigRequest.newBuilder()
             .setDeviceConfiguration(apiContext.deviceInfo.configuration.toProto(apiContext.deviceInfo.build.abis))
             .build()
 
-        val dfeRequest = createRequest(DfeApi.URL_UPLOAD_DEVICE_CONFIG) { builder ->
+        val dfeRequest = createRequest(DfeApi.URL_UPLOAD_DEVICE_CONFIG, identity) { builder ->
             builder.post(request.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
         val response = newCall(dfeRequest)
@@ -162,12 +166,18 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                 try {
                     response.body?.use { body ->
                         if (!response.isSuccessful) {
-                            DfeResponse().parseNetworkError(body.byteStream())
-                            if (response.code == HttpURLConnection.HTTP_NOT_FOUND) {
-                                throw DfeServerError("Not Found")
-                            } else {
-                                throw DfeServerError("Status code ${response.code}")
+                            var error: Exception? = null
+                            try {
+                                DfeResponse().parseNetworkError(body.byteStream())
+                            } catch (e: Exception) {
+                                error = e
                             }
+                            val message = when {
+                                error is DfeServerError -> error.message ?: "Status code ${response.code}"
+                                response.code == HttpURLConnection.HTTP_NOT_FOUND -> "Not Found"
+                                else -> "Status code ${response.code}"
+                            }
+                            throw DfeServerError(message, response.code, error)
                         } else {
                             val parsed = responseParser(body.byteStream())
                             continuation.resume(parsed)
@@ -182,7 +192,11 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
         continuation.invokeOnCancellation { call.cancel() }
     }
 
-    private fun createRequest(url: String, customizer: ((Request.Builder) -> Unit)? = null): Request {
+    private fun createRequest(
+        url: String,
+        identity: DfeDeviceIdentity?,
+        customizer: ((Request.Builder) -> Unit)?
+    ): Request {
         return Request.Builder()
                 .url(url)
                 .apply {
@@ -191,7 +205,7 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
                     } else {
                         customizer(this)
                     }
-                    apiContext.createDefaultHeaders().forEach { entry ->
+                    apiContext.createDefaultHeaders(identity).forEach { entry ->
                         addHeader(entry.key, entry.value)
                     }
                 }

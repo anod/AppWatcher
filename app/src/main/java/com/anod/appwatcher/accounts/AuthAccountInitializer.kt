@@ -4,94 +4,134 @@ import android.accounts.Account
 import android.os.Build
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
-import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
-import java.math.BigInteger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-class AuthAccountInitializer(private val preferences: Preferences, private val authToken: AuthTokenBlocking, private val dfeApi: DfeApi) {
-    suspend fun initialize(account: Account): AuthAccount {
-        val existingAccount = preferences.account
-        val tokenResult = try {
-            authToken.refreshToken(account)
+class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
+class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
+
+class PlaySessionCoordinator {
+    private val sessionMutex = Mutex()
+
+    suspend fun <T> withSession(action: suspend () -> T): T = sessionMutex.withLock {
+        action()
+    }
+
+    suspend fun <T> withUserInitiatedSession(action: suspend () -> T): T {
+        if (!sessionMutex.tryLock()) {
+            throw AccountSessionBusyException()
+        }
+        return try {
+            action()
+        } finally {
+            sessionMutex.unlock()
+        }
+    }
+}
+
+class AuthAccountInitializer(
+    private val preferences: Preferences,
+    private val authToken: AuthTokenBlocking,
+    private val dfeApi: DfeApi,
+    private val playSessionCoordinator: PlaySessionCoordinator
+) {
+    private val deviceRegistration = DeviceRegistration(
+        preferences = preferences,
+        dfeApi = dfeApi,
+        sdkInt = Build.VERSION.SDK_INT
+    )
+
+    suspend fun initialize(
+        account: Account,
+        userInitiated: Boolean
+    ): AuthAccount =
+        if (userInitiated) {
+            playSessionCoordinator.withUserInitiatedSession {
+                initializeInSession(account, userInitiated = true)
+            }
+        } else {
+            playSessionCoordinator.withSession {
+                initializeInSession(account, userInitiated = false)
+            }
+        }
+
+    private suspend fun initializeInSession(
+        account: Account,
+        userInitiated: Boolean
+    ): AuthAccount {
+        val activeAccount = preferences.account
+        if (
+            !userInitiated &&
+            activeAccount != null &&
+            (activeAccount.name != account.name || activeAccount.type != account.type)
+        ) {
+            return activeAccount
+        }
+        val existingAccount = activeAccount
+        val selectedAccount = if (
+            existingAccount?.name == account.name &&
+            existingAccount.type == account.type
+        ) {
+            existingAccount
+        } else {
+            AuthAccount(account, preferences.deviceIdentity, "")
+        }
+        val authorizeRegistration = userInitiated && selectedAccount.gfsId.isEmpty()
+        check(
+            preferences.saveAccount(
+                selectedAccount,
+                deviceRegistrationPending = null,
+                deviceRegistrationAuthorized = if (userInitiated) authorizeRegistration else null,
+                deviceConfigRevision = null
+            )
+        ) {
+            "Unable to persist selected account"
+        }
+        val allowCheckIn = userInitiated || preferences.isDeviceRegistrationAuthorized
+
+        try {
+            requireToken(authToken.refreshToken(account))
+        } catch (e: AuthTokenStartIntent) {
+            throw e
         } catch (e: Exception) {
+            clearDeviceRegistrationAuthorization()
             AppLog.d("Exception during token refresh. Persisting account anyway, ${e.message}")
-            preferences.account = AuthAccount(account, GfsIdResult("", ""), "")
             throw e
         }
-        val isNewAccount = existingAccount?.name != account.name
-        var gfsIdResult: GfsIdResult? = if (isNewAccount) null else existingAccount?.toGfsResult()
-        var deviceConfigToken: String? = if (isNewAccount) null else existingAccount?.deviceConfig
-        if (needToRetrieveGfsId(existingAccount, account, tokenResult)) {
-            gfsIdResult = try {
-                retrieveGsfId()
-            } catch (e: Exception) {
-                AppLog.e("Unable to generate gfs Id ${e.message}")
-                GfsIdResult("", "")
-            }
-            deviceConfigToken = try {
-                dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
-            } catch (e: Exception) {
-                AppLog.e("Unable to upload device config ${e.message}")
-                ""
-            }
-        }
-        val authAccount = AuthAccount(
-            account,
-            gfsIdResult ?: GfsIdResult("", ""),
-            deviceConfigToken ?: ""
+
+        clearDeviceRegistrationAuthorization()
+        val authAccount = deviceRegistration.ensure(
+            selectedAccount,
+            allowCheckIn = allowCheckIn
         )
-        preferences.account = authAccount
         return authAccount
     }
 
     suspend fun refresh() {
+        playSessionCoordinator.withSession {
+            refreshInSession()
+        }
+    }
+
+    internal suspend fun refreshInSession(): AuthAccount {
         val account = preferences.account ?: throw IllegalStateException("Account should not be null")
         val androidAccount = account.toAndroidAccount()
-        val tokenResult = authToken.refreshToken(androidAccount)
-        if (needToRetrieveGfsId(account, androidAccount, tokenResult)) {
-            val gfsIdResult = retrieveGsfId()
-            val deviceConfigToken = dfeApi.uploadDeviceConfig().uploadDeviceConfigToken
-            val authAccount = AuthAccount(androidAccount, gfsIdResult, deviceConfigToken)
-            preferences.account = authAccount
+        requireToken(authToken.refreshToken(androidAccount))
+        return deviceRegistration.ensure(account, allowCheckIn = false)
+    }
+
+    private fun requireToken(result: CheckTokenResult) {
+        if (result !is CheckTokenResult.Success) {
+            throw AuthTokenUnavailableException()
         }
     }
 
-    private suspend fun needToRetrieveGfsId(existingAccount: AuthAccount?, newAccount: Account, tokenResult: CheckTokenResult): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            return false
+    internal suspend fun clearDeviceRegistrationAuthorization() {
+        if (preferences.isDeviceRegistrationAuthorized) {
+            check(preferences.saveDeviceRegistrationAuthorization(false)) {
+                "Unable to persist device registration authorization"
+            }
         }
-        val tokenInvalidated = if (tokenResult is CheckTokenResult.Success) tokenResult.invalidated else false
-        return existingAccount == null ||
-            existingAccount.deviceConfig.isEmpty() ||
-            existingAccount.name != newAccount.name ||
-            tokenInvalidated ||
-            !canRequest()
-    }
-
-    private suspend fun canRequest(): Boolean {
-        if (preferences.account == null) {
-            return false
-        }
-        return try {
-            val app = dfeApi.details("details?doc=com.anod.appwatcher").toDocument()
-            val result = app?.appDetails?.packageName == "com.anod.appwatcher"
-            AppLog.d("Auth verification result: $result")
-            result
-        } catch (e: Exception) {
-            AppLog.d("Auth verification failed $e")
-            false
-        }
-    }
-
-    private suspend fun retrieveGsfId(): GfsIdResult {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            return GfsIdResult("", "")
-        }
-        val response = dfeApi.checkIn()
-        if (response.androidId == 0L) {
-            throw IllegalStateException("Incorrect androidId")
-        }
-        val gsfId = BigInteger.valueOf(response.androidId).toString(16)
-        return GfsIdResult(gsfId, response.deviceCheckinConsistencyToken ?: "")
     }
 }

@@ -18,11 +18,13 @@ import androidx.paging.filter
 import androidx.paging.map
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
+import com.anod.appwatcher.accounts.AccountSessionBusyException
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
+import com.anod.appwatcher.accounts.DeviceRegistrationException
 import com.anod.appwatcher.accounts.showAccountSelectionAction
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
@@ -42,7 +44,10 @@ import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.showToastAction
 import info.anodsplace.framework.content.startActivityAction
 import info.anodsplace.playstore.AppDetailsFilter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -58,11 +63,12 @@ sealed interface SearchStatus {
     data class NoResults(val query: String) : SearchStatus
     data class NoNetwork(val query: String) : SearchStatus
     data class Error(val query: String) : SearchStatus
-    data class SearchList(val query: String) : SearchStatus
+    data class SearchList(val query: String, val generation: Int) : SearchStatus
 }
 
 sealed interface SearchViewEvent {
     data object NoAccount : SearchViewEvent
+    data object OnResume : SearchViewEvent
     data object OnBackPressed : SearchViewEvent
     class SearchQueryChange(val query: String) : SearchViewEvent
     class OnSearchEnter(val query: String) : SearchViewEvent
@@ -100,16 +106,19 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
     private val dfeApi: DfeApi by inject()
 
     private var searchJob: Job? = null
+    private var accountInitializationJob: Job? = null
+    private var pendingAccountInitialization: Account? = null
 
     override fun onCleared() {
         searchJob?.cancel()
+        accountInitializationJob?.cancel()
     }
 
     init {
         viewState = initialState.copy(
             searchStatus = if (initialState.searchQuery.isNotEmpty() && initialState.initiateSearch) SearchStatus.Loading else SearchStatus.NoResults(query = ""),
         )
-        if (prefs.account == null) {
+        if (prefs.account == null || prefs.isDeviceRegistrationRequired) {
             handleEvent(SearchViewEvent.NoAccount)
         }
 
@@ -121,13 +130,18 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
     override fun handleEvent(event: SearchViewEvent) {
         when (event) {
             SearchViewEvent.NoAccount -> emitAction(showAccountSelectionAction(prefs.account?.toAndroidAccount()))
+            SearchViewEvent.OnResume -> resumeAccountInitialization()
             is SearchViewEvent.SearchQueryChange -> viewState = viewState.copy(searchQuery = event.query)
             is SearchViewEvent.OnSearchEnter -> onSearchRequest(event.query)
             is SearchViewEvent.SetAccount -> {
                 if (event.result is AccountSelectionResult.Error) {
                     onAccountSelectError(event.result.errorMessage)
                 } else if (event.result is AccountSelectionResult.Success) {
-                    onAccountSelected(event.result.account)
+                    onAccountSelected(
+                        account = event.result.account,
+                        userInitiated = true,
+                        resumingInteractiveAuth = false
+                    )
                 }
             }
 
@@ -212,24 +226,22 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
                         )
                     )
                 } else {
-                    resetPager()
-                    emit(SearchStatus.SearchList(query = query))
+                    emit(SearchStatus.SearchList(query = query, generation = resetPager()))
                 }
             } catch (_: Exception) {
                 if (!networkConnection.isNetworkAvailable) {
                     emit(SearchStatus.NoNetwork(query = query))
                 } else {
-                    resetPager()
-                    emit(SearchStatus.SearchList(query = query))
+                    emit(SearchStatus.SearchList(query = query, generation = resetPager()))
                 }
             }
         } else {
-            resetPager()
-            emit(SearchStatus.SearchList(query = query))
+            emit(SearchStatus.SearchList(query = query, generation = resetPager()))
         }
     }
 
     private var _pagingData: Flow<PagingData<ListItem>>? = null
+    private var pagerGeneration = 0
     val pagingData: Flow<PagingData<ListItem>>
         get() {
             if (_pagingData == null) {
@@ -238,9 +250,11 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
             return _pagingData!!
         }
 
-    private fun resetPager() {
+    private fun resetPager(): Int {
         // Trigger new pager creation
         _pagingData = null
+        pagerGeneration++
+        return pagerGeneration
     }
 
     private fun createPager() = Pager(
@@ -265,13 +279,66 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
             flow = database.apps().observePackages().distinctUntilChanged()
         ) { pageData, watchingPackages -> pageData.updateRowId(watchingPackages) }
 
-    private fun onAccountSelected(account: Account) {
-        viewModelScope.launch {
+    private fun resumeAccountInitialization() {
+        if (accountInitializationJob?.isActive == true) {
+            return
+        }
+        val account = pendingAccountInitialization
+            ?: if (prefs.isDeviceRegistrationAuthorized) prefs.account?.toAndroidAccount() else null
+        if (account != null) {
+            onAccountSelected(
+                account,
+                userInitiated = false,
+                resumingInteractiveAuth = true
+            )
+        }
+    }
+
+    private fun onAccountSelected(
+        account: Account,
+        userInitiated: Boolean,
+        resumingInteractiveAuth: Boolean
+    ) {
+        if (accountInitializationJob?.isActive == true) {
+            return
+        }
+        accountInitializationJob = viewModelScope.launch {
             try {
-                accountInitializer.initialize(account)
+                accountInitializer.initialize(account, userInitiated)
+                pendingAccountInitialization = null
+                viewState = viewState.copy(authenticated = true)
+                if (viewState.searchQuery.isNotEmpty()) {
+                    onSearchRequest(viewState.searchQuery)
+                }
             } catch (e: AuthTokenStartIntent) {
-                emitAction(startActivityAction(intent = e.intent)) //  TODO: finish = true
+                currentCoroutineContext().ensureActive()
+                if (resumingInteractiveAuth) {
+                    pendingAccountInitialization = null
+                    accountInitializer.clearDeviceRegistrationAuthorization()
+                    onAccountSelectError("")
+                } else {
+                    pendingAccountInitialization = account
+                    emitAction(startActivityAction(intent = e.intent)) //  TODO: finish = true
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: DeviceRegistrationException) {
+                currentCoroutineContext().ensureActive()
+                pendingAccountInitialization = null
+                emitAction(showToastAction(
+                    text = context.getString(R.string.failed_gain_access),
+                    length = Toast.LENGTH_LONG
+                ))
+                emitAction(showAccountSelectionAction(prefs.account?.toAndroidAccount()))
+            } catch (_: AccountSessionBusyException) {
+                currentCoroutineContext().ensureActive()
+                emitAction(showToastAction(
+                    text = context.getString(R.string.sync_in_progress_retry),
+                    length = Toast.LENGTH_LONG
+                ))
             } catch (e: Exception) {
+                currentCoroutineContext().ensureActive()
+                pendingAccountInitialization = null
                 if (networkConnection.isNetworkAvailable) {
                     emitAction(showToastAction(text = context.getString(R.string.failed_gain_access), length = Toast.LENGTH_LONG))
                     emitAction(ScreenCommonAction.NavigateBack)

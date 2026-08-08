@@ -68,7 +68,11 @@ class DfeResponse {
                 AppLog.d(commands.logErrorStacktrace)
             }
             if (!TextUtils.isEmpty(commands.displayErrorMessage)) {
-                throw DfeServerError(commands.displayErrorMessage)
+                throw DfeServerError(
+                    message = commands.displayErrorMessage,
+                    statusCode = null,
+                    cause = null
+                )
             }
         }
     }

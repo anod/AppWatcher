@@ -37,6 +37,14 @@ data class AppListRowSnapshot(
     val recentFlag: Boolean,
 )
 
+data class AppSyncUpdate(
+    val rowId: Long,
+    val expectedAppId: String,
+    val expectedPackageName: String,
+    val values: ContentValues,
+    val changelogValues: ContentValues
+)
+
 @Dao
 interface AppListTable {
 
@@ -275,6 +283,49 @@ interface AppListTable {
                     app.contentValues
                 )
             })
+        }
+
+        suspend fun applySyncUpdates(
+            updates: List<AppSyncUpdate>,
+            db: AppsDatabase
+        ): Set<Long> = withContext(Dispatchers.IO) {
+            val appliedRowIds = mutableSetOf<Long>()
+            db.withTransaction {
+                val writableDatabase = db.openHelper.writableDatabase
+                updates.forEach { update ->
+                    val updated = writableDatabase.update(
+                        TABLE,
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                        update.values,
+                        "${BaseColumns._ID}=? AND " +
+                            "${Columns.APP_ID}=? AND " +
+                            "${Columns.PACKAGE_NAME}=? AND " +
+                            "${Columns.STATUS}!=?",
+                        arrayOf<Any>(
+                            update.rowId,
+                            update.expectedAppId,
+                            update.expectedPackageName,
+                            App.STATUS_DELETED
+                        )
+                    )
+                    if (updated == 0) {
+                        return@forEach
+                    }
+                    check(updated == 1) {
+                        "Multiple app rows matched synchronization update ${update.rowId}"
+                    }
+                    val changelogRowId = writableDatabase.insert(
+                        ChangelogTable.TABLE,
+                        SQLiteDatabase.CONFLICT_REPLACE,
+                        update.changelogValues
+                    )
+                    check(changelogRowId != -1L) {
+                        "Unable to persist changelog for app row ${update.rowId}"
+                    }
+                    appliedRowIds.add(update.rowId)
+                }
+            }
+            appliedRowIds
         }
 
         suspend fun delete(appId: String, db: AppsDatabase): Int {

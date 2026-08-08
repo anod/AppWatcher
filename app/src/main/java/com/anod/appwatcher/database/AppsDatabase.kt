@@ -1,14 +1,8 @@
 package com.anod.appwatcher.database
 
-import android.content.ContentProviderOperation
-import android.content.ContentProviderResult
-import android.content.ContentResolver
-import android.content.ContentValues
-import android.net.Uri
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
-import androidx.room.withTransaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.App
@@ -17,8 +11,6 @@ import com.anod.appwatcher.database.entities.AppTag
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * @author Alex Gavrishev
@@ -35,26 +27,6 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun tags(): TagsTable
     abstract fun appTags(): AppTagsTable
     abstract fun schedules(): SchedulesTable
-
-    suspend fun applyBatchUpdates(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
-        val operations = values.map {
-            ContentProviderOperation.newUpdate(uriMapper(it)).withValues(it).build()
-        }
-
-        return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
-        }
-    }
-
-    suspend fun applyBatchInsert(contentResolver: ContentResolver, values: List<ContentValues>, uriMapper: (ContentValues) -> Uri): Array<ContentProviderResult> = withContext(Dispatchers.IO) {
-        val operations = values.map {
-            ContentProviderOperation.newInsert(uriMapper(it)).withValues(it).build()
-        }
-
-        return@withContext withTransaction {
-            contentResolver.applyBatch(DbContentProvider.AUTHORITY, ArrayList(operations))
-        }
-    }
 
     companion object {
         const val VERSION = 19
