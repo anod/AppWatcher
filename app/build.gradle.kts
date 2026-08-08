@@ -27,8 +27,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 17009
-        versionName = "1.7.0"
+        versionCode = 17100
+        versionName = "1.7.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -202,9 +202,15 @@ apply(plugin = "com.google.firebase.crashlytics")
 val releaseGoogleServicesFile = providers.gradleProperty("APPWATCHER_GOOGLE_SERVICES_FILE")
     .map { file(it) }
 
+val releaseGoogleServicesTasks = setOf(
+    "processReleaseGoogleServices",
+    "processBenchmarkGoogleServices",
+    "processNonMinifiedReleaseGoogleServices"
+)
+
 afterEvaluate {
-    listOf("processReleaseGoogleServices", "processBenchmarkGoogleServices").forEach { taskName ->
-        tasks.named<GoogleServicesTask>(taskName).configure {
+    tasks.withType<GoogleServicesTask>().configureEach {
+        if (name in releaseGoogleServicesTasks) {
             googleServicesJsonFiles.set(releaseGoogleServicesFile.map { listOf(it) })
         }
     }
