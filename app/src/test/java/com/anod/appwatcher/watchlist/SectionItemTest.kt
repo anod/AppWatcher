@@ -47,6 +47,33 @@ class SectionItemTest {
     }
 
     @Test
+    fun `local version changes update section content without changing identity`() {
+        val app = appSectionItem(
+            rowId = 1,
+            packageName = "com.example.app",
+            packageInfo = InstalledApps.Info(versionCode = 1, versionName = "1")
+        )
+        val updatedApp = appSectionItem(
+            rowId = 1,
+            packageName = "com.example.app",
+            packageInfo = InstalledApps.Info(versionCode = 2, versionName = "2")
+        )
+        val onDevice = onDeviceSectionItem(
+            packageName = "com.example.local",
+            packageInfo = InstalledApps.Info(versionCode = 1, versionName = "1")
+        )
+        val updatedOnDevice = onDeviceSectionItem(
+            packageName = "com.example.local",
+            packageInfo = InstalledApps.Info(versionCode = 2, versionName = "2")
+        )
+
+        assertEquals(app.sectionKey, updatedApp.sectionKey)
+        assertNotEquals(app, updatedApp)
+        assertEquals(onDevice.sectionKey, updatedOnDevice.sectionKey)
+        assertNotEquals(onDevice, updatedOnDevice)
+    }
+
+    @Test
     fun `app section keys stay unique when temporary row ids match`() {
         assertNotEquals(
             appSectionItem(rowId = -1, packageName = "com.example.first").sectionKey,
@@ -97,7 +124,8 @@ class SectionItemTest {
         rowId: Int,
         packageName: String,
         title: String = packageName,
-        versionNumber: Int = 1
+        versionNumber: Int = 1,
+        packageInfo: InstalledApps.Info = InstalledApps.Info(versionCode = 0, versionName = "")
     ): SectionItem.App = SectionItem.App(
         appListItem = appListItem(
             rowId = rowId,
@@ -106,17 +134,18 @@ class SectionItemTest {
             versionNumber = versionNumber
         ),
         isLocal = false,
-        packageInfo = InstalledApps.Info(versionCode = 0, versionName = "")
+        packageInfo = packageInfo
     )
 
     private fun onDeviceSectionItem(
         packageName: String,
         title: String = packageName,
-        showSelection: Boolean = false
+        showSelection: Boolean = false,
+        packageInfo: InstalledApps.Info = InstalledApps.Info(versionCode = 1, versionName = "1")
     ): SectionItem.OnDevice = SectionItem.OnDevice(
         appListItem = appListItem(rowId = -1, packageName = packageName, title = title),
         showSelection = showSelection,
-        packageInfo = InstalledApps.Info(versionCode = 1, versionName = "1")
+        packageInfo = packageInfo
     )
 
     private fun appListItem(

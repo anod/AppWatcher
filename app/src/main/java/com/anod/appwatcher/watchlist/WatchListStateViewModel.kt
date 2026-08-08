@@ -412,11 +412,12 @@ class WatchListStateViewModel(
             throw IllegalStateException("auth token is invalid")
         }
 
+        installedApps.reset()
+        invalidatePagingSources()
         viewState = viewState.copy(
             syncProgress = SyncProgress(true, 0),
             refreshRequest = viewState.refreshRequest + 1
         )
-        installedApps.reset()
         SyncScheduler(application).execute().first()
     }
 
