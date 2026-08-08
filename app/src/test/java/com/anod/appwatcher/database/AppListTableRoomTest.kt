@@ -92,7 +92,7 @@ class AppListTableRoomTest {
     }
 
     private suspend fun loadIds(tagId: Int?, titleFilter: String): List<String> {
-        val rowIds = AppListTable.Queries.loadAppListRows(
+        val rows = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
             orderByRecentlyDiscovered = false,
             tagId = tagId,
@@ -100,7 +100,7 @@ class AppListTableRoomTest {
             table = db.apps()
         )
         return AppListTable.Queries.loadAppList(
-            rowIds = rowIds,
+            rowIds = rows.map { it.rowId },
             table = db.apps()
         ).map { item -> item.app.appId }
     }

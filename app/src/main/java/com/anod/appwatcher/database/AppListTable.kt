@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RawQuery
@@ -25,6 +26,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
+data class AppListRowSnapshot(
+    @ColumnInfo(name = BaseColumns._ID)
+    val rowId: Int,
+
+    @ColumnInfo(name = AppListTable.Columns.STATUS)
+    val status: Int,
+
+    @ColumnInfo(name = AppListTable.Columns.RECENT_FLAG)
+    val recentFlag: Boolean,
+)
+
 @Dao
 interface AppListTable {
 
@@ -38,7 +50,7 @@ interface AppListTable {
     suspend fun load(query: SupportSQLiteQuery): List<AppListItem>
 
     @RawQuery
-    suspend fun loadRows(query: SupportSQLiteQuery): List<Int>
+    suspend fun loadRowSnapshots(query: SupportSQLiteQuery): List<AppListRowSnapshot>
 
     @Query("SELECT * FROM $TABLE WHERE ${Columns.APP_ID} == :appId")
     fun observeApp(appId: String): Flow<App?>
@@ -193,9 +205,9 @@ interface AppListTable {
             tagId: Int?,
             titleFilter: String,
             table: AppListTable
-        ): List<Int> {
+        ): List<AppListRowSnapshot> {
             val query = createAppsListRowsQuery(sortId, orderByRecentlyDiscovered, tagId, titleFilter)
-            return table.loadRows(SimpleSQLiteQuery(query.first, query.second))
+            return table.loadRowSnapshots(SimpleSQLiteQuery(query.first, query.second))
         }
 
         suspend fun loadAppList(rowIds: List<Int>, table: AppListTable): List<AppListItem> {
@@ -233,7 +245,8 @@ interface AppListTable {
         ): Pair<String, Array<String>> {
             val selection = createSelection(tagId, titleFilter)
             val sql =
-                "SELECT $TABLE.${BaseColumns._ID} " +
+                "SELECT $TABLE.${BaseColumns._ID}, ${Columns.STATUS}, " +
+                    "CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
                     "FROM $TABLE " +
                     "WHERE ${selection.first} " +
                     "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} "
