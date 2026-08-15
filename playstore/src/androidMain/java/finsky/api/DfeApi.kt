@@ -119,7 +119,11 @@ interface DfeApi {
 
     suspend fun details(appDetailsUrl: String): Details.DetailsResponse
 
-    suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): Details.BulkDetailsResponse
+    suspend fun details(
+        docIds: List<BulkDocId>,
+        includeDetails: Boolean,
+        forUpdateCheck: Boolean
+    ): Details.BulkDetailsResponse
 
     suspend fun delivery(
         docId: String,

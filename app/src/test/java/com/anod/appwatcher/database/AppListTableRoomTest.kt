@@ -107,6 +107,52 @@ class AppListTableRoomTest {
     }
 
     @Test
+    fun syncUpdateCanSkipUnavailableChangelog() = runBlocking {
+        insertApp(appId = "active", title = "Active")
+        val activeApp = db.apps().loadApp("active")!!
+        val values = ContentValues().apply {
+            put(BaseColumns._ID, activeApp.rowId)
+            put(AppListTable.Columns.VERSION_NUMBER, 1)
+            put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+        }
+
+        val appliedRowIds = AppListTable.Queries.applySyncUpdates(
+            listOf(syncUpdate(activeApp, values, changelogValues = null)),
+            db
+        )
+
+        assertEquals(setOf(activeApp.rowId.toLong()), appliedRowIds)
+        assertEquals(App.STATUS_NORMAL, db.apps().loadAppRow(activeApp.rowId)?.status)
+        assertTrue(db.changelog().ofApp("active").isEmpty())
+    }
+
+    @Test
+    fun clearUpdateStateSkipsDeletedApps() = runBlocking {
+        insertApp(
+            appId = "active",
+            title = "Active",
+            status = App.STATUS_UPDATED,
+            syncTime = 123
+        )
+        insertApp(
+            appId = "deleted",
+            title = "Deleted",
+            status = App.STATUS_DELETED,
+            syncTime = 123
+        )
+        val activeApp = db.apps().loadApp("active")!!
+        val deletedApp = db.apps().loadApp("deleted")!!
+
+        assertEquals(1, db.apps().clearUpdateState(activeApp.rowId, activeApp.packageName))
+        assertEquals(0, db.apps().clearUpdateState(deletedApp.rowId, deletedApp.packageName))
+
+        val activeRow = db.apps().loadAppRow(activeApp.rowId)!!
+        assertEquals(App.STATUS_NORMAL, activeRow.status)
+        assertEquals(0L, activeRow.syncTime)
+        assertEquals(App.STATUS_DELETED, db.apps().loadAppRow(deletedApp.rowId)?.status)
+    }
+
+    @Test
     fun syncUpdatesSkipChangedIdentityWithoutRollingBackOthers() = runBlocking {
         insertApp(appId = "first", title = "First")
         insertApp(appId = "second", title = "Second")
@@ -146,12 +192,16 @@ class AppListTableRoomTest {
         assertTrue(db.changelog().ofApp("second").isEmpty())
     }
 
-    private fun syncUpdate(app: App, values: ContentValues) = AppSyncUpdate(
+    private fun syncUpdate(
+        app: App,
+        values: ContentValues,
+        changelogValues: ContentValues? = changelog(app.appId)
+    ) = AppSyncUpdate(
         rowId = app.rowId.toLong(),
         expectedAppId = app.appId,
         expectedPackageName = app.packageName,
         values = values,
-        changelogValues = changelog(app.appId)
+        changelogValues = changelogValues
     )
 
     private fun changelog(appId: String): ContentValues = AppChange(
@@ -163,7 +213,12 @@ class AppListTableRoomTest {
         noNewDetails = false
     ).contentValues
 
-    private suspend fun insertApp(appId: String, title: String, status: Int = App.STATUS_NORMAL) {
+    private suspend fun insertApp(
+        appId: String,
+        title: String,
+        status: Int = App.STATUS_NORMAL,
+        syncTime: Long = 0
+    ) {
         AppListTable.Queries.insert(
             App(
                 rowId = 0,
@@ -180,7 +235,7 @@ class AppListTableRoomTest {
                 detailsUrl = null,
                 uploadTime = 0,
                 appType = "",
-                syncTime = 0
+                syncTime = syncTime
             ),
             db
         )

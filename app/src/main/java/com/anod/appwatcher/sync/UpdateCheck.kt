@@ -71,8 +71,16 @@ class UpdateCheck(
         val expectedAppId: String,
         val expectedPackageName: String,
         val values: ContentValues,
-        val changelog: ContentValues,
-        val updatedApp: UpdatedApp?
+        val changelog: ContentValues?,
+        val updatedApp: UpdatedApp?,
+        val autoIgnoredVersion: Int?
+    )
+
+    private data class AppUpdateResult(
+        val values: ContentValues,
+        val updatedApp: UpdatedApp?,
+        val persistChangelog: Boolean,
+        val autoIgnoredVersion: Int?
     )
 
     companion object {
@@ -213,10 +221,23 @@ class UpdateCheck(
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk... $docIds")
-            val documents = dfeApi.details(docIds, includeDetails = true)
+            val documents = dfeApi.details(
+                docIds,
+                includeDetails = true,
+                forUpdateCheck = true
+            )
                 .filterDocuments(AppDetailsFilter.hasAppDetails)
             unavailable += (docIds.size - documents.size)
-            AppLog.i("Sent ${docIds.size}, received ${documents.size}", "UpdateCheck")
+            val availabilitySummary = documents
+                .groupingBy { it.availabilityRestriction?.toString() ?: "absent" }
+                .eachCount()
+                .toSortedMap()
+                .entries
+                .joinToString { "${it.key}=${it.value}" }
+            AppLog.i(
+                "Sent ${docIds.size}, received ${documents.size}, availability {$availabilitySummary}",
+                "UpdateCheck"
+            )
             documents
         }
         val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
@@ -261,7 +282,7 @@ class UpdateCheck(
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let { localItem ->
-                val (values, updatedApp) = updateApp(marketApp, localItem, lastUpdatesViewed)
+                val result = updateApp(marketApp, localItem, lastUpdatesViewed)
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
                 val noNewDetails = if (isNewVersion) {
@@ -269,22 +290,27 @@ class UpdateCheck(
                 } else {
                     localItem.noNewDetails
                 }
-                if (values.size() > 0) {
+                if (result.values.size() > 0) {
                     pendingUpdates.add(
                         PendingAppUpdate(
                             rowId = localItem.app.rowId.toLong(),
                             expectedAppId = localItem.app.appId,
                             expectedPackageName = localItem.app.packageName,
-                            values = values,
-                            changelog = AppChange(
-                                docId,
-                                marketApp.appDetails.versionCode,
-                                marketApp.appDetails.versionString,
-                                recentChanges,
-                                marketApp.appDetails.uploadDate,
-                                noNewDetails
-                            ).contentValues,
-                            updatedApp = updatedApp?.copy(noNewDetails = noNewDetails)
+                            values = result.values,
+                            changelog = if (result.persistChangelog) {
+                                AppChange(
+                                    docId,
+                                    marketApp.appDetails.versionCode,
+                                    marketApp.appDetails.versionString,
+                                    recentChanges,
+                                    marketApp.appDetails.uploadDate,
+                                    noNewDetails
+                                ).contentValues
+                            } else {
+                                null
+                            },
+                            updatedApp = result.updatedApp?.copy(noNewDetails = noNewDetails),
+                            autoIgnoredVersion = result.autoIgnoredVersion
                         )
                     )
                 }
@@ -323,16 +349,44 @@ class UpdateCheck(
                 "UpdateCheck"
             )
         }
-        return pendingUpdates
-            .filter { it.rowId in appliedRowIds }
-            .mapNotNull { it.updatedApp }
+        val appliedUpdates = pendingUpdates.filter { it.rowId in appliedRowIds }
+        appliedUpdates.forEach { update ->
+            update.autoIgnoredVersion?.let { versionCode ->
+                preferences.setUpdateIgnored(update.expectedPackageName, versionCode, ignored = true)
+            }
+        }
+        return appliedUpdates.mapNotNull { it.updatedApp }
     }
 
-    private fun updateApp(marketDoc: Document, localItem: AppListItem, lastUpdatesViewed: Boolean): Pair<ContentValues, UpdatedApp?> {
+    private fun updateApp(
+        marketDoc: Document,
+        localItem: AppListItem,
+        lastUpdatesViewed: Boolean
+    ): AppUpdateResult {
         val appDetails = marketDoc.appDetails
         val localApp = localItem.app
 
         val values = ContentValues()
+        val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
+        val unavailableAction = reconcileUnavailableUpdate(marketDoc, localApp, installedInfo, values)
+        if (unavailableAction != UnavailableUpdateAction.NONE) {
+            AppLog.i(
+                "Suppressing unavailable update ${appDetails.packageName} " +
+                    "version ${appDetails.versionCode}, restriction " +
+                    marketDoc.availabilityRestriction,
+                "UpdateCheck"
+            )
+            return AppUpdateResult(
+                values = values,
+                updatedApp = null,
+                persistChangelog = false,
+                autoIgnoredVersion = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
+                    localApp.versionNumber
+                } else {
+                    null
+                }
+            )
+        }
         if (reconcileVersionRollback(appDetails.versionCode, localApp, values)) {
             AppLog.w(
                 "Play Store version rolled back for ${localApp.packageName}: " +
@@ -340,21 +394,58 @@ class UpdateCheck(
                 "UpdateCheck"
             )
             updateLocalApp(marketDoc, localApp, values)
-            return Pair(values, null)
+            return AppUpdateResult(
+                values = values,
+                updatedApp = null,
+                persistChangelog = true,
+                autoIgnoredVersion = null
+            )
         }
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.d("New version found [" + appDetails.versionCode + "]")
             val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
+            val updateIgnored = preferences.isUpdateIgnored(
+                appDetails.packageName,
+                appDetails.versionCode
+            )
             val newApp = marketDoc.toApp(
                 rowId = localApp.rowId,
-                status = App.STATUS_UPDATED,
+                status = if (updateIgnored) App.STATUS_NORMAL else App.STATUS_UPDATED,
                 uploadTime = uploadTime,
-                syncTime = System.currentTimeMillis(),
+                syncTime = if (updateIgnored) 0L else System.currentTimeMillis(),
             )
-            val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
+            if (updateIgnored) {
+                AppLog.i(
+                    "Ignoring ${appDetails.packageName} version ${appDetails.versionCode}",
+                    "UpdateCheck"
+                )
+                return AppUpdateResult(
+                    values = newApp.contentValues,
+                    updatedApp = null,
+                    persistChangelog = true,
+                    autoIgnoredVersion = null
+                )
+            }
             val recentChanges = appDetails.recentChangesHtml ?: ""
-            return Pair(newApp.contentValues, UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true))
+            return AppUpdateResult(
+                values = newApp.contentValues,
+                updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
+                persistChangelog = true,
+                autoIgnoredVersion = null
+            )
+        }
+
+        if (preferences.isUpdateIgnored(appDetails.packageName, appDetails.versionCode)) {
+            values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+            values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
+            updateLocalApp(marketDoc, localApp, values)
+            return AppUpdateResult(
+                values = values,
+                updatedApp = null,
+                persistChangelog = true,
+                autoIgnoredVersion = null
+            )
         }
 
         var updatedApp: UpdatedApp? = null
@@ -364,13 +455,17 @@ class UpdateCheck(
             values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
-            val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
             val recentChanges = appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
         // Refresh app info with latest fetched
         updateLocalApp(marketDoc, localApp, values)
-        return Pair(values, updatedApp)
+        return AppUpdateResult(
+            values = values,
+            updatedApp = updatedApp,
+            persistChangelog = true,
+            autoIgnoredVersion = null
+        )
     }
 
     private suspend fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, schedule: Schedule) {
@@ -458,6 +553,47 @@ internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, val
     values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
     values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
     return true
+}
+
+internal enum class UnavailableUpdateAction {
+    NONE,
+    SUPPRESS,
+    ROLL_BACK
+}
+
+internal fun reconcileUnavailableUpdate(
+    marketDoc: Document,
+    localApp: App,
+    installedInfo: InstalledApps.Info,
+    values: ContentValues
+): UnavailableUpdateAction {
+    if (
+        !marketDoc.isUnavailableForUpdate ||
+        !installedInfo.isInstalled ||
+        !installedInfo.isUpdatable(marketDoc.appDetails.versionCode)
+    ) {
+        return UnavailableUpdateAction.NONE
+    }
+    if (
+        localApp.versionNumber == marketDoc.appDetails.versionCode &&
+        localApp.versionNumber > installedInfo.versionCode
+    ) {
+        values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+        values.put(AppListTable.Columns.VERSION_NUMBER, installedInfo.versionCode)
+        values.put(AppListTable.Columns.VERSION_NAME, installedInfo.versionName)
+        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, 0L)
+        values.put(AppListTable.Columns.UPLOAD_DATE, "")
+        values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
+        return UnavailableUpdateAction.ROLL_BACK
+    }
+    if (
+        localApp.versionNumber <= installedInfo.versionCode &&
+        (localApp.status != App.STATUS_NORMAL || localApp.syncTime != 0L)
+    ) {
+        values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+        values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
+    }
+    return UnavailableUpdateAction.SUPPRESS
 }
 
 internal suspend fun <T, R> fetchAllChunks(

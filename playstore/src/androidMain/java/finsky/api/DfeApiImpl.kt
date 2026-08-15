@@ -66,13 +66,14 @@ class DfeApiImpl(private val http: OkHttpClient, private val apiContext: DfeApiC
         return responseWrapper.payload.detailsResponse
     }
 
-    override suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): BulkDetailsResponse {
-        val bulkDetailsRequest = Details.BulkDetailsRequest.newBuilder()
-                .setIncludeDetails(true)
-                .addAllDocid(docIds.map { it.packageName }.sorted())
-                .build()
+    override suspend fun details(
+        docIds: List<BulkDocId>,
+        includeDetails: Boolean,
+        forUpdateCheck: Boolean
+    ): BulkDetailsResponse {
+        val bulkDetailsRequest = createBulkDetailsRequest(docIds, includeDetails)
 
-        val dfeRequest = createRequest(DfeApi.BULK_DETAILS_URI, identity = null) { builder ->
+        val dfeRequest = createRequest(bulkDetailsUrl(forUpdateCheck), identity = null) { builder ->
             builder.post(bulkDetailsRequest.toByteArray().toRequestBody("application/x-protobuf".toMediaType()))
         }
 

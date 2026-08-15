@@ -52,7 +52,7 @@ class WatchListPagingSource(
     private fun createFilter(filterId: Int): AppListFilter = when (filterId) {
         Filters.INSTALLED -> AppListFilter.Installed(installedApps)
         Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
-        Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
+        Filters.UPDATABLE -> AppListFilter.Updatable(installedApps, prefs::isUpdateIgnored)
         else -> AppListFilter.All()
     }
 

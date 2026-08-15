@@ -54,6 +54,10 @@
     <string name="import_export">Import</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
     <string name="new_updates">New updates</string>
+    <string name="ignore_update">Ignore this update</string>
+    <string name="restore_update">Restore this update</string>
+    <string name="update_ignored">This update will be ignored</string>
+    <string name="update_restored">This update will be shown again</string>
     <string name="recently_discovered">Recently discovered</string>
     <string name="watching">Watching</string>
     <string name="menu_filter">Search</string>

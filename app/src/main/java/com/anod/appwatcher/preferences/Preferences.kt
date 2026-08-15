@@ -154,6 +154,18 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         get() = preferences.getLong(LAST_UPDATE_TIME, -1)
         set(value) = preferences.edit().putLong(LAST_UPDATE_TIME, value).apply()
 
+    fun isUpdateIgnored(packageName: String, versionCode: Int): Boolean =
+        preferences.getInt(ignoredUpdateKey(packageName), -1) == versionCode
+
+    fun setUpdateIgnored(packageName: String, versionCode: Int, ignored: Boolean) {
+        val key = ignoredUpdateKey(packageName)
+        if (ignored) {
+            preferences.edit().putInt(key, versionCode).apply()
+        } else if (preferences.getInt(key, -1) == versionCode) {
+            preferences.edit().remove(key).apply()
+        }
+    }
+
     var isWifiOnly: Boolean
         get() = preferences.getBoolean(WIFI_ONLY, false)
         set(value) = preferences.edit().putBoolean(WIFI_ONLY, value).apply()
@@ -309,6 +321,7 @@ class Preferences(context: Context, private val notificationManager: Notificatio
         private const val AUTOSYNC = "autosync"
         private const val REQUIRES_CHARGING = "requires-charging"
         private const val UPDATE_FREQUENCY = "update_frequency"
+        private const val IGNORED_UPDATE_PREFIX = "ignored-update-"
 
         const val VERSION_CODE = "version_code"
         const val NOTIFY_INSTALLED_UPTODATE = "notify_installed_uptodate"
@@ -351,6 +364,9 @@ class Preferences(context: Context, private val notificationManager: Notificatio
             THEME_DEFAULT,
             THEME_BLACK,
         )
+
+        private fun ignoredUpdateKey(packageName: String): String =
+            "$IGNORED_UPDATE_PREFIX$packageName"
 
         internal fun migrateDeviceRegistrationPreferences(
             legacyPreferences: SharedPreferences,

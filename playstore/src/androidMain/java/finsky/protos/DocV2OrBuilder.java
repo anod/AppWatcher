@@ -131,27 +131,26 @@ public interface DocV2OrBuilder extends
   int getOfferCount();
 
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   * @return Whether the availability field is set.
+   */
+  boolean hasAvailability();
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   * @return The availability.
+   */
+  finsky.protos.Availability getAvailability();
+
+  /**
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   java.util.List<finsky.protos.Common.Image> 
       getImageList();
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   finsky.protos.Common.Image getImage(int index);
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   int getImageCount();

@@ -42,7 +42,7 @@ data class AppSyncUpdate(
     val expectedAppId: String,
     val expectedPackageName: String,
     val values: ContentValues,
-    val changelogValues: ContentValues
+    val changelogValues: ContentValues?
 )
 
 @Dao
@@ -131,6 +131,14 @@ interface AppListTable {
 
     @Query("UPDATE $TABLE SET ${Columns.STATUS} = :status WHERE ${BaseColumns._ID} = :rowId")
     suspend fun updateStatus(rowId: Int, status: Int): Int
+
+    @Query(
+        "UPDATE $TABLE SET ${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
+            "${Columns.SYNC_TIMESTAMP} = 0 WHERE ${BaseColumns._ID} = :rowId " +
+            "AND ${Columns.PACKAGE_NAME} = :packageName " +
+            "AND ${Columns.STATUS} != ${App.STATUS_DELETED}"
+    )
+    suspend fun clearUpdateState(rowId: Int, packageName: String): Int
 
     @Query(
         "INSERT INTO $TABLE (" +
@@ -314,13 +322,15 @@ interface AppListTable {
                     check(updated == 1) {
                         "Multiple app rows matched synchronization update ${update.rowId}"
                     }
-                    val changelogRowId = writableDatabase.insert(
-                        ChangelogTable.TABLE,
-                        SQLiteDatabase.CONFLICT_REPLACE,
-                        update.changelogValues
-                    )
-                    check(changelogRowId != -1L) {
-                        "Unable to persist changelog for app row ${update.rowId}"
+                    if (update.changelogValues != null) {
+                        val changelogRowId = writableDatabase.insert(
+                            ChangelogTable.TABLE,
+                            SQLiteDatabase.CONFLICT_REPLACE,
+                            update.changelogValues
+                        )
+                        check(changelogRowId != -1L) {
+                            "Unable to persist changelog for app row ${update.rowId}"
+                        }
                     }
                     appliedRowIds.add(update.rowId)
                 }

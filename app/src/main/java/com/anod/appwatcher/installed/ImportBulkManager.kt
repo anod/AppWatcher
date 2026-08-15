@@ -69,7 +69,11 @@ internal class ImportBulkManager(private val koin: Koin) {
     private suspend fun importDetails(docIds: List<BulkDocId>): SimpleArrayMap<String, Int> = withContext(Main) {
         val dfeApi = koin.get<DfeApi>()
         try {
-            val docs = dfeApi.details(docIds, includeDetails = true)
+            val docs = dfeApi.details(
+                docIds,
+                includeDetails = true,
+                forUpdateCheck = false
+            )
                 .filterDocuments(AppDetailsFilter.hasAppDetails)
                 .toTypedArray()
             return@withContext importTask.execute(*docs)

@@ -42,7 +42,11 @@ internal class FakeDfeApi : DfeApi {
         return detailsResponse ?: error("Details response not configured")
     }
 
-    override suspend fun details(docIds: List<BulkDocId>, includeDetails: Boolean): Details.BulkDetailsResponse =
+    override suspend fun details(
+        docIds: List<BulkDocId>,
+        includeDetails: Boolean,
+        forUpdateCheck: Boolean
+    ): Details.BulkDetailsResponse =
         error("Unused")
 
     override suspend fun delivery(

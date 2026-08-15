@@ -45,13 +45,18 @@ interface AppListFilter {
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
-    class Updatable(private val installedApps: InstalledApps) : AppListFilter {
+    class Updatable(
+        private val installedApps: InstalledApps,
+        private val isUpdateIgnored: (packageName: String, versionCode: Int) -> Boolean
+    ) : AppListFilter {
         override val filterId = Filters.UPDATABLE
         override fun filterRecord(item: AppListItem): Boolean {
             val packageName = item.app.packageName
             val installedInfo = installedApps.packageInfo(packageName)
             val versionCode = item.app.versionNumber
-            val updatable = installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
+            val updatable = installedInfo.isInstalled &&
+                installedInfo.isUpdatable(versionCode) &&
+                !isUpdateIgnored(packageName, versionCode)
             return !updatable
         }
 

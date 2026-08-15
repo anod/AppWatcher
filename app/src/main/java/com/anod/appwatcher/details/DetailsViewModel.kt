@@ -33,6 +33,7 @@ import com.anod.appwatcher.tags.TagSnackbarAppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.androidVersions
+import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
@@ -97,6 +98,7 @@ data class DetailsState(
     val remoteVersionInfo: AppVersionInfo? = null,
     val remoteCallFinished: Boolean = false,
     val packageInfo: InstalledApps.Info = InstalledApps.Info(0, ""),
+    val isUpdateIgnored: Boolean = false,
     val isSystemInDarkTheme: Boolean = false,
     val theme: SelectedTheme = SelectedTheme()
 ) {
@@ -105,6 +107,11 @@ data class DetailsState(
 
     val fetchedRemoteDocument: Boolean
         get() = document != null
+
+    val canIgnoreUpdate: Boolean
+        get() = isWatched &&
+            packageInfo.isInstalled &&
+            app?.let { packageInfo.isUpdatable(it.versionNumber) } == true
 }
 
 @Immutable
@@ -139,6 +146,7 @@ sealed interface DetailsEvent {
     object App : DetailsEvent
     object PlayStore : DetailsEvent
     object Translate : DetailsEvent
+    object ToggleUpdateIgnored : DetailsEvent
 }
 
 class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewModel<DetailsState, DetailsEvent, DetailsAction>(), KoinComponent {
@@ -170,6 +178,7 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
             title = app.title,
             isLocalApp = app.rowId == -1,
             packageInfo = installedApps.packageInfo(app.packageName),
+            isUpdateIgnored = prefs.isUpdateIgnored(app.packageName, app.versionNumber),
             isSystemInDarkTheme = isSystemInDarkTheme,
             theme = prefs.selectedTheme
         )
@@ -194,7 +203,10 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                     viewState.copy(
                         appLoadingState = if (app == null) AppLoadingState.NotFound else AppLoadingState.Loaded,
                         app = app,
-                        rowId = app?.rowId ?: -1
+                        rowId = app?.rowId ?: -1,
+                        isUpdateIgnored = app?.let {
+                            prefs.isUpdateIgnored(it.packageName, it.versionNumber)
+                        } ?: false
                     )
                 }
             }
@@ -308,6 +320,8 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                 })))
             }
 
+            DetailsEvent.ToggleUpdateIgnored -> toggleUpdateIgnored()
+
             is DetailsEvent.OpenUrl -> {
                 emitAction(
                     action = startActivityAction(
@@ -319,6 +333,31 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                 )
             }
         }
+    }
+
+    private fun toggleUpdateIgnored() {
+        val app = viewState.app
+        if (app == null || !viewState.canIgnoreUpdate) {
+            AppLog.w("Cannot change ignored update state for ${viewState.appId}", "DetailsView")
+            return
+        }
+        val ignored = !viewState.isUpdateIgnored
+        prefs.setUpdateIgnored(app.packageName, app.versionNumber, ignored)
+        viewState = viewState.copy(isUpdateIgnored = ignored)
+        if (ignored) {
+            appScope.launch {
+                val updated = database.apps().clearUpdateState(
+                    rowId = app.rowId,
+                    packageName = app.packageName
+                )
+                if (updated != 1) {
+                    AppLog.w("Unable to clear update state for ${app.packageName}", "DetailsView")
+                }
+            }
+        }
+        emitAction(showToastAction(
+            if (ignored) R.string.update_ignored else R.string.update_restored
+        ))
     }
 
     private suspend fun loadChangelog() {

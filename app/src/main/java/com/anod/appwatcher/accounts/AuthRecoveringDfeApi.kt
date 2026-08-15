@@ -28,9 +28,12 @@ internal class AuthRecoveringDfeApi(
 
     override suspend fun details(
         docIds: List<BulkDocId>,
-        includeDetails: Boolean
+        includeDetails: Boolean,
+        forUpdateCheck: Boolean
     ): Details.BulkDetailsResponse =
-        withAuthenticationRecovery { delegate.details(docIds, includeDetails) }
+        withAuthenticationRecovery {
+            delegate.details(docIds, includeDetails, forUpdateCheck)
+        }
 
     override suspend fun delivery(
         docId: String,
