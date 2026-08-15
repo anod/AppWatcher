@@ -40,6 +40,20 @@ class DocumentTest {
     }
 
     @Test
+    fun restrictionWithoutAvailableIfOwnedMarksDocumentUnavailable() {
+        val original = DocV2.newBuilder()
+            .setAvailability(
+                Availability.newBuilder()
+                    .setRestriction(9)
+            )
+            .build()
+        val document = Document(original)
+
+        assertFalse(original.availability.hasAvailableIfOwned())
+        assertTrue(document.isUnavailableForUpdate)
+    }
+
+    @Test
     fun availableIfOwnedFailsOpen() {
         val document = documentWithAvailability(
             restriction = 8,
