@@ -133,14 +133,6 @@ interface AppListTable {
     suspend fun updateStatus(rowId: Int, status: Int): Int
 
     @Query(
-        "UPDATE $TABLE SET ${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
-            "${Columns.SYNC_TIMESTAMP} = 0 WHERE ${BaseColumns._ID} = :rowId " +
-            "AND ${Columns.PACKAGE_NAME} = :packageName " +
-            "AND ${Columns.STATUS} != ${App.STATUS_DELETED}"
-    )
-    suspend fun clearUpdateState(rowId: Int, packageName: String): Int
-
-    @Query(
         "INSERT INTO $TABLE (" +
             "${Columns.APP_ID}," +
             "${Columns.PACKAGE_NAME}," +

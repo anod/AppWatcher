@@ -1009,27 +1009,6 @@ private fun DetailsTopAppBar(
                     }
                 )
 
-                if (screenState.canIgnoreUpdate) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(
-                                    if (screenState.isUpdateIgnored) {
-                                        R.string.restore_update
-                                    } else {
-                                        R.string.ignore_update
-                                    }
-                                ),
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                            )
-                        },
-                        onClick = {
-                            onEvent(DetailsEvent.ToggleUpdateIgnored)
-                            dismiss()
-                        }
-                    )
-                }
-
                 if (screenState.packageInfo.isInstalled) {
                     DropdownMenuItem(
                         text = {

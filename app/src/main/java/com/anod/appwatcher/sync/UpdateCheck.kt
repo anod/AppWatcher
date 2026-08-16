@@ -72,15 +72,13 @@ class UpdateCheck(
         val expectedPackageName: String,
         val values: ContentValues,
         val changelog: ContentValues?,
-        val updatedApp: UpdatedApp?,
-        val autoIgnoredVersion: Int?
+        val updatedApp: UpdatedApp?
     )
 
     private data class AppUpdateResult(
         val values: ContentValues,
         val updatedApp: UpdatedApp?,
-        val persistChangelog: Boolean,
-        val autoIgnoredVersion: Int?
+        val persistChangelog: Boolean
     )
 
     companion object {
@@ -309,8 +307,7 @@ class UpdateCheck(
                             } else {
                                 null
                             },
-                            updatedApp = result.updatedApp?.copy(noNewDetails = noNewDetails),
-                            autoIgnoredVersion = result.autoIgnoredVersion
+                            updatedApp = result.updatedApp?.copy(noNewDetails = noNewDetails)
                         )
                     )
                 }
@@ -349,13 +346,9 @@ class UpdateCheck(
                 "UpdateCheck"
             )
         }
-        val appliedUpdates = pendingUpdates.filter { it.rowId in appliedRowIds }
-        appliedUpdates.forEach { update ->
-            update.autoIgnoredVersion?.let { versionCode ->
-                preferences.setUpdateIgnored(update.expectedPackageName, versionCode, ignored = true)
-            }
-        }
-        return appliedUpdates.mapNotNull { it.updatedApp }
+        return pendingUpdates
+            .filter { it.rowId in appliedRowIds }
+            .mapNotNull { it.updatedApp }
     }
 
     private fun updateApp(
@@ -370,21 +363,22 @@ class UpdateCheck(
         val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
         val unavailableAction = reconcileUnavailableUpdate(marketDoc, localApp, installedInfo, values)
         if (unavailableAction != UnavailableUpdateAction.NONE) {
+            val reconciliation = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
+                ", reconciled cached version ${localApp.versionNumber} " +
+                    "to installed version ${installedInfo.versionCode}"
+            } else {
+                ""
+            }
             AppLog.i(
                 "Suppressing unavailable update ${appDetails.packageName} " +
                     "version ${appDetails.versionCode}, restriction " +
-                    marketDoc.availabilityRestriction,
+                    "${marketDoc.availabilityRestriction}$reconciliation",
                 "UpdateCheck"
             )
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
-                persistChangelog = false,
-                autoIgnoredVersion = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
-                    localApp.versionNumber
-                } else {
-                    null
-                }
+                persistChangelog = false
             )
         }
         if (reconcileVersionRollback(appDetails.versionCode, localApp, values)) {
@@ -397,54 +391,30 @@ class UpdateCheck(
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
-                persistChangelog = true,
-                autoIgnoredVersion = null
+                persistChangelog = true
             )
         }
 
         if (appDetails.versionCode > localApp.versionNumber) {
-            AppLog.d("New version found [" + appDetails.versionCode + "]")
-            val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
-            val updateIgnored = preferences.isUpdateIgnored(
-                appDetails.packageName,
-                appDetails.versionCode
+            AppLog.i(
+                "Play update candidate ${appDetails.packageName}: installed " +
+                    "${installedInfo.versionCode}, cached ${localApp.versionNumber}, " +
+                    "remote ${appDetails.versionCode}, restriction " +
+                    (marketDoc.availabilityRestriction?.toString() ?: "absent"),
+                "UpdateCheck"
             )
+            val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
             val newApp = marketDoc.toApp(
                 rowId = localApp.rowId,
-                status = if (updateIgnored) App.STATUS_NORMAL else App.STATUS_UPDATED,
+                status = App.STATUS_UPDATED,
                 uploadTime = uploadTime,
-                syncTime = if (updateIgnored) 0L else System.currentTimeMillis(),
+                syncTime = System.currentTimeMillis(),
             )
-            if (updateIgnored) {
-                AppLog.i(
-                    "Ignoring ${appDetails.packageName} version ${appDetails.versionCode}",
-                    "UpdateCheck"
-                )
-                return AppUpdateResult(
-                    values = newApp.contentValues,
-                    updatedApp = null,
-                    persistChangelog = true,
-                    autoIgnoredVersion = null
-                )
-            }
             val recentChanges = appDetails.recentChangesHtml ?: ""
             return AppUpdateResult(
                 values = newApp.contentValues,
                 updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
-                persistChangelog = true,
-                autoIgnoredVersion = null
-            )
-        }
-
-        if (preferences.isUpdateIgnored(appDetails.packageName, appDetails.versionCode)) {
-            values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
-            values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
-            updateLocalApp(marketDoc, localApp, values)
-            return AppUpdateResult(
-                values = values,
-                updatedApp = null,
-                persistChangelog = true,
-                autoIgnoredVersion = null
+                persistChangelog = true
             )
         }
 
@@ -463,8 +433,7 @@ class UpdateCheck(
         return AppUpdateResult(
             values = values,
             updatedApp = updatedApp,
-            persistChangelog = true,
-            autoIgnoredVersion = null
+            persistChangelog = true
         )
     }
 
