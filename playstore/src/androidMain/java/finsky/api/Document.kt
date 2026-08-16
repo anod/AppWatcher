@@ -26,6 +26,19 @@ data class Document(private val doc: DocV2) {
     val docType: Int
         get() = this.doc.docType
 
+    val availabilityRestriction: Int?
+        get() = if (doc.hasAvailability() && doc.availability.hasRestriction()) {
+            doc.availability.restriction
+        } else {
+            null
+        }
+
+    val isUnavailableForUpdate: Boolean
+        get() = availabilityRestriction?.let { restriction ->
+            restriction != AVAILABILITY_NOT_RESTRICTED &&
+                !doc.availability.availableIfOwned
+        } ?: false
+
     val detailsUrl: String
         get() = if (this.doc.detailsUrl == null) "" else this.doc.detailsUrl
 
@@ -69,5 +82,9 @@ data class Document(private val doc: DocV2) {
             typeMap.get(imageType).add(image2)
         }
         typeMap
+    }
+
+    private companion object {
+        const val AVAILABILITY_NOT_RESTRICTED = 1
     }
 }

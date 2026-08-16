@@ -68,7 +68,11 @@ class ChangelogAdapter(private val viewModelScope: CoroutineScope, private val d
             return
         }
         try {
-            val documents = dfeApi.details(docIds, includeDetails = true)
+            val documents = dfeApi.details(
+                docIds,
+                includeDetails = true,
+                forUpdateCheck = false
+            )
                 .filterDocuments(AppDetailsFilter.hasAppDetails)
             documents.associateByTo(changelogs, { it.docId }) {
                 val recentChanges = it.appDetails.recentChangesHtml?.trim() ?: ""

@@ -42,7 +42,7 @@ data class AppSyncUpdate(
     val expectedAppId: String,
     val expectedPackageName: String,
     val values: ContentValues,
-    val changelogValues: ContentValues
+    val changelogValues: ContentValues?
 )
 
 @Dao
@@ -314,13 +314,15 @@ interface AppListTable {
                     check(updated == 1) {
                         "Multiple app rows matched synchronization update ${update.rowId}"
                     }
-                    val changelogRowId = writableDatabase.insert(
-                        ChangelogTable.TABLE,
-                        SQLiteDatabase.CONFLICT_REPLACE,
-                        update.changelogValues
-                    )
-                    check(changelogRowId != -1L) {
-                        "Unable to persist changelog for app row ${update.rowId}"
+                    if (update.changelogValues != null) {
+                        val changelogRowId = writableDatabase.insert(
+                            ChangelogTable.TABLE,
+                            SQLiteDatabase.CONFLICT_REPLACE,
+                            update.changelogValues
+                        )
+                        check(changelogRowId != -1L) {
+                            "Unable to persist changelog for app row ${update.rowId}"
+                        }
                     }
                     appliedRowIds.add(update.rowId)
                 }

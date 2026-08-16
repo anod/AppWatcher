@@ -289,6 +289,11 @@ message Annotations {
 }
 
 
+message Availability {
+  optional int32 restriction = 5 [default = 1];
+  optional bool availableIfOwned = 13;
+}
+
 message DocV2 {
   optional string docid = 1;
   optional string backendDocid = 2;
@@ -298,7 +303,7 @@ message DocV2 {
   optional string creator = 6;
   optional string descriptionHtml = 7;
   repeated Common.Offer offer = 8;
-  //optional Availability availability = 9;
+  optional Availability availability = 9;
   repeated Common.Image image = 10;
   repeated DocV2 child = 11;
   optional Containers.ContainerMetadata containerMetadata = 12;

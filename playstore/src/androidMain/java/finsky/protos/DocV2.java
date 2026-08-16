@@ -2090,13 +2090,55 @@ public  final class DocV2 extends
     offer_.remove(index);
   }
 
+  public static final int AVAILABILITY_FIELD_NUMBER = 9;
+  private finsky.protos.Availability availability_;
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   */
+  @java.lang.Override
+  public boolean hasAvailability() {
+    return ((bitField0_ & 0x00000080) != 0);
+  }
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   */
+  @java.lang.Override
+  public finsky.protos.Availability getAvailability() {
+    return availability_ == null ? finsky.protos.Availability.getDefaultInstance() : availability_;
+  }
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   */
+  private void setAvailability(finsky.protos.Availability value) {
+    value.getClass();
+  availability_ = value;
+    bitField0_ |= 0x00000080;
+    }
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   */
+  @java.lang.SuppressWarnings({"ReferenceEquality"})
+  private void mergeAvailability(finsky.protos.Availability value) {
+    value.getClass();
+  if (availability_ != null &&
+        availability_ != finsky.protos.Availability.getDefaultInstance()) {
+      availability_ =
+        finsky.protos.Availability.newBuilder(availability_).mergeFrom(value).buildPartial();
+    } else {
+      availability_ = value;
+    }
+    bitField0_ |= 0x00000080;
+  }
+  /**
+   * <code>optional .finsky.protos.Availability availability = 9;</code>
+   */
+  private void clearAvailability() {  availability_ = null;
+    bitField0_ = (bitField0_ & ~0x00000080);
+  }
+
   public static final int IMAGE_FIELD_NUMBER = 10;
   private com.google.protobuf.Internal.ProtobufList<finsky.protos.Common.Image> image_;
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   @java.lang.Override
@@ -2104,10 +2146,6 @@ public  final class DocV2 extends
     return image_;
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   public java.util.List<? extends finsky.protos.Common.ImageOrBuilder> 
@@ -2115,10 +2153,6 @@ public  final class DocV2 extends
     return image_;
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   @java.lang.Override
@@ -2126,10 +2160,6 @@ public  final class DocV2 extends
     return image_.size();
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   @java.lang.Override
@@ -2137,10 +2167,6 @@ public  final class DocV2 extends
     return image_.get(index);
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   public finsky.protos.Common.ImageOrBuilder getImageOrBuilder(
@@ -2156,10 +2182,6 @@ public  final class DocV2 extends
   }
 
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void setImage(
@@ -2169,10 +2191,6 @@ public  final class DocV2 extends
     image_.set(index, value);
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void addImage(finsky.protos.Common.Image value) {
@@ -2181,10 +2199,6 @@ public  final class DocV2 extends
     image_.add(value);
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void addImage(
@@ -2194,10 +2208,6 @@ public  final class DocV2 extends
     image_.add(index, value);
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void addAllImage(
@@ -2207,20 +2217,12 @@ public  final class DocV2 extends
         values, image_);
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void clearImage() {
     image_ = emptyProtobufList();
   }
   /**
-   * <pre>
-   * optional Availability availability = 9;
-   * </pre>
-   *
    * <code>repeated .finsky.protos.Common.Image image = 10;</code>
    */
   private void removeImage(int index) {
@@ -2329,7 +2331,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasContainerMetadata() {
-    return ((bitField0_ & 0x00000080) != 0);
+    return ((bitField0_ & 0x00000100) != 0);
   }
   /**
    * <code>optional .finsky.protos.Containers.ContainerMetadata containerMetadata = 12;</code>
@@ -2344,7 +2346,7 @@ public  final class DocV2 extends
   private void setContainerMetadata(finsky.protos.Containers.ContainerMetadata value) {
     value.getClass();
   containerMetadata_ = value;
-    bitField0_ |= 0x00000080;
+    bitField0_ |= 0x00000100;
     }
   /**
    * <code>optional .finsky.protos.Containers.ContainerMetadata containerMetadata = 12;</code>
@@ -2359,13 +2361,13 @@ public  final class DocV2 extends
     } else {
       containerMetadata_ = value;
     }
-    bitField0_ |= 0x00000080;
+    bitField0_ |= 0x00000100;
   }
   /**
    * <code>optional .finsky.protos.Containers.ContainerMetadata containerMetadata = 12;</code>
    */
   private void clearContainerMetadata() {  containerMetadata_ = null;
-    bitField0_ = (bitField0_ & ~0x00000080);
+    bitField0_ = (bitField0_ & ~0x00000100);
   }
 
   public static final int DETAILS_FIELD_NUMBER = 13;
@@ -2375,7 +2377,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDetails() {
-    return ((bitField0_ & 0x00000100) != 0);
+    return ((bitField0_ & 0x00000200) != 0);
   }
   /**
    * <code>optional .finsky.protos.DocDetails details = 13;</code>
@@ -2390,7 +2392,7 @@ public  final class DocV2 extends
   private void setDetails(finsky.protos.DocDetails value) {
     value.getClass();
   details_ = value;
-    bitField0_ |= 0x00000100;
+    bitField0_ |= 0x00000200;
     }
   /**
    * <code>optional .finsky.protos.DocDetails details = 13;</code>
@@ -2405,13 +2407,13 @@ public  final class DocV2 extends
     } else {
       details_ = value;
     }
-    bitField0_ |= 0x00000100;
+    bitField0_ |= 0x00000200;
   }
   /**
    * <code>optional .finsky.protos.DocDetails details = 13;</code>
    */
   private void clearDetails() {  details_ = null;
-    bitField0_ = (bitField0_ & ~0x00000100);
+    bitField0_ = (bitField0_ & ~0x00000200);
   }
 
   public static final int AGGREGATERATING_FIELD_NUMBER = 14;
@@ -2421,7 +2423,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasAggregateRating() {
-    return ((bitField0_ & 0x00000200) != 0);
+    return ((bitField0_ & 0x00000400) != 0);
   }
   /**
    * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
@@ -2436,7 +2438,7 @@ public  final class DocV2 extends
   private void setAggregateRating(finsky.protos.DocV2.AggregateRating value) {
     value.getClass();
   aggregateRating_ = value;
-    bitField0_ |= 0x00000200;
+    bitField0_ |= 0x00000400;
     }
   /**
    * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
@@ -2451,13 +2453,13 @@ public  final class DocV2 extends
     } else {
       aggregateRating_ = value;
     }
-    bitField0_ |= 0x00000200;
+    bitField0_ |= 0x00000400;
   }
   /**
    * <code>optional .finsky.protos.DocV2.AggregateRating aggregateRating = 14;</code>
    */
   private void clearAggregateRating() {  aggregateRating_ = null;
-    bitField0_ = (bitField0_ & ~0x00000200);
+    bitField0_ = (bitField0_ & ~0x00000400);
   }
 
   public static final int ANNOTATIONS_FIELD_NUMBER = 15;
@@ -2467,7 +2469,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasAnnotations() {
-    return ((bitField0_ & 0x00000400) != 0);
+    return ((bitField0_ & 0x00000800) != 0);
   }
   /**
    * <code>optional .finsky.protos.Annotations annotations = 15;</code>
@@ -2482,7 +2484,7 @@ public  final class DocV2 extends
   private void setAnnotations(finsky.protos.Annotations value) {
     value.getClass();
   annotations_ = value;
-    bitField0_ |= 0x00000400;
+    bitField0_ |= 0x00000800;
     }
   /**
    * <code>optional .finsky.protos.Annotations annotations = 15;</code>
@@ -2497,13 +2499,13 @@ public  final class DocV2 extends
     } else {
       annotations_ = value;
     }
-    bitField0_ |= 0x00000400;
+    bitField0_ |= 0x00000800;
   }
   /**
    * <code>optional .finsky.protos.Annotations annotations = 15;</code>
    */
   private void clearAnnotations() {  annotations_ = null;
-    bitField0_ = (bitField0_ & ~0x00000400);
+    bitField0_ = (bitField0_ & ~0x00000800);
   }
 
   public static final int DETAILSURL_FIELD_NUMBER = 16;
@@ -2514,7 +2516,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDetailsUrl() {
-    return ((bitField0_ & 0x00000800) != 0);
+    return ((bitField0_ & 0x00001000) != 0);
   }
   /**
    * <code>optional string detailsUrl = 16;</code>
@@ -2540,14 +2542,14 @@ public  final class DocV2 extends
   private void setDetailsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00000800;
+  bitField0_ |= 0x00001000;
     detailsUrl_ = value;
   }
   /**
    * <code>optional string detailsUrl = 16;</code>
    */
   private void clearDetailsUrl() {
-    bitField0_ = (bitField0_ & ~0x00000800);
+    bitField0_ = (bitField0_ & ~0x00001000);
     detailsUrl_ = getDefaultInstance().getDetailsUrl();
   }
   /**
@@ -2557,7 +2559,7 @@ public  final class DocV2 extends
   private void setDetailsUrlBytes(
       com.google.protobuf.ByteString value) {
     detailsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00000800;
+    bitField0_ |= 0x00001000;
   }
 
   public static final int SHAREURL_FIELD_NUMBER = 17;
@@ -2568,7 +2570,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasShareUrl() {
-    return ((bitField0_ & 0x00001000) != 0);
+    return ((bitField0_ & 0x00002000) != 0);
   }
   /**
    * <code>optional string shareUrl = 17;</code>
@@ -2594,14 +2596,14 @@ public  final class DocV2 extends
   private void setShareUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00001000;
+  bitField0_ |= 0x00002000;
     shareUrl_ = value;
   }
   /**
    * <code>optional string shareUrl = 17;</code>
    */
   private void clearShareUrl() {
-    bitField0_ = (bitField0_ & ~0x00001000);
+    bitField0_ = (bitField0_ & ~0x00002000);
     shareUrl_ = getDefaultInstance().getShareUrl();
   }
   /**
@@ -2611,7 +2613,7 @@ public  final class DocV2 extends
   private void setShareUrlBytes(
       com.google.protobuf.ByteString value) {
     shareUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00001000;
+    bitField0_ |= 0x00002000;
   }
 
   public static final int REVIEWSURL_FIELD_NUMBER = 18;
@@ -2622,7 +2624,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewsUrl() {
-    return ((bitField0_ & 0x00002000) != 0);
+    return ((bitField0_ & 0x00004000) != 0);
   }
   /**
    * <code>optional string reviewsUrl = 18;</code>
@@ -2648,14 +2650,14 @@ public  final class DocV2 extends
   private void setReviewsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00002000;
+  bitField0_ |= 0x00004000;
     reviewsUrl_ = value;
   }
   /**
    * <code>optional string reviewsUrl = 18;</code>
    */
   private void clearReviewsUrl() {
-    bitField0_ = (bitField0_ & ~0x00002000);
+    bitField0_ = (bitField0_ & ~0x00004000);
     reviewsUrl_ = getDefaultInstance().getReviewsUrl();
   }
   /**
@@ -2665,7 +2667,7 @@ public  final class DocV2 extends
   private void setReviewsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00002000;
+    bitField0_ |= 0x00004000;
   }
 
   public static final int BACKENDURL_FIELD_NUMBER = 19;
@@ -2676,7 +2678,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasBackendUrl() {
-    return ((bitField0_ & 0x00004000) != 0);
+    return ((bitField0_ & 0x00008000) != 0);
   }
   /**
    * <code>optional string backendUrl = 19;</code>
@@ -2702,14 +2704,14 @@ public  final class DocV2 extends
   private void setBackendUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00004000;
+  bitField0_ |= 0x00008000;
     backendUrl_ = value;
   }
   /**
    * <code>optional string backendUrl = 19;</code>
    */
   private void clearBackendUrl() {
-    bitField0_ = (bitField0_ & ~0x00004000);
+    bitField0_ = (bitField0_ & ~0x00008000);
     backendUrl_ = getDefaultInstance().getBackendUrl();
   }
   /**
@@ -2719,7 +2721,7 @@ public  final class DocV2 extends
   private void setBackendUrlBytes(
       com.google.protobuf.ByteString value) {
     backendUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00004000;
+    bitField0_ |= 0x00008000;
   }
 
   public static final int PURCHASEDETAILSURL_FIELD_NUMBER = 20;
@@ -2730,7 +2732,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasPurchaseDetailsUrl() {
-    return ((bitField0_ & 0x00008000) != 0);
+    return ((bitField0_ & 0x00010000) != 0);
   }
   /**
    * <code>optional string purchaseDetailsUrl = 20;</code>
@@ -2756,14 +2758,14 @@ public  final class DocV2 extends
   private void setPurchaseDetailsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00008000;
+  bitField0_ |= 0x00010000;
     purchaseDetailsUrl_ = value;
   }
   /**
    * <code>optional string purchaseDetailsUrl = 20;</code>
    */
   private void clearPurchaseDetailsUrl() {
-    bitField0_ = (bitField0_ & ~0x00008000);
+    bitField0_ = (bitField0_ & ~0x00010000);
     purchaseDetailsUrl_ = getDefaultInstance().getPurchaseDetailsUrl();
   }
   /**
@@ -2773,7 +2775,7 @@ public  final class DocV2 extends
   private void setPurchaseDetailsUrlBytes(
       com.google.protobuf.ByteString value) {
     purchaseDetailsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00008000;
+    bitField0_ |= 0x00010000;
   }
 
   public static final int DETAILSREUSABLE_FIELD_NUMBER = 21;
@@ -2784,7 +2786,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasDetailsReusable() {
-    return ((bitField0_ & 0x00010000) != 0);
+    return ((bitField0_ & 0x00020000) != 0);
   }
   /**
    * <code>optional bool detailsReusable = 21;</code>
@@ -2799,14 +2801,14 @@ public  final class DocV2 extends
    * @param value The detailsReusable to set.
    */
   private void setDetailsReusable(boolean value) {
-    bitField0_ |= 0x00010000;
+    bitField0_ |= 0x00020000;
     detailsReusable_ = value;
   }
   /**
    * <code>optional bool detailsReusable = 21;</code>
    */
   private void clearDetailsReusable() {
-    bitField0_ = (bitField0_ & ~0x00010000);
+    bitField0_ = (bitField0_ & ~0x00020000);
     detailsReusable_ = false;
   }
 
@@ -2818,7 +2820,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasSubtitle() {
-    return ((bitField0_ & 0x00020000) != 0);
+    return ((bitField0_ & 0x00040000) != 0);
   }
   /**
    * <code>optional string subtitle = 22;</code>
@@ -2844,14 +2846,14 @@ public  final class DocV2 extends
   private void setSubtitle(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00020000;
+  bitField0_ |= 0x00040000;
     subtitle_ = value;
   }
   /**
    * <code>optional string subtitle = 22;</code>
    */
   private void clearSubtitle() {
-    bitField0_ = (bitField0_ & ~0x00020000);
+    bitField0_ = (bitField0_ & ~0x00040000);
     subtitle_ = getDefaultInstance().getSubtitle();
   }
   /**
@@ -2861,7 +2863,7 @@ public  final class DocV2 extends
   private void setSubtitleBytes(
       com.google.protobuf.ByteString value) {
     subtitle_ = value.toStringUtf8();
-    bitField0_ |= 0x00020000;
+    bitField0_ |= 0x00040000;
   }
 
   public static final int APPINFO_FIELD_NUMBER = 25;
@@ -2871,7 +2873,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasAppInfo() {
-    return ((bitField0_ & 0x00040000) != 0);
+    return ((bitField0_ & 0x00080000) != 0);
   }
   /**
    * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
@@ -2886,7 +2888,7 @@ public  final class DocV2 extends
   private void setAppInfo(finsky.protos.AppInfo value) {
     value.getClass();
   appInfo_ = value;
-    bitField0_ |= 0x00040000;
+    bitField0_ |= 0x00080000;
     }
   /**
    * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
@@ -2901,13 +2903,13 @@ public  final class DocV2 extends
     } else {
       appInfo_ = value;
     }
-    bitField0_ |= 0x00040000;
+    bitField0_ |= 0x00080000;
   }
   /**
    * <code>optional .finsky.protos.AppInfo appInfo = 25;</code>
    */
   private void clearAppInfo() {  appInfo_ = null;
-    bitField0_ = (bitField0_ & ~0x00040000);
+    bitField0_ = (bitField0_ & ~0x00080000);
   }
 
   public static final int MATURE_FIELD_NUMBER = 26;
@@ -2918,7 +2920,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasMature() {
-    return ((bitField0_ & 0x00080000) != 0);
+    return ((bitField0_ & 0x00100000) != 0);
   }
   /**
    * <code>optional bool mature = 26;</code>
@@ -2933,14 +2935,14 @@ public  final class DocV2 extends
    * @param value The mature to set.
    */
   private void setMature(boolean value) {
-    bitField0_ |= 0x00080000;
+    bitField0_ |= 0x00100000;
     mature_ = value;
   }
   /**
    * <code>optional bool mature = 26;</code>
    */
   private void clearMature() {
-    bitField0_ = (bitField0_ & ~0x00080000);
+    bitField0_ = (bitField0_ & ~0x00100000);
     mature_ = false;
   }
 
@@ -2952,7 +2954,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasPromotionalDescription() {
-    return ((bitField0_ & 0x00100000) != 0);
+    return ((bitField0_ & 0x00200000) != 0);
   }
   /**
    * <code>optional string promotionalDescription = 27;</code>
@@ -2978,14 +2980,14 @@ public  final class DocV2 extends
   private void setPromotionalDescription(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00100000;
+  bitField0_ |= 0x00200000;
     promotionalDescription_ = value;
   }
   /**
    * <code>optional string promotionalDescription = 27;</code>
    */
   private void clearPromotionalDescription() {
-    bitField0_ = (bitField0_ & ~0x00100000);
+    bitField0_ = (bitField0_ & ~0x00200000);
     promotionalDescription_ = getDefaultInstance().getPromotionalDescription();
   }
   /**
@@ -2995,7 +2997,7 @@ public  final class DocV2 extends
   private void setPromotionalDescriptionBytes(
       com.google.protobuf.ByteString value) {
     promotionalDescription_ = value.toStringUtf8();
-    bitField0_ |= 0x00100000;
+    bitField0_ |= 0x00200000;
   }
 
   public static final int AVAILABLEFORPREREGISTRATION_FIELD_NUMBER = 29;
@@ -3006,7 +3008,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasAvailableForPreregistration() {
-    return ((bitField0_ & 0x00200000) != 0);
+    return ((bitField0_ & 0x00400000) != 0);
   }
   /**
    * <code>optional bool availableForPreregistration = 29;</code>
@@ -3021,14 +3023,14 @@ public  final class DocV2 extends
    * @param value The availableForPreregistration to set.
    */
   private void setAvailableForPreregistration(boolean value) {
-    bitField0_ |= 0x00200000;
+    bitField0_ |= 0x00400000;
     availableForPreregistration_ = value;
   }
   /**
    * <code>optional bool availableForPreregistration = 29;</code>
    */
   private void clearAvailableForPreregistration() {
-    bitField0_ = (bitField0_ & ~0x00200000);
+    bitField0_ = (bitField0_ & ~0x00400000);
     availableForPreregistration_ = false;
   }
 
@@ -3040,7 +3042,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewSnippetsUrl() {
-    return ((bitField0_ & 0x00400000) != 0);
+    return ((bitField0_ & 0x00800000) != 0);
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
@@ -3066,14 +3068,14 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x00400000;
+  bitField0_ |= 0x00800000;
     reviewSnippetsUrl_ = value;
   }
   /**
    * <code>optional string reviewSnippetsUrl = 31;</code>
    */
   private void clearReviewSnippetsUrl() {
-    bitField0_ = (bitField0_ & ~0x00400000);
+    bitField0_ = (bitField0_ & ~0x00800000);
     reviewSnippetsUrl_ = getDefaultInstance().getReviewSnippetsUrl();
   }
   /**
@@ -3083,7 +3085,7 @@ public  final class DocV2 extends
   private void setReviewSnippetsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewSnippetsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x00400000;
+    bitField0_ |= 0x00800000;
   }
 
   public static final int FORCESHAREABILITY_FIELD_NUMBER = 32;
@@ -3094,7 +3096,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasForceShareability() {
-    return ((bitField0_ & 0x00800000) != 0);
+    return ((bitField0_ & 0x01000000) != 0);
   }
   /**
    * <code>optional bool forceShareability = 32;</code>
@@ -3109,14 +3111,14 @@ public  final class DocV2 extends
    * @param value The forceShareability to set.
    */
   private void setForceShareability(boolean value) {
-    bitField0_ |= 0x00800000;
+    bitField0_ |= 0x01000000;
     forceShareability_ = value;
   }
   /**
    * <code>optional bool forceShareability = 32;</code>
    */
   private void clearForceShareability() {
-    bitField0_ = (bitField0_ & ~0x00800000);
+    bitField0_ = (bitField0_ & ~0x01000000);
     forceShareability_ = false;
   }
 
@@ -3128,7 +3130,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasUseWishlistAsPrimaryAction() {
-    return ((bitField0_ & 0x01000000) != 0);
+    return ((bitField0_ & 0x02000000) != 0);
   }
   /**
    * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
@@ -3143,14 +3145,14 @@ public  final class DocV2 extends
    * @param value The useWishlistAsPrimaryAction to set.
    */
   private void setUseWishlistAsPrimaryAction(boolean value) {
-    bitField0_ |= 0x01000000;
+    bitField0_ |= 0x02000000;
     useWishlistAsPrimaryAction_ = value;
   }
   /**
    * <code>optional bool useWishlistAsPrimaryAction = 33;</code>
    */
   private void clearUseWishlistAsPrimaryAction() {
-    bitField0_ = (bitField0_ & ~0x01000000);
+    bitField0_ = (bitField0_ & ~0x02000000);
     useWishlistAsPrimaryAction_ = false;
   }
 
@@ -3162,7 +3164,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewQuestionsUrl() {
-    return ((bitField0_ & 0x02000000) != 0);
+    return ((bitField0_ & 0x04000000) != 0);
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
@@ -3188,14 +3190,14 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x02000000;
+  bitField0_ |= 0x04000000;
     reviewQuestionsUrl_ = value;
   }
   /**
    * <code>optional string reviewQuestionsUrl = 34;</code>
    */
   private void clearReviewQuestionsUrl() {
-    bitField0_ = (bitField0_ & ~0x02000000);
+    bitField0_ = (bitField0_ & ~0x04000000);
     reviewQuestionsUrl_ = getDefaultInstance().getReviewQuestionsUrl();
   }
   /**
@@ -3205,7 +3207,7 @@ public  final class DocV2 extends
   private void setReviewQuestionsUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewQuestionsUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x02000000;
+    bitField0_ |= 0x04000000;
   }
 
   public static final int REVIEWSUMMARYURL_FIELD_NUMBER = 39;
@@ -3216,7 +3218,7 @@ public  final class DocV2 extends
    */
   @java.lang.Override
   public boolean hasReviewSummaryUrl() {
-    return ((bitField0_ & 0x04000000) != 0);
+    return ((bitField0_ & 0x08000000) != 0);
   }
   /**
    * <code>optional string reviewSummaryUrl = 39;</code>
@@ -3242,14 +3244,14 @@ public  final class DocV2 extends
   private void setReviewSummaryUrl(
       java.lang.String value) {
     java.lang.Class<?> valueClass = value.getClass();
-  bitField0_ |= 0x04000000;
+  bitField0_ |= 0x08000000;
     reviewSummaryUrl_ = value;
   }
   /**
    * <code>optional string reviewSummaryUrl = 39;</code>
    */
   private void clearReviewSummaryUrl() {
-    bitField0_ = (bitField0_ & ~0x04000000);
+    bitField0_ = (bitField0_ & ~0x08000000);
     reviewSummaryUrl_ = getDefaultInstance().getReviewSummaryUrl();
   }
   /**
@@ -3259,7 +3261,7 @@ public  final class DocV2 extends
   private void setReviewSummaryUrlBytes(
       com.google.protobuf.ByteString value) {
     reviewSummaryUrl_ = value.toStringUtf8();
-    bitField0_ |= 0x04000000;
+    bitField0_ |= 0x08000000;
   }
 
   public static finsky.protos.DocV2 parseFrom(
@@ -3819,10 +3821,53 @@ public  final class DocV2 extends
     }
 
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    @java.lang.Override
+    public boolean hasAvailability() {
+      return instance.hasAvailability();
+    }
+    /**
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    @java.lang.Override
+    public finsky.protos.Availability getAvailability() {
+      return instance.getAvailability();
+    }
+    /**
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    public Builder setAvailability(finsky.protos.Availability value) {
+      copyOnWrite();
+      instance.setAvailability(value);
+      return this;
+      }
+    /**
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    public Builder setAvailability(
+        finsky.protos.Availability.Builder builderForValue) {
+      copyOnWrite();
+      instance.setAvailability(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    public Builder mergeAvailability(finsky.protos.Availability value) {
+      copyOnWrite();
+      instance.mergeAvailability(value);
+      return this;
+    }
+    /**
+     * <code>optional .finsky.protos.Availability availability = 9;</code>
+     */
+    public Builder clearAvailability() {  copyOnWrite();
+      instance.clearAvailability();
+      return this;
+    }
+
+    /**
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     @java.lang.Override
@@ -3831,20 +3876,12 @@ public  final class DocV2 extends
           instance.getImageList());
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     @java.lang.Override
     public int getImageCount() {
       return instance.getImageCount();
     }/**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     @java.lang.Override
@@ -3852,10 +3889,6 @@ public  final class DocV2 extends
       return instance.getImage(index);
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder setImage(
@@ -3865,10 +3898,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder setImage(
@@ -3879,10 +3908,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder addImage(finsky.protos.Common.Image value) {
@@ -3891,10 +3916,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder addImage(
@@ -3904,10 +3925,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder addImage(
@@ -3917,10 +3934,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder addImage(
@@ -3931,10 +3944,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder addAllImage(
@@ -3944,10 +3953,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder clearImage() {
@@ -3956,10 +3961,6 @@ public  final class DocV2 extends
       return this;
     }
     /**
-     * <pre>
-     * optional Availability availability = 9;
-     * </pre>
-     *
      * <code>repeated .finsky.protos.Common.Image image = 10;</code>
      */
     public Builder removeImage(int index) {
@@ -5081,6 +5082,7 @@ public  final class DocV2 extends
             "descriptionHtml_",
             "offer_",
             finsky.protos.Common.Offer.class,
+            "availability_",
             "image_",
             finsky.protos.Common.Image.class,
             "child_",
@@ -5107,13 +5109,13 @@ public  final class DocV2 extends
             "reviewSummaryUrl_",
           };
           java.lang.String info =
-              "\u0001\u001e\u0000\u0001\u0001\'\u001e\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
+              "\u0001\u001f\u0000\u0001\u0001\'\u001f\u0000\u0003\u0000\u0001\u1008\u0000\u0002" +
               "\u1008\u0001\u0003\u1004\u0002\u0004\u1004\u0003\u0005\u1008\u0004\u0006\u1008\u0005" +
-              "\u0007\u1008\u0006\b\u001b\n\u001b\u000b\u001b\f\u1009\u0007\r\u1009\b\u000e\u1009" +
-              "\t\u000f\u1009\n\u0010\u1008\u000b\u0011\u1008\f\u0012\u1008\r\u0013\u1008\u000e" +
-              "\u0014\u1008\u000f\u0015\u1007\u0010\u0016\u1008\u0011\u0019\u1009\u0012\u001a\u1007" +
-              "\u0013\u001b\u1008\u0014\u001d\u1007\u0015\u001f\u1008\u0016 \u1007\u0017!\u1007" +
-              "\u0018\"\u1008\u0019\'\u1008\u001a";
+              "\u0007\u1008\u0006\b\u001b\t\u1009\u0007\n\u001b\u000b\u001b\f\u1009\b\r\u1009\t" +
+              "\u000e\u1009\n\u000f\u1009\u000b\u0010\u1008\f\u0011\u1008\r\u0012\u1008\u000e\u0013" +
+              "\u1008\u000f\u0014\u1008\u0010\u0015\u1007\u0011\u0016\u1008\u0012\u0019\u1009\u0013" +
+              "\u001a\u1007\u0014\u001b\u1008\u0015\u001d\u1007\u0016\u001f\u1008\u0017 \u1007\u0018" +
+              "!\u1007\u0019\"\u1008\u001a\'\u1008\u001b";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

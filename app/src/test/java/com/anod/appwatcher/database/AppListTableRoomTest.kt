@@ -107,6 +107,26 @@ class AppListTableRoomTest {
     }
 
     @Test
+    fun syncUpdateCanSkipUnavailableChangelog() = runBlocking {
+        insertApp(appId = "active", title = "Active")
+        val activeApp = db.apps().loadApp("active")!!
+        val values = ContentValues().apply {
+            put(BaseColumns._ID, activeApp.rowId)
+            put(AppListTable.Columns.VERSION_NUMBER, 1)
+            put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+        }
+
+        val appliedRowIds = AppListTable.Queries.applySyncUpdates(
+            listOf(syncUpdate(activeApp, values, changelogValues = null)),
+            db
+        )
+
+        assertEquals(setOf(activeApp.rowId.toLong()), appliedRowIds)
+        assertEquals(App.STATUS_NORMAL, db.apps().loadAppRow(activeApp.rowId)?.status)
+        assertTrue(db.changelog().ofApp("active").isEmpty())
+    }
+
+    @Test
     fun syncUpdatesSkipChangedIdentityWithoutRollingBackOthers() = runBlocking {
         insertApp(appId = "first", title = "First")
         insertApp(appId = "second", title = "Second")
@@ -146,12 +166,16 @@ class AppListTableRoomTest {
         assertTrue(db.changelog().ofApp("second").isEmpty())
     }
 
-    private fun syncUpdate(app: App, values: ContentValues) = AppSyncUpdate(
+    private fun syncUpdate(
+        app: App,
+        values: ContentValues,
+        changelogValues: ContentValues? = changelog(app.appId)
+    ) = AppSyncUpdate(
         rowId = app.rowId.toLong(),
         expectedAppId = app.appId,
         expectedPackageName = app.packageName,
         values = values,
-        changelogValues = changelog(app.appId)
+        changelogValues = changelogValues
     )
 
     private fun changelog(appId: String): ContentValues = AppChange(
