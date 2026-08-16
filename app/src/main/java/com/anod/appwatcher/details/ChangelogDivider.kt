@@ -12,7 +12,7 @@ import info.anodsplace.framework.content.InstalledApps
  * even when a store rollback prepends an older entry to the list. The separator is only useful
  * while unseen entries exist, so it is skipped once the installed version is the newest one.
  */
-fun installedChangelogDividerIndex(changelogs: List<AppChange>, packageInfo: InstalledApps.Info): Int {
+internal fun installedChangelogDividerIndex(changelogs: List<AppChange>, packageInfo: InstalledApps.Info): Int {
     if (!packageInfo.isInstalled) {
         return -1
     }
