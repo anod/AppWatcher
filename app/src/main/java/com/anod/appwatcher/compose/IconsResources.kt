@@ -117,11 +117,12 @@ fun ShareIcon() {
 }
 
 @Composable
-fun InstalledSignIcon(modifier: Modifier = Modifier) {
+fun InstalledSignIcon(modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
     Icon(
         imageVector = Icons.Default.Smartphone,
         contentDescription = stringResource(id = R.string.installed),
-        modifier = modifier
+        modifier = modifier,
+        tint = tint
     )
 }
 
