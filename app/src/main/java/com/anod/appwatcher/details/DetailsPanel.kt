@@ -82,6 +82,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.LinkAnnotation
@@ -119,6 +121,7 @@ import com.anod.appwatcher.utils.StoreIntent
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.placeholder
 import info.anodsplace.compose.toAnnotatedString
+import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.framework.text.Html
@@ -596,72 +599,150 @@ private fun HorizontalDivider(modifier: Modifier = Modifier, thickness: Dp = Div
     )
 }
 
-@OptIn(ExperimentalTextApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailsChangelog(screenState: DetailsState, onEvent: (DetailsEvent) -> Unit, scrollBehaviour: TopAppBarScrollBehavior) {
-    LazyColumn(
+    ChangelogList(
+        screenState = screenState,
+        onEvent = onEvent,
         modifier = Modifier
             .nestedScroll(scrollBehaviour.nestedScrollConnection)
             .fillMaxSize()
-    ) {
-        items(screenState.changelogs.size) { i ->
-            val change = screenState.changelogs[i]
-            SelectionContainer {
-                Column(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                ) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        StoreVersionSignIcon(
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(end = 4.dp)
-                        )
-                        Text(
-                            text = "${change.versionName} (${change.versionCode})",
-                            modifier = Modifier.weight(1f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = change.uploadDate,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
+    )
+}
 
-                    val text = if (change.details.isEmpty()) {
-                        AnnotatedString(stringResource(id = R.string.no_recent_changes))
-                    } else {
-                        val parsed = Html.parse(change.details)
-                        (parsed.trim() as Spannable).toAnnotatedString(linkColor = MaterialTheme.colorScheme.primary)
-                    }
-
-                    ClickableText(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        text = text,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = LocalContentColor.current
-                        ),
-                        onClick = { offset ->
-                            text.getLinkAnnotations(offset, offset)
-                                .firstOrNull()
-                                ?.let { annotation ->
-                                    annotation.item as? LinkAnnotation.Url
-                                }
-                                ?.also { item ->
-                                    onEvent(DetailsEvent.OpenUrl(item.url))
-                                }
-                        }
-                    )
+@Composable
+private fun ChangelogList(
+    screenState: DetailsState,
+    onEvent: (DetailsEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val changelogs = screenState.changelogs
+    val packageInfo = screenState.packageInfo
+    val dividerIndex = remember(changelogs, packageInfo) { installedChangelogDividerIndex(changelogs, packageInfo) }
+    LazyColumn(modifier = modifier) {
+        items(changelogs.size) { i ->
+            Column {
+                if (i == dividerIndex) {
+                    InstalledChangelogDivider(packageInfo = packageInfo)
                 }
+                ChangelogItem(
+                    change = changelogs[i],
+                    onEvent = onEvent
+                )
+            }
+        }
+        if (dividerIndex == changelogs.size) {
+            item {
+                InstalledChangelogDivider(packageInfo = packageInfo)
             }
         }
     }
+}
+
+@OptIn(ExperimentalTextApi::class)
+@Composable
+private fun ChangelogItem(change: AppChange, onEvent: (DetailsEvent) -> Unit) {
+    SelectionContainer {
+        Column(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+        ) {
+            ChangelogItemHeader(change = change)
+
+            val text = if (change.details.isEmpty()) {
+                AnnotatedString(stringResource(id = R.string.no_recent_changes))
+            } else {
+                val parsed = Html.parse(change.details)
+                (parsed.trim() as Spannable).toAnnotatedString(linkColor = MaterialTheme.colorScheme.primary)
+            }
+
+            ClickableText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                text = text,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = LocalContentColor.current
+                ),
+                onClick = { offset ->
+                    text.getLinkAnnotations(offset, offset)
+                        .firstOrNull()
+                        ?.let { annotation ->
+                            annotation.item as? LinkAnnotation.Url
+                        }
+                        ?.also { item ->
+                            onEvent(DetailsEvent.OpenUrl(item.url))
+                        }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChangelogItemHeader(change: AppChange) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        StoreVersionSignIcon(
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .size(16.dp)
+                .padding(end = 4.dp)
+        )
+        Text(
+            text = "${change.versionName} (${change.versionCode})",
+            modifier = Modifier.weight(1f),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            text = change.uploadDate,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Composable
+private fun InstalledChangelogDivider(packageInfo: InstalledApps.Info, modifier: Modifier = Modifier) {
+    val versionText = stringResource(id = R.string.version_text, packageInfo.versionName, packageInfo.versionCode)
+    val installedText = stringResource(id = R.string.installed)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 12.dp)
+            .clearAndSetSemantics { contentDescription = "$installedText: $versionText" },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ChangelogDividerLine(modifier = Modifier.weight(1f))
+        InstalledSignIcon(
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .padding(start = 8.dp, end = 4.dp)
+                .size(16.dp)
+        )
+        Text(
+            text = versionText,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier
+                .weight(weight = 4f, fill = false)
+                .padding(end = 8.dp)
+        )
+        ChangelogDividerLine(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun ChangelogDividerLine(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(DividerDefaults.Thickness)
+            .background(color = DividerDefaults.color)
+    )
 }
 
 @Composable
