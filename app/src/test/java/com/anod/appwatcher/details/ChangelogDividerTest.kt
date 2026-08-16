@@ -3,6 +3,7 @@ package com.anod.appwatcher.details
 import com.anod.appwatcher.database.entities.AppChange
 import info.anodsplace.framework.content.InstalledApps
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ChangelogDividerTest {
@@ -50,7 +51,17 @@ class ChangelogDividerTest {
         // A store rollback prepends an older remote entry, so the list is no longer sorted
         val rolledBack = listOf(change(17200), change(17300), change(17200))
 
-        assertEquals(1, installedChangelogDividerIndex(rolledBack, installed(17200)))
+        // Below the unseen 17300 entry, not above it
+        assertEquals(2, installedChangelogDividerIndex(rolledBack, installed(17200)))
+    }
+
+    @Test
+    fun unseenEntriesNeverEndUpBelowTheSeparatorInAnUnsortedList() {
+        val rolledBack = listOf(change(17200), change(17300), change(17200))
+
+        val index = installedChangelogDividerIndex(rolledBack, installed(17200))
+
+        assertTrue(rolledBack.drop(index).none { it.versionCode > 17200 })
     }
 
     @Test
