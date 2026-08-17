@@ -34,6 +34,52 @@ class AppPreserveCachedMetadataTest {
     }
 
     @Test
+    fun blankVersionNameUploadDateAppTypeAndPriceFallBackToCachedValues() {
+        val cached = app(
+            versionName = "2.5.0",
+            uploadDate = "Jan 1, 2026",
+            appType = "APPLICATION",
+            price = Price("$1.99", "USD", 1990000)
+        )
+        val sparse = app(
+            versionName = "",
+            uploadDate = "",
+            appType = "",
+            price = Price("", "", 0)
+        )
+
+        val merged = sparse.preserveCachedMetadata(cached)
+
+        assertEquals("2.5.0", merged.versionName)
+        assertEquals("Jan 1, 2026", merged.uploadDate)
+        assertEquals("APPLICATION", merged.appType)
+        assertEquals(Price("$1.99", "USD", 1990000), merged.price)
+    }
+
+    @Test
+    fun nonBlankVersionNameUploadDateAppTypeAndPriceOverrideCachedValues() {
+        val cached = app(
+            versionName = "2.5.0",
+            uploadDate = "Jan 1, 2026",
+            appType = "APPLICATION",
+            price = Price("$1.99", "USD", 1990000)
+        )
+        val fresh = app(
+            versionName = "2.6.0",
+            uploadDate = "Feb 1, 2026",
+            appType = "GAME",
+            price = Price("$2.99", "USD", 2990000)
+        )
+
+        val merged = fresh.preserveCachedMetadata(cached)
+
+        assertEquals("2.6.0", merged.versionName)
+        assertEquals("Feb 1, 2026", merged.uploadDate)
+        assertEquals("GAME", merged.appType)
+        assertEquals(Price("$2.99", "USD", 2990000), merged.price)
+    }
+
+    @Test
     fun nonBlankFieldsOverrideCachedValues() {
         val cached = app(
             title = "Cached Title",
@@ -60,22 +106,26 @@ class AppPreserveCachedMetadataTest {
         title: String = "Example",
         creator: String = "Example Inc",
         iconUrl: String = "https://example.com/icon.png",
-        detailsUrl: String? = "details?doc=com.example.app"
+        detailsUrl: String? = "details?doc=com.example.app",
+        versionName: String = "1.0",
+        uploadDate: String = "Jan 1, 2026",
+        appType: String = "",
+        price: Price = Price("", "", 0)
     ) = App(
         rowId = 1,
         appId = "com.example.app",
         packageName = "com.example.app",
         versionNumber = 1,
-        versionName = "1.0",
+        versionName = versionName,
         title = title,
         creator = creator,
         iconUrl = iconUrl,
         status = App.STATUS_UPDATED,
-        uploadDate = "Jan 1, 2026",
-        price = Price("", "", 0),
+        uploadDate = uploadDate,
+        price = price,
         detailsUrl = detailsUrl,
         uploadTime = 1,
-        appType = "",
+        appType = appType,
         syncTime = 1
     )
 }
