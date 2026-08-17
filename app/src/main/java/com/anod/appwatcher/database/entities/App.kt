@@ -36,6 +36,25 @@ fun PackageManager.packageToApp(rowId: Int, packageName: String): App {
 
 fun Document.toApp(uploadDateParserCache: UploadDateParserCache): App = toApp(extractUploadDate(uploadDateParserCache))
 
+/**
+ * Play's update-purpose bulk-details response (`?au=1`) can omit optional metadata fields
+ * such as title, creator, icon, details URL, version name, upload date, app type and price
+ * for documents that are unchanged. Restore the previously cached values for any field that
+ * came back blank so a sparse response doesn't clobber metadata that a details screen or
+ * icon loader depends on. The version number is intentionally never preserved from cache:
+ * this function is only applied when a genuinely newer version was detected.
+ */
+fun App.preserveCachedMetadata(cached: App): App = copy(
+    title = title.ifBlank { cached.title },
+    creator = creator.ifBlank { cached.creator },
+    iconUrl = iconUrl.ifBlank { cached.iconUrl },
+    detailsUrl = detailsUrl?.ifBlank { cached.detailsUrl } ?: cached.detailsUrl,
+    versionName = versionName.ifBlank { cached.versionName },
+    uploadDate = uploadDate.ifBlank { cached.uploadDate },
+    appType = appType.ifBlank { cached.appType },
+    price = if (price.text.isBlank() && price.cur.isBlank() && price.micros == 0) cached.price else price
+)
+
 private fun Document.toApp(parsedUploadTime: Long): App = toApp(
     rowId = -1,
     status = App.STATUS_NORMAL,
