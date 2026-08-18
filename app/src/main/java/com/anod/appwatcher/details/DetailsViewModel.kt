@@ -185,6 +185,7 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
     fun observeApp() {
         viewModelScope.launch {
             database.apps().observeApp(viewState.appId).collect { app ->
+                val previousIconUrl = viewState.app?.iconUrl
                 viewState = if (app == null && viewState.rowId == -1) {
                     AppLog.i("Show details for unwatched ${viewState.appId}", "DetailsView")
                     viewState.copy(
@@ -197,6 +198,9 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                         app = app,
                         rowId = app?.rowId ?: -1
                     )
+                }
+                if (app != null && app.iconUrl.isNotEmpty() && app.iconUrl != previousIconUrl) {
+                    loadAppIcon(app.iconUrl)
                 }
             }
         }
