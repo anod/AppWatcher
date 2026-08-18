@@ -27,6 +27,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.database.entities.fillBlankMetadata
 import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.tags.TagSnackbarAppInfo
@@ -184,6 +185,7 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
     fun observeApp() {
         viewModelScope.launch {
             database.apps().observeApp(viewState.appId).collect { app ->
+                val previousIconUrl = viewState.app?.iconUrl
                 viewState = if (app == null && viewState.rowId == -1) {
                     AppLog.i("Show details for unwatched ${viewState.appId}", "DetailsView")
                     viewState.copy(
@@ -196,6 +198,9 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                         app = app,
                         rowId = app?.rowId ?: -1
                     )
+                }
+                if (app != null && app.iconUrl.isNotEmpty() && app.iconUrl != previousIconUrl) {
+                    loadAppIcon(app.iconUrl)
                 }
             }
         }
@@ -405,7 +410,7 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
         }
     }
 
-    private fun onRemoteDetailsFetched(localChanges: List<AppChange>, document: Document?) {
+    private suspend fun onRemoteDetailsFetched(localChanges: List<AppChange>, document: Document?) {
         val appDetails = document?.appDetails
 
         viewState = if (appDetails != null) {
@@ -417,6 +422,8 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                 appDetails.uploadDate,
                 false
             )
+
+            repairBlankMetadataIfNeeded(document)
 
             viewState.copy(
                 document = document,
@@ -453,6 +460,37 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
         viewState.remoteVersionInfo?.installationSize?.also {
             AppLog.d("FileList Sum compressedSize: ${Formatter.formatShortFileSize(context, it)}")
         }
+    }
+
+    /**
+     * Self-heal a watched app row whose cached title/creator/icon/details URL were left blank
+     * by an earlier sparse `?au=1` update-check response (see [preserveCachedMetadata], which
+     * only prevents *future* clobbering). The details screen fetches full, non-sparse Play
+     * details, so use it to fill in any currently-blank fields without touching values that
+     * are already present.
+     */
+    private suspend fun repairBlankMetadataIfNeeded(document: Document) {
+        val app = viewState.app ?: return
+        if (app.rowId == -1) {
+            return
+        }
+        val hasBlankMetadata = app.title.isBlank() || app.creator.isBlank() ||
+            app.iconUrl.isBlank() || app.detailsUrl.isNullOrBlank()
+        if (!hasBlankMetadata) {
+            return
+        }
+        val fresh = document.toApp(uploadDateParserCache)
+        val repaired = app.fillBlankMetadata(fresh)
+        if (repaired == app) {
+            return
+        }
+        database.apps().updateMetadata(
+            rowId = app.rowId,
+            title = repaired.title,
+            creator = repaired.creator,
+            iconUrl = repaired.iconUrl,
+            detailsUrl = repaired.detailsUrl
+        )
     }
 
     private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> = when {

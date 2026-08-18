@@ -48,11 +48,25 @@ fun App.preserveCachedMetadata(cached: App): App = copy(
     title = title.ifBlank { cached.title },
     creator = creator.ifBlank { cached.creator },
     iconUrl = iconUrl.ifBlank { cached.iconUrl },
-    detailsUrl = detailsUrl?.ifBlank { cached.detailsUrl } ?: cached.detailsUrl,
+    detailsUrl = if (detailsUrl.isNullOrBlank()) cached.detailsUrl else detailsUrl,
     versionName = versionName.ifBlank { cached.versionName },
     uploadDate = uploadDate.ifBlank { cached.uploadDate },
     appType = appType.ifBlank { cached.appType },
-    price = if (price.text.isBlank() && price.cur.isBlank() && price.micros == 0) cached.price else price
+    price = if (price.text.isBlank() && price.cur.isBlank() && (price.micros == null || price.micros == 0)) cached.price else price
+)
+
+/**
+ * Fills in title/creator/iconUrl/detailsUrl on this (already cached) app from a freshly
+ * fetched, non-sparse [fresh] app, but only for fields that are currently blank here.
+ * Used to self-heal rows that were previously clobbered by a sparse `?au=1` update-check
+ * response (before [preserveCachedMetadata] existed), without touching fields that already
+ * hold a value.
+ */
+fun App.fillBlankMetadata(fresh: App): App = copy(
+    title = title.ifBlank { fresh.title },
+    creator = creator.ifBlank { fresh.creator },
+    iconUrl = iconUrl.ifBlank { fresh.iconUrl },
+    detailsUrl = if (detailsUrl.isNullOrBlank()) fresh.detailsUrl else detailsUrl
 )
 
 private fun Document.toApp(parsedUploadTime: Long): App = toApp(

@@ -39,7 +39,7 @@ class AppPreserveCachedMetadataTest {
             versionName = "2.5.0",
             uploadDate = "Jan 1, 2026",
             appType = "APPLICATION",
-            price = Price("$1.99", "USD", 1990000)
+            price = Price("\$1.99", "USD", 1990000)
         )
         val sparse = app(
             versionName = "",
@@ -53,7 +53,30 @@ class AppPreserveCachedMetadataTest {
         assertEquals("2.5.0", merged.versionName)
         assertEquals("Jan 1, 2026", merged.uploadDate)
         assertEquals("APPLICATION", merged.appType)
-        assertEquals(Price("$1.99", "USD", 1990000), merged.price)
+        assertEquals(Price("\$1.99", "USD", 1990000), merged.price)
+    }
+
+    @Test
+    fun nullMicrosPriceFallsBackToCachedValue() {
+        val cached = app(
+            versionName = "2.5.0",
+            uploadDate = "Jan 1, 2026",
+            appType = "APPLICATION",
+            price = Price("\$1.99", "USD", 1990000)
+        )
+        val sparse = app(
+            versionName = "",
+            uploadDate = "",
+            appType = "",
+            price = Price("", "", null)
+        )
+
+        val merged = sparse.preserveCachedMetadata(cached)
+
+        assertEquals("2.5.0", merged.versionName)
+        assertEquals("Jan 1, 2026", merged.uploadDate)
+        assertEquals("APPLICATION", merged.appType)
+        assertEquals(Price("\$1.99", "USD", 1990000), merged.price)
     }
 
     @Test
@@ -62,13 +85,13 @@ class AppPreserveCachedMetadataTest {
             versionName = "2.5.0",
             uploadDate = "Jan 1, 2026",
             appType = "APPLICATION",
-            price = Price("$1.99", "USD", 1990000)
+            price = Price("\$1.99", "USD", 1990000)
         )
         val fresh = app(
             versionName = "2.6.0",
             uploadDate = "Feb 1, 2026",
             appType = "GAME",
-            price = Price("$2.99", "USD", 2990000)
+            price = Price("\$2.99", "USD", 2990000)
         )
 
         val merged = fresh.preserveCachedMetadata(cached)
@@ -76,7 +99,7 @@ class AppPreserveCachedMetadataTest {
         assertEquals("2.6.0", merged.versionName)
         assertEquals("Feb 1, 2026", merged.uploadDate)
         assertEquals("GAME", merged.appType)
-        assertEquals(Price("$2.99", "USD", 2990000), merged.price)
+        assertEquals(Price("\$2.99", "USD", 2990000), merged.price)
     }
 
     @Test
