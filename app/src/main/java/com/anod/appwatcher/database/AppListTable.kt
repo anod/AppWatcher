@@ -133,6 +133,16 @@ interface AppListTable {
     suspend fun updateStatus(rowId: Int, status: Int): Int
 
     @Query(
+        "UPDATE $TABLE SET " +
+            "${Columns.TITLE} = :title, " +
+            "${Columns.CREATOR} = :creator, " +
+            "${Columns.ICON_URL} = :iconUrl, " +
+            "${Columns.DETAILS_URL} = :detailsUrl " +
+            "WHERE ${BaseColumns._ID} = :rowId"
+    )
+    suspend fun updateMetadata(rowId: Int, title: String, creator: String, iconUrl: String, detailsUrl: String?): Int
+
+    @Query(
         "INSERT INTO $TABLE (" +
             "${Columns.APP_ID}," +
             "${Columns.PACKAGE_NAME}," +
