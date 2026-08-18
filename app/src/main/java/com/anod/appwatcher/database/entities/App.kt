@@ -48,11 +48,11 @@ fun App.preserveCachedMetadata(cached: App): App = copy(
     title = title.ifBlank { cached.title },
     creator = creator.ifBlank { cached.creator },
     iconUrl = iconUrl.ifBlank { cached.iconUrl },
-    detailsUrl = detailsUrl?.ifBlank { cached.detailsUrl } ?: cached.detailsUrl,
+    detailsUrl = if (detailsUrl.isNullOrBlank()) cached.detailsUrl else detailsUrl,
     versionName = versionName.ifBlank { cached.versionName },
     uploadDate = uploadDate.ifBlank { cached.uploadDate },
     appType = appType.ifBlank { cached.appType },
-    price = if (price.text.isBlank() && price.cur.isBlank() && price.micros == 0) cached.price else price
+    price = if (price.text.isBlank() && price.cur.isBlank() && (price.micros == null || price.micros == 0)) cached.price else price
 )
 
 /**
