@@ -46,7 +46,9 @@ import com.anod.appwatcher.compose.AddIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.TagIcon
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.utils.isLightColor
+import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.preferences.SelectedTheme
+import com.anod.appwatcher.utils.contentColor
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -187,7 +189,7 @@ private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
         modifier
             .size(24.dp),
         containerColor = color,
-        contentColor = if (color.isLightColor) Color.Black else Color.White
+        contentColor = color.contentColor
     ) {
         Text(
             text = if (count > 99) "99+" else "" + count,
@@ -224,5 +226,31 @@ private fun DrawerContentPreviewWithAccountPreview() {
             ),
             onMainEvent = {}
         )
+    }
+}
+
+// Reproduces a dark palette where primaryContainer resolves to a light tone, which used to render the header unreadable
+@Preview(showSystemUi = true)
+@Composable
+private fun DrawerContentLightPrimaryContainerPreview() {
+    AppTheme(theme = SelectedTheme(mode = Preferences.THEME_MODE_DARK)) {
+        MaterialTheme(
+            colorScheme = MaterialTheme.colorScheme.copy(
+                primaryContainer = Color(0xFFdde3e7),
+                onPrimaryContainer = Color(0xFF171c1f)
+            )
+        ) {
+            MainDrawer(
+                mainState = MainViewState(
+                    account = AuthAccount("very_long_email_address@example.com", "test", "", "", ""),
+                    lastUpdate = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5),
+                    tags = listOf(
+                        Pair(Tag("Banana", Color.Yellow.toArgb()), 90),
+                        Pair(Tag("Kiwi", Color.DarkGray.toArgb()), 125),
+                    )
+                ),
+                onMainEvent = {}
+            )
+        }
     }
 }
