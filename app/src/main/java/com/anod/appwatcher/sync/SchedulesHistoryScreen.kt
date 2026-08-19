@@ -33,7 +33,7 @@ import com.anod.appwatcher.database.entities.New
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.database.entities.Success
-import com.anod.appwatcher.utils.isLightColor
+import com.anod.appwatcher.utils.contentColor
 import info.anodsplace.framework.content.onScreenCommonAction
 import java.text.DateFormat
 import java.util.Date
@@ -182,7 +182,7 @@ private fun ScheduleChip(text: String, color: Color) {
         onClick = { },
         colors = SuggestionChipDefaults.suggestionChipColors(
             containerColor = color,
-            labelColor = if (color.isLightColor) Color.Black else Color.White
+            labelColor = color.contentColor
         )
     )
 }

@@ -1,7 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.text.format.DateUtils
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,13 +20,16 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -44,7 +47,9 @@ import com.anod.appwatcher.compose.AddIcon
 import com.anod.appwatcher.compose.AppTheme
 import com.anod.appwatcher.compose.TagIcon
 import com.anod.appwatcher.database.entities.Tag
-import com.anod.appwatcher.utils.isLightColor
+import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.preferences.SelectedTheme
+import com.anod.appwatcher.utils.contentColor
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -134,40 +139,47 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
 
 @Composable
 private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 24.dp)
-            .padding(vertical = 12.dp)
-            .padding(contentPadding)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
     ) {
-        Text(
-            text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        OutlinedButton(
-            modifier = Modifier.padding(top = 12.dp),
-            onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .padding(vertical = 12.dp)
+                .padding(contentPadding)
         ) {
-            if (mainState.account == null) {
-                Text(text = stringResource(id = R.string.choose_an_account))
-            } else {
-                Text(text = mainState.account.name)
-            }
-        }
-
-        if (mainState.lastUpdate > 0) {
-            val context = LocalContext.current
-            val relativeTime = remember(mainState.lastUpdate) {
-                DateUtils.getRelativeDateTimeString(context, mainState.lastUpdate, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
-            }
             Text(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(id = R.string.last_update, relativeTime)
+                text = stringResource(id = R.string.app_name),
+                style = MaterialTheme.typography.headlineLarge
             )
+
+            OutlinedButton(
+                modifier = Modifier.padding(top = 12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = LocalContentColor.current
+                ),
+                border = BorderStroke(1.dp, LocalContentColor.current),
+                onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
+            ) {
+                if (mainState.account == null) {
+                    Text(text = stringResource(id = R.string.choose_an_account))
+                } else {
+                    Text(text = mainState.account.name)
+                }
+            }
+
+            if (mainState.lastUpdate > 0) {
+                val context = LocalContext.current
+                val relativeTime = remember(mainState.lastUpdate) {
+                    DateUtils.getRelativeDateTimeString(context, mainState.lastUpdate, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
+                }
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = stringResource(id = R.string.last_update, relativeTime)
+                )
+            }
         }
     }
 }
@@ -178,7 +190,7 @@ private fun TagBadge(color: Color, count: Int, modifier: Modifier = Modifier) {
         modifier
             .size(24.dp),
         containerColor = color,
-        contentColor = if (color.isLightColor) Color.Black else Color.White
+        contentColor = color.contentColor
     ) {
         Text(
             text = if (count > 99) "99+" else "" + count,
@@ -215,5 +227,31 @@ private fun DrawerContentPreviewWithAccountPreview() {
             ),
             onMainEvent = {}
         )
+    }
+}
+
+// Reproduces a dark palette where primaryContainer resolves to a light tone, which used to render the header unreadable
+@Preview(showSystemUi = true)
+@Composable
+private fun DrawerContentLightPrimaryContainerPreview() {
+    AppTheme(theme = SelectedTheme(mode = Preferences.THEME_MODE_DARK)) {
+        MaterialTheme(
+            colorScheme = MaterialTheme.colorScheme.copy(
+                primaryContainer = Color(0xFFdde3e7),
+                onPrimaryContainer = Color(0xFF171c1f)
+            )
+        ) {
+            MainDrawer(
+                mainState = MainViewState(
+                    account = AuthAccount("very_long_email_address@example.com", "test", "", "", ""),
+                    lastUpdate = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5),
+                    tags = listOf(
+                        Pair(Tag("Banana", Color.Yellow.toArgb()), 90),
+                        Pair(Tag("Kiwi", Color.DarkGray.toArgb()), 125),
+                    )
+                ),
+                onMainEvent = {}
+            )
+        }
     }
 }
