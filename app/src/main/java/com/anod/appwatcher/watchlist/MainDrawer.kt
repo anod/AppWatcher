@@ -23,6 +23,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
@@ -157,9 +158,9 @@ private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState
             OutlinedButton(
                 modifier = Modifier.padding(top = 12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    contentColor = LocalContentColor.current
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
+                border = BorderStroke(1.dp, LocalContentColor.current),
                 onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
             ) {
                 if (mainState.account == null) {
