@@ -157,7 +157,7 @@ private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
                 onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
             ) {
                 if (mainState.account == null) {
