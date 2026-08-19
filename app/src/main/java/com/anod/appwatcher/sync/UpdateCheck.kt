@@ -589,14 +589,16 @@ internal fun selectStaleUpdatedApps(
     fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
     limit: Int
 ): List<AppListItem> = fetchedChunks
+    .asSequence()
     .flatMap { (localApps, documents) ->
         val returnedDocIds = documents.mapTo(mutableSetOf()) { it.docId }
         localApps
-            .filterKeys { it !in returnedDocIds }
-            .values
-            .filter { it.app.status == App.STATUS_UPDATED }
+            .asSequence()
+            .filter { it.key !in returnedDocIds && it.value.app.status == App.STATUS_UPDATED }
+            .map { it.value }
     }
     .take(limit)
+    .toList()
 
 internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, values: ContentValues): Boolean {
     if (marketVersionCode >= localApp.versionNumber) {

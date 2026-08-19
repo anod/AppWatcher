@@ -38,9 +38,12 @@ class DfeServerError(
         const val HTTP_NOT_FOUND = 404
 
         /**
-         * Play localizes `displayErrorMessage`, so match the stable server-side wordings rather
-         * than relying on a single English phrase. Deliberately excludes a bare "not found",
-         * which is the synthetic message the client itself substitutes for an unparseable 404.
+         * Known English `displayErrorMessage` wordings observed for a delisted document. Play
+         * localizes this message, so a non-English response will not match and the app is simply
+         * left untouched — the conservative outcome, since a missed match only means a stale
+         * updated flag survives, while a false match would clear a legitimate update. Extend this
+         * list as other wordings are observed. Deliberately excludes a bare "not found", which is
+         * the synthetic message the client itself substitutes for an unparseable 404.
          */
         val ITEM_NOT_FOUND_MESSAGES = listOf(
             "item not found",
