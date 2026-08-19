@@ -283,8 +283,10 @@ class UpdateCheck(
         val dfeApi = koin.get<DfeApi>()
         for (item in candidates) {
             val app = item.app
-            val detailsUrl = app.detailsUrl?.takeIf { it.isNotBlank() }
-                ?: App.createDetailsUrl(app.packageName)
+            // Always derive the URL from the package name: a stale cached `detailsUrl` answers with
+            // a bare 404, which is deliberately not treated as item-not-found, so a genuinely
+            // delisted app would never get its stale flag cleared.
+            val detailsUrl = App.createDetailsUrl(app.packageName)
             val unavailable = try {
                 dfeApi.details(detailsUrl)
                 false
