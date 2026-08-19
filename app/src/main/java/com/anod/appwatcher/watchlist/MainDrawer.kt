@@ -1,7 +1,7 @@
 package com.anod.appwatcher.watchlist
 
 import android.text.format.DateUtils
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Badge
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -134,40 +136,47 @@ private fun ColumnScope.DrawerContent(mainState: MainViewState, onMainEvent: (Ma
 
 @Composable
 private fun DrawerHeader(contentPadding: PaddingValues, mainState: MainViewState, onMainEvent: (MainViewEvent) -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 24.dp)
-            .padding(vertical = 12.dp)
-            .padding(contentPadding)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
     ) {
-        Text(
-            text = stringResource(id = R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        OutlinedButton(
-            modifier = Modifier.padding(top = 12.dp),
-            onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .padding(vertical = 12.dp)
+                .padding(contentPadding)
         ) {
-            if (mainState.account == null) {
-                Text(text = stringResource(id = R.string.choose_an_account))
-            } else {
-                Text(text = mainState.account.name)
-            }
-        }
-
-        if (mainState.lastUpdate > 0) {
-            val context = LocalContext.current
-            val relativeTime = remember(mainState.lastUpdate) {
-                DateUtils.getRelativeDateTimeString(context, mainState.lastUpdate, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
-            }
             Text(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(id = R.string.last_update, relativeTime)
+                text = stringResource(id = R.string.app_name),
+                style = MaterialTheme.typography.headlineLarge
             )
+
+            OutlinedButton(
+                modifier = Modifier.padding(top = 12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)),
+                onClick = { onMainEvent(MainViewEvent.ChooseAccount) }
+            ) {
+                if (mainState.account == null) {
+                    Text(text = stringResource(id = R.string.choose_an_account))
+                } else {
+                    Text(text = mainState.account.name)
+                }
+            }
+
+            if (mainState.lastUpdate > 0) {
+                val context = LocalContext.current
+                val relativeTime = remember(mainState.lastUpdate) {
+                    DateUtils.getRelativeDateTimeString(context, mainState.lastUpdate, DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0)
+                }
+                Text(
+                    modifier = Modifier.padding(top = 4.dp),
+                    text = stringResource(id = R.string.last_update, relativeTime)
+                )
+            }
         }
     }
 }
