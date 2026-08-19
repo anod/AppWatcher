@@ -3,6 +3,7 @@ package com.anod.appwatcher.sync
 import android.content.ContentValues
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
 import finsky.api.Document
 import finsky.protos.AppDetails
@@ -183,6 +184,63 @@ class UpdateCheckVersionRollbackTest {
         assertEquals(3, attempts)
     }
 
+    @Test
+    fun staleUpdatedAppsMissingFromBulkResponseAreSelected() {
+        val missingUpdated = listItem(packageName = "missing.updated", status = App.STATUS_UPDATED)
+        val missingNormal = listItem(packageName = "missing.normal", status = App.STATUS_NORMAL)
+        val returnedUpdated = listItem(packageName = "returned.updated", status = App.STATUS_UPDATED)
+
+        val candidates = selectStaleUpdatedApps(
+            fetchedChunks = listOf(
+                mapOf(
+                    "missing.updated" to missingUpdated,
+                    "missing.normal" to missingNormal,
+                    "returned.updated" to returnedUpdated
+                ) to listOf(document(docId = "returned.updated", versionCode = 2, restriction = 1))
+            ),
+            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+        )
+
+        assertEquals(listOf("missing.updated"), candidates.map { it.app.packageName })
+    }
+
+    @Test
+    fun staleUpdatedSelectionIsCappedByLimit() {
+        val localApps = (1..5).associate { index ->
+            "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_UPDATED)
+        }
+
+        val candidates = selectStaleUpdatedApps(
+            fetchedChunks = listOf(localApps to emptyList()),
+            limit = 2
+        )
+
+        assertEquals(2, candidates.size)
+    }
+
+    @Test
+    fun fullyReturnedBulkResponseHasNoStaleCandidates() {
+        val candidates = selectStaleUpdatedApps(
+            fetchedChunks = listOf(
+                mapOf("com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_UPDATED)) to
+                    listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+            ),
+            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+        )
+
+        assertTrue(candidates.isEmpty())
+    }
+
+    private fun listItem(packageName: String, status: Int) = AppListItem(
+        app = app(versionNumber = 1, status = status).copy(
+            appId = packageName,
+            packageName = packageName
+        ),
+        changeDetails = null,
+        noNewDetails = false,
+        recentFlag = false
+    )
+
     private fun app(
         versionNumber: Int,
         status: Int = App.STATUS_UPDATED,
@@ -205,8 +263,15 @@ class UpdateCheckVersionRollbackTest {
         syncTime = syncTime
     )
 
-    private fun document(versionCode: Int, restriction: Int): Document = Document(
+    private fun document(versionCode: Int, restriction: Int): Document = document(
+        docId = "com.example.app",
+        versionCode = versionCode,
+        restriction = restriction
+    )
+
+    private fun document(docId: String, versionCode: Int, restriction: Int): Document = Document(
         DocV2.newBuilder()
+            .setDocid(docId)
             .setAvailability(
                 Availability.newBuilder()
                     .setRestriction(restriction)

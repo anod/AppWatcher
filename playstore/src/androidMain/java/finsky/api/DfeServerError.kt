@@ -18,18 +18,35 @@ class DfeServerError(
         get() = statusCode == 401 || statusCode == 403
 
     /**
-     * Play returns this definitive error for documents that are no longer served,
-     * either as a 404 or as a display error message in the response commands.
+     * Play's definitive "no longer served" answer for a document. A bare 404 is not sufficient on
+     * its own — a stale or malformed details URL produces one for a perfectly healthy app — so the
+     * server must also have supplied its item-not-found display message, either on this error or
+     * on the parsed error carried as the cause.
      */
     val isItemNotFound: Boolean
-        get() = statusCode == 404 || message?.contains(ITEM_NOT_FOUND, ignoreCase = true) == true
+        get() = hasItemNotFoundMessage ||
+            (statusCode == HTTP_NOT_FOUND && (cause as? DfeServerError)?.hasItemNotFoundMessage == true)
+
+    private val hasItemNotFoundMessage: Boolean
+        get() = message?.let { text -> ITEM_NOT_FOUND_MESSAGES.any { text.contains(it, ignoreCase = true) } } == true
 
     override fun toString(): String {
         return "DisplayErrorMessage[$message]"
     }
 
     private companion object {
-        const val ITEM_NOT_FOUND = "item not found"
+        const val HTTP_NOT_FOUND = 404
+
+        /**
+         * Play localizes `displayErrorMessage`, so match the stable server-side wordings rather
+         * than relying on a single English phrase. Deliberately excludes a bare "not found",
+         * which is the synthetic message the client itself substitutes for an unparseable 404.
+         */
+        val ITEM_NOT_FOUND_MESSAGES = listOf(
+            "item not found",
+            "no longer available",
+            "not available in your country"
+        )
     }
 }
 
