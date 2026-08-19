@@ -134,6 +134,14 @@ interface AppListTable {
 
     @Query(
         "UPDATE $TABLE SET " +
+            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
+            "${Columns.SYNC_TIMESTAMP} = 0 " +
+            "WHERE ${BaseColumns._ID} = :rowId AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
+    )
+    suspend fun clearUpdateStatus(rowId: Int): Int
+
+    @Query(
+        "UPDATE $TABLE SET " +
             "${Columns.TITLE} = :title, " +
             "${Columns.CREATOR} = :creator, " +
             "${Columns.ICON_URL} = :iconUrl, " +

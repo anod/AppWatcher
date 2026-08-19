@@ -39,6 +39,7 @@ import com.anod.appwatcher.utils.forPlayStore
 import com.anod.appwatcher.utils.prefs
 import finsky.api.DfeApi
 import finsky.api.Document
+import finsky.api.isItemNotFoundError
 import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
@@ -355,6 +356,9 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
                     } catch (e: Exception) {
                         loadError = true
                         AppLog.e("Cannot fetch details for ${viewState.appId} , detailsUrl: ${viewState.detailsUrl}", e)
+                        if (e.isItemNotFoundError) {
+                            clearStaleUpdateStatus()
+                        }
                     }
                 } else {
                     loadError = true
@@ -491,6 +495,23 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
             iconUrl = repaired.iconUrl,
             detailsUrl = repaired.detailsUrl
         )
+    }
+
+    /**
+     * Play answered with its definitive `Item not found` error for a watched app, so the app is
+     * delisted or otherwise unavailable. Bulk update-check metadata may still have marked it as
+     * updated; drop that stale flag so an unavailable app is not shown as having an update.
+     */
+    private suspend fun clearStaleUpdateStatus() {
+        val app = viewState.app ?: return
+        if (app.rowId == -1 || app.status != App.STATUS_UPDATED) {
+            return
+        }
+        AppLog.i(
+            "Clearing update status for unavailable app ${app.appId}",
+            "DetailsView"
+        )
+        database.apps().clearUpdateStatus(rowId = app.rowId)
     }
 
     private fun mergeChangelogs(localChanges: List<AppChange>, recentChange: AppChange): List<AppChange> = when {
