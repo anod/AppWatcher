@@ -166,6 +166,22 @@ class AppListTableRoomTest {
         assertTrue(db.changelog().ofApp("second").isEmpty())
     }
 
+    @Test
+    fun clearUpdateStatusResetsOnlyUpdatedRows() = runBlocking {
+        insertApp(appId = "updated", title = "Updated", status = App.STATUS_UPDATED, syncTime = 42L)
+        insertApp(appId = "normal", title = "Normal", status = App.STATUS_NORMAL, syncTime = 42L)
+        val updatedApp = db.apps().loadApp("updated")!!
+        val normalApp = db.apps().loadApp("normal")!!
+
+        assertEquals(1, db.apps().clearUpdateStatus(updatedApp.rowId))
+        assertEquals(0, db.apps().clearUpdateStatus(normalApp.rowId))
+
+        val clearedApp = db.apps().loadAppRow(updatedApp.rowId)!!
+        assertEquals(App.STATUS_NORMAL, clearedApp.status)
+        assertEquals(0L, clearedApp.syncTime)
+        assertEquals(42L, db.apps().loadAppRow(normalApp.rowId)?.syncTime)
+    }
+
     private fun syncUpdate(
         app: App,
         values: ContentValues,
@@ -187,7 +203,12 @@ class AppListTableRoomTest {
         noNewDetails = false
     ).contentValues
 
-    private suspend fun insertApp(appId: String, title: String, status: Int = App.STATUS_NORMAL) {
+    private suspend fun insertApp(
+        appId: String,
+        title: String,
+        status: Int = App.STATUS_NORMAL,
+        syncTime: Long = 0
+    ) {
         AppListTable.Queries.insert(
             App(
                 rowId = 0,
@@ -204,7 +225,7 @@ class AppListTableRoomTest {
                 detailsUrl = null,
                 uploadTime = 0,
                 appType = "",
-                syncTime = 0
+                syncTime = syncTime
             ),
             db
         )
