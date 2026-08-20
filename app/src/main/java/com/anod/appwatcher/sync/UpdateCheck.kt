@@ -35,7 +35,6 @@ import finsky.api.DfeServerError
 import finsky.api.Document
 import finsky.api.filterDocuments
 import finsky.api.isItemNotFoundError
-import finsky.api.toDocument
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -96,12 +95,6 @@ class UpdateCheck(
          * app is delisted. Keeps a large watchlist from turning one sync into hundreds of calls.
          */
         internal const val MAX_UNAVAILABLE_CONFIRMATIONS = 10
-
-        /**
-         * Upper bound on the extra full-details requests issued per sync to recover changelog text
-         * missing from the sparse update-check response.
-         */
-        internal const val MAX_CHANGELOG_RECOVERIES = 30
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
@@ -275,35 +268,50 @@ class UpdateCheck(
      */
     private fun selectMissingChangelogApps(
         fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-    ): List<String> = selectMissingChangelogApps(fetchedChunks, MAX_CHANGELOG_RECOVERIES)
+    ): List<BulkDocId> = selectMissingChangelogApps(fetchedChunks, Int.MAX_VALUE)
 
     /**
-     * Fetch the full (non update-check) details document for each app whose bulk response lacks
-     * recent changes, and return the recovered changelog HTML keyed by doc id. Failures are
-     * tolerated: a missing entry simply leaves the cached changelog untouched.
+     * Recover changelog text for every app whose update-check document arrived without it, using
+     * the plain (non update-check) bulk-details endpoint, which still returns `recentChangesHtml`.
+     * Requests are chunked at [BULK_SIZE] like the main update check, so a large watchlist costs a
+     * bounded number of extra batched calls rather than one call per app.
+     *
+     * Recovery is best-effort: a failing chunk is skipped rather than failing the whole sync, and
+     * the apps it covered simply keep their cached changelog.
      */
-    private suspend fun fetchMissingRecentChanges(docIds: List<String>): Map<String, String> {
+    private suspend fun fetchMissingRecentChanges(docIds: List<BulkDocId>): Map<String, String> {
         if (docIds.isEmpty()) {
             return emptyMap()
         }
         val dfeApi = koin.get<DfeApi>()
         val recovered = mutableMapOf<String, String>()
-        for (docId in docIds) {
-            try {
-                val document = dfeApi.details(App.createDetailsUrl(docId)).toDocument()
-                val changes = document?.appDetails?.recentChangesHtml?.trim() ?: ""
-                if (changes.isNotBlank()) {
-                    recovered[docId] = changes
-                }
+        for (chunk in docIds.chunked(BULK_SIZE)) {
+            val documents = try {
+                dfeApi.details(
+                    chunk,
+                    includeDetails = true,
+                    forUpdateCheck = false
+                ).filterDocuments(AppDetailsFilter.hasAppDetails)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 AppLog.w(
-                    "Cannot fetch recent changes for $docId: ${e.message}",
+                    "Cannot recover recent changes for ${chunk.size} apps: ${e.message}",
                     "UpdateCheck"
                 )
+                continue
+            }
+            for (document in documents) {
+                val changes = document.appDetails.recentChangesHtml?.trim() ?: ""
+                if (changes.isNotBlank()) {
+                    recovered[document.docId] = changes
+                }
             }
         }
+        AppLog.i(
+            "Recovered recent changes for ${recovered.size} of ${docIds.size} apps",
+            "UpdateCheck"
+        )
         return recovered
     }
 
@@ -638,16 +646,19 @@ class UpdateCheck(
 }
 
 /**
- * Doc ids returned by the update-check bulk response without any recent changes text. Play's
+ * Apps returned by the update-check bulk response without any recent changes text. Play's
  * update-purpose response (`?au=1`) is sparse and routinely omits `recentChangesHtml`, so these
- * apps need a full details request before their changelog can be persisted. Only apps whose
- * changelog would actually be written are selected: an app on a new version always needs the text,
- * and an app on the cached version only needs it when nothing is cached yet.
+ * apps need a second, plain bulk-details request before their changelog can be persisted. Only
+ * apps whose changelog would actually be written are selected: an app on a new version always
+ * needs the text, and an app on the cached version only needs it when nothing is cached yet.
+ *
+ * [limit] exists only so tests can bound the result; production passes no effective limit, since
+ * recovery is batched and its cost scales with the same chunking as the update check itself.
  */
 internal fun selectMissingChangelogApps(
     fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
     limit: Int
-): List<String> = fetchedChunks
+): List<BulkDocId> = fetchedChunks
     .asSequence()
     .flatMap { (localApps, documents) -> documents.asSequence().map { localApps[it.docId] to it } }
     .filter { (localItem, document) ->
@@ -655,8 +666,8 @@ internal fun selectMissingChangelogApps(
             document.appDetails.recentChangesHtml.isNullOrBlank() &&
             (document.appDetails.versionCode > localItem.app.versionNumber || localItem.changeDetails.isNullOrBlank())
     }
-    .map { (_, document) -> document.docId }
-    .distinct()
+    .map { (localItem, document) -> BulkDocId(document.docId, localItem!!.app.versionNumber) }
+    .distinctBy { it.packageName }
     .take(limit)
     .toList()
 

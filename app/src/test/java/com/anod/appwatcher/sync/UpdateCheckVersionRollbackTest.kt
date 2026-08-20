@@ -232,7 +232,7 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun sparseResponseWithoutChangesSelectsAppForFullDetailsFetch() {
+    fun sparseResponseWithoutChangesSelectsAppForRecovery() {
         val localApps = mapOf(
             "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
         )
@@ -241,14 +241,14 @@ class UpdateCheckVersionRollbackTest {
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
             ),
-            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+            limit = Int.MAX_VALUE
         )
 
-        assertEquals(listOf("com.example.app"), missing)
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     @Test
-    fun responseWithChangesIsNotSelectedForFullDetailsFetch() {
+    fun responseWithChangesIsNotSelectedForRecovery() {
         val localApps = mapOf(
             "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
         )
@@ -259,7 +259,7 @@ class UpdateCheckVersionRollbackTest {
                     document(docId = "com.example.app", versionCode = 2, restriction = 1, recentChanges = "What's new")
                 )
             ),
-            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+            limit = Int.MAX_VALUE
         )
 
         assertTrue(missing.isEmpty())
@@ -279,22 +279,43 @@ class UpdateCheckVersionRollbackTest {
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
             ),
-            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+            limit = Int.MAX_VALUE
         )
 
         assertTrue(missing.isEmpty())
     }
 
     @Test
-    fun missingChangelogSelectionIsCappedByLimit() {
-        val localApps = (1..5).associate { index ->
+    fun everyAppMissingChangesIsSelectedWithoutCap() {
+        val localApps = (1..45).associate { index ->
             "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_NORMAL)
         }
-        val documents = (1..5).map { index ->
+        val documents = (1..45).map { index ->
             document(docId = "missing.$index", versionCode = 2, restriction = 1)
         }
 
-        assertEquals(2, selectMissingChangelogApps(listOf(localApps to documents), limit = 2).size)
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(localApps to documents),
+            limit = Int.MAX_VALUE
+        )
+
+        assertEquals(45, missing.size)
+    }
+
+    @Test
+    fun recoveryDocIdsCarryCachedVersionCode() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+        )
+
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+            ),
+            limit = Int.MAX_VALUE
+        )
+
+        assertEquals(1, missing.single().versionCode)
     }
 
     @Test
