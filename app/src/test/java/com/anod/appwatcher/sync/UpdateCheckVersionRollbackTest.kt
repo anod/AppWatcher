@@ -231,12 +231,132 @@ class UpdateCheckVersionRollbackTest {
         assertTrue(candidates.isEmpty())
     }
 
-    private fun listItem(packageName: String, status: Int) = AppListItem(
+    @Test
+    fun sparseResponseWithoutChangesSelectsAppForFullDetailsFetch() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+        )
+
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+            ),
+            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+        )
+
+        assertEquals(listOf("com.example.app"), missing)
+    }
+
+    @Test
+    fun responseWithChangesIsNotSelectedForFullDetailsFetch() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+        )
+
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(
+                localApps to listOf(
+                    document(docId = "com.example.app", versionCode = 2, restriction = 1, recentChanges = "What's new")
+                )
+            ),
+            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+        )
+
+        assertTrue(missing.isEmpty())
+    }
+
+    @Test
+    fun sameVersionWithCachedChangelogIsNotRefetched() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(
+                packageName = "com.example.app",
+                status = App.STATUS_UPDATED,
+                changeDetails = "Cached notes"
+            )
+        )
+
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
+            ),
+            limit = UpdateCheck.MAX_CHANGELOG_RECOVERIES
+        )
+
+        assertTrue(missing.isEmpty())
+    }
+
+    @Test
+    fun missingChangelogSelectionIsCappedByLimit() {
+        val localApps = (1..5).associate { index ->
+            "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_NORMAL)
+        }
+        val documents = (1..5).map { index ->
+            document(docId = "missing.$index", versionCode = 2, restriction = 1)
+        }
+
+        assertEquals(2, selectMissingChangelogApps(listOf(localApps to documents), limit = 2).size)
+    }
+
+    @Test
+    fun responseChangesWinOverRecoveredAndCached() {
+        assertEquals(
+            "From response",
+            resolveRecentChanges(
+                responseChanges = " From response ",
+                recoveredChanges = "From details",
+                cachedChanges = "Cached",
+                isNewVersion = true
+            )
+        )
+    }
+
+    @Test
+    fun recoveredChangesRestoreDescriptionForNewVersion() {
+        assertEquals(
+            "From details",
+            resolveRecentChanges(
+                responseChanges = "",
+                recoveredChanges = "From details",
+                cachedChanges = "Cached",
+                isNewVersion = true
+            )
+        )
+    }
+
+    @Test
+    fun cachedChangesAreKeptWhenSameVersionResponseIsBlank() {
+        assertEquals(
+            "Cached",
+            resolveRecentChanges(
+                responseChanges = null,
+                recoveredChanges = null,
+                cachedChanges = "Cached",
+                isNewVersion = false
+            )
+        )
+    }
+
+    @Test
+    fun newVersionWithoutAnyChangesDoesNotReuseCachedText() {
+        assertEquals(
+            "",
+            resolveRecentChanges(
+                responseChanges = null,
+                recoveredChanges = null,
+                cachedChanges = "Cached",
+                isNewVersion = true
+            )
+        )
+    }
+
+    private fun listItem(packageName: String, status: Int) = listItem(packageName, status, changeDetails = null)
+
+    private fun listItem(packageName: String, status: Int, changeDetails: String?) = AppListItem(
         app = app(versionNumber = 1, status = status).copy(
             appId = packageName,
             packageName = packageName
         ),
-        changeDetails = null,
+        changeDetails = changeDetails,
         noNewDetails = false,
         recentFlag = false
     )
@@ -269,7 +389,19 @@ class UpdateCheckVersionRollbackTest {
         restriction = restriction
     )
 
-    private fun document(docId: String, versionCode: Int, restriction: Int): Document = Document(
+    private fun document(docId: String, versionCode: Int, restriction: Int): Document = document(
+        docId = docId,
+        versionCode = versionCode,
+        restriction = restriction,
+        recentChanges = null
+    )
+
+    private fun document(
+        docId: String,
+        versionCode: Int,
+        restriction: Int,
+        recentChanges: String?
+    ): Document = Document(
         DocV2.newBuilder()
             .setDocid(docId)
             .setAvailability(
@@ -282,6 +414,11 @@ class UpdateCheckVersionRollbackTest {
                         AppDetails.newBuilder()
                             .setPackageName("com.example.app")
                             .setVersionCode(versionCode)
+                            .also { builder ->
+                                if (recentChanges != null) {
+                                    builder.setRecentChangesHtml(recentChanges)
+                                }
+                            }
                     )
             )
             .build()
