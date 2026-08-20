@@ -303,19 +303,23 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun recoveryDocIdsCarryCachedVersionCode() {
+    fun sameVersionWithBlankCachedChangelogIsSelectedForRecovery() {
         val localApps = mapOf(
-            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+            "com.example.app" to listItem(
+                packageName = "com.example.app",
+                status = App.STATUS_UPDATED,
+                changeDetails = ""
+            )
         )
 
         val missing = selectMissingChangelogApps(
             fetchedChunks = listOf(
-                localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+                localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
             ),
             limit = Int.MAX_VALUE
         )
 
-        assertEquals(1, missing.single().versionCode)
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     @Test
@@ -326,7 +330,7 @@ class UpdateCheckVersionRollbackTest {
                 responseChanges = " From response ",
                 recoveredChanges = "From details",
                 cachedChanges = "Cached",
-                isNewVersion = true
+                isSameVersion = false
             )
         )
     }
@@ -339,7 +343,7 @@ class UpdateCheckVersionRollbackTest {
                 responseChanges = "",
                 recoveredChanges = "From details",
                 cachedChanges = "Cached",
-                isNewVersion = true
+                isSameVersion = false
             )
         )
     }
@@ -352,22 +356,42 @@ class UpdateCheckVersionRollbackTest {
                 responseChanges = null,
                 recoveredChanges = null,
                 cachedChanges = "Cached",
-                isNewVersion = false
+                isSameVersion = true
             )
         )
     }
 
     @Test
-    fun newVersionWithoutAnyChangesDoesNotReuseCachedText() {
+    fun differentVersionWithoutAnyChangesDoesNotReuseCachedText() {
         assertEquals(
             "",
             resolveRecentChanges(
                 responseChanges = null,
                 recoveredChanges = null,
                 cachedChanges = "Cached",
-                isNewVersion = true
+                isSameVersion = false
             )
         )
+    }
+
+    @Test
+    fun rolledBackVersionIsSelectedForRecoveryDespiteCachedText() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(
+                packageName = "com.example.app",
+                status = App.STATUS_UPDATED,
+                changeDetails = "Notes for the newer version"
+            )
+        )
+
+        val missing = selectMissingChangelogApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 0, restriction = 1))
+            ),
+            limit = Int.MAX_VALUE
+        )
+
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     private fun listItem(packageName: String, status: Int) = listItem(packageName, status, changeDetails = null)

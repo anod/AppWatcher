@@ -408,13 +408,17 @@ class UpdateCheck(
                     responseChanges = marketApp.appDetails.recentChangesHtml,
                     recoveredChanges = recoveredChanges[docId],
                     cachedChanges = localItem.changeDetails,
-                    isNewVersion = isNewVersion
+                    isSameVersion = marketApp.appDetails.versionCode == localItem.app.versionNumber
                 )
                 val noNewDetails = if (isNewVersion) {
                     recentChanges.compareLettersAndDigits(localItem.changeDetails)
                 } else {
                     localItem.noNewDetails
                 }
+                // A blank changelog is only worth storing for a version that has no row yet.
+                // Writing it for an existing version would replace real notes with nothing, since
+                // rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE.
+                val persistChangelog = result.persistChangelog && (recentChanges.isNotBlank() || isNewVersion)
                 if (result.values.size() > 0) {
                     pendingUpdates.add(
                         PendingAppUpdate(
@@ -422,7 +426,7 @@ class UpdateCheck(
                             expectedAppId = localItem.app.appId,
                             expectedPackageName = localItem.app.packageName,
                             values = result.values,
-                            changelog = if (result.persistChangelog) {
+                            changelog = if (persistChangelog) {
                                 AppChange(
                                     docId,
                                     marketApp.appDetails.versionCode,
@@ -648,9 +652,11 @@ class UpdateCheck(
 /**
  * Apps returned by the update-check bulk response without any recent changes text. Play's
  * update-purpose response (`?au=1`) is sparse and routinely omits `recentChangesHtml`, so these
- * apps need a second, plain bulk-details request before their changelog can be persisted. Only
- * apps whose changelog would actually be written are selected: an app on a new version always
- * needs the text, and an app on the cached version only needs it when nothing is cached yet.
+ * apps need a second, plain bulk-details request before their changelog can be persisted.
+ *
+ * Only apps that have no usable fallback are selected. The cached `changeDetails` is joined on the
+ * cached version code, so it can only stand in when the remote version is that same version;
+ * a new version or a rollback has to be recovered or it is written blank.
  *
  * [limit] exists only so tests can bound the result; production passes no effective limit, since
  * recovery is batched and its cost scales with the same chunking as the update check itself.
@@ -662,33 +668,39 @@ internal fun selectMissingChangelogApps(
     .asSequence()
     .flatMap { (localApps, documents) -> documents.asSequence().map { localApps[it.docId] to it } }
     .filter { (localItem, document) ->
-        localItem != null &&
-            document.appDetails.recentChangesHtml.isNullOrBlank() &&
-            (document.appDetails.versionCode > localItem.app.versionNumber || localItem.changeDetails.isNullOrBlank())
+        if (localItem == null || !document.appDetails.recentChangesHtml.isNullOrBlank()) {
+            return@filter false
+        }
+        val isSameVersion = document.appDetails.versionCode == localItem.app.versionNumber
+        !isSameVersion || localItem.changeDetails.isNullOrBlank()
     }
-    .map { (localItem, document) -> BulkDocId(document.docId, localItem!!.app.versionNumber) }
+    .map { (_, document) -> BulkDocId(document.docId, document.appDetails.versionCode) }
     .distinctBy { it.packageName }
     .take(limit)
     .toList()
 
 /**
  * Recent changes to persist for an app. The sparse update-check response wins only when it
- * actually carries text; otherwise the recovered full-details text is used, and finally the
- * cached changelog is kept so a blank response never wipes a previously stored description. A new
- * version with no text anywhere is stored as blank, since the cached text belongs to the old
- * version.
+ * actually carries text; otherwise the recovered full-details text is used, and finally the cached
+ * changelog is kept so a blank response never wipes a previously stored description.
+ *
+ * The cached text is only reused when [isSameVersion], because `AppListItem.changeDetails` is
+ * joined on the *cached* version code while the row written here is keyed by the *remote* version.
+ * Reusing it across versions would file one version's notes under another - both for a new version
+ * (whose notes are not written yet) and for a rollback (whose older row would be overwritten with
+ * the newer version's notes).
  */
 internal fun resolveRecentChanges(
     responseChanges: String?,
     recoveredChanges: String?,
     cachedChanges: String?,
-    isNewVersion: Boolean
+    isSameVersion: Boolean
 ): String {
     val fresh = responseChanges?.trim().orEmpty().ifBlank { recoveredChanges?.trim().orEmpty() }
     if (fresh.isNotBlank()) {
         return fresh
     }
-    return if (isNewVersion) "" else cachedChanges?.trim().orEmpty()
+    return if (isSameVersion) cachedChanges?.trim().orEmpty() else ""
 }
 
 /**
