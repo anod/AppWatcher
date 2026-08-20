@@ -246,11 +246,13 @@ class UpdateCheck(
             )
             documents
         }
-        // The update-check response (?au=1) is sparse and frequently omits recent changes, so
-        // fetch the full documents for the affected apps before persisting any changelog.
-        val recentChanges = fetchMissingRecentChanges(selectMissingChangelogApps(fetchedChunks))
+        // The update-check response (?au=1) only carries the availability signal: it routinely
+        // omits recent changes, icon, version name, upload date and price. Fetch the full
+        // documents for apps whose release actually changed so the stored data describes the
+        // new release rather than the sparse placeholder.
+        val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
         val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
-            prepareAppUpdates(documents, localApps, lastUpdatesViewed, recentChanges)
+            prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
         }
         val updatedApps = applyAppUpdates(pendingUpdates, database)
 
@@ -264,27 +266,30 @@ class UpdateCheck(
     }
 
     /**
-     * Doc ids for apps whose bulk update-check document arrived without recent changes.
+     * Doc ids for apps whose release data has to be re-fetched in full.
      */
-    private fun selectMissingChangelogApps(
+    private fun selectReleaseDetailsApps(
         fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-    ): List<BulkDocId> = selectMissingChangelogApps(fetchedChunks, Int.MAX_VALUE)
+    ): List<BulkDocId> = selectReleaseDetailsApps(fetchedChunks, Int.MAX_VALUE)
 
     /**
-     * Recover changelog text for every app whose update-check document arrived without it, using
-     * the plain (non update-check) bulk-details endpoint, which still returns `recentChangesHtml`.
+     * Full documents for apps whose release changed, from the plain (non update-check) bulk-details
+     * endpoint. Unlike the `?au=1` variant this returns the complete document, so the changelog,
+     * icon, version name, upload date and price describe the release actually being stored.
      * Requests are chunked at [BULK_SIZE] like the main update check, so a large watchlist costs a
      * bounded number of extra batched calls rather than one call per app.
      *
-     * Recovery is best-effort: a failing chunk is skipped rather than failing the whole sync, and
-     * the apps it covered simply keep their cached changelog.
+     * Best-effort by design: a failing chunk is skipped rather than failing the sync, and apps Play
+     * does not return are simply absent from the result. Bulk entries carry no doc id or error, so
+     * an omission cannot be attributed anyway - those apps keep their sparse document and cached
+     * values.
      */
-    private suspend fun fetchMissingRecentChanges(docIds: List<BulkDocId>): Map<String, String> {
+    private suspend fun fetchReleaseDetails(docIds: List<BulkDocId>): Map<String, Document> {
         if (docIds.isEmpty()) {
             return emptyMap()
         }
         val dfeApi = koin.get<DfeApi>()
-        val recovered = mutableMapOf<String, String>()
+        val details = mutableMapOf<String, Document>()
         for (chunk in docIds.chunked(BULK_SIZE)) {
             val documents = try {
                 dfeApi.details(
@@ -296,23 +301,20 @@ class UpdateCheck(
                 throw e
             } catch (e: Exception) {
                 AppLog.w(
-                    "Cannot recover recent changes for ${chunk.size} apps: ${e.message}",
+                    "Cannot fetch release details for ${chunk.size} apps: ${e.message}",
                     "UpdateCheck"
                 )
                 continue
             }
             for (document in documents) {
-                val changes = document.appDetails.recentChangesHtml?.trim() ?: ""
-                if (changes.isNotBlank()) {
-                    recovered[document.docId] = changes
-                }
+                details[document.docId] = document
             }
         }
         AppLog.i(
-            "Recovered recent changes for ${recovered.size} of ${docIds.size} apps",
+            "Fetched release details for ${details.size} of ${docIds.size} apps",
             "UpdateCheck"
         )
-        return recovered
+        return details
     }
 
     /**
@@ -396,17 +398,22 @@ class UpdateCheck(
         documents: List<Document>,
         localApps: Map<String, AppListItem>,
         lastUpdatesViewed: Boolean,
-        recoveredChanges: Map<String, String>
+        releaseDetails: Map<String, Document>
     ): List<PendingAppUpdate> {
         val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let { localItem ->
-                val result = updateApp(marketApp, localItem, lastUpdatesViewed)
+                // Only the version the update check decided on may supply the release data;
+                // otherwise Play advancing between the two requests would file one version's
+                // details under another.
+                val releaseApp = releaseDetails[docId]
+                    ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
+                    ?: marketApp
+                val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = resolveRecentChanges(
-                    responseChanges = marketApp.appDetails.recentChangesHtml,
-                    recoveredChanges = recoveredChanges[docId],
+                    responseChanges = releaseApp.appDetails.recentChangesHtml,
                     cachedChanges = localItem.changeDetails,
                     isSameVersion = marketApp.appDetails.versionCode == localItem.app.versionNumber
                 )
@@ -429,10 +436,10 @@ class UpdateCheck(
                             changelog = if (persistChangelog) {
                                 AppChange(
                                     docId,
-                                    marketApp.appDetails.versionCode,
-                                    marketApp.appDetails.versionString,
+                                    releaseApp.appDetails.versionCode,
+                                    releaseApp.appDetails.versionString,
                                     recentChanges,
-                                    marketApp.appDetails.uploadDate,
+                                    releaseApp.appDetails.uploadDate,
                                     noNewDetails
                                 ).contentValues
                             } else {
@@ -485,8 +492,14 @@ class UpdateCheck(
             .mapNotNull { it.updatedApp }
     }
 
+    /**
+     * [marketDoc] is the update-check (`?au=1`) document and stays the authority on availability
+     * and on which version this sync decided to store. [releaseDoc] carries the data written for
+     * that version; it is the full document when one could be fetched and [marketDoc] otherwise.
+     */
     private fun updateApp(
         marketDoc: Document,
+        releaseDoc: Document,
         localItem: AppListItem,
         lastUpdatesViewed: Boolean
     ): AppUpdateResult {
@@ -521,7 +534,7 @@ class UpdateCheck(
                     "${localApp.versionNumber} -> ${appDetails.versionCode}",
                 "UpdateCheck"
             )
-            updateLocalApp(marketDoc, localApp, values)
+            updateLocalApp(releaseDoc, localApp, values)
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
@@ -537,14 +550,14 @@ class UpdateCheck(
                     (marketDoc.availabilityRestriction?.toString() ?: "absent"),
                 "UpdateCheck"
             )
-            val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
-            val newApp = marketDoc.toApp(
+            val uploadTime = releaseDoc.extractUploadDate(uploadDateParserCache)
+            val newApp = releaseDoc.toApp(
                 rowId = localApp.rowId,
                 status = App.STATUS_UPDATED,
                 uploadTime = uploadTime,
                 syncTime = System.currentTimeMillis(),
             ).preserveCachedMetadata(localApp)
-            val recentChanges = appDetails.recentChangesHtml ?: ""
+            val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
             return AppUpdateResult(
                 values = newApp.contentValues,
                 updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
@@ -559,11 +572,11 @@ class UpdateCheck(
             values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
-            val recentChanges = appDetails.recentChangesHtml ?: ""
+            val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
         // Refresh app info with latest fetched
-        updateLocalApp(marketDoc, localApp, values)
+        updateLocalApp(releaseDoc, localApp, values)
         return AppUpdateResult(
             values = values,
             updatedApp = updatedApp,
@@ -650,25 +663,25 @@ class UpdateCheck(
 }
 
 /**
- * Apps returned by the update-check bulk response without any recent changes text. Play's
- * update-purpose response (`?au=1`) is sparse and routinely omits `recentChangesHtml`, so these
- * apps need a second, plain bulk-details request before their changelog can be persisted.
+ * Apps whose release data has to be re-fetched from the plain bulk-details endpoint. Play's
+ * update-purpose response (`?au=1`) only signals availability: it routinely omits recent changes,
+ * icon, version name, upload date and price, so it cannot describe a release on its own.
  *
- * Only apps that have no usable fallback are selected. The cached `changeDetails` is joined on the
- * cached version code, so it can only stand in when the remote version is that same version;
- * a new version or a rollback has to be recovered or it is written blank.
+ * Selected when the remote version differs from the cached one - a new version or a rollback both
+ * store data for a version this row has never held. An app still on its cached version is only
+ * selected when its changelog is missing, since everything else already describes that version.
  *
  * [limit] exists only so tests can bound the result; production passes no effective limit, since
- * recovery is batched and its cost scales with the same chunking as the update check itself.
+ * the fetch is batched and its cost scales with the same chunking as the update check itself.
  */
-internal fun selectMissingChangelogApps(
+internal fun selectReleaseDetailsApps(
     fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
     limit: Int
 ): List<BulkDocId> = fetchedChunks
     .asSequence()
     .flatMap { (localApps, documents) -> documents.asSequence().map { localApps[it.docId] to it } }
     .filter { (localItem, document) ->
-        if (localItem == null || !document.appDetails.recentChangesHtml.isNullOrBlank()) {
+        if (localItem == null) {
             return@filter false
         }
         val isSameVersion = document.appDetails.versionCode == localItem.app.versionNumber
@@ -680,9 +693,9 @@ internal fun selectMissingChangelogApps(
     .toList()
 
 /**
- * Recent changes to persist for an app. The sparse update-check response wins only when it
- * actually carries text; otherwise the recovered full-details text is used, and finally the cached
- * changelog is kept so a blank response never wipes a previously stored description.
+ * Recent changes to persist for an app. [responseChanges] comes from the best document available
+ * for this version - the full release document when one was fetched - and the cached changelog is
+ * only a fallback so a blank response never wipes a previously stored description.
  *
  * The cached text is only reused when [isSameVersion], because `AppListItem.changeDetails` is
  * joined on the *cached* version code while the row written here is keyed by the *remote* version.
@@ -692,11 +705,10 @@ internal fun selectMissingChangelogApps(
  */
 internal fun resolveRecentChanges(
     responseChanges: String?,
-    recoveredChanges: String?,
     cachedChanges: String?,
     isSameVersion: Boolean
 ): String {
-    val fresh = responseChanges?.trim().orEmpty().ifBlank { recoveredChanges?.trim().orEmpty() }
+    val fresh = responseChanges?.trim().orEmpty()
     if (fresh.isNotBlank()) {
         return fresh
     }

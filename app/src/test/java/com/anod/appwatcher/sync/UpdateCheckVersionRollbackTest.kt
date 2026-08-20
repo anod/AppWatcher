@@ -232,12 +232,12 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun sparseResponseWithoutChangesSelectsAppForRecovery() {
+    fun newVersionIsSelectedForReleaseDetails() {
         val localApps = mapOf(
             "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
         )
 
-        val missing = selectMissingChangelogApps(
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
             ),
@@ -248,12 +248,14 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun responseWithChangesIsNotSelectedForRecovery() {
+    fun newVersionIsSelectedEvenWhenUpdateCheckCarriesChanges() {
         val localApps = mapOf(
             "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
         )
 
-        val missing = selectMissingChangelogApps(
+        // Recent changes alone don't make the sparse document complete: icon, version name,
+        // upload date and price still have to come from the full release document.
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(
                     document(docId = "com.example.app", versionCode = 2, restriction = 1, recentChanges = "What's new")
@@ -262,7 +264,7 @@ class UpdateCheckVersionRollbackTest {
             limit = Int.MAX_VALUE
         )
 
-        assertTrue(missing.isEmpty())
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     @Test
@@ -275,7 +277,7 @@ class UpdateCheckVersionRollbackTest {
             )
         )
 
-        val missing = selectMissingChangelogApps(
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
             ),
@@ -286,7 +288,7 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun everyAppMissingChangesIsSelectedWithoutCap() {
+    fun everyChangedAppIsSelectedWithoutCap() {
         val localApps = (1..45).associate { index ->
             "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_NORMAL)
         }
@@ -294,7 +296,7 @@ class UpdateCheckVersionRollbackTest {
             document(docId = "missing.$index", versionCode = 2, restriction = 1)
         }
 
-        val missing = selectMissingChangelogApps(
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(localApps to documents),
             limit = Int.MAX_VALUE
         )
@@ -312,7 +314,7 @@ class UpdateCheckVersionRollbackTest {
             )
         )
 
-        val missing = selectMissingChangelogApps(
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
             ),
@@ -323,25 +325,11 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun responseChangesWinOverRecoveredAndCached() {
+    fun releaseChangesWinOverCachedText() {
         assertEquals(
-            "From response",
+            "From release",
             resolveRecentChanges(
-                responseChanges = " From response ",
-                recoveredChanges = "From details",
-                cachedChanges = "Cached",
-                isSameVersion = false
-            )
-        )
-    }
-
-    @Test
-    fun recoveredChangesRestoreDescriptionForNewVersion() {
-        assertEquals(
-            "From details",
-            resolveRecentChanges(
-                responseChanges = "",
-                recoveredChanges = "From details",
+                responseChanges = " From release ",
                 cachedChanges = "Cached",
                 isSameVersion = false
             )
@@ -354,7 +342,6 @@ class UpdateCheckVersionRollbackTest {
             "Cached",
             resolveRecentChanges(
                 responseChanges = null,
-                recoveredChanges = null,
                 cachedChanges = "Cached",
                 isSameVersion = true
             )
@@ -367,7 +354,6 @@ class UpdateCheckVersionRollbackTest {
             "",
             resolveRecentChanges(
                 responseChanges = null,
-                recoveredChanges = null,
                 cachedChanges = "Cached",
                 isSameVersion = false
             )
@@ -384,7 +370,7 @@ class UpdateCheckVersionRollbackTest {
             )
         )
 
-        val missing = selectMissingChangelogApps(
+        val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 0, restriction = 1))
             ),
