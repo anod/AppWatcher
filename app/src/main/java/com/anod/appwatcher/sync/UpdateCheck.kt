@@ -239,18 +239,15 @@ class UpdateCheck(
             )
             documents
         }
-        // The update-check response (?au=1) only carries the availability signal: it routinely
-        // omits recent changes, icon, version name, upload date and price. Fetch the full
-        // documents for apps that moved to a new version so the stored data describes the new
-        // release rather than the sparse placeholder.
+        // The update-check response (?au=1) only signals availability, so fetch full documents for
+        // apps that moved to a new version.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
         val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
             prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
         }
         val updatedApps = applyAppUpdates(pendingUpdates, database)
 
-        // Absent from the bulk response, so these never reach `updatedApps`; clearing them only
-        // repairs rows the bulk data can no longer speak for.
+        // Missing from the response, so they never reach `updatedApps`.
         clearUnavailableUpdates(selectStaleUpdatedApps(fetchedChunks))
 
         val checked = localAppChunks.sumOf { it.size }
@@ -259,16 +256,11 @@ class UpdateCheck(
     }
 
     /**
-     * Full documents for apps whose release changed, from the plain (non update-check) bulk-details
-     * endpoint. Unlike the `?au=1` variant this returns the complete document, so the changelog,
-     * icon, version name, upload date and price describe the release actually being stored.
-     * Requests are chunked at [BULK_SIZE] like the main update check, so a large watchlist costs a
-     * bounded number of extra batched calls rather than one call per app.
+     * Full documents for apps that moved to a new version, from the plain (non `?au=1`) endpoint,
+     * chunked at [BULK_SIZE].
      *
-     * Best-effort by design: a failing chunk is skipped rather than failing the sync, and apps Play
-     * does not return are simply absent from the result. Bulk entries carry no doc id or error, so
-     * an omission cannot be attributed anyway - those apps keep their sparse document and cached
-     * values.
+     * Best-effort: a failing chunk is skipped and apps Play does not return are simply absent, so
+     * they keep their sparse document and cached values.
      */
     private suspend fun fetchReleaseDetails(docIds: List<BulkDocId>): Map<String, Document> {
         if (docIds.isEmpty()) {
@@ -304,15 +296,11 @@ class UpdateCheck(
     }
 
     /**
-     * Drop the stale updated flag for watched apps the bulk update-check response did not return.
+     * Drop the stale updated flag for watched apps the update-check response did not return.
      *
-     * Play omits documents it no longer serves, and a bulk entry carries no doc id or error, so an
-     * omission cannot be attributed to a delisting, a region restriction or a server hiccup. The
-     * reason is not needed either: clearing only resets the badge - status and sync timestamp - and
-     * touches no version, metadata or changelog data. A transient omission therefore costs the
-     * highlight of an already notified update, the same highlight a viewed update list clears; the
-     * app itself keeps its stored release. It will not be highlighted again for that same version,
-     * so this deliberately favours dropping a stale badge over keeping one Play no longer backs.
+     * A bulk entry carries no doc id or error, so an omission cannot be attributed. Clearing resets
+     * only the badge and touches no stored data, but the app is not highlighted again for that
+     * same version.
      */
     private suspend fun clearUnavailableUpdates(staleApps: List<AppListItem>) {
         if (staleApps.isEmpty()) {
@@ -361,9 +349,8 @@ class UpdateCheck(
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let { localItem ->
-                // Only the version the update check decided on may supply the release data;
-                // otherwise Play advancing between the two requests would file one version's
-                // details under another.
+                // Play advancing between the two requests would file one version's details under
+                // another.
                 val releaseApp = releaseDetails[docId]
                     ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
                     ?: marketApp
@@ -375,10 +362,8 @@ class UpdateCheck(
                 } else {
                     localItem.noNewDetails
                 }
-                // Rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE, so writing a
-                // description we don't have would replace real notes with nothing - and the blank
-                // version name and upload date of a sparse document would replace those too. Only
-                // persist a changelog row when the response actually carried a description.
+                // Rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE, so a write
+                // without a description would blank real notes, version name and upload date.
                 val persistChangelog = result.persistChangelog && recentChanges.isNotBlank()
                 if (result.values.size() > 0) {
                     pendingUpdates.add(
@@ -447,9 +432,8 @@ class UpdateCheck(
     }
 
     /**
-     * [marketDoc] is the update-check (`?au=1`) document and stays the authority on availability
-     * and on which version this sync decided to store. [releaseDoc] carries the data written for
-     * that version; it is the full document when one could be fetched and [marketDoc] otherwise.
+     * [marketDoc] (`?au=1`) stays the authority on availability and on which version to store;
+     * [releaseDoc] carries that version's data - the full document when fetched, else [marketDoc].
      */
     private fun updateApp(
         marketDoc: Document,
@@ -592,11 +576,10 @@ class UpdateCheck(
 /**
  * Copy the fetched release onto the watched row.
  *
- * Play's update-purpose response (`?au=1`) omits optional metadata for documents it considers
- * unchanged, so a blank field means "not reported", not "cleared". Only fields the response
- * actually carries are written; the rest keep their cached values. This mirrors
- * [com.anod.appwatcher.database.entities.preserveCachedMetadata], which protects the new-version
- * path, for the same-version and rollback paths that build their values here instead.
+ * The `?au=1` response omits optional metadata for unchanged documents, so a blank field means
+ * "not reported", not "cleared", and only reported fields are written. Same-version and rollback
+ * rows are built here rather than through
+ * [com.anod.appwatcher.database.entities.preserveCachedMetadata].
  */
 internal fun updateLocalApp(
     releaseDoc: Document,
@@ -623,8 +606,7 @@ internal fun updateLocalApp(
         values.put(AppListTable.Columns.APP_TYPE, appType)
     }
 
-    // The offer is reported as a whole, so an entirely empty one means the response carried no
-    // price rather than a newly free app.
+    // Reported as a whole, so an entirely empty offer means no price was returned.
     val offer = releaseDoc.offer
     val hasOffer = !offer.formattedAmount.isNullOrBlank() ||
         !offer.currencyCode.isNullOrBlank() ||
@@ -648,12 +630,9 @@ internal fun updateLocalApp(
 
 /**
  * Apps whose update-check document reports a new version, as doc ids for a follow-up bulk request.
- * Play's update-purpose response (`?au=1`) only signals availability: it routinely omits recent
- * changes, icon, version name, upload date and price, so it cannot describe the new release.
  *
- * Collected across all update-check chunks so the caller can re-split them into dense bulk
- * requests: the updated apps are usually scattered a few per chunk, and re-packing them costs one
- * request per [BULK_SIZE] updates rather than one per originating chunk.
+ * Collected across all update-check chunks so the caller can re-split them into dense requests:
+ * updates are usually scattered a few per chunk.
  */
 internal fun selectReleaseDetailsApps(
     fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
@@ -668,9 +647,8 @@ internal fun selectReleaseDetailsApps(
     .toList()
 
 /**
- * Watched apps still flagged as [App.STATUS_UPDATED] locally that the bulk update-check response
- * did not return. Play omits documents it no longer serves, so these are the only rows whose stale
- * updated flag the bulk data can never clear on its own.
+ * Watched apps still flagged as [App.STATUS_UPDATED] locally that the update-check response did
+ * not return, so nothing else can clear their stale flag.
  */
 internal fun selectStaleUpdatedApps(
     fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
