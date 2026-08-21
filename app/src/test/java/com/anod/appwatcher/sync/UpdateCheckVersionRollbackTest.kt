@@ -5,6 +5,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.Availability
@@ -322,40 +323,71 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun releaseChangesWinOverCachedText() {
-        assertEquals(
-            "From release",
-            resolveRecentChanges(
-                responseChanges = " From release ",
-                cachedChanges = "Cached",
-                isSameVersion = false
-            )
+    fun sparseResponseDoesNotBlankStoredMetadata() {
+        val values = ContentValues()
+
+        updateLocalApp(
+            releaseDoc = releaseDocument(versionCode = 1, versionString = null, uploadDate = null),
+            localApp = app(versionNumber = 1),
+            values = values,
+            uploadDateParserCache = UploadDateParserCache()
         )
+
+        assertEquals(1, values.getAsInteger(AppListTable.Columns.VERSION_NUMBER))
+        assertFalse(values.containsKey(AppListTable.Columns.VERSION_NAME))
+        assertFalse(values.containsKey(AppListTable.Columns.UPLOAD_DATE))
+        assertFalse(values.containsKey(AppListTable.Columns.UPLOAD_TIMESTAMP))
+        assertFalse(values.containsKey(AppListTable.Columns.APP_TYPE))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_CURRENCY))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_TEXT))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_MICROS))
     }
 
     @Test
-    fun cachedChangesAreKeptWhenSameVersionResponseIsBlank() {
-        assertEquals(
-            "Cached",
-            resolveRecentChanges(
-                responseChanges = null,
-                cachedChanges = "Cached",
-                isSameVersion = true
-            )
+    fun populatedResponseUpdatesMetadata() {
+        val values = ContentValues()
+
+        updateLocalApp(
+            releaseDoc = releaseDocument(
+                versionCode = 2,
+                versionString = "2.0",
+                uploadDate = "Feb 2, 2026"
+            ),
+            localApp = app(versionNumber = 1),
+            values = values,
+            uploadDateParserCache = UploadDateParserCache()
         )
+
+        assertEquals(2, values.getAsInteger(AppListTable.Columns.VERSION_NUMBER))
+        assertEquals("2.0", values.getAsString(AppListTable.Columns.VERSION_NAME))
+        assertEquals("Feb 2, 2026", values.getAsString(AppListTable.Columns.UPLOAD_DATE))
     }
 
-    @Test
-    fun differentVersionWithoutAnyChangesDoesNotReuseCachedText() {
-        assertEquals(
-            "",
-            resolveRecentChanges(
-                responseChanges = null,
-                cachedChanges = "Cached",
-                isSameVersion = false
+    private fun releaseDocument(
+        versionCode: Int,
+        versionString: String?,
+        uploadDate: String?
+    ): Document = Document(
+        DocV2.newBuilder()
+            .setDocid("com.example.app")
+            .setDetails(
+                DocDetails.newBuilder()
+                    .setAppDetails(
+                        AppDetails.newBuilder()
+                            .setPackageName("com.example.app")
+                            .setVersionCode(versionCode)
+                            .also { builder ->
+                                if (versionString != null) {
+                                    builder.setVersionString(versionString)
+                                }
+                                if (uploadDate != null) {
+                                    builder.setUploadDate(uploadDate)
+                                }
+                            }
+                    )
             )
-        )
-    }
+            .build()
+    )
 
     private fun listItem(packageName: String, status: Int) = listItem(packageName, status, changeDetails = null)
 

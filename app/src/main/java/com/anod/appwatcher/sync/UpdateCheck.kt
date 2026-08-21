@@ -308,8 +308,11 @@ class UpdateCheck(
      *
      * Play omits documents it no longer serves, and a bulk entry carries no doc id or error, so an
      * omission cannot be attributed to a delisting, a region restriction or a server hiccup. The
-     * reason is not needed either: an app the update check can no longer speak for must not keep
-     * advertising an update, and a later response that does return it will mark it again.
+     * reason is not needed either: clearing only resets the badge - status and sync timestamp - and
+     * touches no version, metadata or changelog data. A transient omission therefore costs the
+     * highlight of an already notified update, the same highlight a viewed update list clears; the
+     * app itself keeps its stored release. It will not be highlighted again for that same version,
+     * so this deliberately favours dropping a stale badge over keeping one Play no longer backs.
      */
     private suspend fun clearUnavailableUpdates(staleApps: List<AppListItem>) {
         if (staleApps.isEmpty()) {
@@ -366,20 +369,17 @@ class UpdateCheck(
                     ?: marketApp
                 val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
-                val recentChanges = resolveRecentChanges(
-                    responseChanges = releaseApp.appDetails.recentChangesHtml,
-                    cachedChanges = localItem.changeDetails,
-                    isSameVersion = marketApp.appDetails.versionCode == localItem.app.versionNumber
-                )
+                val recentChanges = releaseApp.appDetails.recentChangesHtml?.trim().orEmpty()
                 val noNewDetails = if (isNewVersion) {
                     recentChanges.compareLettersAndDigits(localItem.changeDetails)
                 } else {
                     localItem.noNewDetails
                 }
-                // A blank changelog is only worth storing for a version that has no row yet.
-                // Writing it for an existing version would replace real notes with nothing, since
-                // rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE.
-                val persistChangelog = result.persistChangelog && (recentChanges.isNotBlank() || isNewVersion)
+                // Rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE, so writing a
+                // description we don't have would replace real notes with nothing - and the blank
+                // version name and upload date of a sparse document would replace those too. Only
+                // persist a changelog row when the response actually carried a description.
+                val persistChangelog = result.persistChangelog && recentChanges.isNotBlank()
                 if (result.values.size() > 0) {
                     pendingUpdates.add(
                         PendingAppUpdate(
@@ -488,7 +488,7 @@ class UpdateCheck(
                     "${localApp.versionNumber} -> ${appDetails.versionCode}",
                 "UpdateCheck"
             )
-            updateLocalApp(releaseDoc, localApp, values)
+            updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
@@ -530,7 +530,7 @@ class UpdateCheck(
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
         // Refresh app info with latest fetched
-        updateLocalApp(releaseDoc, localApp, values)
+        updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
         return AppUpdateResult(
             values = values,
             updatedApp = updatedApp,
@@ -587,20 +587,49 @@ class UpdateCheck(
             AppLog.d("Google Drive sync is fresh")
         }
     }
+}
 
-    private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {
-        val uploadTime = marketApp.extractUploadDate(uploadDateParserCache)
-        values.put(BaseColumns._ID, localApp.rowId)
-        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, uploadTime)
-        values.put(AppListTable.Columns.UPLOAD_DATE, marketApp.appDetails.uploadDate)
-        values.put(AppListTable.Columns.VERSION_NAME, marketApp.appDetails.versionString)
-        values.put(AppListTable.Columns.VERSION_NUMBER, marketApp.appDetails.versionCode)
+/**
+ * Copy the fetched release onto the watched row.
+ *
+ * Play's update-purpose response (`?au=1`) omits optional metadata for documents it considers
+ * unchanged, so a blank field means "not reported", not "cleared". Only fields the response
+ * actually carries are written; the rest keep their cached values. This mirrors
+ * [com.anod.appwatcher.database.entities.preserveCachedMetadata], which protects the new-version
+ * path, for the same-version and rollback paths that build their values here instead.
+ */
+internal fun updateLocalApp(
+    releaseDoc: Document,
+    localApp: App,
+    values: ContentValues,
+    uploadDateParserCache: UploadDateParserCache
+) {
+    values.put(BaseColumns._ID, localApp.rowId)
+    values.put(AppListTable.Columns.VERSION_NUMBER, releaseDoc.appDetails.versionCode)
 
-        if (marketApp.appDetails.appType != localApp.appType) {
-            values.put(AppListTable.Columns.APP_TYPE, marketApp.appDetails.appType)
-        }
+    val uploadDate = releaseDoc.appDetails.uploadDate
+    if (!uploadDate.isNullOrBlank()) {
+        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, releaseDoc.extractUploadDate(uploadDateParserCache))
+        values.put(AppListTable.Columns.UPLOAD_DATE, uploadDate)
+    }
 
-        val offer = marketApp.offer
+    val versionString = releaseDoc.appDetails.versionString
+    if (!versionString.isNullOrBlank()) {
+        values.put(AppListTable.Columns.VERSION_NAME, versionString)
+    }
+
+    val appType = releaseDoc.appDetails.appType
+    if (!appType.isNullOrBlank() && appType != localApp.appType) {
+        values.put(AppListTable.Columns.APP_TYPE, appType)
+    }
+
+    // The offer is reported as a whole, so an entirely empty one means the response carried no
+    // price rather than a newly free app.
+    val offer = releaseDoc.offer
+    val hasOffer = !offer.formattedAmount.isNullOrBlank() ||
+        !offer.currencyCode.isNullOrBlank() ||
+        offer.micros > 0
+    if (hasOffer) {
         if (offer.currencyCode != localApp.price.cur) {
             values.put(AppListTable.Columns.PRICE_CURRENCY, offer.currencyCode)
         }
@@ -610,9 +639,10 @@ class UpdateCheck(
         if (localApp.price.micros != offer.micros.toInt()) {
             values.put(AppListTable.Columns.PRICE_MICROS, offer.micros)
         }
-        if (!marketApp.iconUrl.isNullOrEmpty()) {
-            values.put(AppListTable.Columns.ICON_URL, marketApp.iconUrl)
-        }
+    }
+
+    if (!releaseDoc.iconUrl.isNullOrEmpty()) {
+        values.put(AppListTable.Columns.ICON_URL, releaseDoc.iconUrl)
     }
 }
 
@@ -636,29 +666,6 @@ internal fun selectReleaseDetailsApps(
     .map { (_, document) -> BulkDocId(document.docId, document.appDetails.versionCode) }
     .distinctBy { it.packageName }
     .toList()
-
-/**
- * Recent changes to persist for an app. [responseChanges] comes from the best document available
- * for this version - the full release document when one was fetched - and the cached changelog is
- * only a fallback so a blank response never wipes a previously stored description.
- *
- * The cached text is only reused when [isSameVersion], because `AppListItem.changeDetails` is
- * joined on the *cached* version code while the row written here is keyed by the *remote* version.
- * Reusing it across versions would file one version's notes under another - both for a new version
- * (whose notes are not written yet) and for a rollback (whose older row would be overwritten with
- * the newer version's notes).
- */
-internal fun resolveRecentChanges(
-    responseChanges: String?,
-    cachedChanges: String?,
-    isSameVersion: Boolean
-): String {
-    val fresh = responseChanges?.trim().orEmpty()
-    if (fresh.isNotBlank()) {
-        return fresh
-    }
-    return if (isSameVersion) cachedChanges?.trim().orEmpty() else ""
-}
 
 /**
  * Watched apps still flagged as [App.STATUS_UPDATED] locally that the bulk update-check response
