@@ -34,7 +34,6 @@ import finsky.api.DfeApi
 import finsky.api.DfeServerError
 import finsky.api.Document
 import finsky.api.filterDocuments
-import finsky.api.isItemNotFoundError
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -89,12 +88,6 @@ class UpdateCheck(
         internal const val MAX_CHUNK_ATTEMPTS = 3
         private const val CHUNK_RETRY_DELAY_MILLIS = 250L
         internal const val EXTRAS_MANUAL = "manual"
-
-        /**
-         * Upper bound on the extra non-bulk details requests issued per sync to confirm that an
-         * app is delisted. Keeps a large watchlist from turning one sync into hundreds of calls.
-         */
-        internal const val MAX_UNAVAILABLE_CONFIRMATIONS = 10
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
@@ -246,13 +239,15 @@ class UpdateCheck(
             )
             documents
         }
+        // The update-check response (?au=1) only signals availability, so fetch full documents for
+        // apps that moved to a new version.
+        val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
         val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
-            prepareAppUpdates(documents, localApps, lastUpdatesViewed)
+            prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
         }
         val updatedApps = applyAppUpdates(pendingUpdates, database)
 
-        // Candidates are absent from the bulk response, so they never reach `updatedApps`;
-        // clearing them only repairs rows the bulk data can no longer speak for.
+        // Missing from the response, so they never reach `updatedApps`.
         clearUnavailableUpdates(selectStaleUpdatedApps(fetchedChunks))
 
         val checked = localAppChunks.sumOf { it.size }
@@ -261,56 +256,63 @@ class UpdateCheck(
     }
 
     /**
-     * Watched apps that are still flagged as updated locally but were not returned by the bulk
-     * update-check response. Play omits documents it no longer serves, so these are candidates for
-     * a delisted app whose cached [App.STATUS_UPDATED] flag can never be cleared by the bulk data
-     * alone.
+     * Full documents for apps that moved to a new version, from the plain (non `?au=1`) endpoint,
+     * chunked at [BULK_SIZE].
+     *
+     * Best-effort: a failing chunk is skipped and apps Play does not return are simply absent, so
+     * they keep their sparse document and cached values.
      */
-    private fun selectStaleUpdatedApps(
-        fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-    ): List<AppListItem> = selectStaleUpdatedApps(fetchedChunks, MAX_UNAVAILABLE_CONFIRMATIONS)
-
-    /**
-     * Confirm each candidate against the non-bulk details endpoint, which answers with Play's
-     * definitive item-not-found error for delisted apps, and drop the stale updated flag for the
-     * confirmed ones. Any other failure (network, auth, throttling) leaves the app untouched so a
-     * transient error never hides a legitimate update.
-     */
-    private suspend fun clearUnavailableUpdates(candidates: List<AppListItem>) {
-        if (candidates.isEmpty()) {
-            return
+    private suspend fun fetchReleaseDetails(docIds: List<BulkDocId>): Map<String, Document> {
+        if (docIds.isEmpty()) {
+            return emptyMap()
         }
         val dfeApi = koin.get<DfeApi>()
-        for (item in candidates) {
-            val app = item.app
-            // Always derive the URL from the package name: a stale cached `detailsUrl` answers with
-            // a bare 404, which is deliberately not treated as item-not-found, so a genuinely
-            // delisted app would never get its stale flag cleared.
-            val detailsUrl = App.createDetailsUrl(app.packageName)
-            val unavailable = try {
-                dfeApi.details(detailsUrl)
-                false
+        val details = mutableMapOf<String, Document>()
+        for (chunk in docIds.chunked(BULK_SIZE)) {
+            val documents = try {
+                dfeApi.details(
+                    chunk,
+                    includeDetails = true,
+                    forUpdateCheck = false
+                ).filterDocuments(AppDetailsFilter.hasAppDetails)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                if (!e.isItemNotFoundError) {
-                    AppLog.w(
-                        "Cannot confirm availability of ${app.packageName}: ${e.message}",
-                        "UpdateCheck"
-                    )
-                    false
-                } else {
-                    true
-                }
-            }
-            if (!unavailable) {
+                AppLog.w(
+                    "Cannot fetch release details for ${chunk.size} apps: ${e.message}",
+                    "UpdateCheck"
+                )
                 continue
             }
-            AppLog.i(
-                "Clearing update status for unavailable ${app.packageName}",
-                "UpdateCheck"
-            )
-            database.apps().clearUpdateStatus(rowId = app.rowId)
+            for (document in documents) {
+                details[document.docId] = document
+            }
+        }
+        AppLog.i(
+            "Fetched release details for ${details.size} of ${docIds.size} apps",
+            "UpdateCheck"
+        )
+        return details
+    }
+
+    /**
+     * Drop the stale updated flag for watched apps the update-check response did not return.
+     *
+     * A bulk entry carries no doc id or error, so an omission cannot be attributed. Clearing resets
+     * only the badge and touches no stored data, but the app is not highlighted again for that
+     * same version.
+     */
+    private suspend fun clearUnavailableUpdates(staleApps: List<AppListItem>) {
+        if (staleApps.isEmpty()) {
+            return
+        }
+        AppLog.i(
+            "Clearing update status for ${staleApps.size} apps missing from the update check: " +
+                staleApps.joinToString { it.app.packageName },
+            "UpdateCheck"
+        )
+        for (item in staleApps) {
+            database.apps().clearUpdateStatus(rowId = item.app.rowId)
         }
     }
 
@@ -340,20 +342,29 @@ class UpdateCheck(
     private fun prepareAppUpdates(
         documents: List<Document>,
         localApps: Map<String, AppListItem>,
-        lastUpdatesViewed: Boolean
+        lastUpdatesViewed: Boolean,
+        releaseDetails: Map<String, Document>
     ): List<PendingAppUpdate> {
         val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
             val docId = marketApp.docId
             localApps[docId]?.let { localItem ->
-                val result = updateApp(marketApp, localItem, lastUpdatesViewed)
+                // Play advancing between the two requests would file one version's details under
+                // another.
+                val releaseApp = releaseDetails[docId]
+                    ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
+                    ?: marketApp
+                val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
-                val recentChanges = marketApp.appDetails.recentChangesHtml?.trim() ?: ""
+                val recentChanges = releaseApp.appDetails.recentChangesHtml?.trim().orEmpty()
                 val noNewDetails = if (isNewVersion) {
                     recentChanges.compareLettersAndDigits(localItem.changeDetails)
                 } else {
                     localItem.noNewDetails
                 }
+                // Rows are keyed by (app_id, code) and inserted with CONFLICT_REPLACE, so a write
+                // without a description would blank real notes, version name and upload date.
+                val persistChangelog = result.persistChangelog && recentChanges.isNotBlank()
                 if (result.values.size() > 0) {
                     pendingUpdates.add(
                         PendingAppUpdate(
@@ -361,19 +372,22 @@ class UpdateCheck(
                             expectedAppId = localItem.app.appId,
                             expectedPackageName = localItem.app.packageName,
                             values = result.values,
-                            changelog = if (result.persistChangelog) {
+                            changelog = if (persistChangelog) {
                                 AppChange(
                                     docId,
-                                    marketApp.appDetails.versionCode,
-                                    marketApp.appDetails.versionString,
+                                    releaseApp.appDetails.versionCode,
+                                    releaseApp.appDetails.versionString,
                                     recentChanges,
-                                    marketApp.appDetails.uploadDate,
+                                    releaseApp.appDetails.uploadDate,
                                     noNewDetails
                                 ).contentValues
                             } else {
                                 null
                             },
-                            updatedApp = result.updatedApp?.copy(noNewDetails = noNewDetails)
+                            updatedApp = result.updatedApp?.copy(
+                                recentChanges = recentChanges,
+                                noNewDetails = noNewDetails
+                            )
                         )
                     )
                 }
@@ -417,8 +431,13 @@ class UpdateCheck(
             .mapNotNull { it.updatedApp }
     }
 
+    /**
+     * [marketDoc] (`?au=1`) stays the authority on availability and on which version to store;
+     * [releaseDoc] carries that version's data - the full document when fetched, else [marketDoc].
+     */
     private fun updateApp(
         marketDoc: Document,
+        releaseDoc: Document,
         localItem: AppListItem,
         lastUpdatesViewed: Boolean
     ): AppUpdateResult {
@@ -453,7 +472,7 @@ class UpdateCheck(
                     "${localApp.versionNumber} -> ${appDetails.versionCode}",
                 "UpdateCheck"
             )
-            updateLocalApp(marketDoc, localApp, values)
+            updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
@@ -469,14 +488,14 @@ class UpdateCheck(
                     (marketDoc.availabilityRestriction?.toString() ?: "absent"),
                 "UpdateCheck"
             )
-            val uploadTime = marketDoc.extractUploadDate(uploadDateParserCache)
-            val newApp = marketDoc.toApp(
+            val uploadTime = releaseDoc.extractUploadDate(uploadDateParserCache)
+            val newApp = releaseDoc.toApp(
                 rowId = localApp.rowId,
                 status = App.STATUS_UPDATED,
                 uploadTime = uploadTime,
                 syncTime = System.currentTimeMillis(),
             ).preserveCachedMetadata(localApp)
-            val recentChanges = appDetails.recentChangesHtml ?: ""
+            val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
             return AppUpdateResult(
                 values = newApp.contentValues,
                 updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
@@ -491,11 +510,11 @@ class UpdateCheck(
             values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
-            val recentChanges = appDetails.recentChangesHtml ?: ""
+            val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
             updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
         }
         // Refresh app info with latest fetched
-        updateLocalApp(marketDoc, localApp, values)
+        updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
         return AppUpdateResult(
             values = values,
             updatedApp = updatedApp,
@@ -552,20 +571,47 @@ class UpdateCheck(
             AppLog.d("Google Drive sync is fresh")
         }
     }
+}
 
-    private fun updateLocalApp(marketApp: Document, localApp: App, values: ContentValues) {
-        val uploadTime = marketApp.extractUploadDate(uploadDateParserCache)
-        values.put(BaseColumns._ID, localApp.rowId)
-        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, uploadTime)
-        values.put(AppListTable.Columns.UPLOAD_DATE, marketApp.appDetails.uploadDate)
-        values.put(AppListTable.Columns.VERSION_NAME, marketApp.appDetails.versionString)
-        values.put(AppListTable.Columns.VERSION_NUMBER, marketApp.appDetails.versionCode)
+/**
+ * Copy the fetched release onto the watched row.
+ *
+ * The `?au=1` response omits optional metadata for unchanged documents, so a blank field means
+ * "not reported", not "cleared", and only reported fields are written. Same-version and rollback
+ * rows are built here rather than through
+ * [com.anod.appwatcher.database.entities.preserveCachedMetadata].
+ */
+internal fun updateLocalApp(
+    releaseDoc: Document,
+    localApp: App,
+    values: ContentValues,
+    uploadDateParserCache: UploadDateParserCache
+) {
+    values.put(BaseColumns._ID, localApp.rowId)
+    values.put(AppListTable.Columns.VERSION_NUMBER, releaseDoc.appDetails.versionCode)
 
-        if (marketApp.appDetails.appType != localApp.appType) {
-            values.put(AppListTable.Columns.APP_TYPE, marketApp.appDetails.appType)
-        }
+    val uploadDate = releaseDoc.appDetails.uploadDate
+    if (!uploadDate.isNullOrBlank()) {
+        values.put(AppListTable.Columns.UPLOAD_TIMESTAMP, releaseDoc.extractUploadDate(uploadDateParserCache))
+        values.put(AppListTable.Columns.UPLOAD_DATE, uploadDate)
+    }
 
-        val offer = marketApp.offer
+    val versionString = releaseDoc.appDetails.versionString
+    if (!versionString.isNullOrBlank()) {
+        values.put(AppListTable.Columns.VERSION_NAME, versionString)
+    }
+
+    val appType = releaseDoc.appDetails.appType
+    if (!appType.isNullOrBlank() && appType != localApp.appType) {
+        values.put(AppListTable.Columns.APP_TYPE, appType)
+    }
+
+    // Reported as a whole, so an entirely empty offer means no price was returned.
+    val offer = releaseDoc.offer
+    val hasOffer = !offer.formattedAmount.isNullOrBlank() ||
+        !offer.currencyCode.isNullOrBlank() ||
+        offer.micros > 0
+    if (hasOffer) {
         if (offer.currencyCode != localApp.price.cur) {
             values.put(AppListTable.Columns.PRICE_CURRENCY, offer.currencyCode)
         }
@@ -575,21 +621,37 @@ class UpdateCheck(
         if (localApp.price.micros != offer.micros.toInt()) {
             values.put(AppListTable.Columns.PRICE_MICROS, offer.micros)
         }
-        if (!marketApp.iconUrl.isNullOrEmpty()) {
-            values.put(AppListTable.Columns.ICON_URL, marketApp.iconUrl)
-        }
+    }
+
+    if (!releaseDoc.iconUrl.isNullOrEmpty()) {
+        values.put(AppListTable.Columns.ICON_URL, releaseDoc.iconUrl)
     }
 }
 
 /**
- * Watched apps still flagged as [App.STATUS_UPDATED] locally that the bulk update-check response
- * did not return. Play omits documents it no longer serves, so these are the only rows whose stale
- * updated flag the bulk data can never clear on its own. Capped by [limit] to bound the number of
- * follow-up confirmation requests.
+ * Apps whose update-check document reports a new version, as doc ids for a follow-up bulk request.
+ *
+ * Collected across all update-check chunks so the caller can re-split them into dense requests:
+ * updates are usually scattered a few per chunk.
+ */
+internal fun selectReleaseDetailsApps(
+    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
+): List<BulkDocId> = fetchedChunks
+    .asSequence()
+    .flatMap { (localApps, documents) -> documents.asSequence().map { localApps[it.docId] to it } }
+    .filter { (localItem, document) ->
+        localItem != null && document.appDetails.versionCode > localItem.app.versionNumber
+    }
+    .map { (_, document) -> BulkDocId(document.docId, document.appDetails.versionCode) }
+    .distinctBy { it.packageName }
+    .toList()
+
+/**
+ * Watched apps still flagged as [App.STATUS_UPDATED] locally that the update-check response did
+ * not return, so nothing else can clear their stale flag.
  */
 internal fun selectStaleUpdatedApps(
-    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
-    limit: Int
+    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
 ): List<AppListItem> = fetchedChunks
     .asSequence()
     .flatMap { (localApps, documents) ->
@@ -599,7 +661,6 @@ internal fun selectStaleUpdatedApps(
             .filter { it.key !in returnedDocIds && it.value.app.status == App.STATUS_UPDATED }
             .map { it.value }
     }
-    .take(limit)
     .toList()
 
 internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, values: ContentValues): Boolean {

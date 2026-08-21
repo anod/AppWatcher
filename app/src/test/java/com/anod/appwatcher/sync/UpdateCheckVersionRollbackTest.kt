@@ -5,6 +5,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.utils.date.UploadDateParserCache
 import finsky.api.Document
 import finsky.protos.AppDetails
 import finsky.protos.Availability
@@ -197,25 +198,23 @@ class UpdateCheckVersionRollbackTest {
                     "missing.normal" to missingNormal,
                     "returned.updated" to returnedUpdated
                 ) to listOf(document(docId = "returned.updated", versionCode = 2, restriction = 1))
-            ),
-            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+            )
         )
 
         assertEquals(listOf("missing.updated"), candidates.map { it.app.packageName })
     }
 
     @Test
-    fun staleUpdatedSelectionIsCappedByLimit() {
-        val localApps = (1..5).associate { index ->
+    fun everyStaleUpdatedAppIsSelectedWithoutCap() {
+        val localApps = (1..45).associate { index ->
             "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_UPDATED)
         }
 
         val candidates = selectStaleUpdatedApps(
-            fetchedChunks = listOf(localApps to emptyList()),
-            limit = 2
+            fetchedChunks = listOf(localApps to emptyList())
         )
 
-        assertEquals(2, candidates.size)
+        assertEquals(45, candidates.size)
     }
 
     @Test
@@ -224,19 +223,180 @@ class UpdateCheckVersionRollbackTest {
             fetchedChunks = listOf(
                 mapOf("com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_UPDATED)) to
                     listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
-            ),
-            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+            )
         )
 
         assertTrue(candidates.isEmpty())
     }
 
-    private fun listItem(packageName: String, status: Int) = AppListItem(
+    @Test
+    fun newVersionIsSelectedForReleaseDetails() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+        )
+
+        val missing = selectReleaseDetailsApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+            )
+        )
+
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
+    }
+
+    @Test
+    fun newVersionIsSelectedEvenWhenUpdateCheckCarriesChanges() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_NORMAL)
+        )
+
+        // Recent changes alone don't make the sparse document complete: icon, version name,
+        // upload date and price still have to come from the full release document.
+        val missing = selectReleaseDetailsApps(
+            fetchedChunks = listOf(
+                localApps to listOf(
+                    document(docId = "com.example.app", versionCode = 2, restriction = 1, recentChanges = "What's new")
+                )
+            )
+        )
+
+        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
+    }
+
+    @Test
+    fun sameVersionIsNotRefetched() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(
+                packageName = "com.example.app",
+                status = App.STATUS_UPDATED,
+                changeDetails = "Cached notes"
+            )
+        )
+
+        val missing = selectReleaseDetailsApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
+            )
+        )
+
+        assertTrue(missing.isEmpty())
+    }
+
+    @Test
+    fun updatesScatteredAcrossChunksArePackedIntoFullBulkRequests() {
+        // One update per update-check chunk: re-splitting the collected ids is what turns 45
+        // scattered updates into 3 dense requests instead of 45 sparse ones.
+        val fetchedChunks = (1..45).map { index ->
+            mapOf(
+                "updated.$index" to listItem(packageName = "updated.$index", status = App.STATUS_NORMAL),
+                "same.$index" to listItem(packageName = "same.$index", status = App.STATUS_NORMAL)
+            ) to listOf(
+                document(docId = "updated.$index", versionCode = 2, restriction = 1),
+                document(docId = "same.$index", versionCode = 1, restriction = 1)
+            )
+        }
+
+        val missing = selectReleaseDetailsApps(fetchedChunks)
+
+        assertEquals(45, missing.size)
+        assertEquals(3, missing.chunked(20).size)
+        assertTrue(missing.none { it.packageName.startsWith("same.") })
+    }
+
+    @Test
+    fun rolledBackVersionIsNotRefetched() {
+        val localApps = mapOf(
+            "com.example.app" to listItem(
+                packageName = "com.example.app",
+                status = App.STATUS_UPDATED,
+                changeDetails = "Notes for the newer version"
+            )
+        )
+
+        val missing = selectReleaseDetailsApps(
+            fetchedChunks = listOf(
+                localApps to listOf(document(docId = "com.example.app", versionCode = 0, restriction = 1))
+            )
+        )
+
+        assertTrue(missing.isEmpty())
+    }
+
+    @Test
+    fun sparseResponseDoesNotBlankStoredMetadata() {
+        val values = ContentValues()
+
+        updateLocalApp(
+            releaseDoc = releaseDocument(versionCode = 1, versionString = null, uploadDate = null),
+            localApp = app(versionNumber = 1),
+            values = values,
+            uploadDateParserCache = UploadDateParserCache()
+        )
+
+        assertEquals(1, values.getAsInteger(AppListTable.Columns.VERSION_NUMBER))
+        assertFalse(values.containsKey(AppListTable.Columns.VERSION_NAME))
+        assertFalse(values.containsKey(AppListTable.Columns.UPLOAD_DATE))
+        assertFalse(values.containsKey(AppListTable.Columns.UPLOAD_TIMESTAMP))
+        assertFalse(values.containsKey(AppListTable.Columns.APP_TYPE))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_CURRENCY))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_TEXT))
+        assertFalse(values.containsKey(AppListTable.Columns.PRICE_MICROS))
+    }
+
+    @Test
+    fun populatedResponseUpdatesMetadata() {
+        val values = ContentValues()
+
+        updateLocalApp(
+            releaseDoc = releaseDocument(
+                versionCode = 2,
+                versionString = "2.0",
+                uploadDate = "Feb 2, 2026"
+            ),
+            localApp = app(versionNumber = 1),
+            values = values,
+            uploadDateParserCache = UploadDateParserCache()
+        )
+
+        assertEquals(2, values.getAsInteger(AppListTable.Columns.VERSION_NUMBER))
+        assertEquals("2.0", values.getAsString(AppListTable.Columns.VERSION_NAME))
+        assertEquals("Feb 2, 2026", values.getAsString(AppListTable.Columns.UPLOAD_DATE))
+    }
+
+    private fun releaseDocument(
+        versionCode: Int,
+        versionString: String?,
+        uploadDate: String?
+    ): Document = Document(
+        DocV2.newBuilder()
+            .setDocid("com.example.app")
+            .setDetails(
+                DocDetails.newBuilder()
+                    .setAppDetails(
+                        AppDetails.newBuilder()
+                            .setPackageName("com.example.app")
+                            .setVersionCode(versionCode)
+                            .also { builder ->
+                                if (versionString != null) {
+                                    builder.setVersionString(versionString)
+                                }
+                                if (uploadDate != null) {
+                                    builder.setUploadDate(uploadDate)
+                                }
+                            }
+                    )
+            )
+            .build()
+    )
+
+    private fun listItem(packageName: String, status: Int) = listItem(packageName, status, changeDetails = null)
+
+    private fun listItem(packageName: String, status: Int, changeDetails: String?) = AppListItem(
         app = app(versionNumber = 1, status = status).copy(
             appId = packageName,
             packageName = packageName
         ),
-        changeDetails = null,
+        changeDetails = changeDetails,
         noNewDetails = false,
         recentFlag = false
     )
@@ -269,7 +429,19 @@ class UpdateCheckVersionRollbackTest {
         restriction = restriction
     )
 
-    private fun document(docId: String, versionCode: Int, restriction: Int): Document = Document(
+    private fun document(docId: String, versionCode: Int, restriction: Int): Document = document(
+        docId = docId,
+        versionCode = versionCode,
+        restriction = restriction,
+        recentChanges = null
+    )
+
+    private fun document(
+        docId: String,
+        versionCode: Int,
+        restriction: Int,
+        recentChanges: String?
+    ): Document = Document(
         DocV2.newBuilder()
             .setDocid(docId)
             .setAvailability(
@@ -282,6 +454,11 @@ class UpdateCheckVersionRollbackTest {
                         AppDetails.newBuilder()
                             .setPackageName("com.example.app")
                             .setVersionCode(versionCode)
+                            .also { builder ->
+                                if (recentChanges != null) {
+                                    builder.setRecentChangesHtml(recentChanges)
+                                }
+                            }
                     )
             )
             .build()
