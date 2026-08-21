@@ -242,10 +242,12 @@ class UpdateCheck(
         // The update-check response (?au=1) only signals availability, so fetch full documents for
         // apps that moved to a new version.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
-        val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
-            prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
+        // Applied chunk by chunk so only one chunk worth of prepared updates is held at a time.
+        val updatedApps = mutableListOf<UpdatedApp>()
+        for ((localApps, documents) in fetchedChunks) {
+            val pendingUpdates = prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
+            updatedApps.addAll(applyAppUpdates(pendingUpdates, database))
         }
-        val updatedApps = applyAppUpdates(pendingUpdates, database)
 
         // Missing from the response, so they never reach `updatedApps`.
         clearUnavailableUpdates(selectStaleUpdatedApps(fetchedChunks))
@@ -261,6 +263,9 @@ class UpdateCheck(
      *
      * Best-effort: a failing chunk is skipped and apps Play does not return are simply absent, so
      * they keep their sparse document and cached values.
+     *
+     * The bulk request carries only doc ids and `includeDetails`, so the response cannot be narrowed
+     * to the changelog: `includeDetails = false` would drop `recentChangesHtml` itself.
      */
     private suspend fun fetchReleaseDetails(docIds: List<BulkDocId>): Map<String, Document> {
         if (docIds.isEmpty()) {
