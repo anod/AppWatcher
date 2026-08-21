@@ -243,6 +243,10 @@ class UpdateCheck(
         // apps that moved to a new version.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
         // Applied chunk by chunk so only one chunk worth of prepared updates is held at a time.
+        // Each chunk commits its own transaction, so a failure part way through leaves earlier
+        // chunks applied. That is safe: a row and its changelog still commit together, app rows
+        // carry no cross-row invariant, and the next sync re-fetches and reconciles whatever the
+        // failed run did not reach.
         val updatedApps = mutableListOf<UpdatedApp>()
         for ((localApps, documents) in fetchedChunks) {
             val pendingUpdates = prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
