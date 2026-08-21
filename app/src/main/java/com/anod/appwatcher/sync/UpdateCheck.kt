@@ -34,7 +34,6 @@ import finsky.api.DfeApi
 import finsky.api.DfeServerError
 import finsky.api.Document
 import finsky.api.filterDocuments
-import finsky.api.isItemNotFoundError
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
@@ -89,12 +88,6 @@ class UpdateCheck(
         internal const val MAX_CHUNK_ATTEMPTS = 3
         private const val CHUNK_RETRY_DELAY_MILLIS = 250L
         internal const val EXTRAS_MANUAL = "manual"
-
-        /**
-         * Upper bound on the extra non-bulk details requests issued per sync to confirm that an
-         * app is delisted. Keeps a large watchlist from turning one sync into hundreds of calls.
-         */
-        internal const val MAX_UNAVAILABLE_CONFIRMATIONS = 10
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
@@ -248,29 +241,22 @@ class UpdateCheck(
         }
         // The update-check response (?au=1) only carries the availability signal: it routinely
         // omits recent changes, icon, version name, upload date and price. Fetch the full
-        // documents for apps whose release actually changed so the stored data describes the
-        // new release rather than the sparse placeholder.
+        // documents for apps that moved to a new version so the stored data describes the new
+        // release rather than the sparse placeholder.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
         val pendingUpdates = fetchedChunks.flatMap { (localApps, documents) ->
             prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
         }
         val updatedApps = applyAppUpdates(pendingUpdates, database)
 
-        // Candidates are absent from the bulk response, so they never reach `updatedApps`;
-        // clearing them only repairs rows the bulk data can no longer speak for.
+        // Absent from the bulk response, so these never reach `updatedApps`; clearing them only
+        // repairs rows the bulk data can no longer speak for.
         clearUnavailableUpdates(selectStaleUpdatedApps(fetchedChunks))
 
         val checked = localAppChunks.sumOf { it.size }
         AppLog.i("Sync finished for $checked apps", "UpdateCheck")
         return SyncResult(true, updatedApps, checked, unavailable)
     }
-
-    /**
-     * Doc ids for apps whose release data has to be re-fetched in full.
-     */
-    private fun selectReleaseDetailsApps(
-        fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-    ): List<BulkDocId> = selectReleaseDetailsApps(fetchedChunks, Int.MAX_VALUE)
 
     /**
      * Full documents for apps whose release changed, from the plain (non update-check) bulk-details
@@ -318,56 +304,24 @@ class UpdateCheck(
     }
 
     /**
-     * Watched apps that are still flagged as updated locally but were not returned by the bulk
-     * update-check response. Play omits documents it no longer serves, so these are candidates for
-     * a delisted app whose cached [App.STATUS_UPDATED] flag can never be cleared by the bulk data
-     * alone.
+     * Drop the stale updated flag for watched apps the bulk update-check response did not return.
+     *
+     * Play omits documents it no longer serves, and a bulk entry carries no doc id or error, so an
+     * omission cannot be attributed to a delisting, a region restriction or a server hiccup. The
+     * reason is not needed either: an app the update check can no longer speak for must not keep
+     * advertising an update, and a later response that does return it will mark it again.
      */
-    private fun selectStaleUpdatedApps(
-        fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-    ): List<AppListItem> = selectStaleUpdatedApps(fetchedChunks, MAX_UNAVAILABLE_CONFIRMATIONS)
-
-    /**
-     * Confirm each candidate against the non-bulk details endpoint, which answers with Play's
-     * definitive item-not-found error for delisted apps, and drop the stale updated flag for the
-     * confirmed ones. Any other failure (network, auth, throttling) leaves the app untouched so a
-     * transient error never hides a legitimate update.
-     */
-    private suspend fun clearUnavailableUpdates(candidates: List<AppListItem>) {
-        if (candidates.isEmpty()) {
+    private suspend fun clearUnavailableUpdates(staleApps: List<AppListItem>) {
+        if (staleApps.isEmpty()) {
             return
         }
-        val dfeApi = koin.get<DfeApi>()
-        for (item in candidates) {
-            val app = item.app
-            // Always derive the URL from the package name: a stale cached `detailsUrl` answers with
-            // a bare 404, which is deliberately not treated as item-not-found, so a genuinely
-            // delisted app would never get its stale flag cleared.
-            val detailsUrl = App.createDetailsUrl(app.packageName)
-            val unavailable = try {
-                dfeApi.details(detailsUrl)
-                false
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (!e.isItemNotFoundError) {
-                    AppLog.w(
-                        "Cannot confirm availability of ${app.packageName}: ${e.message}",
-                        "UpdateCheck"
-                    )
-                    false
-                } else {
-                    true
-                }
-            }
-            if (!unavailable) {
-                continue
-            }
-            AppLog.i(
-                "Clearing update status for unavailable ${app.packageName}",
-                "UpdateCheck"
-            )
-            database.apps().clearUpdateStatus(rowId = app.rowId)
+        AppLog.i(
+            "Clearing update status for ${staleApps.size} apps missing from the update check: " +
+                staleApps.joinToString { it.app.packageName },
+            "UpdateCheck"
+        )
+        for (item in staleApps) {
+            database.apps().clearUpdateStatus(rowId = item.app.rowId)
         }
     }
 
@@ -663,33 +617,24 @@ class UpdateCheck(
 }
 
 /**
- * Apps whose release data has to be re-fetched from the plain bulk-details endpoint. Play's
- * update-purpose response (`?au=1`) only signals availability: it routinely omits recent changes,
- * icon, version name, upload date and price, so it cannot describe a release on its own.
+ * Apps whose update-check document reports a new version, as doc ids for a follow-up bulk request.
+ * Play's update-purpose response (`?au=1`) only signals availability: it routinely omits recent
+ * changes, icon, version name, upload date and price, so it cannot describe the new release.
  *
- * Selected when the remote version differs from the cached one - a new version or a rollback both
- * store data for a version this row has never held. An app still on its cached version is only
- * selected when its changelog is missing, since everything else already describes that version.
- *
- * [limit] exists only so tests can bound the result; production passes no effective limit, since
- * the fetch is batched and its cost scales with the same chunking as the update check itself.
+ * Collected across all update-check chunks so the caller can re-split them into dense bulk
+ * requests: the updated apps are usually scattered a few per chunk, and re-packing them costs one
+ * request per [BULK_SIZE] updates rather than one per originating chunk.
  */
 internal fun selectReleaseDetailsApps(
-    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
-    limit: Int
+    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
 ): List<BulkDocId> = fetchedChunks
     .asSequence()
     .flatMap { (localApps, documents) -> documents.asSequence().map { localApps[it.docId] to it } }
     .filter { (localItem, document) ->
-        if (localItem == null) {
-            return@filter false
-        }
-        val isSameVersion = document.appDetails.versionCode == localItem.app.versionNumber
-        !isSameVersion || localItem.changeDetails.isNullOrBlank()
+        localItem != null && document.appDetails.versionCode > localItem.app.versionNumber
     }
     .map { (_, document) -> BulkDocId(document.docId, document.appDetails.versionCode) }
     .distinctBy { it.packageName }
-    .take(limit)
     .toList()
 
 /**
@@ -718,12 +663,10 @@ internal fun resolveRecentChanges(
 /**
  * Watched apps still flagged as [App.STATUS_UPDATED] locally that the bulk update-check response
  * did not return. Play omits documents it no longer serves, so these are the only rows whose stale
- * updated flag the bulk data can never clear on its own. Capped by [limit] to bound the number of
- * follow-up confirmation requests.
+ * updated flag the bulk data can never clear on its own.
  */
 internal fun selectStaleUpdatedApps(
-    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>,
-    limit: Int
+    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
 ): List<AppListItem> = fetchedChunks
     .asSequence()
     .flatMap { (localApps, documents) ->
@@ -733,7 +676,6 @@ internal fun selectStaleUpdatedApps(
             .filter { it.key !in returnedDocIds && it.value.app.status == App.STATUS_UPDATED }
             .map { it.value }
     }
-    .take(limit)
     .toList()
 
 internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, values: ContentValues): Boolean {

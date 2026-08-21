@@ -197,25 +197,23 @@ class UpdateCheckVersionRollbackTest {
                     "missing.normal" to missingNormal,
                     "returned.updated" to returnedUpdated
                 ) to listOf(document(docId = "returned.updated", versionCode = 2, restriction = 1))
-            ),
-            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+            )
         )
 
         assertEquals(listOf("missing.updated"), candidates.map { it.app.packageName })
     }
 
     @Test
-    fun staleUpdatedSelectionIsCappedByLimit() {
-        val localApps = (1..5).associate { index ->
+    fun everyStaleUpdatedAppIsSelectedWithoutCap() {
+        val localApps = (1..45).associate { index ->
             "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_UPDATED)
         }
 
         val candidates = selectStaleUpdatedApps(
-            fetchedChunks = listOf(localApps to emptyList()),
-            limit = 2
+            fetchedChunks = listOf(localApps to emptyList())
         )
 
-        assertEquals(2, candidates.size)
+        assertEquals(45, candidates.size)
     }
 
     @Test
@@ -224,8 +222,7 @@ class UpdateCheckVersionRollbackTest {
             fetchedChunks = listOf(
                 mapOf("com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_UPDATED)) to
                     listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
-            ),
-            limit = UpdateCheck.MAX_UNAVAILABLE_CONFIRMATIONS
+            )
         )
 
         assertTrue(candidates.isEmpty())
@@ -240,8 +237,7 @@ class UpdateCheckVersionRollbackTest {
         val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
-            ),
-            limit = Int.MAX_VALUE
+            )
         )
 
         assertEquals(listOf("com.example.app"), missing.map { it.packageName })
@@ -260,15 +256,14 @@ class UpdateCheckVersionRollbackTest {
                 localApps to listOf(
                     document(docId = "com.example.app", versionCode = 2, restriction = 1, recentChanges = "What's new")
                 )
-            ),
-            limit = Int.MAX_VALUE
+            )
         )
 
         assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     @Test
-    fun sameVersionWithCachedChangelogIsNotRefetched() {
+    fun sameVersionIsNotRefetched() {
         val localApps = mapOf(
             "com.example.app" to listItem(
                 packageName = "com.example.app",
@@ -280,48 +275,50 @@ class UpdateCheckVersionRollbackTest {
         val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
                 localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
-            ),
-            limit = Int.MAX_VALUE
+            )
         )
 
         assertTrue(missing.isEmpty())
     }
 
     @Test
-    fun everyChangedAppIsSelectedWithoutCap() {
-        val localApps = (1..45).associate { index ->
-            "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_NORMAL)
-        }
-        val documents = (1..45).map { index ->
-            document(docId = "missing.$index", versionCode = 2, restriction = 1)
+    fun updatesScatteredAcrossChunksArePackedIntoFullBulkRequests() {
+        // One update per update-check chunk: re-splitting the collected ids is what turns 45
+        // scattered updates into 3 dense requests instead of 45 sparse ones.
+        val fetchedChunks = (1..45).map { index ->
+            mapOf(
+                "updated.$index" to listItem(packageName = "updated.$index", status = App.STATUS_NORMAL),
+                "same.$index" to listItem(packageName = "same.$index", status = App.STATUS_NORMAL)
+            ) to listOf(
+                document(docId = "updated.$index", versionCode = 2, restriction = 1),
+                document(docId = "same.$index", versionCode = 1, restriction = 1)
+            )
         }
 
-        val missing = selectReleaseDetailsApps(
-            fetchedChunks = listOf(localApps to documents),
-            limit = Int.MAX_VALUE
-        )
+        val missing = selectReleaseDetailsApps(fetchedChunks)
 
         assertEquals(45, missing.size)
+        assertEquals(3, missing.chunked(20).size)
+        assertTrue(missing.none { it.packageName.startsWith("same.") })
     }
 
     @Test
-    fun sameVersionWithBlankCachedChangelogIsSelectedForRecovery() {
+    fun rolledBackVersionIsNotRefetched() {
         val localApps = mapOf(
             "com.example.app" to listItem(
                 packageName = "com.example.app",
                 status = App.STATUS_UPDATED,
-                changeDetails = ""
+                changeDetails = "Notes for the newer version"
             )
         )
 
         val missing = selectReleaseDetailsApps(
             fetchedChunks = listOf(
-                localApps to listOf(document(docId = "com.example.app", versionCode = 1, restriction = 1))
-            ),
-            limit = Int.MAX_VALUE
+                localApps to listOf(document(docId = "com.example.app", versionCode = 0, restriction = 1))
+            )
         )
 
-        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
+        assertTrue(missing.isEmpty())
     }
 
     @Test
@@ -358,26 +355,6 @@ class UpdateCheckVersionRollbackTest {
                 isSameVersion = false
             )
         )
-    }
-
-    @Test
-    fun rolledBackVersionIsSelectedForRecoveryDespiteCachedText() {
-        val localApps = mapOf(
-            "com.example.app" to listItem(
-                packageName = "com.example.app",
-                status = App.STATUS_UPDATED,
-                changeDetails = "Notes for the newer version"
-            )
-        )
-
-        val missing = selectReleaseDetailsApps(
-            fetchedChunks = listOf(
-                localApps to listOf(document(docId = "com.example.app", versionCode = 0, restriction = 1))
-            ),
-            limit = Int.MAX_VALUE
-        )
-
-        assertEquals(listOf("com.example.app"), missing.map { it.packageName })
     }
 
     private fun listItem(packageName: String, status: Int) = listItem(packageName, status, changeDetails = null)
