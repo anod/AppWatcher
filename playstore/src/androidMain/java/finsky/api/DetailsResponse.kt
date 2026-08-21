@@ -17,13 +17,12 @@ private fun filterResponseDocuments(response: Details.BulkDetailsResponse, filte
     val list = mutableListOf<Document>()
     for (i in response.entryList.indices) {
         response.getEntry(i).doc?.let {
-            list.add(Document(it))
+            val document = Document(it)
+            if (filter(document)) {
+                list.add(document)
+            }
         }
     }
 
-    return if (list.isEmpty()) {
-        list
-    } else {
-        list.filter(filter)
-    }
+    return list
 }
