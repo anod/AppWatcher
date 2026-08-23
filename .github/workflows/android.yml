@@ -79,9 +79,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # Without an explicit profile avdmanager falls back to the system image default, which is a
-      # much shorter screen than any current phone. The navigation drawer then renders its items
-      # below the fold, where Compose has not composed them and the tests cannot find them.
+      # Pinned only so the emulator geometry is deterministic and matches the phone these tests were
+      # written against. It is not what fixes them: the drawer is a scrolling Column, so every item
+      # is composed regardless of screen height, and the earlier failure was the drawer animation
+      # not having settled when the assertion sampled the tree.
       - name: Instrumentation Test
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2

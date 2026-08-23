@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
@@ -88,6 +89,10 @@ class AppWatcherUiTestSupport(private val compose: ComposeTestRule) {
      * [R.string.navdrawer_item_add] and [R.string.menu_add] both read "Add", so [fromEnd] picks
      * between them: the navigation items are rendered above the tags section, and the add-tag item
      * is rendered last.
+     *
+     * The sheet is a scrolling [androidx.compose.foundation.layout.Column], so every item is
+     * composed and found even when it sits below the fold, but clicking one that is off screen
+     * fails. Scrolling to it first keeps this independent of screen height and font scale.
      */
     fun openDrawerItem(itemText: String, fromEnd: Boolean) {
         openDrawer()
@@ -96,7 +101,9 @@ class AppWatcherUiTestSupport(private val compose: ComposeTestRule) {
         if (matches == 0) {
             fail("No drawer item labelled \"$itemText\" was found")
         }
-        items[if (fromEnd) matches - 1 else 0].performClick()
+        val item = items[if (fromEnd) matches - 1 else 0]
+        item.performScrollTo()
+        item.performClick()
         compose.waitForIdle()
         dismissExternalAccountPicker()
     }
