@@ -37,20 +37,40 @@ class BaselineProfileGenerator {
     @get:Rule
     val rule = BaselineProfileRule()
 
+    /**
+     * Startup only, and the only generator that feeds the startup profile.
+     *
+     * The startup profile drives dex layout, so it pays off only while it describes what a cold
+     * start actually touches. Folding the journeys below into it would move search, scrolling and
+     * the drawer into the primary dex region and push genuine startup classes out of it, which
+     * works against the metric the profile exists to improve.
+     */
     @Test
-    fun generate() {
-        // The application id for the running build variant is read from the instrumentation arguments.
-        val packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-            ?: throw Exception("targetAppId not passed as instrumentation runner arg")
-
+    fun startup() {
+        val packageName = targetPackageName()
         rule.collect(
             packageName = packageName,
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true
         ) {
-            // Startup, then the journeys that dominate real usage: filtering the watch list,
-            // scrolling it, and moving between the top level screens through the drawer.
+            pressHome()
+            startActivityAndWait()
+            AppWatcherJourney(scope = this, packageName = packageName).awaitWatchList()
+        }
+    }
+
+    /**
+     * The journeys that dominate real usage, collected into the baseline profile but deliberately
+     * kept out of the startup profile.
+     */
+    @Test
+    fun criticalUserJourneys() {
+        val packageName = targetPackageName()
+        rule.collect(
+            packageName = packageName,
+            includeInStartupProfile = false
+        ) {
             pressHome()
             startActivityAndWait()
 
@@ -63,4 +83,9 @@ class BaselineProfileGenerator {
             journey.visitDrawerScreen(titleResName = "navdrawer_item_wishlist")
         }
     }
+
+    /** The application id for the running build variant, passed as an instrumentation argument. */
+    private fun targetPackageName(): String =
+        InstrumentationRegistry.getArguments().getString("targetAppId")
+            ?: throw Exception("targetAppId not passed as instrumentation runner arg")
 }
