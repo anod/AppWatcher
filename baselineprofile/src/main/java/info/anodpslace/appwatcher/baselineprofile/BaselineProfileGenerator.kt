@@ -9,9 +9,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * This test class generates a basic startup baseline profile for the target package.
+ * This test class generates the startup and critical user journey baseline profile for the app.
  *
- * We recommend you start with this but add important user flows to the profile to improve their performance.
  * Refer to the [baseline profile documentation](https://d.android.com/topic/performance/baselineprofiles)
  * for more information.
  *
@@ -38,31 +37,55 @@ class BaselineProfileGenerator {
     @get:Rule
     val rule = BaselineProfileRule()
 
+    /**
+     * Startup only, and the only generator that feeds the startup profile.
+     *
+     * The startup profile drives dex layout, so it pays off only while it describes what a cold
+     * start actually touches. Folding the journeys below into it would move search, scrolling and
+     * the drawer into the primary dex region and push genuine startup classes out of it, which
+     * works against the metric the profile exists to improve.
+     */
     @Test
-    fun generate() {
-        // The application id for the running build variant is read from the instrumentation arguments.
+    fun startup() {
+        val packageName = targetPackageName()
         rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = packageName,
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true
         ) {
-            // This block defines the app's critical user journey. Here we are interested in
-            // optimizing for app startup. But you can also navigate and scroll through your most important UI.
+            pressHome()
+            startActivityAndWait()
+            AppWatcherJourney(scope = this, packageName = packageName).awaitWatchList()
+        }
+    }
 
-            // Start default activity for your app
+    /**
+     * The journeys that dominate real usage, collected into the baseline profile but deliberately
+     * kept out of the startup profile.
+     */
+    @Test
+    fun criticalUserJourneys() {
+        val packageName = targetPackageName()
+        rule.collect(
+            packageName = packageName,
+            includeInStartupProfile = false
+        ) {
             pressHome()
             startActivityAndWait()
 
-            // TODO Write more interactions to optimize advanced journeys of your app.
-            // For example:
-            // 1. Wait until the content is asynchronously loaded
-            // 2. Scroll the feed content
-            // 3. Navigate to detail screen
-
-            // Check UiAutomator documentation for more information how to interact with the app.
-            // https://d.android.com/training/testing/other-components/ui-automator
+            val journey = AppWatcherJourney(scope = this, packageName = packageName)
+            journey.awaitWatchList()
+            journey.searchWatchList()
+            journey.scrollWatchList()
+            journey.visitDrawerScreen(titleResName = "navdrawer_item_add")
+            journey.visitDrawerScreen(titleResName = "installed")
+            journey.visitDrawerScreen(titleResName = "navdrawer_item_wishlist")
         }
     }
+
+    /** The application id for the running build variant, passed as an instrumentation argument. */
+    private fun targetPackageName(): String =
+        InstrumentationRegistry.getArguments().getString("targetAppId")
+            ?: throw Exception("targetAppId not passed as instrumentation runner arg")
 }

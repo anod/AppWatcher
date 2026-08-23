@@ -92,7 +92,7 @@ fun EditTagDialog(tag: Tag, onDismissRequest: (tagId: Int) -> Unit) {
 }
 
 @Composable
-private fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit) {
+internal fun EditTagScreen(screenState: EditTagState, onEvent: (EditTagEvent) -> Unit) {
     Surface {
         Column(
             modifier = Modifier

@@ -1,4 +1,7 @@
 import com.google.gms.googleservices.GoogleServicesTask
+import org.gradle.api.artifacts.component.ModuleComponentSelector
+import org.gradle.api.artifacts.result.ResolvedComponentResult
+import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -19,6 +22,8 @@ kotlin {
         jvmTarget = JvmTarget.JVM_11
     }
 }
+
+val composeMaterial3Version = libs.versions.compose.material3.get()
 
 android {
     compileSdk = 37
@@ -97,10 +102,33 @@ android {
         schemaDirectory("$projectDir/schemas")
     }
 
+    testOptions {
+        unitTests {
+            // Required by Material3TextFieldSurfacesTest: Robolectric needs the merged resources
+            // to resolve stringResource() while composing the app's TextField surfaces.
+            isIncludeAndroidResources = true
+        }
+    }
+
     namespace = "com.anod.appwatcher"
 }
 
 dependencies {
+    constraints {
+        // play-services-oss-licenses hard-requires an androidx.compose.material3 1.5.0 alpha for its
+        // Compose licenses UI, and a Compose BOM constraint does not outrank a hard requirement. Keep
+        // the catalog pin strict so a future transitive bump fails dependency resolution instead of
+        // silently shipping a material3 that is ABI-skewed against the BOM's compose-foundation.
+        implementation("androidx.compose.material3:material3") {
+            version { strictly(composeMaterial3Version) }
+            because("material3 must stay aligned with the compose-foundation version from the Compose BOM")
+        }
+        implementation("androidx.compose.material3:material3-window-size-class") {
+            version { strictly(composeMaterial3Version) }
+            because("material3 must stay aligned with the compose-foundation version from the Compose BOM")
+        }
+    }
+
     implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))
     ktlintRuleset(libs.ktlint.compose)
@@ -173,6 +201,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
@@ -214,4 +244,120 @@ afterEvaluate {
             googleServicesJsonFiles.set(releaseGoogleServicesFile.map { listOf(it) })
         }
     }
+}
+
+/**
+ * Guards the invariant that `strictly` cannot express: that the resolved compose-material3 was
+ * actually built against the compose-foundation the Compose BOM resolves.
+ *
+ * material3 1.5.0-alpha17 declares compose-foundation 1.11.x. Paired with the BOM's foundation
+ * 1.12.0 that ABI skew crashed every Material3 TextField at measure time. `strictly` stops an
+ * external dependency from overriding the pin; this stops the pin itself from being moved to an
+ * alpha built against a different foundation minor line.
+ */
+abstract class VerifyComposeMaterial3Alignment : DefaultTask() {
+
+    @get:Input
+    abstract val rootComponent: Property<ResolvedComponentResult>
+
+    @get:Input
+    abstract val expectedMaterial3Version: Property<String>
+
+    @get:Input
+    abstract val skip: Property<Boolean>
+
+    @TaskAction
+    fun verify() {
+        if (skip.get()) {
+            logger.lifecycle("compose-material3 alignment check skipped via -PskipComposeVersionCheck")
+            return
+        }
+
+        val components = collectComponents()
+        val material3 = components.selectAny("androidx.compose.material3", "material3-android", "material3")
+            ?: throw GradleException("androidx.compose.material3 is not on the runtime classpath")
+        val foundation = components.selectAny("androidx.compose.foundation", "foundation-android", "foundation")
+            ?: throw GradleException("androidx.compose.foundation is not on the runtime classpath")
+
+        val selectedMaterial3 = material3.moduleVersion!!.version
+        val expected = expectedMaterial3Version.get()
+        if (selectedMaterial3 != expected) {
+            throw GradleException(report("compose-material3 was overridden by another dependency.", selectedMaterial3, expected, null, null))
+        }
+
+        val declaredFoundation = material3.dependencies
+            .filterIsInstance<ResolvedDependencyResult>()
+            .mapNotNull { it.requested as? ModuleComponentSelector }
+            .firstOrNull { it.group == "androidx.compose.foundation" && (it.module == "foundation" || it.module == "foundation-android") }
+            ?.version
+            ?: return
+
+        val resolvedFoundation = foundation.moduleVersion!!.version
+        if (declaredFoundation.minorLine() != resolvedFoundation.minorLine()) {
+            throw GradleException(
+                report(
+                    "compose-material3 is ABI-skewed against compose-foundation.",
+                    selectedMaterial3,
+                    expected,
+                    declaredFoundation,
+                    resolvedFoundation
+                )
+            )
+        }
+    }
+
+    private fun report(headline: String, selectedMaterial3: String, expected: String, declaredFoundation: String?, resolvedFoundation: String?): String = buildString {
+        appendLine(headline)
+        appendLine()
+        appendLine("  androidx.compose.material3:material3   -> $selectedMaterial3 (expected $expected)")
+        if (declaredFoundation != null) {
+            appendLine("    declares compose-foundation          -> $declaredFoundation")
+            appendLine("  androidx.compose.foundation:foundation -> $resolvedFoundation")
+        }
+        appendLine()
+        appendLine("material3 must be built against the same compose-foundation minor line the Compose BOM")
+        appendLine("resolves. Otherwise every Material3 TextField crashes at measure time with")
+        appendLine("NoSuchElementException in TextFieldMeasurePolicy, or AbstractMethodError on")
+        appendLine("androidx.compose.foundation.style.CustomStyle.applyStyle. This compiles cleanly, so it")
+        appendLine("only shows up on device.")
+        appendLine()
+        appendLine("Known offender: com.google.android.gms:play-services-oss-licenses hard-requires a")
+        appendLine("material3 1.5.0 alpha for its Compose licenses UI, and a BOM constraint does not")
+        appendLine("outrank a hard requirement. Update the `compose-material3` pin in")
+        appendLine("gradle/libs.versions.toml to an alpha built against the resolved compose-foundation.")
+        appendLine()
+        append("Bypass with -PskipComposeVersionCheck=true (intended for reproducing the failure only).")
+    }
+
+    private fun collectComponents(): Map<String, ResolvedComponentResult> {
+        val found = LinkedHashMap<String, ResolvedComponentResult>()
+        val seen = HashSet<String>()
+        val queue = ArrayDeque<ResolvedComponentResult>()
+        queue.add(rootComponent.get())
+        while (queue.isNotEmpty()) {
+            val component = queue.removeFirst()
+            if (!seen.add(component.id.displayName)) {
+                continue
+            }
+            component.moduleVersion?.let { found.putIfAbsent("${it.group}:${it.name}", component) }
+            component.dependencies.filterIsInstance<ResolvedDependencyResult>().forEach { queue.add(it.selected) }
+        }
+        return found
+    }
+
+    private fun Map<String, ResolvedComponentResult>.selectAny(group: String, vararg names: String): ResolvedComponentResult? = names.firstNotNullOfOrNull { this["$group:$it"] }
+
+    private fun String.minorLine(): String = substringBefore('-').split('.').take(2).joinToString(".")
+}
+
+val verifyComposeMaterial3Alignment = tasks.register<VerifyComposeMaterial3Alignment>("verifyComposeMaterial3Alignment") {
+    group = "verification"
+    description = "Fails if compose-material3 drifts off its pin or off the Compose BOM's compose-foundation."
+    rootComponent.set(configurations.named("debugRuntimeClasspath").flatMap { it.incoming.resolutionResult.rootComponent })
+    expectedMaterial3Version.set(composeMaterial3Version)
+    skip.set(providers.gradleProperty("skipComposeVersionCheck").map { it.toBoolean() }.orElse(false))
+}
+
+tasks.named("check") {
+    dependsOn(verifyComposeMaterial3Alignment)
 }

@@ -28,12 +28,74 @@ jobs:
       - name: Checkout submodule
         run: git submodule update --init --recursive
 
+      # Fails when a transitive dependency drags in a compose-material3 that is built against a
+      # different compose-foundation than the one the Compose BOM resolves. That ABI skew crashes
+      # every Material3 TextField at measure time but still compiles, so it needs its own gate.
+      - name: Verify Compose dependency alignment
+        run: ./gradlew :app:verifyComposeMaterial3Alignment
+
       - name: Unit Test
         run: ./gradlew testDebugUnitTest
-        continue-on-error: true # Allow steps to continue even with test failures
 
       - name: Publish test result
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
           path: app/build/reports/tests/testDebugUnitTest/
+
+  # Advisory signal only. These tests drive real screens end to end, so they depend on the Play
+  # account picker and on network calls that neither the runner nor this repository controls. The
+  # blocking gates for the Material3 ABI skew are the two steps above.
+  #
+  # continue-on-error sits on the test step rather than on the job: a job level flag still reports a
+  # failed check run, which leaves the pull request mergebox permanently unstable and blocks merges
+  # on a signal that is meant to be advisory. On the step it keeps the red cross and the uploaded
+  # report while letting the job conclude successfully.
+  instrumentation:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Required files
+        run: echo $GOOGLE_SERVICES_JSON > app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GoogleServicesJson }}
+
+      - name: Checkout submodule
+        run: git submodule update --init --recursive
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Pinned only so the emulator geometry is deterministic and matches the phone these tests were
+      # written against. It is not what fixes them: the drawer is a scrolling Column, so every item
+      # is composed regardless of screen height, and the earlier failure was the drawer animation
+      # not having settled when the assertion sampled the tree.
+      - name: Instrumentation Test
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          script: ./gradlew :app:connectedDebugAndroidTest
+
+      - name: Publish instrumentation test result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: InstrumentationTestResults
+          path: app/build/reports/androidTests/connected/

@@ -1,47 +1,37 @@
 package com.anod.appwatcher
 
-import android.content.Context
-import android.content.SharedPreferences
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
-import org.junit.AfterClass
-import org.junit.Assert.fail
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AppWatcherSmokeTest {
-    @get:Rule
-    val compose = createAndroidComposeRule<AppWatcherActivity>()
+    private val compose = createAndroidComposeRule<AppWatcherActivity>()
+    private val support = AppWatcherUiTestSupport(compose)
 
-    private val instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val targetContext = instrumentation.targetContext
-    private val device = UiDevice.getInstance(instrumentation)
+    @get:Rule
+    val rules: RuleChain = RuleChain
+        .outerRule(StableStartupPreferencesRule())
+        .around(compose)
 
     @Before
     fun waitForApp() {
-        dismissExternalAccountPicker()
-        waitForText(text(R.string.app_name))
+        support.awaitAppReady()
     }
 
     @Test
-    fun mainFlow_smokeTest() {
+    fun mainFlow_smokeTest(): Unit = with(support) {
         assertTextExists(text(R.string.app_name))
 
         compose.onNodeWithContentDescription(text(R.string.menu_filter)).performClick()
@@ -64,11 +54,7 @@ class AppWatcherSmokeTest {
         assertTextExists(text(R.string.play_store_my_apps))
         device.pressBack()
 
-        openMenuContaining(
-            contentDescription = text(R.string.menu),
-            expectedText = text(R.string.navdrawer_item_settings),
-            preferLast = false
-        )
+        openDrawer()
         assertTextExists(text(R.string.navdrawer_item_add))
         assertTextExists(text(R.string.installed))
         assertTextExists(text(R.string.navdrawer_item_wishlist))
@@ -88,97 +74,5 @@ class AppWatcherSmokeTest {
 
         compose.onNodeWithContentDescription(text(R.string.back)).performClick()
         assertTextExists(text(R.string.app_name))
-    }
-
-    private fun openMenuContaining(contentDescription: String, expectedText: String, preferLast: Boolean) {
-        val nodes = compose.onAllNodesWithContentDescription(contentDescription).fetchSemanticsNodes()
-        val indices = nodes.indices.toList().let { if (preferLast) it.reversed() else it }
-        for (index in indices) {
-            compose.onAllNodesWithContentDescription(contentDescription)[index].performClick()
-            compose.waitForIdle()
-            if (hasVisibleText(expectedText)) {
-                return
-            }
-            device.pressBack()
-            compose.waitForIdle()
-        }
-        fail("No menu with item \"$expectedText\" was found")
-    }
-
-    private fun waitForText(text: String, timeoutMillis: Long = 10_000) {
-        compose.waitUntil(timeoutMillis) {
-            compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
-    private fun hasVisibleText(text: String): Boolean = compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
-
-    private fun assertTextExists(text: String) {
-        compose.onAllNodesWithText(text).fetchSemanticsNodes().also { nodes ->
-            if (nodes.isEmpty()) {
-                fail("No node with text \"$text\" was found")
-            }
-        }
-    }
-
-    private fun text(resId: Int): String = targetContext.getString(resId)
-
-    private fun dismissExternalAccountPicker() {
-        val targetPackage = targetContext.packageName
-        repeat(3) {
-            if (device.currentPackageName != targetPackage || device.hasObject(By.text(text(R.string.choose_an_account)))) {
-                device.pressBack()
-                device.wait(Until.hasObject(By.pkg(targetPackage)), 5_000)
-            }
-        }
-    }
-
-    companion object {
-        private const val PREFS_NAME = "WatcherPrefs"
-        private const val DEVICE_PREFS_NAME = "DeviceRegistration"
-        private lateinit var preferences: SharedPreferences
-        private lateinit var devicePreferences: SharedPreferences
-        private var originalPrefs: Map<String, Any?> = emptyMap()
-        private var originalDevicePrefs: Map<String, Any?> = emptyMap()
-
-        @JvmStatic
-        @BeforeClass
-        fun configureStableStartupState() {
-            val context = InstrumentationRegistry.getInstrumentation().targetContext
-            preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, Context.MODE_PRIVATE)
-            originalPrefs = HashMap<String, Any?>(preferences.all)
-            originalDevicePrefs = HashMap<String, Any?>(devicePreferences.all)
-            devicePreferences.edit().clear().commit()
-            preferences.edit()
-                .putInt("update_frequency", 0)
-                .putBoolean("crash-reports", false)
-                .commit()
-        }
-
-        @JvmStatic
-        @AfterClass
-        fun restoreStartupState() {
-            restorePreferences(preferences, originalPrefs)
-            restorePreferences(devicePreferences, originalDevicePrefs)
-        }
-
-        private fun restorePreferences(
-            preferences: SharedPreferences,
-            values: Map<String, Any?>
-        ) {
-            val editor = preferences.edit().clear()
-            values.forEach { (key, value) ->
-                when (value) {
-                    is Boolean -> editor.putBoolean(key, value)
-                    is Float -> editor.putFloat(key, value)
-                    is Int -> editor.putInt(key, value)
-                    is Long -> editor.putLong(key, value)
-                    is String -> editor.putString(key, value)
-                    is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
-                }
-            }
-            editor.commit()
-        }
     }
 }
