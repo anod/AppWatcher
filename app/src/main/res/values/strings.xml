@@ -51,6 +51,7 @@
     <string name="failed_to_read_file">Cannot read file</string>
     <string name="file_not_exist">File not exist</string>
     <string name="failed_to_write_file">Failed to write into file</string>
+    <string name="no_document_provider">No file manager available on this device</string>
     <string name="import_export">Import</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
     <string name="new_updates">New updates</string>
