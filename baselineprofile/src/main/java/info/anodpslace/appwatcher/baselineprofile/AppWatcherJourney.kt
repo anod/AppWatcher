@@ -146,7 +146,6 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
      * Back is only meaningful for a window stacked on top of the app. Once the app is gone from the
      * foreground altogether no number of back presses brings it forward, so pressing again just
      * burns the timeout and then loses the rest of the iteration to a restart. Relaunch instead.
-     * [scope] is started directly rather than through [restart], which would recurse back into here.
      */
     private fun dismissExternalWindow() {
         repeat(MAX_ATTEMPTS) {
@@ -154,6 +153,8 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
                 return
             }
             if (device.currentPackageName == device.launcherPackageName) {
+                // Deliberately not restart(), which would recurse: restart() calls awaitWatchList(),
+                // and awaitWatchList() calls this. Start the activity directly instead.
                 scope.startActivityAndWait()
                 return
             }
