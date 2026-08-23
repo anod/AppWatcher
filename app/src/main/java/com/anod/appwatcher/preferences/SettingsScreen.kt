@@ -1,9 +1,11 @@
 package com.anod.appwatcher.preferences
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,6 +58,7 @@ import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.compose.PreferencesScreen
 import info.anodsplace.compose.key
 import info.anodsplace.framework.content.CreateDocument
+import info.anodsplace.framework.content.ShowToastActionDefaults
 import info.anodsplace.framework.content.showToast
 import info.anodsplace.framework.content.startActivity
 import info.anodsplace.permissions.AppPermissions
@@ -139,6 +142,7 @@ private fun onExportResult(result: Int, context: Context) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) -> Unit, prefs: Preferences = KoinJavaComponent.getKoin().get()) {
+    val context = LocalContext.current
     val exportDocumentRequest = rememberLauncherForActivityResult(contract = CreateDocument("application/json")) { uri ->
         if (uri == null) {
             AppLog.d("Create document cancelled")
@@ -227,13 +231,14 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                 },
                 onClick = { item ->
                     when (item.key) {
-                        "export" -> exportDocumentRequest.launch(
+                        "export" -> exportDocumentRequest.launchOrToast(
+                            context,
                             CreateDocument.Args(
                                 "appwatcher-" + DbBackupManager.generateFileName(),
                                 Uri.parse(DbBackupManager.defaultBackupDir.absolutePath),
                             )
                         )
-                        "import" -> importDocumentRequest.launch(arrayOf("application/json", "text/plain", "*/*"))
+                        "import" -> importDocumentRequest.launchOrToast(context, arrayOf("application/json", "text/plain", "*/*"))
                         "licenses" -> onEvent(SettingsViewEvent.OssLicenses)
                         "user-log" -> onEvent(SettingsViewEvent.OpenUserLog)
                         "refresh-history" -> onEvent(SettingsViewEvent.OpenRefreshHistory)
@@ -242,6 +247,19 @@ fun SettingsScreen(screenState: SettingsViewState, onEvent: (SettingsViewEvent) 
                 }
             )
         }
+    }
+}
+
+/**
+ * Some devices ship without a Storage Access Framework provider, so launching a document
+ * picker throws instead of opening one. Tell the user rather than crashing.
+ */
+private fun <I> ActivityResultLauncher<I>.launchOrToast(context: Context, input: I) {
+    try {
+        launch(input)
+    } catch (e: ActivityNotFoundException) {
+        AppLog.e(e)
+        context.showToast(ShowToastActionDefaults(resId = R.string.no_document_provider))
     }
 }
 
