@@ -29,6 +29,14 @@ import org.junit.runner.RunWith
  * When using this class to generate a baseline profile, only API 33+ or rooted API 28+ are supported.
  *
  * The minimum required version of androidx.benchmark to generate a baseline profile is 1.2.0.
+ *
+ * Expect `baseline-prof.txt` and `startup-prof.txt` to differ. Through build 17107 a single
+ * collector wrote both, so git stored them as one blob and the startup profile carried nothing
+ * the baseline profile did not -- dex layout had nothing to differentiate on. [startup] now feeds
+ * the startup profile alone. After regenerating, `git ls-tree` on the profile directory must show
+ * two distinct blob ids where every release through 17107 showed one: baseline-prof grows by
+ * several thousand lines while startup-prof barely moves. That diff is the fix working, not a
+ * broken generator.
  **/
 @RunWith(AndroidJUnit4::class)
 @LargeTest
