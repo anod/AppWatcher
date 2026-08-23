@@ -9,9 +9,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * This test class generates a basic startup baseline profile for the target package.
+ * This test class generates the startup and critical user journey baseline profile for the app.
  *
- * We recommend you start with this but add important user flows to the profile to improve their performance.
  * Refer to the [baseline profile documentation](https://d.android.com/topic/performance/baselineprofiles)
  * for more information.
  *
@@ -41,28 +40,27 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         // The application id for the running build variant is read from the instrumentation arguments.
+        val packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
+            ?: throw Exception("targetAppId not passed as instrumentation runner arg")
+
         rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = packageName,
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true
         ) {
-            // This block defines the app's critical user journey. Here we are interested in
-            // optimizing for app startup. But you can also navigate and scroll through your most important UI.
-
-            // Start default activity for your app
+            // Startup, then the journeys that dominate real usage: filtering the watch list,
+            // scrolling it, and moving between the top level screens through the drawer.
             pressHome()
             startActivityAndWait()
 
-            // TODO Write more interactions to optimize advanced journeys of your app.
-            // For example:
-            // 1. Wait until the content is asynchronously loaded
-            // 2. Scroll the feed content
-            // 3. Navigate to detail screen
-
-            // Check UiAutomator documentation for more information how to interact with the app.
-            // https://d.android.com/training/testing/other-components/ui-automator
+            val journey = AppWatcherJourney(scope = this, packageName = packageName)
+            journey.awaitWatchList()
+            journey.searchWatchList()
+            journey.scrollWatchList()
+            journey.visitDrawerScreen(titleResName = "navdrawer_item_add")
+            journey.visitDrawerScreen(titleResName = "installed")
+            journey.visitDrawerScreen(titleResName = "navdrawer_item_wishlist")
         }
     }
 }
