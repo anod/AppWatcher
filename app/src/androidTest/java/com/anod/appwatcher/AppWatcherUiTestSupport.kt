@@ -1,6 +1,7 @@
 package com.anod.appwatcher
 
 import android.app.Instrumentation
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
@@ -50,13 +51,20 @@ class AppWatcherUiTestSupport(private val compose: ComposeTestRule) {
         }
     }
 
+    /**
+     * Clicks each node carrying [contentDescription] until one of them reveals [expectedText].
+     *
+     * The menu has to be recognised by what it opens rather than by its position, because the top
+     * bar carries two identically described buttons. Waiting for the text instead of sampling it
+     * once matters on a software rendered emulator, where the drawer needs several frames to settle
+     * and a single check reports the wrong button as the wrong one.
+     */
     fun openMenuContaining(contentDescription: String, expectedText: String, preferLast: Boolean) {
         val nodes = compose.onAllNodesWithContentDescription(contentDescription).fetchSemanticsNodes()
         val indices = nodes.indices.toList().let { if (preferLast) it.reversed() else it }
         for (index in indices) {
             compose.onAllNodesWithContentDescription(contentDescription)[index].performClick()
-            compose.waitForIdle()
-            if (hasVisibleText(expectedText)) {
+            if (awaitText(expectedText, MENU_TIMEOUT_MILLIS)) {
                 return
             }
             device.pressBack()
@@ -168,6 +176,14 @@ class AppWatcherUiTestSupport(private val compose: ComposeTestRule) {
         }
     }
 
+    /** Bounded wait that reports whether [text] appeared rather than failing the test. */
+    private fun awaitText(text: String, timeoutMillis: Long): Boolean = try {
+        compose.waitUntil(timeoutMillis) { hasVisibleText(text) }
+        true
+    } catch (_: ComposeTimeoutException) {
+        false
+    }
+
     private fun searchFieldCount(): Int = try {
         compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().size
     } catch (e: IllegalStateException) {
@@ -178,6 +194,9 @@ class AppWatcherUiTestSupport(private val compose: ComposeTestRule) {
 
     private companion object {
         const val DEFAULT_TIMEOUT_MILLIS = 10_000L
+
+        // Short, because every candidate button that does not open the wanted menu costs this wait.
+        const val MENU_TIMEOUT_MILLIS = 3_000L
         const val MAX_BACK_PRESSES = 6
     }
 }

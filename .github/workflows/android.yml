@@ -47,10 +47,14 @@ jobs:
   # Advisory signal only. These tests drive real screens end to end, so they depend on the Play
   # account picker and on network calls that neither the runner nor this repository controls. The
   # blocking gates for the Material3 ABI skew are the two steps above.
+  #
+  # continue-on-error sits on the test step rather than on the job: a job level flag still reports a
+  # failed check run, which leaves the pull request mergebox permanently unstable and blocks merges
+  # on a signal that is meant to be advisory. On the step it keeps the red cross and the uploaded
+  # report while letting the job conclude successfully.
   instrumentation:
 
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v3
@@ -75,12 +79,17 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # Without an explicit profile avdmanager falls back to the system image default, which is a
+      # much shorter screen than any current phone. The navigation drawer then renders its items
+      # below the fold, where Compose has not composed them and the tests cannot find them.
       - name: Instrumentation Test
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
           target: google_apis
           arch: x86_64
+          profile: pixel_6
           script: ./gradlew :app:connectedDebugAndroidTest
 
       - name: Publish instrumentation test result
