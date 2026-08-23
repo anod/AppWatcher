@@ -102,6 +102,14 @@ android {
         schemaDirectory("$projectDir/schemas")
     }
 
+    testOptions {
+        unitTests {
+            // Required by Material3TextFieldSurfacesTest: Robolectric needs the merged resources
+            // to resolve stringResource() while composing the app's TextField surfaces.
+            isIncludeAndroidResources = true
+        }
+    }
+
     namespace = "com.anod.appwatcher"
 }
 
@@ -193,6 +201,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
