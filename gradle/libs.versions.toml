@@ -12,6 +12,9 @@ compose-bom = "2026.08.00"
 # play-services-oss-licenses pulls in an androidx.compose.material3 1.5.0 alpha for its licenses UI.
 # Pin it explicitly so material3 matches the compose-foundation version from the BOM (1.12.0);
 # older alphas were built against foundation 1.11.x and break every Material3 TextField at runtime.
+# Changing this pin requires re-checking the foundation pairing: pick an alpha built against the
+# same compose-foundation minor line the BOM resolves. :app enforces both halves of this via a
+# `strictly` constraint plus the verifyComposeMaterial3Alignment task.
 compose-material3 = "1.5.0-alpha26"
 core-splashscreen = "1.2.0"
 core-ktx = "1.19.0"
