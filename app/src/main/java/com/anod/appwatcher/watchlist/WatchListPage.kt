@@ -15,10 +15,12 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -233,7 +235,11 @@ fun WatchListSectionItem(
             appIconLoader = appIconLoader
         )
 
-        is SectionItem.Recent -> RecentItem(onEvent = onEvent, recentApps = recentlyInstalledApps)
+        is SectionItem.Recent -> RecentItem(
+            onEvent = onEvent,
+            recentApps = recentlyInstalledApps,
+            appIconLoader = appIconLoader
+        )
         is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
     }
 }
@@ -478,6 +484,7 @@ private fun RecentItemRow(
         modifier = Modifier
             .defaultMinSize(minHeight = 96.dp)
             .fillMaxWidth()
+            .height(IntrinsicSize.Max)
             .padding(start = 6.dp, end = 8.dp)
             .horizontalScroll(scrollState)
     ) {
@@ -513,6 +520,7 @@ private fun RecentItemAppCard(
 ) {
     Card(
         modifier = Modifier
+            .fillMaxHeight()
             .defaultMinSize(minHeight = 116.dp)
             .width(96.dp)
             .padding(start = 2.dp, end = 2.dp, top = 2.dp, bottom = 2.dp)
