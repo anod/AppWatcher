@@ -39,6 +39,7 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.playstore.AppDetailsFilter
 import java.io.IOException
+import java.time.Instant
 import java.util.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +66,13 @@ class UpdateCheck(
     private val koin: Koin
 ) {
 
-    class SyncResult(val success: Boolean, val updates: List<UpdatedApp>, val checked: Int, val unavailable: Int)
+    class SyncResult(
+        val success: Boolean,
+        val updates: List<UpdatedApp>,
+        val checked: Int,
+        val unavailable: Int,
+        val failure: Throwable? = null
+    )
 
     private data class PendingAppUpdate(
         val rowId: Long,
@@ -136,9 +143,9 @@ class UpdateCheck(
                 `package` = context.actual.packageName
             }
             context.sendBroadcast(startIntent)
-
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
+            AppLog.i("Play Store update check started (syncId=${schedule.id})", "UpdateCheck")
 
             try {
                 doSync(lastUpdatesViewed)
@@ -147,8 +154,7 @@ class UpdateCheck(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                AppLog.e("Error during synchronization ${e.message}", e)
-                SyncResult(false, listOf(), 0, 0)
+                SyncResult(false, listOf(), 0, 0, e)
             }
         } catch (e: AuthTokenStartIntent) {
             AppLog.e("AuthToken: require interactive sign in")
@@ -159,21 +165,30 @@ class UpdateCheck(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            AppLog.e("Play Store session refresh or sync setup failed: ${e.message}", e)
-            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED, manualSync)
+            return@withContext finishFailedSyncWithDiagnostics(
+                schedule = schedule,
+                status = Schedule.STATUS_FAILED,
+                manualSync = manualSync,
+                stage = SyncFailureStage.SESSION_INITIALIZATION,
+                error = e
+            )
         }
 
         if (syncResult.success) {
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
-            return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED, manualSync)
+            return@withContext finishFailedSyncWithDiagnostics(
+                schedule = schedule,
+                status = Schedule.STATUS_FAILED,
+                manualSync = manualSync,
+                stage = SyncFailureStage.PLAY_STORE_UPDATE_CHECK,
+                error = checkNotNull(syncResult.failure)
+            )
         }
 
         val updatedApps: List<UpdatedApp> = syncResult.updates
         if (updatedApps.isNotEmpty() && updatedApps.first().uploadTime == 0.toLong()) {
-            val uploadDate = updatedApps.first().uploadDate
-            val locale = Locale.getDefault()
-            AppLog.e("Cannot parse date '$uploadDate' for locale '$locale'")
+            AppLog.e("Cannot parse update upload date")
         }
 
         val now = System.currentTimeMillis()
@@ -219,7 +234,7 @@ class UpdateCheck(
         ) { localApps ->
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
-            AppLog.d("Sending chunk... $docIds")
+            AppLog.d("Sending chunk of ${docIds.size} apps")
             val documents = dfeApi.details(
                 docIds,
                 includeDetails = true,
@@ -288,7 +303,7 @@ class UpdateCheck(
                 throw e
             } catch (e: Exception) {
                 AppLog.w(
-                    "Cannot fetch release details for ${chunk.size} apps: ${e.message}",
+                    "Cannot fetch release details for ${chunk.size} apps: ${e.syncFailureDescription()}",
                     "UpdateCheck"
                 )
                 continue
@@ -316,8 +331,7 @@ class UpdateCheck(
             return
         }
         AppLog.i(
-            "Clearing update status for ${staleApps.size} apps missing from the update check: " +
-                staleApps.joinToString { it.app.packageName },
+            "Clearing update status for ${staleApps.size} apps missing from the update check",
             "UpdateCheck"
         )
         for (item in staleApps) {
@@ -330,7 +344,30 @@ class UpdateCheck(
         status: Int,
         manualSync: Boolean
     ): Int {
-        SchedulesTable.Queries.save(schedule.finish(status), database)
+        saveFailedSchedule(schedule, status)
+        return completeFailedSync(manualSync)
+    }
+
+    private suspend fun finishFailedSyncWithDiagnostics(
+        schedule: Schedule,
+        status: Int,
+        manualSync: Boolean,
+        stage: SyncFailureStage,
+        error: Throwable
+    ): Int {
+        val failedSchedule = saveFailedSchedule(schedule, status)
+        val failure = SyncFailureException(failedSchedule, stage, error)
+        AppLog.e(checkNotNull(failure.message), "UpdateCheck", failure)
+        return completeFailedSync(manualSync)
+    }
+
+    private suspend fun saveFailedSchedule(schedule: Schedule, status: Int): Schedule {
+        val failedSchedule = schedule.finish(status)
+        SchedulesTable.Queries.save(failedSchedule, database)
+        return failedSchedule
+    }
+
+    private suspend fun completeFailedSync(manualSync: Boolean): Int {
         performMaintenance(manualSync, System.currentTimeMillis())
         return -1
     }
@@ -431,7 +468,7 @@ class UpdateCheck(
             .filterNot { it in appliedRowIds }
         if (skippedRowIds.isNotEmpty()) {
             AppLog.w(
-                "Skipped app rows changed during synchronization: ${skippedRowIds.joinToString()}",
+                "Skipped ${skippedRowIds.size} app rows changed during synchronization",
                 "UpdateCheck"
             )
         }
@@ -464,8 +501,7 @@ class UpdateCheck(
                 ""
             }
             AppLog.i(
-                "Suppressing unavailable update ${appDetails.packageName} " +
-                    "version ${appDetails.versionCode}, restriction " +
+                "Suppressing unavailable update version ${appDetails.versionCode}, restriction " +
                     "${marketDoc.availabilityRestriction}$reconciliation",
                 "UpdateCheck"
             )
@@ -477,8 +513,7 @@ class UpdateCheck(
         }
         if (reconcileVersionRollback(appDetails.versionCode, localApp, values)) {
             AppLog.w(
-                "Play Store version rolled back for ${localApp.packageName}: " +
-                    "${localApp.versionNumber} -> ${appDetails.versionCode}",
+                "Play Store version rolled back: ${localApp.versionNumber} -> ${appDetails.versionCode}",
                 "UpdateCheck"
             )
             updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
@@ -491,8 +526,7 @@ class UpdateCheck(
 
         if (appDetails.versionCode > localApp.versionNumber) {
             AppLog.i(
-                "Play update candidate ${appDetails.packageName}: installed " +
-                    "${installedInfo.versionCode}, cached ${localApp.versionNumber}, " +
+                "Play update candidate: installed ${installedInfo.versionCode}, cached ${localApp.versionNumber}, " +
                     "remote ${appDetails.versionCode}, restriction " +
                     (marketDoc.availabilityRestriction?.toString() ?: "absent"),
                 "UpdateCheck"
@@ -515,7 +549,7 @@ class UpdateCheck(
         var updatedApp: UpdatedApp? = null
         // Mark updated app as normal
         if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
-            AppLog.d("Set ${localApp.appId} update as viewed")
+            AppLog.d("Set update as viewed")
             values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
         } else if (localApp.status == App.STATUS_UPDATED) {
             // Application was previously updated
@@ -537,7 +571,7 @@ class UpdateCheck(
             if (updatedApps.isEmpty()) {
                 AppLog.i("No new updates", "UpdateCheck")
             } else {
-                AppLog.i("Updates: [${updatedApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]", "UpdateCheck")
+                AppLog.i("Updates found: ${updatedApps.size}", "UpdateCheck")
             }
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
@@ -547,7 +581,7 @@ class UpdateCheck(
             } else {
                 updatedApps
             }
-            AppLog.i("Notifying about: [${filteredApps.joinToString(",") { "${it.title} (${it.versionNumber})" }}]", "UpdateCheck")
+            AppLog.i("Notifying about ${filteredApps.size} updates", "UpdateCheck")
             database.schedules().updateNotified(schedule.id, filteredApps.size)
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
@@ -742,7 +776,7 @@ internal suspend fun <T, R> fetchAllChunks(
                     throw error
                 }
                 AppLog.w(
-                    "Retrying Play Store chunk after attempt $attempt: ${error.message}",
+                    "Retrying Play Store chunk after attempt $attempt: ${error.syncFailureDescription()}",
                     "UpdateCheck"
                 )
                 delay(initialRetryDelayMillis * attempt)
@@ -757,3 +791,54 @@ private fun isTransientChunkFailure(error: Exception): Boolean =
     error is IOException ||
         (error is DfeServerError &&
             (error.statusCode == 429 || error.statusCode?.let { it in 500..599 } == true))
+
+private fun Throwable.syncFailureDescription(): String {
+    val details = when (this) {
+        is DfeServerError -> " [statusCode=${statusCode ?: "none"}]"
+        else -> ""
+    }
+    return "${javaClass.name}$details"
+}
+
+internal enum class SyncFailureStage(val value: String) {
+    SESSION_INITIALIZATION("session-initialization"),
+    PLAY_STORE_UPDATE_CHECK("play-store-update-check")
+}
+
+internal class SyncFailureException(
+    schedule: Schedule,
+    stage: SyncFailureStage,
+    error: Throwable
+) : Exception(createMessage(schedule, stage, error)) {
+
+    init {
+        stackTrace = error.stackTrace
+    }
+
+    companion object {
+        private const val MAX_CAUSE_DEPTH = 8
+
+        private fun createMessage(
+            schedule: Schedule,
+            stage: SyncFailureStage,
+            error: Throwable
+        ): String {
+            val syncType = if (schedule.reason == Schedule.REASON_MANUAL) "manual" else "scheduled"
+            return "$syncType sync #${schedule.id} failed during ${stage.value}; " +
+                "started=${Instant.ofEpochMilli(schedule.start)}; " +
+                "durationMs=${schedule.finish - schedule.start}; " +
+                "causeChain=${error.describeChain()}"
+        }
+
+        private fun Throwable.describeChain(): String {
+            val causes = mutableListOf<Throwable>()
+            val seen = mutableSetOf<Throwable>()
+            var current: Throwable? = this
+            while (current != null && causes.size < MAX_CAUSE_DEPTH && seen.add(current)) {
+                causes.add(current)
+                current = current.cause
+            }
+            return causes.joinToString(" <- ", transform = Throwable::syncFailureDescription)
+        }
+    }
+}
