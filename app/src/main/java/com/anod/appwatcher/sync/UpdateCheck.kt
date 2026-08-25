@@ -165,7 +165,7 @@ class UpdateCheck(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            return@withContext finishFailedSync(
+            return@withContext finishFailedSyncWithDiagnostics(
                 schedule = schedule,
                 status = Schedule.STATUS_FAILED,
                 manualSync = manualSync,
@@ -177,7 +177,7 @@ class UpdateCheck(
         if (syncResult.success) {
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
-            return@withContext finishFailedSync(
+            return@withContext finishFailedSyncWithDiagnostics(
                 schedule = schedule,
                 status = Schedule.STATUS_FAILED,
                 manualSync = manualSync,
@@ -342,16 +342,32 @@ class UpdateCheck(
     private suspend fun finishFailedSync(
         schedule: Schedule,
         status: Int,
-        manualSync: Boolean,
-        stage: SyncFailureStage? = null,
-        error: Throwable? = null
+        manualSync: Boolean
     ): Int {
+        saveFailedSchedule(schedule, status)
+        return completeFailedSync(manualSync)
+    }
+
+    private suspend fun finishFailedSyncWithDiagnostics(
+        schedule: Schedule,
+        status: Int,
+        manualSync: Boolean,
+        stage: SyncFailureStage,
+        error: Throwable
+    ): Int {
+        val failedSchedule = saveFailedSchedule(schedule, status)
+        val failure = SyncFailureException(failedSchedule, stage, error)
+        AppLog.e(checkNotNull(failure.message), "UpdateCheck", failure)
+        return completeFailedSync(manualSync)
+    }
+
+    private suspend fun saveFailedSchedule(schedule: Schedule, status: Int): Schedule {
         val failedSchedule = schedule.finish(status)
         SchedulesTable.Queries.save(failedSchedule, database)
-        if (stage != null && error != null) {
-            val failure = SyncFailureException(failedSchedule, stage, error)
-            AppLog.e(checkNotNull(failure.message), "UpdateCheck", failure)
-        }
+        return failedSchedule
+    }
+
+    private suspend fun completeFailedSync(manualSync: Boolean): Int {
         performMaintenance(manualSync, System.currentTimeMillis())
         return -1
     }
