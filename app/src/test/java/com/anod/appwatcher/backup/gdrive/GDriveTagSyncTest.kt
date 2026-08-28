@@ -72,6 +72,18 @@ class GDriveTagSyncTest {
     }
 
     @Test
+    fun recreatedTagClearsDuplicateDeletedRows() = runBlocking {
+        val name = "Recreated"
+        db.tags().insertDeleted(name, 1)
+        db.tags().insertDeleted(name, 2)
+
+        val recreatedTag = insertTag(name)
+
+        assertEquals(listOf(recreatedTag), db.tags().load())
+        assertTrue(db.tags().loadDeletedNames().isEmpty())
+    }
+
+    @Test
     fun existingTagCreateAndUpdateMergeBehaviorIsPreserved() = runBlocking {
         val existingTag = insertTag("Existing")
         val staleRemote = writeDatabase()

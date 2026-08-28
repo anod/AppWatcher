@@ -82,6 +82,7 @@ interface TagsTable {
             val deletedTag = db.tags().loadDeletedByName(tag.name)
             if (deletedTag != null) {
                 db.tags().update(deletedTag.copy(color = tag.color, status = Tag.STATUS_NORMAL))
+                db.tags().deleteDeleted(tag.name)
                 deletedTag.id.toLong()
             } else {
                 db.tags().insert(tag.name, tag.color)
