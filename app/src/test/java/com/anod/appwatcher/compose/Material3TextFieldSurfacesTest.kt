@@ -59,7 +59,9 @@ class Material3TextFieldSurfacesTest {
         compose.setContent {
             AppTheme(updateSystemBars = false) {
                 EditTagScreen(
-                    screenState = EditTagState(tag = Tag(id = 0, name = "", color = 0xFFE91E63.toInt())),
+                    screenState = EditTagState(
+                        tag = Tag(id = 0, name = "", color = 0xFFE91E63.toInt(), status = Tag.STATUS_NORMAL)
+                    ),
                     onEvent = { }
                 )
             }

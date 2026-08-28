@@ -61,7 +61,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
             }
         }
 
-        val deletedTagNames = db.deletedTags().loadNames()
+        val deletedTagIds = db.tags().loadDeletedIds()
         val bytes = file.write(DbJsonWriter(), db)
         AppLog.i("Uploaded ${Formatter.formatShortFileSize(context.actual, bytes)}", "GDriveSync")
 
@@ -69,8 +69,8 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
-        val numDeletedTags = if (bytes > 0 && deletedTagNames.isNotEmpty()) {
-            db.deletedTags().delete(deletedTagNames)
+        val numDeletedTags = if (bytes > 0 && deletedTagIds.isNotEmpty()) {
+            db.tags().deleteDeleted(deletedTagIds)
         } else {
             0
         }
@@ -91,7 +91,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
 
             val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
             val currentTags = db.tags().load().associateBy { it.name }.toMutableMap()
-            val deletedTagNames = db.deletedTags().loadNames().toSet()
+            val deletedTagNames = db.tags().loadDeletedNames().toSet()
 
             val tagList = mutableListOf<Tag>()
             val tagApps = mutableMapOf<String, MutableList<String>>()
@@ -121,7 +121,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
                         if (tag.name !in deletedTagNames && !currentTags.containsKey(tag.name)) {
                             val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
                             if (rowId > 0) {
-                                currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
+                                currentTags[tag.name] = Tag(rowId, tag.name, tag.color, Tag.STATUS_NORMAL)
                             }
                         }
                     }

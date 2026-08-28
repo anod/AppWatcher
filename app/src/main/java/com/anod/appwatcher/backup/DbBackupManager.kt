@@ -97,7 +97,6 @@ class DbBackupManager(private val context: info.anodsplace.context.ApplicationCo
             db.apps().delete()
             db.tags().delete()
             db.appTags().delete()
-            db.deletedTags().deleteAll()
 
             result.apps.forEach { app ->
                 db.apps().insert(

@@ -27,17 +27,19 @@ data class Tag(
     val name: String,
     @ColumnInfo(name = TagsTable.Columns.COLOR)
     @param:ColorInt
-    val color: Int
+    val color: Int,
+    @ColumnInfo(name = TagsTable.Columns.STATUS, defaultValue = "0")
+    val status: Int
 ) : Parcelable {
 
     val isEmpty: Boolean
         get() = id == 0
 
     @Ignore
-    constructor(name: String) : this(0, name, DEFAULT_COLOR)
+    constructor(name: String) : this(0, name, DEFAULT_COLOR, STATUS_NORMAL)
 
     @Ignore
-    constructor(name: String, @ColorInt color: Int) : this(0, name, color)
+    constructor(name: String, @ColorInt color: Int) : this(0, name, color, STATUS_NORMAL)
 
     override fun equals(other: Any?): Boolean {
         if (other !is Tag) return false
@@ -45,14 +47,17 @@ data class Tag(
             id != other.id -> false
             name != other.name -> false
             color != other.color -> false
+            status != other.status -> false
             else -> true
         }
     }
 
-    override fun hashCode() = hashCodeOf(name, color)
+    override fun hashCode() = hashCodeOf(name, color, status)
 
     companion object {
+        const val STATUS_NORMAL = 0
+        const val STATUS_DELETED = 1
         const val DEFAULT_COLOR = 0xFF2196F3.toInt()
-        val empty = Tag(0, "", DEFAULT_COLOR)
+        val empty = Tag(0, "", DEFAULT_COLOR, STATUS_NORMAL)
     }
 }

@@ -8,7 +8,6 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.TagsTable
 import com.anod.appwatcher.database.entities.App
-import com.anod.appwatcher.database.entities.DeletedTag
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.Tag
 import java.io.StringReader
@@ -53,7 +52,8 @@ class GDriveTagSyncTest {
 
         assertTrue(db.tags().load().isEmpty())
         assertTrue(db.appTags().load().isEmpty())
-        assertEquals(listOf(tag.name), db.deletedTags().loadNames())
+        assertEquals(listOf(tag.name), db.tags().loadDeletedNames())
+        assertEquals(listOf(tag.id), db.tags().loadDeletedIds())
         assertTrue(DbJsonReader().read(StringReader(writeDatabase())).tags.isEmpty())
     }
 
@@ -87,24 +87,25 @@ class GDriveTagSyncTest {
 
     @Test
     fun uploadAcknowledgesOnlyTombstonesPresentBeforeWriting() = runBlocking {
-        db.deletedTags().insert(DeletedTag("Uploaded"))
-        val uploadedTagNames = db.deletedTags().loadNames()
-        db.deletedTags().insert(DeletedTag("Deleted during upload"))
+        val uploadedTagId = db.tags().insertDeleted("Uploaded", Tag.DEFAULT_COLOR).toInt()
+        val uploadedTagIds = db.tags().loadDeletedIds()
+        db.tags().insertDeleted("Deleted during upload", Tag.DEFAULT_COLOR)
 
-        db.deletedTags().delete(uploadedTagNames)
+        db.tags().deleteDeleted(uploadedTagIds)
 
-        assertEquals(listOf("Deleted during upload"), db.deletedTags().loadNames())
+        assertEquals(listOf(uploadedTagId), uploadedTagIds)
+        assertEquals(listOf("Deleted during upload"), db.tags().loadDeletedNames())
     }
 
     @Test
     fun renamingTagTombstonesOldNameAndClearsNewNameTombstone() = runBlocking {
         val tag = insertTag("Old")
-        db.deletedTags().insert(DeletedTag("New"))
+        db.tags().insertDeleted("New", Tag.DEFAULT_COLOR)
 
         TagsTable.Queries.update(tag.copy(name = "New"), db)
 
         assertEquals(listOf("New"), db.tags().load().map { it.name })
-        assertEquals(listOf("Old"), db.deletedTags().loadNames())
+        assertEquals(listOf("Old"), db.tags().loadDeletedNames())
     }
 
     private suspend fun insertTag(name: String): Tag {

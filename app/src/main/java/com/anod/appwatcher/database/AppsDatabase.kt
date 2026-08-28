@@ -8,7 +8,6 @@ import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppTag
-import com.anod.appwatcher.database.entities.DeletedTag
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
@@ -18,7 +17,7 @@ import info.anodsplace.applog.AppLog
  * @date 21/05/2018
  */
 @Database(
-    entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class), (DeletedTag::class)],
+    entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
     version = AppsDatabase.VERSION,
     exportSchema = true)
 abstract class AppsDatabase : RoomDatabase() {
@@ -28,7 +27,6 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun tags(): TagsTable
     abstract fun appTags(): AppTagsTable
     abstract fun schedules(): SchedulesTable
-    abstract fun deletedTags(): DeletedTagsTable
 
     companion object {
         const val VERSION = 20
@@ -197,11 +195,7 @@ abstract class AppsDatabase : RoomDatabase() {
 
         private val MIGRATION_19_20 = object : Migration(19, 20) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `${DeletedTagsTable.TABLE}` (" +
-                        "`${DeletedTagsTable.Columns.NAME}` TEXT NOT NULL, " +
-                        "PRIMARY KEY(`${DeletedTagsTable.Columns.NAME}`))"
-                )
+                db.execSQL("ALTER TABLE ${TagsTable.TABLE} ADD COLUMN ${TagsTable.Columns.STATUS} INTEGER NOT NULL DEFAULT ${Tag.STATUS_NORMAL}")
             }
         }
 
