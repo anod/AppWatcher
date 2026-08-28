@@ -51,6 +51,164 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
+    fun newRemoteVersionAtInstalledVersionDoesNotMarkUpdate() {
+        assertEquals(
+            AppUpdateDecision.REFRESH_INSTALLED_CURRENT,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 100,
+                installedVersion = 101,
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = false
+            )
+        )
+    }
+
+    @Test
+    fun cachedRemoteNewerThanInstalledRestoresDeviceUpdate() {
+        assertEquals(
+            AppUpdateDecision.RESTORE_DEVICE_UPDATE,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 100,
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = true
+            )
+        )
+    }
+
+    @Test
+    fun deviceUpdateRemainsVisibleAfterUpdatesAreViewed() {
+        assertEquals(
+            AppUpdateDecision.KEEP_DEVICE_UPDATE,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 100,
+                status = App.STATUS_UPDATED,
+                lastUpdatesViewed = true
+            )
+        )
+    }
+
+    @Test
+    fun installedUpdateStatusClearsAfterDeviceCatchesUp() {
+        assertEquals(
+            AppUpdateDecision.CLEAR_INSTALLED_UPDATE,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 101,
+                status = App.STATUS_UPDATED,
+                lastUpdatesViewed = false
+            )
+        )
+    }
+
+    @Test
+    fun uninstalledWatchedUpdateClearsAfterBeingViewed() {
+        assertEquals(
+            AppUpdateDecision.CLEAR_VIEWED_UPDATE,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 0,
+                status = App.STATUS_UPDATED,
+                lastUpdatesViewed = true
+            )
+        )
+    }
+
+    @Test
+    fun uninstalledWatchedUpdateRemainsUntilViewed() {
+        assertEquals(
+            AppUpdateDecision.KEEP_UPDATED,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 0,
+                status = App.STATUS_UPDATED,
+                lastUpdatesViewed = false
+            )
+        )
+    }
+
+    @Test
+    fun installedCurrentAppRemainsCurrent() {
+        assertEquals(
+            AppUpdateDecision.CURRENT,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 101,
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = true
+            )
+        )
+    }
+
+    @Test
+    fun genuinelyNewAvailableVersionMarksUpdate() {
+        assertEquals(
+            AppUpdateDecision.MARK_UPDATED,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 100,
+                installedVersion = 100,
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = false
+            )
+        )
+    }
+
+    @Test
+    fun newRemoteVersionMarksUninstalledWatchedApp() {
+        assertEquals(
+            AppUpdateDecision.MARK_UPDATED,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 100,
+                installedVersion = 0,
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = false
+            )
+        )
+    }
+
+    @Test
+    fun invalidMarkedUpdateStillProducesDiagnosticSignal() {
+        assertEquals(
+            SyncDecisionSignal.INVALID_MARKED_NOT_NEWER_THAN_INSTALLED,
+            detectSyncDecisionSignal(
+                decision = AppUpdateDecision.MARK_UPDATED,
+                installedVersion = 101,
+                remoteVersion = 101
+            )
+        )
+    }
+
+    @Test
+    fun restoredAndClearedDeviceUpdatesProduceNeutralSignals() {
+        assertEquals(
+            SyncDecisionSignal.DEVICE_UPDATE_RESTORED,
+            detectSyncDecisionSignal(
+                decision = AppUpdateDecision.RESTORE_DEVICE_UPDATE,
+                installedVersion = 100,
+                remoteVersion = 101
+            )
+        )
+        assertEquals(
+            SyncDecisionSignal.INSTALLED_UPDATE_CLEARED,
+            detectSyncDecisionSignal(
+                decision = AppUpdateDecision.CLEAR_INSTALLED_UPDATE,
+                installedVersion = 101,
+                remoteVersion = 101
+            )
+        )
+    }
+
+    @Test
     fun unavailableMarketVersionFallsBackToInstalledVersion() {
         val values = ContentValues()
 
@@ -186,47 +344,42 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
-    fun staleUpdatedAppsMissingFromBulkResponseAreSelected() {
-        val missingUpdated = listItem(packageName = "missing.updated", status = App.STATUS_UPDATED)
-        val missingNormal = listItem(packageName = "missing.normal", status = App.STATUS_NORMAL)
-        val returnedUpdated = listItem(packageName = "returned.updated", status = App.STATUS_UPDATED)
-
-        val candidates = selectStaleUpdatedApps(
-            fetchedChunks = listOf(
-                mapOf(
-                    "missing.updated" to missingUpdated,
-                    "missing.normal" to missingNormal,
-                    "returned.updated" to returnedUpdated
-                ) to listOf(document(docId = "returned.updated", versionCode = 2, restriction = 1))
-            )
+    fun missingBulkDocumentsAreDistinguishedWithoutSelectingRowsForMutation() {
+        val classification = classifyBulkDocuments(
+            requestedDocIds = setOf("missing.updated", "missing.normal", "returned.updated"),
+            responseDocuments = listOf(document(docId = "returned.updated", versionCode = 2, restriction = 1))
         )
 
-        assertEquals(listOf("missing.updated"), candidates.map { it.app.packageName })
+        assertEquals(listOf("returned.updated"), classification.documents.map { it.docId })
+        assertEquals(setOf("missing.updated", "missing.normal"), classification.missingDocIds)
+        assertTrue(classification.withoutDetailsDocIds.isEmpty())
     }
 
     @Test
-    fun everyStaleUpdatedAppIsSelectedWithoutCap() {
-        val localApps = (1..45).associate { index ->
-            "missing.$index" to listItem(packageName = "missing.$index", status = App.STATUS_UPDATED)
-        }
-
-        val candidates = selectStaleUpdatedApps(
-            fetchedChunks = listOf(localApps to emptyList())
-        )
-
-        assertEquals(45, candidates.size)
-    }
-
-    @Test
-    fun fullyReturnedBulkResponseHasNoStaleCandidates() {
-        val candidates = selectStaleUpdatedApps(
-            fetchedChunks = listOf(
-                mapOf("com.example.app" to listItem(packageName = "com.example.app", status = App.STATUS_UPDATED)) to
-                    listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+    fun returnedDocumentWithoutAppDetailsIsNotReportedAsMissing() {
+        val classification = classifyBulkDocuments(
+            requestedDocIds = setOf("without.details", "returned"),
+            responseDocuments = listOf(
+                documentWithoutDetails("without.details"),
+                document(docId = "returned", versionCode = 2, restriction = 1)
             )
         )
 
-        assertTrue(candidates.isEmpty())
+        assertEquals(listOf("returned"), classification.documents.map { it.docId })
+        assertEquals(setOf("without.details"), classification.withoutDetailsDocIds)
+        assertTrue(classification.missingDocIds.isEmpty())
+    }
+
+    @Test
+    fun fullyUsableBulkResponseHasNoMissingOrDetailLessDocuments() {
+        val classification = classifyBulkDocuments(
+            requestedDocIds = setOf("com.example.app"),
+            responseDocuments = listOf(document(docId = "com.example.app", versionCode = 2, restriction = 1))
+        )
+
+        assertEquals(1, classification.documents.size)
+        assertTrue(classification.withoutDetailsDocIds.isEmpty())
+        assertTrue(classification.missingDocIds.isEmpty())
     }
 
     @Test
@@ -434,6 +587,12 @@ class UpdateCheckVersionRollbackTest {
         versionCode = versionCode,
         restriction = restriction,
         recentChanges = null
+    )
+
+    private fun documentWithoutDetails(docId: String): Document = Document(
+        DocV2.newBuilder()
+            .setDocid(docId)
+            .build()
     )
 
     private fun document(
