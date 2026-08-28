@@ -13,6 +13,7 @@ import com.anod.appwatcher.database.entities.Tag
 import com.google.android.gms.auth.UserRecoverableAuthException
 import info.anodsplace.applog.AppLog
 import java.io.BufferedReader
+import java.io.Reader
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -60,72 +61,80 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
             }
         }
 
+        val deletedTagNames = db.deletedTags().loadNames()
         val bytes = file.write(DbJsonWriter(), db)
         AppLog.i("Uploaded ${Formatter.formatShortFileSize(context.actual, bytes)}", "GDriveSync")
 
-        AppLog.d("Clean locally deleted apps")
-        // Clean deleted
+        AppLog.d("Clean locally deleted apps and tags")
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
-        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags", "GDriveSync")
+        val numDeletedTags = if (bytes > 0 && deletedTagNames.isNotEmpty()) {
+            db.deletedTags().delete(deletedTagNames)
+        } else {
+            0
+        }
+        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags, $numDeletedTags deleted tag records", "GDriveSync")
     }
 
     @Throws(Exception::class)
     private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) = withContext(Dispatchers.IO) {
         val reader = file.read() ?: throw IllegalStateException("Cannot read file")
-
-        // Add missing remote entries
-        val driveBufferedReader = BufferedReader(reader)
-        val jsonReader = DbJsonReader()
-
-        val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
-        val currentTags = db.tags().load().associateBy { it.name }.toMutableMap()
-
-        val tagList = mutableListOf<Tag>()
-        val tagApps = mutableMapOf<String, MutableList<String>>()
-
-        jsonReader.read(driveBufferedReader, object : DbJsonReader.OnReadListener {
-            override suspend fun onAppRead(app: App, tags: List<String>) {
-                AppLog.d("[GDrive] Read app: " + app.packageName)
-                if (!currentIds.containsKey(app.packageName)) {
-                    AppListTable.Queries.insert(app, db)
-                }
-                tags.forEach {
-                    if (tagApps[it] == null) {
-                        tagApps[it] = mutableListOf()
-                    }
-                    tagApps[it]!!.add(app.appId)
-                }
-            }
-
-            override suspend fun onTagRead(tag: Tag) {
-                tagList.add(tag)
-            }
-
-            override suspend fun onFinish(appsRead: Int, tagsRead: Int) {
-                reader.close()
-                AppLog.i("Read from remote $appsRead apps, $tagsRead tags", "GDriveSync")
-                // Add missing tags
-                tagList.forEach { tag ->
-                    if (!currentTags.containsKey(tag.name)) {
-                        val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
-                        if (rowId > 0) {
-                            currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
-                        }
-                    }
-                }
-
-                tagApps.forEach { (tagName, apps) ->
-                    currentTags[tagName]?.let { tag ->
-                        AppTagsTable.Queries.insert(tag, apps, db)
-                    }
-                }
-            }
-        })
+        insertRemoteItems(reader, db)
     }
 
     companion object {
+        internal suspend fun insertRemoteItems(reader: Reader, db: AppsDatabase) = withContext(Dispatchers.IO) {
+            // Add missing remote entries
+            val driveBufferedReader = BufferedReader(reader)
+            val jsonReader = DbJsonReader()
+
+            val currentIds = db.apps().loadPackages(true).associate { it.packageName to it.rowId }
+            val currentTags = db.tags().load().associateBy { it.name }.toMutableMap()
+            val deletedTagNames = db.deletedTags().loadNames().toSet()
+
+            val tagList = mutableListOf<Tag>()
+            val tagApps = mutableMapOf<String, MutableList<String>>()
+
+            jsonReader.read(driveBufferedReader, object : DbJsonReader.OnReadListener {
+                override suspend fun onAppRead(app: App, tags: List<String>) {
+                    AppLog.d("[GDrive] Read app: " + app.packageName)
+                    if (!currentIds.containsKey(app.packageName)) {
+                        AppListTable.Queries.insert(app, db)
+                    }
+                    tags.forEach {
+                        if (tagApps[it] == null) {
+                            tagApps[it] = mutableListOf()
+                        }
+                        tagApps[it]!!.add(app.appId)
+                    }
+                }
+
+                override suspend fun onTagRead(tag: Tag) {
+                    tagList.add(tag)
+                }
+
+                override suspend fun onFinish(appsRead: Int, tagsRead: Int) {
+                    AppLog.i("Read from remote $appsRead apps, $tagsRead tags", "GDriveSync")
+                    // Add missing tags
+                    tagList.forEach { tag ->
+                        if (tag.name !in deletedTagNames && !currentTags.containsKey(tag.name)) {
+                            val rowId = TagsTable.Queries.insert(Tag(tag.name, tag.color), db).toInt()
+                            if (rowId > 0) {
+                                currentTags[tag.name] = Tag(rowId, tag.name, tag.color)
+                            }
+                        }
+                    }
+
+                    tagApps.forEach { (tagName, apps) ->
+                        currentTags[tagName]?.takeIf { tagName !in deletedTagNames }?.let { tag ->
+                            AppTagsTable.Queries.insert(tag, apps, db)
+                        }
+                    }
+                }
+            })
+        }
+
         /**
          * Lock used when maintaining queue of requested updates.
          */

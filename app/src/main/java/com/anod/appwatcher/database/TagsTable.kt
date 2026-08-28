@@ -1,17 +1,14 @@
 package com.anod.appwatcher.database
 
-import android.content.ContentValues
-import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import androidx.room.Dao
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.withTransaction
+import com.anod.appwatcher.database.entities.DeletedTag
 import com.anod.appwatcher.database.entities.Tag
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 /**
  * @author alex
@@ -36,6 +33,9 @@ interface TagsTable {
     @Query("SELECT ${BaseColumns._ID} FROM $TABLE")
     suspend fun loadIds(): List<Int>
 
+    @Query("SELECT COUNT(*) FROM $TABLE WHERE ${Columns.NAME} = :name")
+    suspend fun countByName(name: String): Int
+
     @Query("DELETE FROM $TABLE WHERE ${BaseColumns._ID} = :tagId")
     suspend fun delete(tagId: Int)
 
@@ -52,21 +52,28 @@ interface TagsTable {
         suspend fun delete(tag: Tag, db: AppsDatabase) = db.withTransaction {
             db.tags().delete(tag.id)
             db.appTags().delete(tag.id)
+            if (db.tags().countByName(tag.name) == 0) {
+                db.deletedTags().insert(DeletedTag(tag.name))
+            }
         }
 
-        suspend fun insert(tag: Tag, db: AppsDatabase): Long {
-            // Skip id to apply autoincrement
-            val values = ContentValues().apply {
-                put(Columns.NAME, tag.name)
-                put(Columns.COLOR, tag.color)
+        suspend fun insert(tag: Tag, db: AppsDatabase): Long = db.withTransaction {
+            val rowId = db.tags().insert(tag.name, tag.color)
+            if (rowId > 0) {
+                db.deletedTags().delete(tag.name)
             }
-            var rowId = 0L
-            withContext(Dispatchers.IO) {
-                db.runInTransaction {
-                    rowId = db.openHelper.writableDatabase.insert(TABLE, SQLiteDatabase.CONFLICT_REPLACE, values)
+            rowId
+        }
+
+        suspend fun update(tag: Tag, db: AppsDatabase) = db.withTransaction {
+            val previousTag = db.tags().loadById(tag.id)
+            db.tags().update(tag)
+            db.deletedTags().delete(tag.name)
+            if (previousTag != null && previousTag.name != tag.name) {
+                if (db.tags().countByName(previousTag.name) == 0) {
+                    db.deletedTags().insert(DeletedTag(previousTag.name))
                 }
             }
-            return rowId
         }
     }
 

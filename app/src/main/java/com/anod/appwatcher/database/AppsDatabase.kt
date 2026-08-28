@@ -8,6 +8,7 @@ import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppChange
 import com.anod.appwatcher.database.entities.AppTag
+import com.anod.appwatcher.database.entities.DeletedTag
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Tag
 import info.anodsplace.applog.AppLog
@@ -17,7 +18,7 @@ import info.anodsplace.applog.AppLog
  * @date 21/05/2018
  */
 @Database(
-    entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class)],
+    entities = [(App::class), (AppChange::class), (AppTag::class), (Tag::class), (Schedule::class), (DeletedTag::class)],
     version = AppsDatabase.VERSION,
     exportSchema = true)
 abstract class AppsDatabase : RoomDatabase() {
@@ -27,9 +28,10 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun tags(): TagsTable
     abstract fun appTags(): AppTagsTable
     abstract fun schedules(): SchedulesTable
+    abstract fun deletedTags(): DeletedTagsTable
 
     companion object {
-        const val VERSION = 19
+        const val VERSION = 20
         val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
 
         private val MIGRATION_17_18 = object : Migration(17, 18) {
@@ -193,6 +195,16 @@ abstract class AppsDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `${DeletedTagsTable.TABLE}` (" +
+                        "`${DeletedTagsTable.Columns.NAME}` TEXT NOT NULL, " +
+                        "PRIMARY KEY(`${DeletedTagsTable.Columns.NAME}`))"
+                )
+            }
+        }
+
         val migrations: Array<Migration> = arrayOf(
             MIGRATION_9_11,
             MIGRATION_11_12,
@@ -202,7 +214,8 @@ abstract class AppsDatabase : RoomDatabase() {
             MIGRATION_15_16,
             MIGRATION_16_17,
             MIGRATION_17_18,
-            MIGRATION_18_19
+            MIGRATION_18_19,
+            MIGRATION_19_20
         )
     }
 }
