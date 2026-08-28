@@ -78,7 +78,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
     }
 
     @Throws(Exception::class)
-    private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) = withContext(Dispatchers.IO) {
+    private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) {
         val reader = file.read() ?: throw IllegalStateException("Cannot read file")
         insertRemoteItems(reader, db)
     }
