@@ -97,7 +97,7 @@ class UpdateCheck(
 
     private data class AppSyncDiagnostic(
         val syncId: Long,
-        val packageId: String,
+        val packageName: String,
         val installedVersion: Int,
         val cachedVersion: Int,
         val updateRemoteVersion: Int?,
@@ -391,7 +391,7 @@ class UpdateCheck(
             logSyncDiagnostic(
                 diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
-                    packageId = packageDiagnosticId(packageName),
+                    packageName = packageName,
                     installedVersion = installedAppsProvider.packageInfo(packageName).versionCode,
                     cachedVersion = localItem.app.versionNumber,
                     updateRemoteVersion = null,
@@ -474,7 +474,7 @@ class UpdateCheck(
                 val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
                 val diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
-                    packageId = packageDiagnosticId(localItem.app.packageName),
+                    packageName = localItem.app.packageName,
                     installedVersion = result.installedVersion,
                     cachedVersion = localItem.app.versionNumber,
                     updateRemoteVersion = marketApp.appDetails.versionCode,
@@ -692,8 +692,9 @@ class UpdateCheck(
         val fullRemoteVersion = diagnostic.fullRemoteVersion?.toString() ?: "missing"
         val updateRemoteVersion = diagnostic.updateRemoteVersion?.toString() ?: "missing"
         val applied = dbApplied?.toString() ?: "not-required"
+        val packageId = packageDiagnosticId(diagnostic.packageName)
         AppLog.i(
-            "Sync app decision (syncId=${diagnostic.syncId}, packageId=${diagnostic.packageId}, " +
+            "Sync app decision (syncId=${diagnostic.syncId}, packageId=$packageId, " +
                 "installed=${diagnostic.installedVersion}, cached=${diagnostic.cachedVersion}, " +
                 "updateRemote=$updateRemoteVersion, " +
                 "fullRemote=$fullRemoteVersion, availability=${diagnostic.availability}, " +
