@@ -3,10 +3,12 @@ package com.anod.appwatcher.sync
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.RemoteException
 import android.provider.BaseColumns
 import android.text.format.DateUtils
 import androidx.work.Data
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.AuthTokenUnavailableException
@@ -37,6 +39,7 @@ import finsky.api.filterDocuments
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
+import info.anodsplace.ktx.Hash
 import info.anodsplace.playstore.AppDetailsFilter
 import java.io.IOException
 import java.time.Instant
@@ -80,13 +83,30 @@ class UpdateCheck(
         val expectedPackageName: String,
         val values: ContentValues,
         val changelog: ContentValues?,
-        val updatedApp: UpdatedApp?
+        val updatedApp: UpdatedApp?,
+        val diagnostic: AppSyncDiagnostic
     )
 
     private data class AppUpdateResult(
         val values: ContentValues,
         val updatedApp: UpdatedApp?,
-        val persistChangelog: Boolean
+        val persistChangelog: Boolean,
+        val installedVersion: Int,
+        val decision: AppUpdateDecision
+    )
+
+    private data class AppSyncDiagnostic(
+        val syncId: Long,
+        val packageName: String,
+        val installedVersion: Int,
+        val cachedVersion: Int,
+        val updateRemoteVersion: Int?,
+        val fullRemoteVersion: Int?,
+        val availability: String,
+        val statusBefore: Int,
+        val decision: AppUpdateDecision,
+        val signal: SyncDecisionSignal,
+        val verbose: Boolean
     )
 
     companion object {
@@ -145,10 +165,17 @@ class UpdateCheck(
             context.sendBroadcast(startIntent)
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
-            AppLog.i("Play Store update check started (syncId=${schedule.id})", "UpdateCheck")
+            val playStoreVersion = installedAppsProvider.packageInfo("com.android.vending").versionCode
+            AppLog.i(
+                "Play Store update check started (syncId=${schedule.id}, " +
+                    "type=${if (manualSync) "manual" else "scheduled"}, build=${BuildConfig.VERSION_CODE}, " +
+                    "sdk=${Build.VERSION.SDK_INT}, device=${Build.MANUFACTURER}/${Build.MODEL}, " +
+                    "playStore=$playStoreVersion)",
+                "UpdateCheck"
+            )
 
             try {
-                doSync(lastUpdatesViewed)
+                doSync(lastUpdatesViewed, schedule.id, verboseDiagnostics = manualSync)
             } catch (e: AuthTokenStartIntent) {
                 throw e
             } catch (e: CancellationException) {
@@ -210,7 +237,11 @@ class UpdateCheck(
     }
 
     @Throws(RemoteException::class)
-    private suspend fun doSync(lastUpdatesViewed: Boolean): SyncResult {
+    private suspend fun doSync(
+        lastUpdatesViewed: Boolean,
+        syncId: Long,
+        verboseDiagnostics: Boolean
+    ): SyncResult {
         val sortId = preferences.sortIndex
         val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
@@ -235,13 +266,29 @@ class UpdateCheck(
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk of ${docIds.size} apps")
-            val documents = dfeApi.details(
+            val responseDocuments = dfeApi.details(
                 docIds,
                 includeDetails = true,
                 forUpdateCheck = true
             )
-                .filterDocuments(AppDetailsFilter.hasAppDetails)
+                .filterDocuments { true }
+            val classification = classifyBulkDocuments(localApps.keys, responseDocuments)
+            val documents = classification.documents
             unavailable += (docIds.size - documents.size)
+            logUnusableDocuments(
+                syncId = syncId,
+                localApps = localApps,
+                packageNames = classification.missingDocIds,
+                decision = AppUpdateDecision.MISSING_RESPONSE_KEEP,
+                verboseDiagnostics = verboseDiagnostics
+            )
+            logUnusableDocuments(
+                syncId = syncId,
+                localApps = localApps,
+                packageNames = classification.withoutDetailsDocIds,
+                decision = AppUpdateDecision.RESPONSE_WITHOUT_DETAILS_KEEP,
+                verboseDiagnostics = verboseDiagnostics
+            )
             val availabilitySummary = documents
                 .groupingBy { it.availabilityRestriction?.toString() ?: "absent" }
                 .eachCount()
@@ -249,7 +296,9 @@ class UpdateCheck(
                 .entries
                 .joinToString { "${it.key}=${it.value}" }
             AppLog.i(
-                "Sent ${docIds.size}, received ${documents.size}, availability {$availabilitySummary}",
+                "Sent ${docIds.size}, received ${responseDocuments.size}, usable ${documents.size}, " +
+                    "withoutDetails ${classification.withoutDetailsDocIds.size}, " +
+                    "missing ${classification.missingDocIds.size}, availability {$availabilitySummary}",
                 "UpdateCheck"
             )
             documents
@@ -264,15 +313,23 @@ class UpdateCheck(
         // failed run did not reach.
         val updatedApps = mutableListOf<UpdatedApp>()
         for ((localApps, documents) in fetchedChunks) {
-            val pendingUpdates = prepareAppUpdates(documents, localApps, lastUpdatesViewed, releaseDetails)
+            val pendingUpdates = prepareAppUpdates(
+                documents,
+                localApps,
+                lastUpdatesViewed,
+                releaseDetails,
+                syncId,
+                verboseDiagnostics
+            )
             updatedApps.addAll(applyAppUpdates(pendingUpdates, database))
         }
 
-        // Missing from the response, so they never reach `updatedApps`.
-        clearUnavailableUpdates(selectStaleUpdatedApps(fetchedChunks))
-
         val checked = localAppChunks.sumOf { it.size }
-        AppLog.i("Sync finished for $checked apps", "UpdateCheck")
+        AppLog.i(
+            "Play Store update check finished (syncId=$syncId, checked=$checked, " +
+                "updates=${updatedApps.size}, unavailable=$unavailable)",
+            "UpdateCheck"
+        )
         return SyncResult(true, updatedApps, checked, unavailable)
     }
 
@@ -319,23 +376,34 @@ class UpdateCheck(
         return details
     }
 
-    /**
-     * Drop the stale updated flag for watched apps the update-check response did not return.
-     *
-     * A bulk entry carries no doc id or error, so an omission cannot be attributed. Clearing resets
-     * only the badge and touches no stored data, but the app is not highlighted again for that
-     * same version.
-     */
-    private suspend fun clearUnavailableUpdates(staleApps: List<AppListItem>) {
-        if (staleApps.isEmpty()) {
+    private fun logUnusableDocuments(
+        syncId: Long,
+        localApps: Map<String, AppListItem>,
+        packageNames: Set<String>,
+        decision: AppUpdateDecision,
+        verboseDiagnostics: Boolean
+    ) {
+        if (!verboseDiagnostics) {
             return
         }
-        AppLog.i(
-            "Clearing update status for ${staleApps.size} apps missing from the update check",
-            "UpdateCheck"
-        )
-        for (item in staleApps) {
-            database.apps().clearUpdateStatus(rowId = item.app.rowId)
+        for (packageName in packageNames) {
+            val localItem = localApps.getValue(packageName)
+            logSyncDiagnostic(
+                diagnostic = AppSyncDiagnostic(
+                    syncId = syncId,
+                    packageName = packageName,
+                    installedVersion = installedAppsProvider.packageInfo(packageName).versionCode,
+                    cachedVersion = localItem.app.versionNumber,
+                    updateRemoteVersion = null,
+                    fullRemoteVersion = null,
+                    availability = "unknown",
+                    statusBefore = localItem.app.status,
+                    decision = decision,
+                    signal = SyncDecisionSignal.NONE,
+                    verbose = true
+                ),
+                dbApplied = null
+            )
         }
     }
 
@@ -389,7 +457,9 @@ class UpdateCheck(
         documents: List<Document>,
         localApps: Map<String, AppListItem>,
         lastUpdatesViewed: Boolean,
-        releaseDetails: Map<String, Document>
+        releaseDetails: Map<String, Document>,
+        syncId: Long,
+        verboseDiagnostics: Boolean
     ): List<PendingAppUpdate> {
         val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
@@ -397,10 +467,28 @@ class UpdateCheck(
             localApps[docId]?.let { localItem ->
                 // Play advancing between the two requests would file one version's details under
                 // another.
-                val releaseApp = releaseDetails[docId]
+                val fullDocument = releaseDetails[docId]
+                val releaseApp = fullDocument
                     ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
                     ?: marketApp
                 val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
+                val diagnostic = AppSyncDiagnostic(
+                    syncId = syncId,
+                    packageName = localItem.app.packageName,
+                    installedVersion = result.installedVersion,
+                    cachedVersion = localItem.app.versionNumber,
+                    updateRemoteVersion = marketApp.appDetails.versionCode,
+                    fullRemoteVersion = fullDocument?.appDetails?.versionCode,
+                    availability = marketApp.availabilityRestriction?.toString() ?: "absent",
+                    statusBefore = localItem.app.status,
+                    decision = result.decision,
+                    signal = detectSyncDecisionSignal(
+                        decision = result.decision,
+                        installedVersion = result.installedVersion,
+                        remoteVersion = marketApp.appDetails.versionCode
+                    ),
+                    verbose = verboseDiagnostics
+                )
                 val isNewVersion = marketApp.appDetails.versionCode > localItem.app.versionNumber
                 val recentChanges = releaseApp.appDetails.recentChangesHtml?.trim().orEmpty()
                 val noNewDetails = if (isNewVersion) {
@@ -433,9 +521,12 @@ class UpdateCheck(
                             updatedApp = result.updatedApp?.copy(
                                 recentChanges = recentChanges,
                                 noNewDetails = noNewDetails
-                            )
+                            ),
+                            diagnostic = diagnostic
                         )
                     )
+                } else {
+                    logSyncDiagnostic(diagnostic, dbApplied = null)
                 }
             }
         }
@@ -472,6 +563,9 @@ class UpdateCheck(
                 "UpdateCheck"
             )
         }
+        pendingUpdates.forEach {
+            logSyncDiagnostic(it.diagnostic, dbApplied = it.rowId in appliedRowIds)
+        }
         return pendingUpdates
             .filter { it.rowId in appliedRowIds }
             .mapNotNull { it.updatedApp }
@@ -494,21 +588,16 @@ class UpdateCheck(
         val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
         val unavailableAction = reconcileUnavailableUpdate(marketDoc, localApp, installedInfo, values)
         if (unavailableAction != UnavailableUpdateAction.NONE) {
-            val reconciliation = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
-                ", reconciled cached version ${localApp.versionNumber} " +
-                    "to installed version ${installedInfo.versionCode}"
-            } else {
-                ""
-            }
-            AppLog.i(
-                "Suppressing unavailable update version ${appDetails.versionCode}, restriction " +
-                    "${marketDoc.availabilityRestriction}$reconciliation",
-                "UpdateCheck"
-            )
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
-                persistChangelog = false
+                persistChangelog = false,
+                installedVersion = installedInfo.versionCode,
+                decision = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
+                    AppUpdateDecision.UNAVAILABLE_ROLLBACK
+                } else {
+                    AppUpdateDecision.UNAVAILABLE_SUPPRESSED
+                }
             )
         }
         if (reconcileVersionRollback(appDetails.versionCode, localApp, values)) {
@@ -520,11 +609,20 @@ class UpdateCheck(
             return AppUpdateResult(
                 values = values,
                 updatedApp = null,
-                persistChangelog = true
+                persistChangelog = true,
+                installedVersion = installedInfo.versionCode,
+                decision = AppUpdateDecision.REMOTE_ROLLBACK
             )
         }
 
-        if (appDetails.versionCode > localApp.versionNumber) {
+        val decision = selectAppUpdateDecision(
+            remoteVersion = appDetails.versionCode,
+            cachedVersion = localApp.versionNumber,
+            installedVersion = installedInfo.versionCode,
+            status = localApp.status,
+            lastUpdatesViewed = lastUpdatesViewed
+        )
+        if (decision == AppUpdateDecision.MARK_UPDATED) {
             AppLog.i(
                 "Play update candidate: installed ${installedInfo.versionCode}, cached ${localApp.versionNumber}, " +
                     "remote ${appDetails.versionCode}, restriction " +
@@ -542,26 +640,67 @@ class UpdateCheck(
             return AppUpdateResult(
                 values = newApp.contentValues,
                 updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
-                persistChangelog = true
+                persistChangelog = true,
+                installedVersion = installedInfo.versionCode,
+                decision = decision
             )
         }
 
         var updatedApp: UpdatedApp? = null
-        // Mark updated app as normal
-        if (localApp.status == App.STATUS_UPDATED && lastUpdatesViewed) {
-            AppLog.d("Set update as viewed")
-            values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
-        } else if (localApp.status == App.STATUS_UPDATED) {
-            // Application was previously updated
-            val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
-            updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
+        when (decision) {
+            AppUpdateDecision.RESTORE_DEVICE_UPDATE ->
+                values.put(AppListTable.Columns.STATUS, App.STATUS_UPDATED)
+            AppUpdateDecision.CLEAR_INSTALLED_UPDATE,
+            AppUpdateDecision.CLEAR_VIEWED_UPDATE -> {
+                values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
+                values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
+            }
+            AppUpdateDecision.KEEP_UPDATED -> {
+                val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
+                updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
+            }
+            AppUpdateDecision.MISSING_RESPONSE_KEEP,
+            AppUpdateDecision.RESPONSE_WITHOUT_DETAILS_KEEP,
+            AppUpdateDecision.UNAVAILABLE_SUPPRESSED,
+            AppUpdateDecision.UNAVAILABLE_ROLLBACK,
+            AppUpdateDecision.REMOTE_ROLLBACK,
+            AppUpdateDecision.MARK_UPDATED,
+            AppUpdateDecision.REFRESH_INSTALLED_CURRENT,
+            AppUpdateDecision.KEEP_DEVICE_UPDATE,
+            AppUpdateDecision.CURRENT -> {
+            }
         }
-        // Refresh app info with latest fetched
         updateLocalApp(releaseDoc, localApp, values, uploadDateParserCache)
         return AppUpdateResult(
             values = values,
             updatedApp = updatedApp,
-            persistChangelog = true
+            persistChangelog = true,
+            installedVersion = installedInfo.versionCode,
+            decision = decision
+        )
+    }
+
+    private fun logSyncDiagnostic(diagnostic: AppSyncDiagnostic, dbApplied: Boolean?) {
+        if (
+            !diagnostic.verbose &&
+            (diagnostic.decision == AppUpdateDecision.CURRENT || diagnostic.decision.isSteadyState) &&
+            diagnostic.signal == SyncDecisionSignal.NONE &&
+            dbApplied != false
+        ) {
+            return
+        }
+        val fullRemoteVersion = diagnostic.fullRemoteVersion?.toString() ?: "missing"
+        val updateRemoteVersion = diagnostic.updateRemoteVersion?.toString() ?: "missing"
+        val applied = dbApplied?.toString() ?: "not-required"
+        val packageId = packageDiagnosticId(diagnostic.packageName)
+        AppLog.i(
+            "Sync app decision (syncId=${diagnostic.syncId}, packageId=$packageId, " +
+                "installed=${diagnostic.installedVersion}, cached=${diagnostic.cachedVersion}, " +
+                "updateRemote=$updateRemoteVersion, " +
+                "fullRemote=$fullRemoteVersion, availability=${diagnostic.availability}, " +
+                "statusBefore=${diagnostic.statusBefore}, decision=${diagnostic.decision.value}, " +
+                "signal=${diagnostic.signal.value}, dbApplied=$applied)",
+            "UpdateCheck"
         )
     }
 
@@ -689,22 +828,27 @@ internal fun selectReleaseDetailsApps(
     .distinctBy { it.packageName }
     .toList()
 
-/**
- * Watched apps still flagged as [App.STATUS_UPDATED] locally that the update-check response did
- * not return, so nothing else can clear their stale flag.
- */
-internal fun selectStaleUpdatedApps(
-    fetchedChunks: List<Pair<Map<String, AppListItem>, List<Document>>>
-): List<AppListItem> = fetchedChunks
-    .asSequence()
-    .flatMap { (localApps, documents) ->
-        val returnedDocIds = documents.mapTo(mutableSetOf()) { it.docId }
-        localApps
-            .asSequence()
-            .filter { it.key !in returnedDocIds && it.value.app.status == App.STATUS_UPDATED }
-            .map { it.value }
+internal data class BulkDocumentClassification(
+    val documents: List<Document>,
+    val withoutDetailsDocIds: Set<String>,
+    val missingDocIds: Set<String>
+)
+
+internal fun classifyBulkDocuments(
+    requestedDocIds: Set<String>,
+    responseDocuments: List<Document>
+): BulkDocumentClassification {
+    val returnedDocIds = responseDocuments.mapTo(mutableSetOf()) { it.docId }
+    val documents = responseDocuments.filter {
+        it.docId in requestedDocIds && AppDetailsFilter.hasAppDetails(it)
     }
-    .toList()
+    val usableDocIds = documents.mapTo(mutableSetOf()) { it.docId }
+    return BulkDocumentClassification(
+        documents = documents,
+        withoutDetailsDocIds = (returnedDocIds intersect requestedDocIds) - usableDocIds,
+        missingDocIds = requestedDocIds - returnedDocIds
+    )
+}
 
 internal fun reconcileVersionRollback(marketVersionCode: Int, localApp: App, values: ContentValues): Boolean {
     if (marketVersionCode >= localApp.versionNumber) {
@@ -720,6 +864,85 @@ internal enum class UnavailableUpdateAction {
     SUPPRESS,
     ROLL_BACK
 }
+
+internal enum class AppUpdateDecision(val value: String) {
+    MISSING_RESPONSE_KEEP("missing-response-keep"),
+    RESPONSE_WITHOUT_DETAILS_KEEP("response-without-details-keep"),
+    UNAVAILABLE_SUPPRESSED("unavailable-suppressed"),
+    UNAVAILABLE_ROLLBACK("unavailable-rollback"),
+    REMOTE_ROLLBACK("remote-rollback"),
+    MARK_UPDATED("mark-updated"),
+    REFRESH_INSTALLED_CURRENT("refresh-installed-current"),
+    RESTORE_DEVICE_UPDATE("restore-device-update"),
+    KEEP_DEVICE_UPDATE("keep-device-update"),
+    CLEAR_INSTALLED_UPDATE("clear-installed-update"),
+    CLEAR_VIEWED_UPDATE("clear-viewed-update"),
+    KEEP_UPDATED("keep-updated"),
+    CURRENT("current");
+
+    val isSteadyState: Boolean
+        get() = this == MISSING_RESPONSE_KEEP ||
+            this == RESPONSE_WITHOUT_DETAILS_KEEP ||
+            this == UNAVAILABLE_SUPPRESSED ||
+            this == UNAVAILABLE_ROLLBACK ||
+            this == KEEP_DEVICE_UPDATE ||
+            this == KEEP_UPDATED
+}
+
+internal enum class SyncDecisionSignal(val value: String) {
+    NONE("none"),
+    INVALID_MARKED_NOT_NEWER_THAN_INSTALLED("invalid-marked-not-newer-than-installed"),
+    DEVICE_UPDATE_RESTORED("device-update-restored"),
+    INSTALLED_UPDATE_CLEARED("installed-update-cleared")
+}
+
+internal fun detectSyncDecisionSignal(
+    decision: AppUpdateDecision,
+    installedVersion: Int,
+    remoteVersion: Int
+): SyncDecisionSignal = when {
+    decision == AppUpdateDecision.MARK_UPDATED && remoteVersion <= installedVersion ->
+        SyncDecisionSignal.INVALID_MARKED_NOT_NEWER_THAN_INSTALLED
+    decision == AppUpdateDecision.RESTORE_DEVICE_UPDATE ->
+        SyncDecisionSignal.DEVICE_UPDATE_RESTORED
+    decision == AppUpdateDecision.CLEAR_INSTALLED_UPDATE ->
+        SyncDecisionSignal.INSTALLED_UPDATE_CLEARED
+    else -> SyncDecisionSignal.NONE
+}
+
+internal fun selectAppUpdateDecision(
+    remoteVersion: Int,
+    cachedVersion: Int,
+    installedVersion: Int,
+    status: Int,
+    lastUpdatesViewed: Boolean
+): AppUpdateDecision {
+    require(remoteVersion >= cachedVersion)
+    val isInstalled = installedVersion > 0
+    return when {
+        isInstalled && remoteVersion <= installedVersion && status == App.STATUS_UPDATED ->
+            AppUpdateDecision.CLEAR_INSTALLED_UPDATE
+        isInstalled && remoteVersion <= installedVersion && remoteVersion > cachedVersion ->
+            AppUpdateDecision.REFRESH_INSTALLED_CURRENT
+        isInstalled && remoteVersion <= installedVersion ->
+            AppUpdateDecision.CURRENT
+        remoteVersion > cachedVersion ->
+            AppUpdateDecision.MARK_UPDATED
+        isInstalled && status == App.STATUS_UPDATED ->
+            AppUpdateDecision.KEEP_DEVICE_UPDATE
+        isInstalled ->
+            AppUpdateDecision.RESTORE_DEVICE_UPDATE
+        status == App.STATUS_UPDATED && lastUpdatesViewed ->
+            AppUpdateDecision.CLEAR_VIEWED_UPDATE
+        status == App.STATUS_UPDATED ->
+            AppUpdateDecision.KEEP_UPDATED
+        else ->
+            AppUpdateDecision.CURRENT
+    }
+}
+
+private fun packageDiagnosticId(packageName: String): String =
+    Hash.sha256(packageName).encoded.take(12)
 
 internal fun reconcileUnavailableUpdate(
     marketDoc: Document,
