@@ -41,7 +41,7 @@ class TagJsonObject(val tag: Tag?) {
             reader.endObject()
 
             if (id > 0) {
-                return Tag(id, name, color)
+                return Tag(id, name, color, Tag.STATUS_NORMAL)
             }
             return null
         }

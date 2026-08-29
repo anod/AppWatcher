@@ -68,7 +68,7 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
     private fun saveAndDismiss(tag: Tag) {
         viewModelScope.launch {
             if (tag.id > 0) {
-                database.tags().update(tag)
+                TagsTable.Queries.update(tag, database)
             } else {
                 val tagId = TagsTable.Queries.insert(tag, database).toInt()
                 viewState = viewState.copy(tag = tag.copy(id = tagId))

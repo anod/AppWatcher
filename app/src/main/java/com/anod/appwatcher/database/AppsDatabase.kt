@@ -29,7 +29,7 @@ abstract class AppsDatabase : RoomDatabase() {
     abstract fun schedules(): SchedulesTable
 
     companion object {
-        const val VERSION = 19
+        const val VERSION = 20
         val dbName = if (BuildConfig.DEBUG) "app_watcher.db" else "app_watcher"
 
         private val MIGRATION_17_18 = object : Migration(17, 18) {
@@ -193,6 +193,12 @@ abstract class AppsDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE ${TagsTable.TABLE} ADD COLUMN ${TagsTable.Columns.STATUS} INTEGER NOT NULL DEFAULT ${Tag.STATUS_NORMAL}")
+            }
+        }
+
         val migrations: Array<Migration> = arrayOf(
             MIGRATION_9_11,
             MIGRATION_11_12,
@@ -202,7 +208,8 @@ abstract class AppsDatabase : RoomDatabase() {
             MIGRATION_15_16,
             MIGRATION_16_17,
             MIGRATION_17_18,
-            MIGRATION_18_19
+            MIGRATION_18_19,
+            MIGRATION_19_20
         )
     }
 }

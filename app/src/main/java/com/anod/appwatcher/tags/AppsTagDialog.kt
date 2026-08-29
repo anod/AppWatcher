@@ -144,7 +144,7 @@ private fun AppRow(
 @Preview
 @Composable
 private fun AppsTagScreenPreview() {
-    val tag = Tag(1, "Banana", Color.Magenta.toArgb())
+    val tag = Tag(1, "Banana", Color.Magenta.toArgb(), Tag.STATUS_NORMAL)
     val appIconLoader = AppIconLoader.Simple(
         LocalContext.current, ImageLoader.Builder(LocalContext.current).build()
     )

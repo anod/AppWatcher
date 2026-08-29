@@ -162,7 +162,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 tag = Tag(
                     id = extraTagId,
                     name = "",
-                    color = extraTagColor
+                    color = extraTagColor,
+                    status = Tag.STATUS_NORMAL
                 )
             ))
         }
@@ -177,7 +178,8 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 tag = Tag(
                     id = extraTagId,
                     name = "",
-                    color = extras.getInt(EXTRA_LIST_TAG_COLOR)
+                    color = extras.getInt(EXTRA_LIST_TAG_COLOR),
+                    status = Tag.STATUS_NORMAL
                 )
             )
         } else if (extras.containsKey(EXTRA_GDRIVE_SIGNIN)) {

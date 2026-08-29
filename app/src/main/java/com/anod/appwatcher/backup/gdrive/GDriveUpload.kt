@@ -40,15 +40,20 @@ class GDriveUpload(private val googleAccount: Account, private val context: Appl
             file.create()
         }
 
+        val deletedTagIds = db.tags().loadDeletedIds()
         val bytes = file.write(DbJsonWriter(), db)
         AppLog.i("Uploaded ${Formatter.formatShortFileSize(context.actual, bytes)}", "GDriveUpload")
 
-        AppLog.d("[GDrive] Clean locally deleted apps ")
-        // Clean deleted
+        AppLog.d("[GDrive] Clean locally deleted apps and tags")
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
-        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags", "GDriveUpload")
+        val numDeletedTags = if (bytes > 0 && deletedTagIds.isNotEmpty()) {
+            db.tags().cleanDeleted(deletedTagIds)
+        } else {
+            0
+        }
+        AppLog.i("Cleaned $numRows locally deleted apps, $numTags tags, $numDeletedTags deleted tag records", "GDriveUpload")
     }
 
     companion object {
