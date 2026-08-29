@@ -103,7 +103,7 @@ class GDriveTagSyncTest {
         val uploadedTagIds = db.tags().loadDeletedIds()
         db.tags().insertDeleted("Deleted during upload", Tag.DEFAULT_COLOR)
 
-        db.tags().deleteDeleted(uploadedTagIds)
+        db.tags().cleanDeleted(uploadedTagIds)
 
         assertEquals(listOf(uploadedTagId), uploadedTagIds)
         assertEquals(listOf("Deleted during upload"), db.tags().loadDeletedNames())

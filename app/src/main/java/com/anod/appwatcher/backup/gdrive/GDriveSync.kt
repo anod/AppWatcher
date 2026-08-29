@@ -70,7 +70,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
         val numDeletedTags = if (bytes > 0 && deletedTagIds.isNotEmpty()) {
-            db.tags().deleteDeleted(deletedTagIds)
+            db.tags().cleanDeleted(deletedTagIds)
         } else {
             0
         }

@@ -48,10 +48,10 @@ interface TagsTable {
     suspend fun delete(tagId: Int)
 
     @Query("DELETE FROM $TABLE WHERE ${BaseColumns._ID} IN (:tagIds) AND ${Columns.STATUS} = ${Tag.STATUS_DELETED}")
-    suspend fun deleteDeleted(tagIds: List<Int>): Int
+    suspend fun cleanDeleted(tagIds: List<Int>): Int
 
     @Query("DELETE FROM $TABLE WHERE ${Columns.NAME} = :name AND ${Columns.STATUS} = ${Tag.STATUS_DELETED}")
-    suspend fun deleteDeleted(name: String): Int
+    suspend fun cleanDeleted(name: String): Int
 
     @Query("UPDATE $TABLE SET ${Columns.STATUS} = :status WHERE ${BaseColumns._ID} = :tagId")
     suspend fun updateStatus(tagId: Int, status: Int): Int
@@ -71,6 +71,7 @@ interface TagsTable {
     object Queries {
         suspend fun delete(tag: Tag, db: AppsDatabase) = db.withTransaction {
             db.appTags().delete(tag.id)
+            // Keep a name-level deletion marker only when no active duplicate represents that name.
             if (db.tags().countByName(tag.name) > 1) {
                 db.tags().delete(tag.id)
             } else {
@@ -82,7 +83,7 @@ interface TagsTable {
             val deletedTag = db.tags().loadDeletedByName(tag.name)
             if (deletedTag != null) {
                 db.tags().update(deletedTag.copy(color = tag.color, status = Tag.STATUS_NORMAL))
-                db.tags().deleteDeleted(tag.name)
+                db.tags().cleanDeleted(tag.name)
                 deletedTag.id.toLong()
             } else {
                 db.tags().insert(tag.name, tag.color)
@@ -92,7 +93,7 @@ interface TagsTable {
         suspend fun update(tag: Tag, db: AppsDatabase) = db.withTransaction {
             val previousTag = db.tags().loadById(tag.id)
             if (previousTag != null && previousTag.name != tag.name) {
-                db.tags().deleteDeleted(tag.name)
+                db.tags().cleanDeleted(tag.name)
                 if (db.tags().countByName(previousTag.name) == 1) {
                     db.tags().insertDeleted(previousTag.name, previousTag.color)
                 }
