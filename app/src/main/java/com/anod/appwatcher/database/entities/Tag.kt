@@ -29,7 +29,7 @@ data class Tag(
     @param:ColorInt
     val color: Int,
     @ColumnInfo(name = TagsTable.Columns.STATUS, defaultValue = "0")
-    val status: Int
+    val status: Int = STATUS_NORMAL
 ) : Parcelable {
 
     val isEmpty: Boolean

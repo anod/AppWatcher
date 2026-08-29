@@ -13,6 +13,7 @@ import com.anod.appwatcher.database.entities.Tag
 import java.io.StringReader
 import java.io.StringWriter
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -38,6 +39,13 @@ class GDriveTagSyncTest {
     @After
     fun closeDb() {
         db.close()
+    }
+
+    @Test
+    fun tagWithoutStatusRestoresAsNormal() {
+        val tag = Json.decodeFromString<Tag>("""{"id":1,"name":"Saved","color":2}""")
+
+        assertEquals(Tag(id = 1, name = "Saved", color = 2), tag)
     }
 
     @Test
