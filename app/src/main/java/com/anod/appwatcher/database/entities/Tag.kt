@@ -52,7 +52,7 @@ data class Tag(
         }
     }
 
-    override fun hashCode() = hashCodeOf(name, color, status)
+    override fun hashCode() = hashCodeOf(id, name, color, status)
 
     companion object {
         const val STATUS_NORMAL = 0
