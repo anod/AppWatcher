@@ -3,18 +3,17 @@ package com.anod.appwatcher.installed
 
 import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.utils.isPackageEnabled
+import com.anod.appwatcher.utils.PackageStateProvider
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
 import com.anod.appwatcher.watchlist.WatchListPagerFactory
 import com.anod.appwatcher.watchlist.WatchListPagingSource
-import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
 
-class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, coroutineScope: CoroutineScope, private val installedApps: InstalledApps, cacheScope: CoroutineScope) :
+class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config, coroutineScope: CoroutineScope, private val packageStates: PackageStateProvider, cacheScope: CoroutineScope) :
     WatchListPagerFactory(pagingSourceConfig, cacheScope),
     KoinComponent {
 
@@ -38,8 +37,7 @@ class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config
         changelogAdapter = changelogAdapter,
         packageManager = packageManager,
         database = database,
-        installedApps = installedApps,
-        packageEnabled = packageManager::isPackageEnabled
+        packageStates = packageStates
     ).also {
         it.sortId = sortId
         it.selectionMode = selectionMode

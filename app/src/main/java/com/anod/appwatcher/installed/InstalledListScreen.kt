@@ -31,10 +31,10 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.asNavKey
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageStateProvider
 import com.anod.appwatcher.watchlist.WatchListPage
 import com.anod.appwatcher.watchlist.WatchListPagingSource
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.onScreenCommonAction
 import kotlinx.coroutines.CoroutineScope
 
@@ -73,7 +73,7 @@ fun InstalledListScreenScene(
             screenState = screenState,
             pagingSourceConfig = pagingSourceConfig,
             onEvent = viewModel::handleEvent,
-            installedApps = viewModel.installedApps,
+            packageStates = viewModel.packageStates,
             listCacheScope = viewModel.viewModelScope
         )
     }
@@ -90,7 +90,7 @@ fun InstalledListScreen(
     screenState: InstalledListState,
     pagingSourceConfig: WatchListPagingSource.Config,
     onEvent: (InstalledListEvent) -> Unit,
-    installedApps: InstalledApps,
+    packageStates: PackageStateProvider,
     listCacheScope: CoroutineScope
 ) {
     Scaffold(
@@ -139,7 +139,7 @@ fun InstalledListScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             val scope = rememberCoroutineScope()
             val pagerFactory: InstalledListPagerFactory = remember(pagingSourceConfig, scope) {
-                InstalledListPagerFactory(pagingSourceConfig, scope, installedApps, listCacheScope)
+                InstalledListPagerFactory(pagingSourceConfig, scope, packageStates, listCacheScope)
             }
             pagerFactory.sortId = screenState.sortId
             pagerFactory.selectionMode = screenState.selectionMode

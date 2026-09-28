@@ -14,6 +14,8 @@ import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageStateProvider
+import com.anod.appwatcher.utils.stateFor
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
@@ -25,8 +27,7 @@ class WatchListPagingSource(
     private val prefs: Preferences,
     private val packageManager: PackageManager,
     private val database: AppsDatabase,
-    private val installedApps: InstalledApps,
-    private val packageEnabled: (String) -> Boolean,
+    private val packageStates: PackageStateProvider,
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
         set(value) {
@@ -181,15 +182,15 @@ class WatchListPagingSource(
                     lockedFilterQuery,
                     database.apps()
                 )
+                val installedPackageStates = packageStates.load(databaseRows.map { it.packageName })
                 val rows = databaseRows
                     .mapIndexed { index, row ->
-                        val packageInfo = installedApps.packageInfo(row.packageName)
-                        val isPackageEnabled = !packageInfo.isInstalled || packageEnabled(row.packageName)
+                        val packageState = installedPackageStates.stateFor(row.packageName)
                         AppListSnapshotRow(
                             databaseRow = row,
-                            packageInfo = packageInfo,
-                            isPackageEnabled = isPackageEnabled,
-                            sectionRank = sectionRank(row, isPackageEnabled),
+                            packageInfo = packageState.packageInfo,
+                            isPackageEnabled = packageState.isEnabled,
+                            sectionRank = sectionRank(row, packageState.isEnabled),
                             sortPosition = index,
                         )
                     }
@@ -221,6 +222,7 @@ class WatchListPagingSource(
     private suspend fun loadOnDeviceItems(titleFilter: String): List<SectionItem.OnDevice> {
         val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
         val allInstalledPackageNames = installed.map { it.pkg.name }
+        val installedPackageStates = packageStates.load(allInstalledPackageNames)
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
         return allInstalledPackageNames
             .asSequence()
@@ -228,12 +230,12 @@ class WatchListPagingSource(
             .map { packageManager.packageToApp(-1, it) }
             .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
             .map { item ->
-                val packageInfo = installedApps.packageInfo(item.app.packageName)
+                val packageState = installedPackageStates.stateFor(item.app.packageName)
                 SectionItem.OnDevice(
                     appListItem = item,
                     showSelection = false,
-                    packageInfo = packageInfo,
-                    isPackageEnabled = !packageInfo.isInstalled || packageEnabled(item.app.packageName)
+                    packageInfo = packageState.packageInfo,
+                    isPackageEnabled = packageState.isEnabled
                 )
             }.toList()
     }

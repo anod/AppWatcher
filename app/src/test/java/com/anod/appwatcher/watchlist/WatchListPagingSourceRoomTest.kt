@@ -12,6 +12,8 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageState
+import com.anod.appwatcher.utils.PackageStateProvider
 import com.anod.appwatcher.utils.clearDisabledUpdateStatus
 import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import info.anodsplace.framework.content.InstalledApps
@@ -154,8 +156,10 @@ class WatchListPagingSourceRoomTest {
         )
 
         val cleared = db.apps().clearDisabledUpdateStatuses(
-            installedApps = installedApps,
-            packageEnabled = { false }
+            packageStates = packageStateProvider(
+                installedApps = installedApps,
+                packageEnabled = { false }
+            )
         )
 
         assertEquals(1, cleared)
@@ -209,8 +213,10 @@ class WatchListPagingSourceRoomTest {
 
         val cleared = db.apps().clearDisabledUpdateStatus(
             packageName = "disabled.watched",
-            installedApps = installedApps,
-            packageEnabled = { false }
+            packageState = PackageState(
+                packageInfo = installedApps.packageInfo("disabled.watched"),
+                isEnabled = false
+            )
         )
 
         assertEquals(1, cleared)
@@ -539,9 +545,21 @@ class WatchListPagingSourceRoomTest {
         prefs = preferences,
         packageManager = context.packageManager,
         database = db,
-        packageEnabled = packageEnabled,
-        installedApps = installedApps
+        packageStates = packageStateProvider(installedApps, packageEnabled)
     )
+
+    private fun packageStateProvider(
+        installedApps: InstalledApps,
+        packageEnabled: (String) -> Boolean
+    ) = PackageStateProvider { packageNames ->
+        packageNames.associateWith { packageName ->
+            val packageInfo = installedApps.packageInfo(packageName)
+            PackageState(
+                packageInfo = packageInfo,
+                isEnabled = !packageInfo.isInstalled || packageEnabled(packageName)
+            )
+        }
+    }
 
     private fun defaultInstalledApps(): InstalledApps = InstalledApps.StaticMap(
         mapOf(

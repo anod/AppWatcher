@@ -17,13 +17,13 @@ import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.SelectionState
 import com.anod.appwatcher.utils.filterWithExtra
 import com.anod.appwatcher.utils.getInt
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.watchlist.WatchListEvent
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.ScreenCommonAction
 import info.anodsplace.framework.content.getInstalledPackagesCodes
 import kotlin.reflect.KClass
@@ -62,9 +62,8 @@ class InstalledListViewModel(state: SavedStateHandle, showAction: Boolean, sortI
     private val importManager: ImportBulkManager by inject()
     private val packageManager: PackageManager by inject()
     private val packageChanged: PackageChangedReceiver by inject()
+    val packageStates: PackageStateCache by inject()
     private val authToken: AuthTokenBlocking by inject()
-
-    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
     class Factory(private val sortId: Int, private val showAction: Boolean,) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -84,7 +83,6 @@ class InstalledListViewModel(state: SavedStateHandle, showAction: Boolean, sortI
         viewModelScope.launch {
             packageChanged.observer.collect { packageChanged ->
                 if (viewState.importStatus !is ImportStatus.Progress) {
-                    installedApps.reset()
                     viewState = viewState.copy(packageChanged = packageChanged)
                 }
             }

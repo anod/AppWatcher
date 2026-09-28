@@ -2,7 +2,6 @@ package com.anod.appwatcher.sync
 
 import android.content.ContentValues
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.RemoteException
 import android.provider.BaseColumns
@@ -28,11 +27,13 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.preserveCachedMetadata
 import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageState
+import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
-import com.anod.appwatcher.utils.isPackageEnabled
+import com.anod.appwatcher.utils.stateFor
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
 import finsky.api.DfeServerError
@@ -60,7 +61,7 @@ import org.koin.core.parameter.parametersOf
 
 class UpdateCheck(
     private val context: info.anodsplace.context.ApplicationContext,
-    private val packageManager: PackageManager,
+    private val packageStates: PackageStateCache,
     private val notificationManager: info.anodsplace.notification.NotificationManager,
     private val database: AppsDatabase,
     private val preferences: Preferences,
@@ -125,8 +126,6 @@ class UpdateCheck(
         const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
-    private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
-
     suspend fun perform(extras: Data): Int = playSessionCoordinator.withSession {
         performSerialized(extras)
     }
@@ -169,7 +168,8 @@ class UpdateCheck(
             context.sendBroadcast(startIntent)
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
-            val playStoreVersion = installedAppsProvider.packageInfo("com.android.vending").versionCode
+            val installedPackageStates = packageStates.reload(listOf("com.android.vending"))
+            val playStoreVersion = installedPackageStates.stateFor("com.android.vending").packageInfo.versionCode
             AppLog.i(
                 "Play Store update check started (syncId=${schedule.id}, " +
                     "type=${if (manualSync) "manual" else "scheduled"}, build=${BuildConfig.VERSION_CODE}, " +
@@ -179,7 +179,11 @@ class UpdateCheck(
             )
 
             try {
-                doSync(lastUpdatesViewed, schedule.id, verboseDiagnostics = manualSync)
+                doSync(
+                    lastUpdatesViewed = lastUpdatesViewed,
+                    syncId = schedule.id,
+                    verboseDiagnostics = manualSync
+                )
             } catch (e: AuthTokenStartIntent) {
                 throw e
             } catch (e: CancellationException) {
@@ -247,8 +251,7 @@ class UpdateCheck(
         verboseDiagnostics: Boolean
     ): SyncResult {
         val clearedDisabledUpdates = database.apps().clearDisabledUpdateStatuses(
-            installedApps = installedAppsProvider,
-            packageEnabled = packageManager::isPackageEnabled
+            packageStates = packageStates
         )
         if (clearedDisabledUpdates > 0) {
             AppLog.i(
@@ -271,6 +274,9 @@ class UpdateCheck(
         } finally {
             apps.close()
         }
+        val installedPackageStates = packageStates.load(
+            localAppChunks.flatMap { it.keys }
+        )
         var unavailable = 0
         val fetchedChunks = fetchAllChunks(
             chunks = localAppChunks,
@@ -294,14 +300,16 @@ class UpdateCheck(
                 localApps = localApps,
                 packageNames = classification.missingDocIds,
                 decision = AppUpdateDecision.MISSING_RESPONSE_KEEP,
-                verboseDiagnostics = verboseDiagnostics
+                verboseDiagnostics = verboseDiagnostics,
+                installedPackageStates = installedPackageStates
             )
             logUnusableDocuments(
                 syncId = syncId,
                 localApps = localApps,
                 packageNames = classification.withoutDetailsDocIds,
                 decision = AppUpdateDecision.RESPONSE_WITHOUT_DETAILS_KEEP,
-                verboseDiagnostics = verboseDiagnostics
+                verboseDiagnostics = verboseDiagnostics,
+                installedPackageStates = installedPackageStates
             )
             val availabilitySummary = documents
                 .groupingBy { it.availabilityRestriction?.toString() ?: "absent" }
@@ -333,7 +341,8 @@ class UpdateCheck(
                 lastUpdatesViewed,
                 releaseDetails,
                 syncId,
-                verboseDiagnostics
+                verboseDiagnostics,
+                installedPackageStates
             )
             updatedApps.addAll(applyAppUpdates(pendingUpdates, database))
         }
@@ -395,20 +404,21 @@ class UpdateCheck(
         localApps: Map<String, AppListItem>,
         packageNames: Set<String>,
         decision: AppUpdateDecision,
-        verboseDiagnostics: Boolean
+        verboseDiagnostics: Boolean,
+        installedPackageStates: Map<String, PackageState>
     ) {
         if (!verboseDiagnostics) {
             return
         }
         for (packageName in packageNames) {
             val localItem = localApps.getValue(packageName)
-            val installedInfo = installedAppsProvider.packageInfo(packageName)
+            val packageState = installedPackageStates.stateFor(packageName)
             logSyncDiagnostic(
                 diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
                     packageName = packageName,
-                    installedVersion = installedInfo.versionCode,
-                    installedEnabled = installedInfo.isInstalled && packageManager.isPackageEnabled(packageName),
+                    installedVersion = packageState.packageInfo.versionCode,
+                    installedEnabled = packageState.isInstalled && packageState.isEnabled,
                     cachedVersion = localItem.app.versionNumber,
                     updateRemoteVersion = null,
                     fullRemoteVersion = null,
@@ -475,7 +485,8 @@ class UpdateCheck(
         lastUpdatesViewed: Boolean,
         releaseDetails: Map<String, Document>,
         syncId: Long,
-        verboseDiagnostics: Boolean
+        verboseDiagnostics: Boolean,
+        installedPackageStates: Map<String, PackageState>
     ): List<PendingAppUpdate> {
         val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
@@ -487,7 +498,13 @@ class UpdateCheck(
                 val releaseApp = fullDocument
                     ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
                     ?: marketApp
-                val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
+                val result = updateApp(
+                    marketDoc = marketApp,
+                    releaseDoc = releaseApp,
+                    localItem = localItem,
+                    lastUpdatesViewed = lastUpdatesViewed,
+                    packageState = installedPackageStates.stateFor(localItem.app.packageName)
+                )
                 val diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
                     packageName = localItem.app.packageName,
@@ -596,14 +613,15 @@ class UpdateCheck(
         marketDoc: Document,
         releaseDoc: Document,
         localItem: AppListItem,
-        lastUpdatesViewed: Boolean
+        lastUpdatesViewed: Boolean,
+        packageState: PackageState
     ): AppUpdateResult {
         val appDetails = marketDoc.appDetails
         val localApp = localItem.app
 
         val values = ContentValues()
-        val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
-        val installedEnabled = installedInfo.isInstalled && packageManager.isPackageEnabled(appDetails.packageName)
+        val installedInfo = packageState.packageInfo
+        val installedEnabled = packageState.isInstalled && packageState.isEnabled
         val unavailableAction = reconcileUnavailableUpdate(marketDoc, localApp, installedInfo, values)
         if (unavailableAction != UnavailableUpdateAction.NONE) {
             return AppUpdateResult(

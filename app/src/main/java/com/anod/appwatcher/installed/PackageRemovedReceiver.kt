@@ -4,13 +4,11 @@ package com.anod.appwatcher.installed
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.appScope
 import com.anod.appwatcher.utils.clearDisabledUpdateStatus
-import com.anod.appwatcher.utils.isPackageEnabled
-import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -19,39 +17,51 @@ class PackageRemovedReceiver : BroadcastReceiver(), KoinComponent {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action ?: return
+        val packageName = intent.data?.schemeSpecificPart ?: return
         when (action) {
             Intent.ACTION_PACKAGE_FULLY_REMOVED -> {
-                notify(intent, clearDisabledUpdates = false)
+                notify(packageName, clearDisabledUpdates = false, requireStateChange = false)
             }
             Intent.ACTION_PACKAGE_ADDED -> {
-                notify(intent, clearDisabledUpdates = true)
+                notify(packageName, clearDisabledUpdates = true, requireStateChange = false)
             }
             Intent.ACTION_PACKAGE_CHANGED -> {
-                notify(intent, clearDisabledUpdates = true)
+                if (isApplicationPackageChange(packageName, intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST))) {
+                    notify(packageName, clearDisabledUpdates = true, requireStateChange = true)
+                }
             }
             Intent.ACTION_PACKAGE_REPLACED -> {
-                notify(intent, clearDisabledUpdates = true)
+                notify(packageName, clearDisabledUpdates = true, requireStateChange = false)
             }
         }
     }
 
-    private fun notify(intent: Intent, clearDisabledUpdates: Boolean) {
-        val packageName = intent.data?.schemeSpecificPart ?: ""
+    private fun notify(
+        packageName: String,
+        clearDisabledUpdates: Boolean,
+        requireStateChange: Boolean
+    ) {
         val pendingResult = goAsync()
         appScope.launch {
             try {
+                val packageStateRefresh = get<PackageStateCache>().refresh(packageName)
                 if (clearDisabledUpdates) {
-                    val packageManager = get<PackageManager>()
                     get<AppsDatabase>().apps().clearDisabledUpdateStatus(
                         packageName = packageName,
-                        installedApps = InstalledApps.PackageManager(packageManager),
-                        packageEnabled = packageManager::isPackageEnabled
+                        packageState = packageStateRefresh.current
                     )
                 }
-                get<PackageChangedReceiver>().emit(packageName + ":" + System.currentTimeMillis())
+                if (!requireStateChange || packageStateRefresh.changed) {
+                    get<PackageChangedReceiver>().emit(packageName + ":" + System.currentTimeMillis())
+                }
             } finally {
                 pendingResult.finish()
             }
         }
     }
 }
+
+internal fun isApplicationPackageChange(
+    packageName: String,
+    changedComponents: Array<String>?
+): Boolean = changedComponents == null || packageName in changedComponents
