@@ -20,23 +20,23 @@ class PackageRemovedReceiver : BroadcastReceiver(), KoinComponent {
         val packageName = intent.data?.schemeSpecificPart ?: return
         when (action) {
             Intent.ACTION_PACKAGE_FULLY_REMOVED -> {
-                notify(packageName, clearDisabledUpdates = false, requireStateChange = false)
+                handlePackageChange(packageName, clearDisabledUpdates = false, requireStateChange = false)
             }
             Intent.ACTION_PACKAGE_ADDED -> {
-                notify(packageName, clearDisabledUpdates = true, requireStateChange = false)
+                handlePackageChange(packageName, clearDisabledUpdates = true, requireStateChange = false)
             }
             Intent.ACTION_PACKAGE_CHANGED -> {
                 if (isApplicationPackageChange(packageName, intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST))) {
-                    notify(packageName, clearDisabledUpdates = true, requireStateChange = true)
+                    handlePackageChange(packageName, clearDisabledUpdates = true, requireStateChange = true)
                 }
             }
             Intent.ACTION_PACKAGE_REPLACED -> {
-                notify(packageName, clearDisabledUpdates = true, requireStateChange = false)
+                handlePackageChange(packageName, clearDisabledUpdates = true, requireStateChange = false)
             }
         }
     }
 
-    private fun notify(
+    private fun handlePackageChange(
         packageName: String,
         clearDisabledUpdates: Boolean,
         requireStateChange: Boolean
