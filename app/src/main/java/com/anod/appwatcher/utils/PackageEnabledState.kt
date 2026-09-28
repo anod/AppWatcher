@@ -29,6 +29,19 @@ internal fun isPackageEnabled(manifestEnabled: Boolean, enabledSetting: Int): Bo
     else -> manifestEnabled
 }
 
+internal suspend fun AppListTable.clearDisabledUpdateStatus(
+    packageName: String,
+    installedApps: InstalledApps,
+    packageEnabled: (String) -> Boolean
+): Int = withContext(Dispatchers.IO) {
+    val packageInfo = installedApps.packageInfo(packageName)
+    if (packageInfo.isInstalled && !packageEnabled(packageName)) {
+        clearUpdateStatusByPackageName(packageName)
+    } else {
+        0
+    }
+}
+
 internal suspend fun AppListTable.clearDisabledUpdateStatuses(
     installedApps: InstalledApps,
     packageEnabled: (String) -> Boolean

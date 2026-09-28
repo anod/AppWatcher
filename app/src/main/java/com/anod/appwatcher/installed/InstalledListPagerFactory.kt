@@ -3,6 +3,7 @@ package com.anod.appwatcher.installed
 
 import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionHeaderFactory
 import com.anod.appwatcher.watchlist.WatchListPagerFactory
@@ -34,10 +35,11 @@ class InstalledListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config
         }
 
     override fun createPagingSource(): FilterablePagingSource = InstalledPagingSource(
-        changelogAdapter,
-        packageManager,
-        database,
-        installedApps
+        changelogAdapter = changelogAdapter,
+        packageManager = packageManager,
+        database = database,
+        installedApps = installedApps,
+        packageEnabled = packageManager::isPackageEnabled
     ).also {
         it.sortId = sortId
         it.selectionMode = selectionMode

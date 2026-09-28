@@ -2,6 +2,7 @@ package com.anod.appwatcher.watchlist
 
 import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.utils.prefs
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,8 @@ class AppsWatchListPagerFactory(pagingSourceConfig: WatchListPagingSource.Config
         config = pagingSourceConfig,
         packageManager = packageManager,
         database = database,
-        installedApps = installedApps
+        installedApps = installedApps,
+        packageEnabled = packageManager::isPackageEnabled
     ).also {
         it.filterQuery = filterQuery
     }

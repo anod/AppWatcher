@@ -8,7 +8,7 @@ import android.content.pm.PackageManager
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.appScope
-import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
+import com.anod.appwatcher.utils.clearDisabledUpdateStatus
 import com.anod.appwatcher.utils.isPackageEnabled
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.launch
@@ -42,7 +42,8 @@ class PackageRemovedReceiver : BroadcastReceiver(), KoinComponent {
             try {
                 if (clearDisabledUpdates) {
                     val packageManager = get<PackageManager>()
-                    get<AppsDatabase>().apps().clearDisabledUpdateStatuses(
+                    get<AppsDatabase>().apps().clearDisabledUpdateStatus(
+                        packageName = packageName,
                         installedApps = InstalledApps.PackageManager(packageManager),
                         packageEnabled = packageManager::isPackageEnabled
                     )

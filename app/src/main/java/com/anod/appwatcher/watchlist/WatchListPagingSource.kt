@@ -14,7 +14,6 @@ import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.isPackageEnabled
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
@@ -27,7 +26,7 @@ class WatchListPagingSource(
     private val packageManager: PackageManager,
     private val database: AppsDatabase,
     private val installedApps: InstalledApps,
-    private val packageEnabled: (String) -> Boolean = { packageManager.isPackageEnabled(it) },
+    private val packageEnabled: (String) -> Boolean,
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
         set(value) {

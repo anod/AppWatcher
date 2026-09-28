@@ -119,9 +119,9 @@ fun ShareIcon() {
 
 @Composable
 fun InstalledSignIcon(
+    enabled: Boolean,
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current,
-    enabled: Boolean = true
+    tint: Color = LocalContentColor.current
 ) {
     Icon(
         imageVector = if (enabled) Icons.Default.Smartphone else Icons.Default.PhonelinkOff,
@@ -224,7 +224,7 @@ private fun IconsResourcesPreview() {
                 { PlayStoreAppIcon() },
                 { PlayStoreMyAppsIcon() },
                 { ShareIcon() },
-                { InstalledSignIcon() },
+                { InstalledSignIcon(enabled = true) },
                 { StoreVersionSignIcon() },
                 { WatchedIcon(unwatch = true) },
                 { WatchedIcon(unwatch = false) },

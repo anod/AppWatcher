@@ -12,6 +12,7 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.clearDisabledUpdateStatus
 import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.notification.NotificationManager
@@ -179,6 +180,42 @@ class WatchListPagingSourceRoomTest {
                 .insertSeparator(before = null, after = appItem)
                 ?.type
         )
+    }
+
+    @Test
+    fun packageChangeClearsOnlyChangedDisabledUpdateStatus() = runBlocking {
+        insertApp(
+            appId = "disabled",
+            packageName = "disabled.watched",
+            title = "Disabled Watched",
+            versionNumber = 2,
+            status = App.STATUS_UPDATED,
+            syncTime = System.currentTimeMillis()
+        )
+        insertApp(
+            appId = "other",
+            packageName = "other.watched",
+            title = "Other Watched",
+            versionNumber = 2,
+            status = App.STATUS_UPDATED,
+            syncTime = System.currentTimeMillis()
+        )
+        val installedApps = InstalledApps.StaticMap(
+            mapOf(
+                "disabled.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+                "other.watched" to InstalledApps.Info(versionCode = 1, versionName = "1")
+            )
+        )
+
+        val cleared = db.apps().clearDisabledUpdateStatus(
+            packageName = "disabled.watched",
+            installedApps = installedApps,
+            packageEnabled = { false }
+        )
+
+        assertEquals(1, cleared)
+        assertEquals(App.STATUS_NORMAL, db.apps().loadApp("disabled")!!.status)
+        assertEquals(App.STATUS_UPDATED, db.apps().loadApp("other")!!.status)
     }
 
     @Test

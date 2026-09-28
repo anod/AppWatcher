@@ -7,7 +7,6 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
 import info.anodsplace.applog.AppLog
@@ -19,7 +18,7 @@ class InstalledPagingSource(
     private val packageManager: PackageManager,
     private val database: AppsDatabase,
     private val installedApps: InstalledApps,
-    private val packageEnabled: (String) -> Boolean = { packageManager.isPackageEnabled(it) },
+    private val packageEnabled: (String) -> Boolean,
 ) :
     FilterablePagingSource() {
     override var filterQuery: String = ""

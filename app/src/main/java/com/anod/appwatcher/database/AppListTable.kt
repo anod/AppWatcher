@@ -156,6 +156,14 @@ interface AppListTable {
         "UPDATE $TABLE SET " +
             "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
             "${Columns.SYNC_TIMESTAMP} = 0 " +
+            "WHERE ${Columns.PACKAGE_NAME} = :packageName AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
+    )
+    suspend fun clearUpdateStatusByPackageName(packageName: String): Int
+
+    @Query(
+        "UPDATE $TABLE SET " +
+            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
+            "${Columns.SYNC_TIMESTAMP} = 0 " +
             "WHERE ${BaseColumns._ID} IN (:rowIds) AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
     )
     suspend fun clearUpdateStatuses(rowIds: List<Int>): Int
