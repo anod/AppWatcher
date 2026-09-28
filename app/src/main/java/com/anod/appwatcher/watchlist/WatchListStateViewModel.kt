@@ -32,9 +32,11 @@ import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.getInt
+import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
@@ -213,6 +215,17 @@ class WatchListStateViewModel(
         AppLog.d("Initial state: viewState")
 
         viewModelScope.launch {
+            val clearedDisabledUpdates = db.apps().clearDisabledUpdateStatuses(
+                installedApps = installedApps,
+                packageEnabled = packageManager::isPackageEnabled
+            )
+            if (clearedDisabledUpdates > 0) {
+                invalidatePagingSources()
+                viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
+            }
+        }
+
+        viewModelScope.launch {
             syncProgressFlow(application).collect {
                 handleEvent(WatchListEvent.UpdateSyncProgress(syncProgress = it))
             }
@@ -262,6 +275,13 @@ class WatchListStateViewModel(
                 .collect {
                     viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
                 }
+        }
+
+        viewModelScope.launch {
+            packageChangedReceiver.observer.collect {
+                installedApps.reset()
+                invalidatePagingSources()
+            }
         }
 
         viewModelScope.launch {

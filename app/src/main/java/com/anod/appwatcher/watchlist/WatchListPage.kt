@@ -35,7 +35,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -75,6 +74,7 @@ import coil3.compose.AsyncImage
 import com.anod.appwatcher.R
 import com.anod.appwatcher.compose.AppIconImage
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.compose.InstalledSignIcon
 import com.anod.appwatcher.compose.WatchedIcon
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
@@ -219,6 +219,7 @@ fun WatchListSectionItem(
             selection = selection,
             selectionMode = selectionMode,
             packageInfo = item.packageInfo,
+            isPackageEnabled = item.isPackageEnabled,
             appIconLoader = appIconLoader
         )
 
@@ -232,6 +233,7 @@ fun WatchListSectionItem(
             selection = selection,
             selectionMode = selectionMode,
             packageInfo = item.packageInfo,
+            isPackageEnabled = item.isPackageEnabled,
             appIconLoader = appIconLoader
         )
 
@@ -317,6 +319,7 @@ private fun AppItem(
     onClick: (() -> Unit),
     onLongClick: (() -> Unit),
     packageInfo: InstalledApps.Info,
+    isPackageEnabled: Boolean,
     modifier: Modifier = Modifier,
     selection: SelectionState = SelectionState(),
     selectionMode: Boolean = false,
@@ -327,7 +330,7 @@ private fun AppItem(
         derivedStateOf { getPackageSelection(app.packageName, selectionMode, selection) }
     }
     val appItemState = rememberAppItemState(
-        app, item.recentFlag, packageInfo
+        app, item.recentFlag, packageInfo, isPackageEnabled
     )
 
     Box(modifier = modifier) {
@@ -383,9 +386,8 @@ private fun AppItem(
                         )
                     }
                     if (appItemState.installed || isLocalApp) {
-                        Icon(
-                            imageVector = Icons.Default.Smartphone,
-                            contentDescription = stringResource(id = R.string.installed),
+                        InstalledSignIcon(
+                            enabled = isPackageEnabled,
                             modifier = Modifier
                                 .size(16.dp)
                                 .padding(end = 4.dp)
@@ -729,7 +731,8 @@ private fun WatchListPreview() {
                 recentFlag = true
             ),
             isLocal = false,
-            packageInfo = InstalledApps.Info(0, "")
+            packageInfo = InstalledApps.Info(0, ""),
+            isPackageEnabled = true
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -755,7 +758,8 @@ private fun WatchListPreview() {
                 recentFlag = true
             ),
             isLocal = true,
-            packageInfo = InstalledApps.Info(0, "")
+            packageInfo = InstalledApps.Info(0, ""),
+            isPackageEnabled = true
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -784,7 +788,8 @@ private fun WatchListPreview() {
             packageInfo = InstalledApps.Info(
                 versionName = "very long long version name consectetur adipiscing elit",
                 versionCode = 11223300
-            )
+            ),
+            isPackageEnabled = true
         ), SectionItem.App(
             AppListItem(
                 app = App(
@@ -810,7 +815,8 @@ private fun WatchListPreview() {
                 recentFlag = true
             ),
             isLocal = false,
-            packageInfo = InstalledApps.Info(versionName = "version name", versionCode = 11223300)
+            packageInfo = InstalledApps.Info(versionName = "version name", versionCode = 11223300),
+            isPackageEnabled = true
         )
     )
     val selectionState = SelectionState()

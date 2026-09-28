@@ -84,6 +84,7 @@ class InstalledListViewModel(state: SavedStateHandle, showAction: Boolean, sortI
         viewModelScope.launch {
             packageChanged.observer.collect { packageChanged ->
                 if (viewState.importStatus !is ImportStatus.Progress) {
+                    installedApps.reset()
                     viewState = viewState.copy(packageChanged = packageChanged)
                 }
             }

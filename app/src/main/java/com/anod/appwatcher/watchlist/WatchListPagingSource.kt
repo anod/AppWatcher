@@ -7,12 +7,14 @@ import androidx.paging.PagingState
 import com.anod.appwatcher.database.AppListRowSnapshot
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.packageToApp
 import com.anod.appwatcher.installed.InstalledTaskWorker
 import com.anod.appwatcher.model.AppListFilter
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.isPackageEnabled
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import kotlin.math.max
@@ -25,6 +27,7 @@ class WatchListPagingSource(
     private val packageManager: PackageManager,
     private val database: AppsDatabase,
     private val installedApps: InstalledApps,
+    private val packageEnabled: (String) -> Boolean = { packageManager.isPackageEnabled(it) },
 ) : FilterablePagingSource() {
     override var filterQuery: String = ""
         set(value) {
@@ -43,16 +46,24 @@ class WatchListPagingSource(
 
     private data class AppListSnapshot(
         val filterQuery: String,
-        val rows: List<AppListRowSnapshot>,
+        val rows: List<AppListSnapshotRow>,
+    )
+
+    private data class AppListSnapshotRow(
+        val databaseRow: AppListRowSnapshot,
+        val packageInfo: InstalledApps.Info,
+        val isPackageEnabled: Boolean,
+        val sectionRank: Int,
+        val sortPosition: Int,
     )
 
     @Immutable
     data class Config(val filterId: Int, val tagId: Int?, val showRecentlyDiscovered: Boolean, val showOnDevice: Boolean, val showRecentlyInstalled: Boolean,)
 
     private fun createFilter(filterId: Int): AppListFilter = when (filterId) {
-        Filters.INSTALLED -> AppListFilter.Installed(installedApps)
-        Filters.UNINSTALLED -> AppListFilter.Uninstalled(installedApps)
-        Filters.UPDATABLE -> AppListFilter.Updatable(installedApps)
+        Filters.INSTALLED -> AppListFilter.Installed()
+        Filters.UNINSTALLED -> AppListFilter.Uninstalled()
+        Filters.UPDATABLE -> AppListFilter.Updatable()
         else -> AppListFilter.All()
     }
 
@@ -77,26 +88,35 @@ class WatchListPagingSource(
         } else {
             snapshot.rows.subList(offset, minOf(snapshot.rows.size, offset + limit))
         }
-        val pageRowsById = pageRows.associateBy { it.rowId }
-        val data = AppListTable.Queries.loadAppList(pageRows.map { it.rowId }, database.apps())
-            .map { item ->
+        val pageRowsById = pageRows.associateBy { it.databaseRow.rowId }
+        val data = AppListTable.Queries.loadAppList(pageRows.map { it.databaseRow.rowId }, database.apps())
+            .mapNotNull { item ->
                 val snapshotRow = pageRowsById.getValue(item.app.rowId)
-                item.copy(
-                    app = item.app.copy(status = snapshotRow.status),
-                    recentFlag = snapshotRow.recentFlag,
+                if (
+                    item.app.packageName != snapshotRow.databaseRow.packageName ||
+                    item.app.versionNumber != snapshotRow.databaseRow.versionNumber
+                ) {
+                    return@mapNotNull null
+                }
+                Pair(
+                    item.copy(
+                        app = item.app.copy(status = snapshotRow.databaseRow.status),
+                        recentFlag = snapshotRow.databaseRow.recentFlag,
+                    ),
+                    snapshotRow
                 )
             }
-        val filtered = data.filter { !itemFilter.filterRecord(it) }
         var totalItems = countTotalItems(
             snapshotSize = snapshot.rows.size,
             hasMissingSnapshotRows = data.size < pageRows.size,
         )
 
-        items.addAll(filtered.map {
+        items.addAll(data.map { (item, snapshotRow) ->
             SectionItem.App(
-                appListItem = it,
+                appListItem = item,
                 isLocal = false,
-                packageInfo = installedApps.packageInfo(it.app.packageName)
+                packageInfo = snapshotRow.packageInfo,
+                isPackageEnabled = snapshotRow.isPackageEnabled
             )
         })
 
@@ -156,21 +176,48 @@ class WatchListPagingSource(
             if (lockedSnapshot?.filterQuery == lockedFilterQuery) {
                 lockedSnapshot
             } else {
+                val databaseRows = AppListTable.Queries.loadAppListRows(
+                    sortId,
+                    config.tagId,
+                    lockedFilterQuery,
+                    database.apps()
+                )
+                val rows = databaseRows
+                    .mapIndexed { index, row ->
+                        val packageInfo = installedApps.packageInfo(row.packageName)
+                        val isPackageEnabled = !packageInfo.isInstalled || packageEnabled(row.packageName)
+                        AppListSnapshotRow(
+                            databaseRow = row,
+                            packageInfo = packageInfo,
+                            isPackageEnabled = isPackageEnabled,
+                            sectionRank = sectionRank(row, isPackageEnabled),
+                            sortPosition = index,
+                        )
+                    }
+                    .filterNot { row ->
+                        itemFilter.filterRecord(
+                            versionCode = row.databaseRow.versionNumber,
+                            packageInfo = row.packageInfo,
+                            isPackageEnabled = row.isPackageEnabled
+                        )
+                    }
+                    .sortedWith(compareBy(AppListSnapshotRow::sectionRank, AppListSnapshotRow::sortPosition))
                 AppListSnapshot(
                     filterQuery = lockedFilterQuery,
-                    rows = AppListTable.Queries.loadAppListRows(
-                        sortId,
-                        config.showRecentlyDiscovered,
-                        config.tagId,
-                        lockedFilterQuery,
-                        database.apps()
-                    ),
+                    rows = rows,
                 ).also {
                     appListSnapshot = it
                 }
             }
         }
     }
+
+    private fun sectionRank(row: AppListRowSnapshot, isPackageEnabled: Boolean): Int =
+        when {
+            isPackageEnabled && row.status == App.STATUS_UPDATED -> 0
+            isPackageEnabled && config.showRecentlyDiscovered && row.recentFlag -> 1
+            else -> 2
+        }
 
     private suspend fun loadOnDeviceItems(titleFilter: String): List<SectionItem.OnDevice> {
         val installed = InstalledTaskWorker(packageManager, sortId, titleFilter).run()
@@ -182,10 +229,12 @@ class WatchListPagingSource(
             .map { packageManager.packageToApp(-1, it) }
             .map { app -> AppListItem(app, "", noNewDetails = false, recentFlag = false) }
             .map { item ->
+                val packageInfo = installedApps.packageInfo(item.app.packageName)
                 SectionItem.OnDevice(
                     appListItem = item,
                     showSelection = false,
-                    packageInfo = installedApps.packageInfo(item.app.packageName)
+                    packageInfo = packageInfo,
+                    isPackageEnabled = !packageInfo.isInstalled || packageEnabled(item.app.packageName)
                 )
             }.toList()
     }

@@ -513,6 +513,7 @@ fun VersionDetails(screenState: DetailsState) {
         ) {
             if (screenState.packageInfo.isInstalled || screenState.isLocalApp) {
                 InstalledSignIcon(
+                    enabled = screenState.isPackageEnabled,
                     modifier = Modifier
                         .size(16.dp)
                         .padding(end = 4.dp)
@@ -521,7 +522,8 @@ fun VersionDetails(screenState: DetailsState) {
                     val appItemState = rememberAppItemState(
                         app = screenState.app,
                         recentFlag = false,
-                        packageInfo = screenState.packageInfo
+                        packageInfo = screenState.packageInfo,
+                        isPackageEnabled = screenState.isPackageEnabled
                     )
                     Text(
                         text = appItemState.text,
@@ -624,7 +626,10 @@ private fun ChangelogList(
         items(changelogs.size) { i ->
             Column {
                 if (i == dividerIndex) {
-                    InstalledChangelogDivider(packageInfo = packageInfo)
+                    InstalledChangelogDivider(
+                        packageInfo = packageInfo,
+                        isPackageEnabled = screenState.isPackageEnabled
+                    )
                 }
                 ChangelogItem(
                     change = changelogs[i],
@@ -634,7 +639,10 @@ private fun ChangelogList(
         }
         if (dividerIndex == changelogs.size) {
             item {
-                InstalledChangelogDivider(packageInfo = packageInfo)
+                InstalledChangelogDivider(
+                    packageInfo = packageInfo,
+                    isPackageEnabled = screenState.isPackageEnabled
+                )
             }
         }
     }
@@ -705,9 +713,13 @@ private fun ChangelogItemHeader(change: AppChange) {
 }
 
 @Composable
-private fun InstalledChangelogDivider(packageInfo: InstalledApps.Info, modifier: Modifier = Modifier) {
+private fun InstalledChangelogDivider(
+    packageInfo: InstalledApps.Info,
+    isPackageEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
     val versionText = stringResource(id = R.string.version_text, packageInfo.versionName, packageInfo.versionCode)
-    val installedText = stringResource(id = R.string.installed)
+    val installedText = stringResource(id = if (isPackageEnabled) R.string.installed else R.string.installed_disabled)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -717,6 +729,7 @@ private fun InstalledChangelogDivider(packageInfo: InstalledApps.Info, modifier:
     ) {
         ChangelogDividerLine(modifier = Modifier.weight(1f))
         InstalledSignIcon(
+            enabled = isPackageEnabled,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(start = 8.dp, end = 4.dp)
@@ -1010,19 +1023,21 @@ private fun DetailsTopAppBar(
                 )
 
                 if (screenState.packageInfo.isInstalled) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(id = R.string.open),
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                            )
-                        },
-                        leadingIcon = { OpenAppIcon() },
-                        onClick = {
-                            onEvent(DetailsEvent.Open)
-                            dismiss()
-                        }
-                    )
+                    if (screenState.isPackageEnabled) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.open),
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                            },
+                            leadingIcon = { OpenAppIcon() },
+                            onClick = {
+                                onEvent(DetailsEvent.Open)
+                                dismiss()
+                            }
+                        )
+                    }
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -1091,6 +1106,7 @@ private fun DetailsScreenPreview() {
             syncTime = 0
         ),
         title = "Test title long app name",
+        isPackageEnabled = true,
         changelogState = ChangelogLoadState.Complete,
         changelogs = listOf(
             AppChange(
@@ -1178,6 +1194,7 @@ private fun VersionInfoPreview() {
                         syncTime = 0
                     ),
                     title = "Test title long app name",
+                    isPackageEnabled = true,
                     changelogState = ChangelogLoadState.Complete,
                     changelogs = listOf(),
                     remoteVersionInfo = AppVersionInfo(

@@ -30,28 +30,39 @@ fun rememberAppItemState(
     app: App,
     recentFlag: Boolean,
     packageInfo: InstalledApps.Info,
+    isPackageEnabled: Boolean,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     primaryColor: Color = MaterialTheme.colorScheme.primary
 ): AppItemState {
     val context = LocalContext.current
-    return remember(app, recentFlag, packageInfo, textColor, primaryColor, context) {
+    return remember(app, recentFlag, packageInfo, isPackageEnabled, textColor, primaryColor, context) {
         calcAppItemState(
-            app, recentFlag, textColor, primaryColor, packageInfo, context
+            app, recentFlag, textColor, primaryColor, packageInfo, isPackageEnabled, context
         )
     }
 }
 
-private fun calcAppItemState(
+internal fun calcAppItemState(
     app: App,
     recentFlag: Boolean,
     textColor: Color,
     primaryColor: Color,
     packageInfo: InstalledApps.Info,
+    isPackageEnabled: Boolean,
     context: Context
 ): AppItemState {
     var color = textColor
     var installed = false
     val text = when {
+        packageInfo.isInstalled && !isPackageEnabled -> {
+            installed = true
+            context.getString(
+                R.string.installed_disabled_version,
+                packageInfo.versionName,
+                packageInfo.versionCode
+            )
+        }
+
         app.versionNumber == 0 -> {
             color = Amber800
             context.getString(R.string.updates_not_available)
@@ -89,6 +100,7 @@ private fun calcAppItemState(
     }
 
     val showRecent = when {
+        !isPackageEnabled -> false
         app.status == App.STATUS_UPDATED || recentFlag -> true
         else -> false
     }

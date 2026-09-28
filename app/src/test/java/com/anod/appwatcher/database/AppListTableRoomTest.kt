@@ -248,7 +248,6 @@ class AppListTableRoomTest {
     private suspend fun loadIds(tagId: Int?, titleFilter: String): List<String> {
         val rows = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
-            orderByRecentlyDiscovered = false,
             tagId = tagId,
             titleFilter = titleFilter,
             table = db.apps()

@@ -7,13 +7,20 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
 import info.anodsplace.applog.AppLog
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.ktx.dayStartAgoMillis
 
-class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, private val packageManager: PackageManager, private val database: AppsDatabase, private val installedApps: InstalledApps,) :
+class InstalledPagingSource(
+    private val changelogAdapter: ChangelogAdapter,
+    private val packageManager: PackageManager,
+    private val database: AppsDatabase,
+    private val installedApps: InstalledApps,
+    private val packageEnabled: (String) -> Boolean = { packageManager.isPackageEnabled(it) },
+) :
     FilterablePagingSource() {
     override var filterQuery: String = ""
     var sortId: Int = 0
@@ -47,6 +54,7 @@ class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, priv
             }
             .map { app ->
                 val appChange = changelogAdapter.changelogs[app.appId]
+                val packageInfo = installedApps.packageInfo(app.packageName)
                 SectionItem.OnDevice(
                     appListItem = AppListItem(
                         app = app,
@@ -55,7 +63,8 @@ class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, priv
                         recentFlag = false
                     ),
                     showSelection = selectionMode,
-                    packageInfo = installedApps.packageInfo(app.packageName)
+                    packageInfo = packageInfo,
+                    isPackageEnabled = !packageInfo.isInstalled || packageEnabled(app.packageName)
                 )
             }.toList()
 

@@ -12,6 +12,7 @@ import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.notification.NotificationManager
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +70,118 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
+    fun disabledInstalledAppIsNotShownAsUpdatable() = runBlocking {
+        insertApp(
+            appId = "disabled",
+            packageName = "disabled.watched",
+            title = "Z Disabled Watched",
+            versionNumber = 2,
+            status = App.STATUS_UPDATED
+        )
+        insertApp(
+            appId = "enabled",
+            packageName = "enabled.watched",
+            title = "M Enabled Watched",
+            versionNumber = 2,
+            status = App.STATUS_UPDATED
+        )
+        insertApp(
+            appId = "normal",
+            packageName = "normal.watched",
+            title = "A Normal Watched"
+        )
+
+        val allResult = createPagingSource(
+            showOnDevice = false,
+            packageEnabled = { it != "disabled.watched" }
+        ).load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val appItems = (allResult as PagingSource.LoadResult.Page)
+            .data
+            .filterIsInstance<SectionItem.App>()
+        val disabledItem = appItems.single { it.appListItem.app.packageName == "disabled.watched" }
+
+        assertFalse(disabledItem.isPackageEnabled)
+        assertEquals(
+            listOf("enabled.watched", "normal.watched", "disabled.watched"),
+            appItems.map { it.appListItem.app.packageName }
+        )
+        val sectionHeaderFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
+        val headers = appItems.mapIndexedNotNull { index, item ->
+            sectionHeaderFactory.insertSeparator(appItems.getOrNull(index - 1), item)
+        }
+        assertEquals(
+            listOf(SectionHeader.New, SectionHeader.Watching),
+            headers.map { it.type }
+        )
+        assertEquals(headers.size, headers.distinctBy { it.sectionKey }.size)
+        assertEquals(
+            SectionHeader.Watching,
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
+                .insertSeparator(before = appItems.first(), after = disabledItem)
+                ?.type
+        )
+
+        val updatableResult = createPagingSource(
+            showOnDevice = false,
+            filterId = Filters.UPDATABLE,
+            packageEnabled = { it != "disabled.watched" }
+        ).load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+
+        assertEquals(
+            listOf("enabled.watched"),
+            (updatableResult as PagingSource.LoadResult.Page)
+                .data
+                .filterIsInstance<SectionItem.App>()
+                .map { it.appListItem.app.packageName }
+        )
+    }
+
+    @Test
+    fun disabledUpdateStatusIsClearedBeforePackageIsReenabled() = runBlocking {
+        insertApp(
+            appId = "disabled",
+            packageName = "disabled.watched",
+            title = "Disabled Watched",
+            versionNumber = 2,
+            status = App.STATUS_UPDATED,
+            syncTime = System.currentTimeMillis()
+        )
+        val installedApps = InstalledApps.StaticMap(
+            mapOf(
+                "disabled.watched" to InstalledApps.Info(versionCode = 1, versionName = "1")
+            )
+        )
+
+        val cleared = db.apps().clearDisabledUpdateStatuses(
+            installedApps = installedApps,
+            packageEnabled = { false }
+        )
+
+        assertEquals(1, cleared)
+        val storedApp = db.apps().loadApp("disabled")!!
+        assertEquals(App.STATUS_NORMAL, storedApp.status)
+        assertEquals(0L, storedApp.syncTime)
+
+        val result = createPagingSource(
+            showOnDevice = false,
+            packageEnabled = { true },
+            installedApps = installedApps
+        ).load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
+        val appItem = (result as PagingSource.LoadResult.Page)
+            .data
+            .filterIsInstance<SectionItem.App>()
+            .single()
+
+        assertEquals(App.STATUS_NORMAL, appItem.appListItem.app.status)
+        assertEquals(
+            SectionHeader.Watching,
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
+                .insertSeparator(before = null, after = appItem)
+                ?.type
+        )
+    }
+
+    @Test
     fun showOnDeviceUsesUndefinedCountSoExactPageBoundaryCanLoadInstalledApps() = runBlocking {
         repeat(20) { index ->
             insertApp(appId = "boundary-$index", packageName = "boundary.watched.$index", title = "Boundary Watched $index")
@@ -121,7 +234,6 @@ class WatchListPagingSourceRoomTest {
             }
         val unloadedRow = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
-            orderByRecentlyDiscovered = false,
             tagId = null,
             titleFilter = "",
             table = db.apps()
@@ -157,7 +269,6 @@ class WatchListPagingSourceRoomTest {
         val firstPage = firstResult as PagingSource.LoadResult.Page
         val secondPageRow = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
-            orderByRecentlyDiscovered = false,
             tagId = null,
             titleFilter = "",
             table = db.apps()
@@ -168,6 +279,64 @@ class WatchListPagingSourceRoomTest {
         val secondPage = secondResult as PagingSource.LoadResult.Page
 
         assertTrue(secondPage.data.filterIsInstance<SectionItem.App>().none { it.appListItem.app.rowId == secondPageRow.rowId })
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsBefore)
+        assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsAfter)
+    }
+
+    @Test
+    fun pagingSourceDoesNotRenderRowsWhoseVersionChangedAfterSnapshot() = runBlocking {
+        val packageNames = (0 until 40).map { index ->
+            "version.${index.toString().padStart(2, '0')}"
+        }
+        packageNames.forEachIndexed { index, packageName ->
+            insertApp(
+                appId = "version-$index",
+                packageName = packageName,
+                title = "Version ${index.toString().padStart(2, '0')}",
+                versionNumber = 2,
+                status = App.STATUS_UPDATED
+            )
+        }
+        val installedApps = InstalledApps.StaticMap(
+            packageNames.associateWith {
+                InstalledApps.Info(versionCode = 1, versionName = "1")
+            }
+        )
+        val pagingSource = createPagingSource(
+            showOnDevice = false,
+            filterId = Filters.UPDATABLE,
+            installedApps = installedApps
+        )
+
+        val firstResult = pagingSource.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
+        )
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        val changedRow = AppListTable.Queries.loadAppListRows(
+            sortId = Preferences.SORT_NAME_ASC,
+            tagId = null,
+            titleFilter = "",
+            table = db.apps()
+        )[25]
+        db.openHelper.writableDatabase.execSQL(
+            "UPDATE ${AppListTable.TABLE} SET ${AppListTable.Columns.VERSION_NUMBER} = ? WHERE _id = ?",
+            arrayOf<Any>(1, changedRow.rowId)
+        )
+
+        val secondResult = pagingSource.load(
+            PagingSource.LoadParams.Append(
+                key = firstPage.nextKey!!,
+                loadSize = 20,
+                placeholdersEnabled = false
+            )
+        )
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+
+        assertTrue(
+            secondPage.data
+                .filterIsInstance<SectionItem.App>()
+                .none { it.appListItem.app.rowId == changedRow.rowId }
+        )
         assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsBefore)
         assertEquals(PagingSource.LoadResult.Page.COUNT_UNDEFINED, secondPage.itemsAfter)
     }
@@ -194,7 +363,6 @@ class WatchListPagingSourceRoomTest {
         val firstPage = firstResult as PagingSource.LoadResult.Page
         val unloadedRow = AppListTable.Queries.loadAppListRows(
             sortId = Preferences.SORT_NAME_ASC,
-            orderByRecentlyDiscovered = true,
             tagId = null,
             titleFilter = "",
             table = db.apps()
@@ -213,6 +381,78 @@ class WatchListPagingSourceRoomTest {
         assertEquals(itemsWithHeaders.map { it.sectionKey }.toSet().size, itemsWithHeaders.size)
         assertEquals(1, itemsWithHeaders.count { it.sectionKey == "header:recently-discovered" })
         assertEquals(1, itemsWithHeaders.count { it.sectionKey == "header:watching" })
+    }
+
+    @Test
+    fun packageEnabledStateIsPinnedForThePagingGeneration() = runBlocking {
+        val packageNames = (0 until 40).map { index -> "snapshot.${index.toString().padStart(2, '0')}" }
+        packageNames.forEachIndexed { index, packageName ->
+            insertApp(
+                appId = "snapshot-$index",
+                packageName = packageName,
+                title = "Snapshot ${index.toString().padStart(2, '0')}",
+                versionNumber = 2,
+                status = App.STATUS_UPDATED
+            )
+        }
+        val installedApps = InstalledApps.StaticMap(
+            packageNames.associateWith {
+                InstalledApps.Info(versionCode = 1, versionName = "1")
+            }
+        )
+        val enabledStates = packageNames.associateWith { true }.toMutableMap()
+        var enabledLookups = 0
+        val packageEnabled: (String) -> Boolean = { packageName ->
+            enabledLookups++
+            enabledStates.getValue(packageName)
+        }
+        val pagingSource = createPagingSource(
+            showOnDevice = false,
+            packageEnabled = packageEnabled,
+            installedApps = installedApps,
+        )
+
+        val firstResult = pagingSource.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
+        )
+        val firstPage = firstResult as PagingSource.LoadResult.Page
+        assertEquals(40, enabledLookups)
+
+        enabledStates["snapshot.25"] = false
+        val secondResult = pagingSource.load(
+            PagingSource.LoadParams.Append(key = firstPage.nextKey!!, loadSize = 20, placeholdersEnabled = false)
+        )
+        val secondPage = secondResult as PagingSource.LoadResult.Page
+        val currentGenerationItems = (firstPage.data + secondPage.data).filterIsInstance<SectionItem.App>()
+
+        assertTrue(currentGenerationItems.single { it.appListItem.app.packageName == "snapshot.25" }.isPackageEnabled)
+        assertEquals(40, enabledLookups)
+        val currentGenerationWithHeaders = insertHeaders(currentGenerationItems)
+        assertEquals(
+            currentGenerationWithHeaders.map { it.sectionKey }.toSet().size,
+            currentGenerationWithHeaders.size
+        )
+        assertEquals(1, currentGenerationWithHeaders.count { it.sectionKey == "header:new" })
+        assertEquals(0, currentGenerationWithHeaders.count { it.sectionKey == "header:watching" })
+
+        val refreshedSource = createPagingSource(
+            showOnDevice = false,
+            packageEnabled = packageEnabled,
+            installedApps = installedApps,
+        )
+        val refreshedResult = refreshedSource.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 40, placeholdersEnabled = false)
+        )
+        val refreshedItems = (refreshedResult as PagingSource.LoadResult.Page)
+            .data
+            .filterIsInstance<SectionItem.App>()
+        val refreshedWithHeaders = insertHeaders(refreshedItems)
+
+        assertFalse(refreshedItems.single { it.appListItem.app.packageName == "snapshot.25" }.isPackageEnabled)
+        assertEquals(80, enabledLookups)
+        assertEquals(1, refreshedWithHeaders.count { it.sectionKey == "header:new" })
+        assertEquals(1, refreshedWithHeaders.count { it.sectionKey == "header:watching" })
+        assertEquals(refreshedWithHeaders.map { it.sectionKey }.toSet().size, refreshedWithHeaders.size)
     }
 
     @Test
@@ -248,9 +488,12 @@ class WatchListPagingSourceRoomTest {
         showOnDevice: Boolean,
         preferences: Preferences = createPreferences(),
         showRecentlyDiscovered: Boolean = false,
+        filterId: Int = Filters.ALL,
+        packageEnabled: (String) -> Boolean = { true },
+        installedApps: InstalledApps = defaultInstalledApps(),
     ) = WatchListPagingSource(
         config = WatchListPagingSource.Config(
-            filterId = Filters.ALL,
+            filterId = filterId,
             tagId = null,
             showRecentlyDiscovered = showRecentlyDiscovered,
             showOnDevice = showOnDevice,
@@ -259,14 +502,20 @@ class WatchListPagingSourceRoomTest {
         prefs = preferences,
         packageManager = context.packageManager,
         database = db,
-        installedApps = InstalledApps.StaticMap(
-            mapOf(
-                "local.only.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-                "local.only.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-                "boundary.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-                "sort.device.alpha" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-                "sort.device.zulu" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-            )
+        packageEnabled = packageEnabled,
+        installedApps = installedApps
+    )
+
+    private fun defaultInstalledApps(): InstalledApps = InstalledApps.StaticMap(
+        mapOf(
+            "local.only.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "local.only.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "boundary.device" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "sort.device.alpha" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "sort.device.zulu" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "disabled.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "enabled.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
+            "normal.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
         )
     )
 
@@ -298,6 +547,7 @@ class WatchListPagingSourceRoomTest {
         appId: String,
         packageName: String,
         title: String,
+        versionNumber: Int = 1,
         status: Int = App.STATUS_NORMAL,
         syncTime: Long = 0,
     ) {
@@ -306,7 +556,7 @@ class WatchListPagingSourceRoomTest {
                 rowId = 0,
                 appId = appId,
                 packageName = packageName,
-                versionNumber = 1,
+                versionNumber = versionNumber,
                 versionName = "1.0",
                 title = title,
                 creator = "creator",

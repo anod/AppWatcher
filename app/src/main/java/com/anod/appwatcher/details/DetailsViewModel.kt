@@ -33,9 +33,11 @@ import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.tags.TagSnackbarAppInfo
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.BaseFlowViewModel
+import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.androidVersions
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.forPlayStore
+import com.anod.appwatcher.utils.isPackageEnabled
 import com.anod.appwatcher.utils.prefs
 import finsky.api.DfeApi
 import finsky.api.Document
@@ -53,6 +55,7 @@ import java.net.URLEncoder
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -99,6 +102,7 @@ data class DetailsState(
     val remoteVersionInfo: AppVersionInfo? = null,
     val remoteCallFinished: Boolean = false,
     val packageInfo: InstalledApps.Info = InstalledApps.Info(0, ""),
+    val isPackageEnabled: Boolean,
     val isSystemInDarkTheme: Boolean = false,
     val theme: SelectedTheme = SelectedTheme()
 ) {
@@ -159,10 +163,12 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
     private val uploadDateParserCache: UploadDateParserCache by inject()
     private val iconLoader: AppIconLoader by inject()
     private val packageManager: PackageManager by inject()
+    private val packageChangedReceiver: PackageChangedReceiver by inject()
     private val dfeApi: DfeApi by inject()
     val installedApps: InstalledApps = InstalledApps.PackageManager(packageManager)
 
     init {
+        val packageInfo = installedApps.packageInfo(app.packageName)
         viewState = DetailsState(
             appId = app.appId,
             rowId = app.rowId,
@@ -171,7 +177,8 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
             appIconState = if (app.iconUrl.isEmpty()) AppIconState.Default else AppIconState.Initial,
             title = app.title,
             isLocalApp = app.rowId == -1,
-            packageInfo = installedApps.packageInfo(app.packageName),
+            packageInfo = packageInfo,
+            isPackageEnabled = !packageInfo.isInstalled || packageManager.isPackageEnabled(app.packageName),
             isSystemInDarkTheme = isSystemInDarkTheme,
             theme = prefs.selectedTheme
         )
@@ -180,6 +187,21 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
             loadAppIcon(app.iconUrl)
         }
         observeApp()
+        viewModelScope.launch {
+            packageChangedReceiver.observer
+                .filter { it.startsWith("${app.packageName}:") }
+                .collect {
+                    refreshPackageState(app.packageName)
+                }
+        }
+    }
+
+    private fun refreshPackageState(packageName: String) {
+        val packageInfo = installedApps.packageInfo(packageName)
+        viewState = viewState.copy(
+            packageInfo = packageInfo,
+            isPackageEnabled = !packageInfo.isInstalled || packageManager.isPackageEnabled(packageName)
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -273,13 +295,21 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
 
             DetailsEvent.OnBackPressed -> emitAction(DetailsAction.Dismiss)
             DetailsEvent.Open -> {
-                val launchIntent = packageManager.getLaunchIntentForPackage(viewState.appId)
-                if (launchIntent != null) {
+                if (!viewState.isPackageEnabled) {
                     emitAction(
                         startActivityAction(
-                            intent = launchIntent,
+                            intent = Intent().forAppInfo(viewState.appId),
                         )
                     )
+                } else {
+                    val launchIntent = packageManager.getLaunchIntentForPackage(viewState.appId)
+                    if (launchIntent != null) {
+                        emitAction(
+                            startActivityAction(
+                                intent = launchIntent,
+                            )
+                        )
+                    }
                 }
             }
 

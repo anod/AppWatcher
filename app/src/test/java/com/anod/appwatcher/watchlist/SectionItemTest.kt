@@ -134,7 +134,8 @@ class SectionItemTest {
             versionNumber = versionNumber
         ),
         isLocal = false,
-        packageInfo = packageInfo
+        packageInfo = packageInfo,
+        isPackageEnabled = true
     )
 
     private fun onDeviceSectionItem(
@@ -145,7 +146,8 @@ class SectionItemTest {
     ): SectionItem.OnDevice = SectionItem.OnDevice(
         appListItem = appListItem(rowId = -1, packageName = packageName, title = title),
         showSelection = showSelection,
-        packageInfo = packageInfo
+        packageInfo = packageInfo,
+        isPackageEnabled = true
     )
 
     private fun appListItem(

@@ -61,12 +61,17 @@ sealed interface SectionItem {
     }
 
     @Immutable
-    class App(val appListItem: AppListItem, val isLocal: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
+    class App(
+        val appListItem: AppListItem,
+        val isLocal: Boolean,
+        val packageInfo: InstalledApps.Info,
+        val isPackageEnabled: Boolean
+    ) : SectionItem {
         override val sectionKey = "app-${appListItem.app.rowId}-${appListItem.app.packageName}"
         override val contentType = "App"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int = hashCodeOf("SectionItem.App", appListItem, isLocal, packageInfo)
+        override fun hashCode(): Int = hashCodeOf("SectionItem.App", appListItem, isLocal, packageInfo, isPackageEnabled)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? App ?: return false
@@ -75,12 +80,17 @@ sealed interface SectionItem {
     }
 
     @Immutable
-    class OnDevice(val appListItem: AppListItem, var showSelection: Boolean, val packageInfo: InstalledApps.Info) : SectionItem {
+    class OnDevice(
+        val appListItem: AppListItem,
+        var showSelection: Boolean,
+        val packageInfo: InstalledApps.Info,
+        val isPackageEnabled: Boolean
+    ) : SectionItem {
         override val sectionKey = "ondevice-${appListItem.app.packageName}"
         override val contentType = "OnDevice"
         val changesHtml: String = appListItem.cleanChangeHtml()
 
-        override fun hashCode(): Int = hashCodeOf("SectionItem.OnDevice", appListItem, showSelection, packageInfo)
+        override fun hashCode(): Int = hashCodeOf("SectionItem.OnDevice", appListItem, showSelection, packageInfo, isPackageEnabled)
 
         override fun equals(other: Any?): Boolean {
             val item = other as? OnDevice ?: return false
