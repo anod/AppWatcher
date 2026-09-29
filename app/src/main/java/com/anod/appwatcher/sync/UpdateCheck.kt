@@ -2,7 +2,6 @@ package com.anod.appwatcher.sync
 
 import android.content.ContentValues
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.RemoteException
 import android.provider.BaseColumns
@@ -28,9 +27,13 @@ import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.preserveCachedMetadata
 import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageState
+import com.anod.appwatcher.utils.PackageStateCache
+import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
+import com.anod.appwatcher.utils.stateFor
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
 import finsky.api.DfeServerError
@@ -58,7 +61,7 @@ import org.koin.core.parameter.parametersOf
 
 class UpdateCheck(
     private val context: info.anodsplace.context.ApplicationContext,
-    private val packageManager: PackageManager,
+    private val packageStates: PackageStateCache,
     private val notificationManager: info.anodsplace.notification.NotificationManager,
     private val database: AppsDatabase,
     private val preferences: Preferences,
@@ -92,6 +95,7 @@ class UpdateCheck(
         val updatedApp: UpdatedApp?,
         val persistChangelog: Boolean,
         val installedVersion: Int,
+        val installedEnabled: Boolean,
         val decision: AppUpdateDecision
     )
 
@@ -99,6 +103,7 @@ class UpdateCheck(
         val syncId: Long,
         val packageName: String,
         val installedVersion: Int,
+        val installedEnabled: Boolean,
         val cachedVersion: Int,
         val updateRemoteVersion: Int?,
         val fullRemoteVersion: Int?,
@@ -120,8 +125,6 @@ class UpdateCheck(
         const val SYNC_PROGRESS = "com.anod.appwatcher.sync.progress"
         const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
-
-    private val installedAppsProvider = InstalledApps.PackageManager(packageManager)
 
     suspend fun perform(extras: Data): Int = playSessionCoordinator.withSession {
         performSerialized(extras)
@@ -165,7 +168,8 @@ class UpdateCheck(
             context.sendBroadcast(startIntent)
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
-            val playStoreVersion = installedAppsProvider.packageInfo("com.android.vending").versionCode
+            val installedPackageStates = packageStates.reload(listOf("com.android.vending"))
+            val playStoreVersion = installedPackageStates.stateFor("com.android.vending").packageInfo.versionCode
             AppLog.i(
                 "Play Store update check started (syncId=${schedule.id}, " +
                     "type=${if (manualSync) "manual" else "scheduled"}, build=${BuildConfig.VERSION_CODE}, " +
@@ -175,7 +179,11 @@ class UpdateCheck(
             )
 
             try {
-                doSync(lastUpdatesViewed, schedule.id, verboseDiagnostics = manualSync)
+                doSync(
+                    lastUpdatesViewed = lastUpdatesViewed,
+                    syncId = schedule.id,
+                    verboseDiagnostics = manualSync
+                )
             } catch (e: AuthTokenStartIntent) {
                 throw e
             } catch (e: CancellationException) {
@@ -242,6 +250,15 @@ class UpdateCheck(
         syncId: Long,
         verboseDiagnostics: Boolean
     ): SyncResult {
+        val clearedDisabledUpdates = database.apps().clearDisabledUpdateStatuses(
+            packageStates = packageStates
+        )
+        if (clearedDisabledUpdates > 0) {
+            AppLog.i(
+                "Cleared $clearedDisabledUpdates disabled app update statuses",
+                "UpdateCheck"
+            )
+        }
         val sortId = preferences.sortIndex
         val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
@@ -257,6 +274,9 @@ class UpdateCheck(
         } finally {
             apps.close()
         }
+        val installedPackageStates = packageStates.load(
+            localAppChunks.flatMap { it.keys }
+        )
         var unavailable = 0
         val fetchedChunks = fetchAllChunks(
             chunks = localAppChunks,
@@ -280,14 +300,16 @@ class UpdateCheck(
                 localApps = localApps,
                 packageNames = classification.missingDocIds,
                 decision = AppUpdateDecision.MISSING_RESPONSE_KEEP,
-                verboseDiagnostics = verboseDiagnostics
+                verboseDiagnostics = verboseDiagnostics,
+                installedPackageStates = installedPackageStates
             )
             logUnusableDocuments(
                 syncId = syncId,
                 localApps = localApps,
                 packageNames = classification.withoutDetailsDocIds,
                 decision = AppUpdateDecision.RESPONSE_WITHOUT_DETAILS_KEEP,
-                verboseDiagnostics = verboseDiagnostics
+                verboseDiagnostics = verboseDiagnostics,
+                installedPackageStates = installedPackageStates
             )
             val availabilitySummary = documents
                 .groupingBy { it.availabilityRestriction?.toString() ?: "absent" }
@@ -319,7 +341,8 @@ class UpdateCheck(
                 lastUpdatesViewed,
                 releaseDetails,
                 syncId,
-                verboseDiagnostics
+                verboseDiagnostics,
+                installedPackageStates
             )
             updatedApps.addAll(applyAppUpdates(pendingUpdates, database))
         }
@@ -381,18 +404,21 @@ class UpdateCheck(
         localApps: Map<String, AppListItem>,
         packageNames: Set<String>,
         decision: AppUpdateDecision,
-        verboseDiagnostics: Boolean
+        verboseDiagnostics: Boolean,
+        installedPackageStates: Map<String, PackageState>
     ) {
         if (!verboseDiagnostics) {
             return
         }
         for (packageName in packageNames) {
             val localItem = localApps.getValue(packageName)
+            val packageState = installedPackageStates.stateFor(packageName)
             logSyncDiagnostic(
                 diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
                     packageName = packageName,
-                    installedVersion = installedAppsProvider.packageInfo(packageName).versionCode,
+                    installedVersion = packageState.packageInfo.versionCode,
+                    installedEnabled = packageState.isInstalled && packageState.isEnabled,
                     cachedVersion = localItem.app.versionNumber,
                     updateRemoteVersion = null,
                     fullRemoteVersion = null,
@@ -459,7 +485,8 @@ class UpdateCheck(
         lastUpdatesViewed: Boolean,
         releaseDetails: Map<String, Document>,
         syncId: Long,
-        verboseDiagnostics: Boolean
+        verboseDiagnostics: Boolean,
+        installedPackageStates: Map<String, PackageState>
     ): List<PendingAppUpdate> {
         val pendingUpdates = mutableListOf<PendingAppUpdate>()
         for (marketApp in documents) {
@@ -471,11 +498,18 @@ class UpdateCheck(
                 val releaseApp = fullDocument
                     ?.takeIf { it.appDetails.versionCode == marketApp.appDetails.versionCode }
                     ?: marketApp
-                val result = updateApp(marketApp, releaseApp, localItem, lastUpdatesViewed)
+                val result = updateApp(
+                    marketDoc = marketApp,
+                    releaseDoc = releaseApp,
+                    localItem = localItem,
+                    lastUpdatesViewed = lastUpdatesViewed,
+                    packageState = installedPackageStates.stateFor(localItem.app.packageName)
+                )
                 val diagnostic = AppSyncDiagnostic(
                     syncId = syncId,
                     packageName = localItem.app.packageName,
                     installedVersion = result.installedVersion,
+                    installedEnabled = result.installedEnabled,
                     cachedVersion = localItem.app.versionNumber,
                     updateRemoteVersion = marketApp.appDetails.versionCode,
                     fullRemoteVersion = fullDocument?.appDetails?.versionCode,
@@ -579,13 +613,15 @@ class UpdateCheck(
         marketDoc: Document,
         releaseDoc: Document,
         localItem: AppListItem,
-        lastUpdatesViewed: Boolean
+        lastUpdatesViewed: Boolean,
+        packageState: PackageState
     ): AppUpdateResult {
         val appDetails = marketDoc.appDetails
         val localApp = localItem.app
 
         val values = ContentValues()
-        val installedInfo = installedAppsProvider.packageInfo(appDetails.packageName)
+        val installedInfo = packageState.packageInfo
+        val installedEnabled = packageState.isInstalled && packageState.isEnabled
         val unavailableAction = reconcileUnavailableUpdate(marketDoc, localApp, installedInfo, values)
         if (unavailableAction != UnavailableUpdateAction.NONE) {
             return AppUpdateResult(
@@ -593,6 +629,7 @@ class UpdateCheck(
                 updatedApp = null,
                 persistChangelog = false,
                 installedVersion = installedInfo.versionCode,
+                installedEnabled = installedEnabled,
                 decision = if (unavailableAction == UnavailableUpdateAction.ROLL_BACK) {
                     AppUpdateDecision.UNAVAILABLE_ROLLBACK
                 } else {
@@ -611,6 +648,7 @@ class UpdateCheck(
                 updatedApp = null,
                 persistChangelog = true,
                 installedVersion = installedInfo.versionCode,
+                installedEnabled = installedEnabled,
                 decision = AppUpdateDecision.REMOTE_ROLLBACK
             )
         }
@@ -620,7 +658,8 @@ class UpdateCheck(
             cachedVersion = localApp.versionNumber,
             installedVersion = installedInfo.versionCode,
             status = localApp.status,
-            lastUpdatesViewed = lastUpdatesViewed
+            lastUpdatesViewed = lastUpdatesViewed,
+            installedEnabled = installedEnabled
         )
         if (decision == AppUpdateDecision.MARK_UPDATED) {
             AppLog.i(
@@ -642,6 +681,7 @@ class UpdateCheck(
                 updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
                 persistChangelog = true,
                 installedVersion = installedInfo.versionCode,
+                installedEnabled = installedEnabled,
                 decision = decision
             )
         }
@@ -651,6 +691,7 @@ class UpdateCheck(
             AppUpdateDecision.RESTORE_DEVICE_UPDATE ->
                 values.put(AppListTable.Columns.STATUS, App.STATUS_UPDATED)
             AppUpdateDecision.CLEAR_INSTALLED_UPDATE,
+            AppUpdateDecision.CLEAR_DISABLED_UPDATE,
             AppUpdateDecision.CLEAR_VIEWED_UPDATE -> {
                 values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
                 values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
@@ -667,6 +708,7 @@ class UpdateCheck(
             AppUpdateDecision.MARK_UPDATED,
             AppUpdateDecision.REFRESH_INSTALLED_CURRENT,
             AppUpdateDecision.KEEP_DEVICE_UPDATE,
+            AppUpdateDecision.DISABLED_INSTALLED,
             AppUpdateDecision.CURRENT -> {
             }
         }
@@ -676,6 +718,7 @@ class UpdateCheck(
             updatedApp = updatedApp,
             persistChangelog = true,
             installedVersion = installedInfo.versionCode,
+            installedEnabled = installedEnabled,
             decision = decision
         )
     }
@@ -695,7 +738,8 @@ class UpdateCheck(
         val packageId = packageDiagnosticId(diagnostic.packageName)
         AppLog.i(
             "Sync app decision (syncId=${diagnostic.syncId}, packageId=$packageId, " +
-                "installed=${diagnostic.installedVersion}, cached=${diagnostic.cachedVersion}, " +
+                "installed=${diagnostic.installedVersion}, enabled=${diagnostic.installedEnabled}, " +
+                "cached=${diagnostic.cachedVersion}, " +
                 "updateRemote=$updateRemoteVersion, " +
                 "fullRemote=$fullRemoteVersion, availability=${diagnostic.availability}, " +
                 "statusBefore=${diagnostic.statusBefore}, decision=${diagnostic.decision.value}, " +
@@ -876,8 +920,10 @@ internal enum class AppUpdateDecision(val value: String) {
     RESTORE_DEVICE_UPDATE("restore-device-update"),
     KEEP_DEVICE_UPDATE("keep-device-update"),
     CLEAR_INSTALLED_UPDATE("clear-installed-update"),
+    CLEAR_DISABLED_UPDATE("clear-disabled-update"),
     CLEAR_VIEWED_UPDATE("clear-viewed-update"),
     KEEP_UPDATED("keep-updated"),
+    DISABLED_INSTALLED("disabled-installed"),
     CURRENT("current");
 
     val isSteadyState: Boolean
@@ -886,14 +932,16 @@ internal enum class AppUpdateDecision(val value: String) {
             this == UNAVAILABLE_SUPPRESSED ||
             this == UNAVAILABLE_ROLLBACK ||
             this == KEEP_DEVICE_UPDATE ||
-            this == KEEP_UPDATED
+            this == KEEP_UPDATED ||
+            this == DISABLED_INSTALLED
 }
 
 internal enum class SyncDecisionSignal(val value: String) {
     NONE("none"),
     INVALID_MARKED_NOT_NEWER_THAN_INSTALLED("invalid-marked-not-newer-than-installed"),
     DEVICE_UPDATE_RESTORED("device-update-restored"),
-    INSTALLED_UPDATE_CLEARED("installed-update-cleared")
+    INSTALLED_UPDATE_CLEARED("installed-update-cleared"),
+    DISABLED_UPDATE_CLEARED("disabled-update-cleared")
 }
 
 internal fun detectSyncDecisionSignal(
@@ -907,6 +955,8 @@ internal fun detectSyncDecisionSignal(
         SyncDecisionSignal.DEVICE_UPDATE_RESTORED
     decision == AppUpdateDecision.CLEAR_INSTALLED_UPDATE ->
         SyncDecisionSignal.INSTALLED_UPDATE_CLEARED
+    decision == AppUpdateDecision.CLEAR_DISABLED_UPDATE ->
+        SyncDecisionSignal.DISABLED_UPDATE_CLEARED
     else -> SyncDecisionSignal.NONE
 }
 
@@ -915,11 +965,16 @@ internal fun selectAppUpdateDecision(
     cachedVersion: Int,
     installedVersion: Int,
     status: Int,
-    lastUpdatesViewed: Boolean
+    lastUpdatesViewed: Boolean,
+    installedEnabled: Boolean
 ): AppUpdateDecision {
     require(remoteVersion >= cachedVersion)
     val isInstalled = installedVersion > 0
     return when {
+        isInstalled && !installedEnabled && status == App.STATUS_UPDATED ->
+            AppUpdateDecision.CLEAR_DISABLED_UPDATE
+        isInstalled && !installedEnabled ->
+            AppUpdateDecision.DISABLED_INSTALLED
         isInstalled && remoteVersion <= installedVersion && status == App.STATUS_UPDATED ->
             AppUpdateDecision.CLEAR_INSTALLED_UPDATE
         isInstalled && remoteVersion <= installedVersion && remoteVersion > cachedVersion ->

@@ -15,6 +15,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.RealAppIconLoader
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.watchlist.RecentlyInstalledAppsLoader
@@ -64,6 +65,7 @@ fun createAppModule(): Module = module {
     single<LruCache<String, Any?>>(named("memoryCache")) { createLruCache() }
     single { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
     singleOf(::PackageChangedReceiver)
+    singleOf(::PackageStateCache)
     singleOf(::AuthTokenBlocking)
     single {
         HttpClient(OkHttp) {
@@ -85,7 +87,7 @@ fun createAppModule(): Module = module {
     factory {
         UpdateCheck(
             context = get(),
-            packageManager = get(),
+            packageStates = get(),
             notificationManager = get(),
             database = get(),
             authAccount = get(),

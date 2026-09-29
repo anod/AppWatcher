@@ -7,13 +7,19 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.utils.PackageStateProvider
+import com.anod.appwatcher.utils.stateFor
 import com.anod.appwatcher.watchlist.FilterablePagingSource
 import com.anod.appwatcher.watchlist.SectionItem
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.ktx.dayStartAgoMillis
 
-class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, private val packageManager: PackageManager, private val database: AppsDatabase, private val installedApps: InstalledApps,) :
+class InstalledPagingSource(
+    private val changelogAdapter: ChangelogAdapter,
+    private val packageManager: PackageManager,
+    private val database: AppsDatabase,
+    private val packageStates: PackageStateProvider,
+) :
     FilterablePagingSource() {
     override var filterQuery: String = ""
     var sortId: Int = 0
@@ -23,6 +29,7 @@ class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, priv
         AppLog.d("$params")
         val installed = InstalledTaskWorker(packageManager, sortId, filterQuery).run()
         val allInstalledPackageNames = installed.map { it.pkg.name }
+        val installedPackageStates = packageStates.load(allInstalledPackageNames)
         val watchingPackages = database.apps().loadRowIds(allInstalledPackageNames).associateBy({ it.packageName }, { it.rowId })
 
         if (sortId == Preferences.SORT_DATE_ASC || sortId == Preferences.SORT_DATE_DESC) {
@@ -47,6 +54,7 @@ class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, priv
             }
             .map { app ->
                 val appChange = changelogAdapter.changelogs[app.appId]
+                val packageState = installedPackageStates.stateFor(app.packageName)
                 SectionItem.OnDevice(
                     appListItem = AppListItem(
                         app = app,
@@ -55,7 +63,8 @@ class InstalledPagingSource(private val changelogAdapter: ChangelogAdapter, priv
                         recentFlag = false
                     ),
                     showSelection = selectionMode,
-                    packageInfo = installedApps.packageInfo(app.packageName)
+                    packageInfo = packageState.packageInfo,
+                    isPackageEnabled = packageState.isEnabled
                 )
             }.toList()
 

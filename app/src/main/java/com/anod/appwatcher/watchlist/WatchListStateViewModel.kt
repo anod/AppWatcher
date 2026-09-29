@@ -3,7 +3,6 @@ package com.anod.appwatcher.watchlist
 import android.app.Application
 import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -30,8 +29,10 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.BaseFlowViewModel
 import com.anod.appwatcher.utils.PackageChangedReceiver
+import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
+import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.getInt
@@ -39,7 +40,6 @@ import com.anod.appwatcher.utils.networkConnection
 import com.anod.appwatcher.utils.prefs
 import com.anod.appwatcher.utils.syncProgressFlow
 import info.anodsplace.applog.AppLog
-import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.content.PinShortcut
 import info.anodsplace.framework.content.PinShortcutManager
 import info.anodsplace.framework.content.ScreenCommonAction
@@ -138,10 +138,8 @@ class WatchListStateViewModel(
     private val db: AppsDatabase by inject()
     private val packageChangedReceiver: PackageChangedReceiver by inject()
     private val recentlyInstalledAppsLoader: RecentlyInstalledAppsLoader by inject()
-    private val packageManager: PackageManager by inject()
+    private val packageStates: PackageStateCache by inject()
     private val shortcutManager: PinShortcutManager by inject()
-
-    val installedApps = InstalledApps.MemoryCache(InstalledApps.PackageManager(packageManager))
 
     private var watchListPreferences = WatchListPreferences(
         defaultFilterId = defaultFilterId,
@@ -171,7 +169,7 @@ class WatchListStateViewModel(
             AppLog.d("[Paging] listPagerFactory: $configKey, return existing ${pagerFactories[configKey].hashCode()}")
             return pagerFactories[configKey]!!
         }
-        pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, installedApps = installedApps, viewModelScope)
+        pagerFactories[configKey] = AppsWatchListPagerFactory(pagingSourceConfig, packageStates, viewModelScope)
         AppLog.d("[Paging] listPagerFactory: $configKey, create new ${pagerFactories[configKey].hashCode()}")
         return pagerFactories[configKey]!!
     }
@@ -211,6 +209,16 @@ class WatchListStateViewModel(
         )
 
         AppLog.d("Initial state: viewState")
+
+        viewModelScope.launch {
+            val clearedDisabledUpdates = db.apps().clearDisabledUpdateStatuses(
+                packageStates = packageStates
+            )
+            if (clearedDisabledUpdates > 0) {
+                invalidatePagingSources()
+                viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
+            }
+        }
 
         viewModelScope.launch {
             syncProgressFlow(application).collect {
@@ -262,6 +270,12 @@ class WatchListStateViewModel(
                 .collect {
                     viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
                 }
+        }
+
+        viewModelScope.launch {
+            packageChangedReceiver.observer.collect {
+                invalidatePagingSources()
+            }
         }
 
         viewModelScope.launch {
@@ -412,7 +426,7 @@ class WatchListStateViewModel(
             throw IllegalStateException("auth token is invalid")
         }
 
-        installedApps.reset()
+        packageStates.clear()
         invalidatePagingSources()
         viewState = viewState.copy(
             syncProgress = SyncProgress(true, 0),

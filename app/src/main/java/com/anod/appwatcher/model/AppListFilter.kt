@@ -1,6 +1,5 @@
 package com.anod.appwatcher.model
 
-import com.anod.appwatcher.database.entities.AppListItem
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.ktx.hashCodeOf
 
@@ -12,48 +11,58 @@ import info.anodsplace.ktx.hashCodeOf
 
 interface AppListFilter {
     val filterId: Int
-    fun filterRecord(item: AppListItem): Boolean
+    fun filterRecord(
+        versionCode: Int,
+        packageInfo: InstalledApps.Info,
+        isPackageEnabled: Boolean
+    ): Boolean
 
     class All : AppListFilter {
         override val filterId = Filters.ALL
-        override fun filterRecord(item: AppListItem): Boolean = false
+        override fun filterRecord(
+            versionCode: Int,
+            packageInfo: InstalledApps.Info,
+            isPackageEnabled: Boolean
+        ): Boolean = false
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
-    class Installed(private val installedApps: InstalledApps) : AppListFilter {
+    class Installed : AppListFilter {
         override val filterId = Filters.INSTALLED
-        override fun filterRecord(item: AppListItem): Boolean {
-            val packageName = item.app.packageName
-            val installedInfo = installedApps.packageInfo(packageName)
-            return !installedInfo.isInstalled
-        }
+        override fun filterRecord(
+            versionCode: Int,
+            packageInfo: InstalledApps.Info,
+            isPackageEnabled: Boolean
+        ): Boolean = !packageInfo.isInstalled
 
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
-    class Uninstalled(private val installedApps: InstalledApps) : AppListFilter {
+    class Uninstalled : AppListFilter {
         override val filterId = Filters.UNINSTALLED
-        override fun filterRecord(item: AppListItem): Boolean {
-            val packageName = item.app.packageName
-            val installedInfo = installedApps.packageInfo(packageName)
-            return installedInfo.isInstalled
-        }
+        override fun filterRecord(
+            versionCode: Int,
+            packageInfo: InstalledApps.Info,
+            isPackageEnabled: Boolean
+        ): Boolean = packageInfo.isInstalled
 
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()
     }
 
-    class Updatable(private val installedApps: InstalledApps) : AppListFilter {
+    class Updatable : AppListFilter {
         override val filterId = Filters.UPDATABLE
-        override fun filterRecord(item: AppListItem): Boolean {
-            val packageName = item.app.packageName
-            val installedInfo = installedApps.packageInfo(packageName)
-            val versionCode = item.app.versionNumber
-            val updatable = installedInfo.isInstalled && installedInfo.isUpdatable(versionCode)
-            return !updatable
-        }
+        override fun filterRecord(
+            versionCode: Int,
+            packageInfo: InstalledApps.Info,
+            isPackageEnabled: Boolean
+        ): Boolean = !(
+            packageInfo.isInstalled &&
+                isPackageEnabled &&
+                packageInfo.isUpdatable(versionCode)
+            )
 
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()

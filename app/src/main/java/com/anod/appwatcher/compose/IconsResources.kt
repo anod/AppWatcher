@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.PhonelinkOff
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
@@ -117,10 +118,14 @@ fun ShareIcon() {
 }
 
 @Composable
-fun InstalledSignIcon(modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
+fun InstalledSignIcon(
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
     Icon(
-        imageVector = Icons.Default.Smartphone,
-        contentDescription = stringResource(id = R.string.installed),
+        imageVector = if (enabled) Icons.Default.Smartphone else Icons.Default.PhonelinkOff,
+        contentDescription = stringResource(id = if (enabled) R.string.installed else R.string.installed_disabled),
         modifier = modifier,
         tint = tint
     )
@@ -219,7 +224,7 @@ private fun IconsResourcesPreview() {
                 { PlayStoreAppIcon() },
                 { PlayStoreMyAppsIcon() },
                 { ShareIcon() },
-                { InstalledSignIcon() },
+                { InstalledSignIcon(enabled = true) },
                 { StoreVersionSignIcon() },
                 { WatchedIcon(unwatch = true) },
                 { WatchedIcon(unwatch = false) },

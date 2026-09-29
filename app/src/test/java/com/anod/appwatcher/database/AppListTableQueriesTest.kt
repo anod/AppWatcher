@@ -43,17 +43,17 @@ class AppListTableQueriesTest {
     }
 
     @Test
-    fun `row snapshot query can order by recently discovered`() {
+    fun `row snapshot query preserves user sort for effective section grouping`() {
         val (sql, args) = AppListTable.Queries.createAppsListRowsQuery(
             sortId = Preferences.SORT_NAME_ASC,
-            orderByRecentlyDiscovered = true,
             tagId = null,
             titleFilter = ""
         )
 
         assertTrue(sql.contains("CASE WHEN sync_version >"))
-        assertTrue(sql.contains("THEN 1 ELSE 0 END DESC"))
-        assertFalse(sql.contains("recent_flag DESC"))
+        assertTrue(sql.contains("ORDER BY title COLLATE NOCASE ASC, app_list._id ASC"))
+        assertFalse(sql.contains("status DESC"))
+        assertFalse(sql.contains("THEN 1 ELSE 0 END DESC"))
         assertEquals(listOf(App.STATUS_DELETED.toString()), args.toList())
     }
 

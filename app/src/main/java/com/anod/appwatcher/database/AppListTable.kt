@@ -30,6 +30,12 @@ data class AppListRowSnapshot(
     @ColumnInfo(name = BaseColumns._ID)
     val rowId: Int,
 
+    @ColumnInfo(name = AppListTable.Columns.PACKAGE_NAME)
+    val packageName: String,
+
+    @ColumnInfo(name = AppListTable.Columns.VERSION_NUMBER)
+    val versionNumber: Int,
+
     @ColumnInfo(name = AppListTable.Columns.STATUS)
     val status: Int,
 
@@ -86,6 +92,12 @@ interface AppListTable {
 
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
+            "${Columns.STATUS} = ${App.STATUS_UPDATED}"
+    )
+    suspend fun loadUpdatedPackages(): List<PackageRowPair>
+
+    @Query(
+        "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
             "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END"
     )
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
@@ -139,6 +151,22 @@ interface AppListTable {
             "WHERE ${BaseColumns._ID} = :rowId AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
     )
     suspend fun clearUpdateStatus(rowId: Int): Int
+
+    @Query(
+        "UPDATE $TABLE SET " +
+            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
+            "${Columns.SYNC_TIMESTAMP} = 0 " +
+            "WHERE ${Columns.PACKAGE_NAME} = :packageName AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
+    )
+    suspend fun clearUpdateStatusByPackageName(packageName: String): Int
+
+    @Query(
+        "UPDATE $TABLE SET " +
+            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
+            "${Columns.SYNC_TIMESTAMP} = 0 " +
+            "WHERE ${BaseColumns._ID} IN (:rowIds) AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
+    )
+    suspend fun clearUpdateStatuses(rowIds: List<Int>): Int
 
     @Query(
         "UPDATE $TABLE SET " +
@@ -227,12 +255,11 @@ interface AppListTable {
 
         suspend fun loadAppListRows(
             sortId: Int,
-            orderByRecentlyDiscovered: Boolean,
             tagId: Int?,
             titleFilter: String,
             table: AppListTable
         ): List<AppListRowSnapshot> {
-            val query = createAppsListRowsQuery(sortId, orderByRecentlyDiscovered, tagId, titleFilter)
+            val query = createAppsListRowsQuery(sortId, tagId, titleFilter)
             return table.loadRowSnapshots(SimpleSQLiteQuery(query.first, query.second))
         }
 
@@ -265,17 +292,16 @@ interface AppListTable {
 
         internal fun createAppsListRowsQuery(
             sortId: Int,
-            orderByRecentlyDiscovered: Boolean,
             tagId: Int?,
             titleFilter: String
         ): Pair<String, Array<String>> {
             val selection = createSelection(tagId, titleFilter)
             val sql =
-                "SELECT $TABLE.${BaseColumns._ID}, ${Columns.STATUS}, " +
+                "SELECT $TABLE.${BaseColumns._ID}, ${Columns.PACKAGE_NAME}, ${Columns.VERSION_NUMBER}, ${Columns.STATUS}, " +
                     "CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END ${Columns.RECENT_FLAG} " +
                     "FROM $TABLE " +
                     "WHERE ${selection.first} " +
-                    "ORDER BY ${createSortOrder(sortId, orderByRecentlyDiscovered)} "
+                    "ORDER BY ${createSnapshotSortOrder(sortId)} "
             return Pair(sql, selection.second)
         }
 
@@ -365,6 +391,15 @@ interface AppListTable {
             if (orderByRecentlyUpdated) {
                 filter.add("CASE WHEN ${Columns.SYNC_TIMESTAMP} > $recentTime THEN 1 ELSE 0 END DESC")
             }
+            filter.addAll(createUserSortOrder(sortId))
+            return filter.joinToString(", ")
+        }
+
+        private fun createSnapshotSortOrder(sortId: Int): String =
+            createUserSortOrder(sortId).joinToString(", ")
+
+        private fun createUserSortOrder(sortId: Int): List<String> {
+            val filter = mutableListOf<String>()
             when (sortId) {
                 Preferences.SORT_NAME_DESC -> filter.add(Columns.TITLE + " COLLATE NOCASE DESC")
                 Preferences.SORT_DATE_ASC -> filter.add(Columns.UPLOAD_TIMESTAMP + " ASC")
@@ -372,7 +407,7 @@ interface AppListTable {
                 else -> filter.add(Columns.TITLE + " COLLATE NOCASE ASC")
             }
             filter.add("$TABLE.${BaseColumns._ID} ASC")
-            return filter.joinToString(", ")
+            return filter
         }
 
         private fun createSelection(tagId: Int?, titleFilter: String): Pair<String, Array<String>> {
