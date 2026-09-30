@@ -225,6 +225,35 @@ class AccountSelectionViewModelTest {
     }
 
     @Test
+    fun searchSelectionWinsOverQueuedMainSelection() = runBlocking {
+        preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
+        selectAccount(firstAccount)
+        awaitFirstToken()
+
+        selectAccount(secondAccount)
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        assertTrue(preferences.isDeviceRegistrationRequired)
+        val searchViewModel = SearchViewModel(SearchViewState())
+        viewModelStore.put("search", searchViewModel)
+        searchViewModel.handleEvent(
+            SearchViewEvent.SetAccount(
+                AccountSelectionResult.Success(Account(thirdAccount, AuthTokenBlocking.ACCOUNT_TYPE))
+            )
+        )
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+        tokenProvider.releaseFirst.countDown()
+
+        withTimeout(10_000) {
+            while (!searchViewModel.viewState.authenticated || preferences.account?.name != thirdAccount) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
+        assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
+    }
+
+    @Test
     fun mainShowsAccountSelectedFromSearchPickerOnReturn() = runBlocking {
         preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
         preferences.versionCode = 0
