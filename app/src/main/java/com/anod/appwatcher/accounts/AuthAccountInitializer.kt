@@ -6,6 +6,7 @@ import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
@@ -66,7 +67,11 @@ class AuthAccountInitializer(
             previous
         }
         return try {
-            awaitPreviousInitialization(previousJob)
+            // Keep canceled intermediate selections waiting so the latest one cannot overtake an active session.
+            withContext(NonCancellable) {
+                previousJob?.join()
+            }
+            context.ensureActive()
             if (userInitiated) {
                 playSessionCoordinator.withUserInitiatedSession {
                     initializeInSession(account, userInitiated = true)

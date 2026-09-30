@@ -16,7 +16,6 @@ import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.DeviceRegistrationException
-import com.anod.appwatcher.accounts.launchAccountInitialization
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
@@ -237,13 +236,11 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     ) {
         if (userInitiated) {
             pendingAccountInitialization = null
+            accountInitializationJob?.cancel()
         }
         val collectReports = prefs.collectCrashReports
         val initializer = authAccountInitializer
-        accountInitializationJob = viewModelScope.launchAccountInitialization(
-            previousJob = accountInitializationJob,
-            userInitiated = userInitiated
-        ) {
+        accountInitializationJob = viewModelScope.launch {
             try {
                 val authAccount = initializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null

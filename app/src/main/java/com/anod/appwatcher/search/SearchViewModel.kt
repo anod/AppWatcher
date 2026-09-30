@@ -25,7 +25,6 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.DeviceRegistrationException
-import com.anod.appwatcher.accounts.launchAccountInitialization
 import com.anod.appwatcher.accounts.showAccountSelectionAction
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
@@ -302,11 +301,9 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
     ) {
         if (userInitiated) {
             pendingAccountInitialization = null
+            accountInitializationJob?.cancel()
         }
-        accountInitializationJob = viewModelScope.launchAccountInitialization(
-            previousJob = accountInitializationJob,
-            userInitiated = userInitiated
-        ) {
+        accountInitializationJob = viewModelScope.launch {
             try {
                 accountInitializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null
