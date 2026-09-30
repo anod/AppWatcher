@@ -299,11 +299,16 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
+        val previousJob = accountInitializationJob
+        if (previousJob?.isActive == true && !userInitiated) {
+            return
+        }
         if (userInitiated) {
             pendingAccountInitialization = null
-            accountInitializationJob?.cancel()
+            previousJob?.cancel()
         }
         accountInitializationJob = viewModelScope.launch {
+            previousJob?.join()
             try {
                 accountInitializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null

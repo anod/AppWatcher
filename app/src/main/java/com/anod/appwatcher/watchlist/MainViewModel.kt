@@ -234,13 +234,18 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
+        val previousJob = accountInitializationJob
+        if (previousJob?.isActive == true && !userInitiated) {
+            return
+        }
         if (userInitiated) {
             pendingAccountInitialization = null
-            accountInitializationJob?.cancel()
+            previousJob?.cancel()
         }
         val collectReports = prefs.collectCrashReports
         val initializer = authAccountInitializer
         accountInitializationJob = viewModelScope.launch {
+            previousJob?.join()
             try {
                 val authAccount = initializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null
