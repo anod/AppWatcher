@@ -49,12 +49,26 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
 
     /** Scrolling only happens when apps are watched, so an empty list is tolerated here. */
     fun scrollWatchList() {
-        val list = device.findObject(By.scrollable(true)) ?: return
-        list.setGestureMargin(device.displayWidth / 5)
-        list.fling(Direction.DOWN)
-        device.waitForIdle()
-        list.fling(Direction.UP)
-        device.waitForIdle()
+        if (device.findObject(By.scrollable(true)) == null) return
+        flingWatchList(Direction.DOWN)
+        flingWatchList(Direction.UP)
+    }
+
+    private fun flingWatchList(direction: Direction) {
+        repeat(MAX_ATTEMPTS) {
+            val list = device.findObject(By.scrollable(true))
+            if (list != null && tolerateStaleNodes(false) {
+                    // The upward fling must start below the horizontally scrollable app cards.
+                    list.setGestureMarginsPercentage(0.2f, 0.4f, 0.2f, 0.1f)
+                    list.fling(direction)
+                    true
+                }) {
+                device.waitForIdle()
+                return
+            }
+            device.waitForIdle()
+        }
+        error("The watch list could not be scrolled $direction, on ${describeScreen()}")
     }
 
     fun visitDrawerScreen(titleResName: String) {
