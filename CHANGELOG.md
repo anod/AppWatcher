@@ -3,15 +3,9 @@ App Watcher Changelog
 
 1.7.2 Sep 30, 2026
 
- * Keep app lists stable while paging and syncing, with fewer flickers and duplicate entries
- * Improve app update detection, including Android 15 and Play Store updates; avoid false updates for delisted apps
- * Refresh installed app versions and correctly show disabled apps
- * Preserve app details and update descriptions when Play Store responses are incomplete
- * Reduce sync memory use, improve sync failure diagnostics, and sync local tag deletions to Google Drive
- * Fix app account switching during authentication and automatic sync
- * Prevent repeated update notifications after they are dismissed
- * Fix search crashes, missing file-manager handling in Settings, and recently installed card sizing
- * Improve drawer header readability
+ * Improve app list stability, update detection, and installed-app status
+ * Make sync more reliable and efficient, including Google Drive tag updates
+ * Fix account switching, repeated notifications, search crashes, and other UI issues
 
 1.8.7 Mar 4, 2017, 12:49 PM
 
