@@ -3,9 +3,15 @@ App Watcher Changelog
 
 1.7.2 Sep 30, 2026
 
- * Fix account switching during authentication and automatic sync
- * Preserve account selection order across authentication and screens
- * Cancel outdated account initializations when the selection changes
+ * Keep app lists stable while paging and syncing, with fewer flickers and duplicate entries
+ * Improve app update detection, including Android 15 and Play Store updates; avoid false updates for delisted apps
+ * Refresh installed app versions and correctly show disabled apps
+ * Preserve app details and update descriptions when Play Store responses are incomplete
+ * Reduce sync memory use, improve sync failure diagnostics, and sync local tag deletions to Google Drive
+ * Fix app account switching during authentication and automatic sync
+ * Prevent repeated update notifications after they are dismissed
+ * Fix search crashes, missing file-manager handling in Settings, and recently installed card sizing
+ * Improve drawer header readability
 
 1.8.7 Mar 4, 2017, 12:49 PM
 
