@@ -6,6 +6,8 @@ App Watcher Changelog
  * Improve app list stability, update detection, and installed-app status
  * Make sync more reliable and efficient, including Google Drive tag updates
  * Fix account switching, repeated notifications, search crashes, and other UI issues
+ * Fix account switching during authentication and automatic sync
+ * Keep account selections consistent across screens and cancel outdated initializations
 
 1.8.7 Mar 4, 2017, 12:49 PM
 
