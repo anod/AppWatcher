@@ -7,6 +7,8 @@ import android.os.Looper
 import androidx.lifecycle.ViewModelStore
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import androidx.work.testing.WorkManagerTestInitHelper
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.accounts.AccountAuthTokenProvider
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AuthAccount
@@ -30,6 +32,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -50,6 +53,7 @@ import org.robolectric.annotation.LooperMode
 class AccountSelectionViewModelTest {
     private val firstAccount = "first@example.com"
     private val secondAccount = "second@example.com"
+    private val thirdAccount = "third@example.com"
     private val tokenProvider = BlockingTokenProvider(firstAccount)
     private val appScope = CoroutineScope(Dispatchers.Unconfined)
     private val viewModelStore = ViewModelStore()
@@ -58,13 +62,15 @@ class AccountSelectionViewModelTest {
     private lateinit var viewModel: MainViewModel
     private var originalCrashReports = false
     private var originalUpdateFrequency = 0
+    private var originalVersionCode = 0
 
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        preferences = Preferences(context, NotificationManager.NoOp(), appScope)
+        preferences = Preferences(context, NotificationManager.NoOp(areNotificationsEnabled = true), appScope)
         originalCrashReports = preferences.collectCrashReports
         originalUpdateFrequency = preferences.updatesFrequency
+        originalVersionCode = preferences.versionCode
         preferences.collectCrashReports = false
         preferences.updatesFrequency = 0
         runBlocking {
@@ -103,6 +109,7 @@ class AccountSelectionViewModelTest {
         preferences.account = null
         preferences.collectCrashReports = originalCrashReports
         preferences.updatesFrequency = originalUpdateFrequency
+        preferences.versionCode = originalVersionCode
         stopKoin()
         appScope.cancel()
     }
@@ -130,11 +137,34 @@ class AccountSelectionViewModelTest {
         awaitFirstToken()
 
         selectAccount(secondAccount)
+        selectAccount(thirdAccount)
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
         tokenProvider.releaseFirst.countDown()
 
+        awaitAccount(thirdAccount)
+        assertEquals(thirdAccount, preferences.account?.name)
+        assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
+    }
+
+    @Test
+    fun autoSyncSchedulingFinishesBeforeSwitchingAccounts() = runBlocking {
+        WorkManagerTestInitHelper.initializeTestWorkManager(ApplicationProvider.getApplicationContext())
+        preferences.updatesFrequency = 3600
+        preferences.versionCode = 0
+
+        viewModel.handleEvent(MainViewEvent.OnResume)
+        awaitFirstToken()
+        tokenProvider.releaseFirst.countDown()
+
+        withTimeout(10_000) {
+            while (preferences.versionCode != BuildConfig.VERSION_CODE) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
+        selectAccount(secondAccount)
         awaitAccount(secondAccount)
         assertEquals(secondAccount, preferences.account?.name)
-        assertEquals(listOf(firstAccount, secondAccount), tokenProvider.requestedAccounts)
     }
 
     @Test
@@ -153,15 +183,21 @@ class AccountSelectionViewModelTest {
                 AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
             )
         )
+        searchViewModel.handleEvent(
+            SearchViewEvent.SetAccount(
+                AccountSelectionResult.Success(Account(thirdAccount, AuthTokenBlocking.ACCOUNT_TYPE))
+            )
+        )
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
         tokenProvider.releaseFirst.countDown()
 
         withTimeout(5_000) {
-            while (!searchViewModel.viewState.authenticated || preferences.account?.name != secondAccount) {
+            while (!searchViewModel.viewState.authenticated || preferences.account?.name != thirdAccount) {
                 Shadows.shadowOf(Looper.getMainLooper()).idle()
                 delay(10)
             }
         }
-        assertEquals(listOf(firstAccount, secondAccount), tokenProvider.requestedAccounts)
+        assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
     }
 
     private fun selectAccount(name: String) {
@@ -173,12 +209,17 @@ class AccountSelectionViewModelTest {
     }
 
     private suspend fun awaitAccount(name: String) {
-        withTimeout(5_000) {
+        val observed = withTimeoutOrNull(10_000) {
             while (viewModel.viewState.account?.name != name) {
                 Shadows.shadowOf(Looper.getMainLooper()).idle()
                 delay(10)
             }
+            true
         }
+        assertTrue(
+            "Expected $name; shown=${viewModel.viewState.account?.name}, saved=${preferences.account?.name}, requests=${tokenProvider.requestedAccounts}",
+            observed == true
+        )
     }
 
     private suspend fun awaitFirstToken() {

@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import androidx.work.Operation
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AccountSessionBusyException
@@ -15,6 +16,7 @@ import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.DeviceRegistrationException
+import com.anod.appwatcher.accounts.launchAccountInitialization
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
@@ -36,6 +38,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -229,18 +232,15 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
-        val previousJob = accountInitializationJob
-        if (previousJob?.isActive == true && !userInitiated) {
-            return
-        }
         if (userInitiated) {
             pendingAccountInitialization = null
-            previousJob?.cancel()
         }
         val collectReports = prefs.collectCrashReports
         val initializer = authAccountInitializer
-        accountInitializationJob = viewModelScope.launch {
-            previousJob?.join()
+        accountInitializationJob = viewModelScope.launchAccountInitialization(
+            previousJob = accountInitializationJob,
+            userInitiated = userInitiated
+        ) {
             try {
                 val authAccount = initializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null
@@ -300,7 +300,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     private suspend fun scheduleRefresh() {
         SyncScheduler(context)
             .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-            .collect { }
+            .first { it !is Operation.State.IN_PROGRESS }
     }
 
     private fun showAccountErrorToast(errorMessage: String) {

@@ -25,6 +25,7 @@ import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.CheckTokenError
 import com.anod.appwatcher.accounts.CheckTokenResult
 import com.anod.appwatcher.accounts.DeviceRegistrationException
+import com.anod.appwatcher.accounts.launchAccountInitialization
 import com.anod.appwatcher.accounts.showAccountSelectionAction
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
@@ -299,16 +300,13 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
-        val previousJob = accountInitializationJob
-        if (previousJob?.isActive == true && !userInitiated) {
-            return
-        }
         if (userInitiated) {
             pendingAccountInitialization = null
-            previousJob?.cancel()
         }
-        accountInitializationJob = viewModelScope.launch {
-            previousJob?.join()
+        accountInitializationJob = viewModelScope.launchAccountInitialization(
+            previousJob = accountInitializationJob,
+            userInitiated = userInitiated
+        ) {
             try {
                 accountInitializer.initialize(account, userInitiated)
                 pendingAccountInitialization = null
