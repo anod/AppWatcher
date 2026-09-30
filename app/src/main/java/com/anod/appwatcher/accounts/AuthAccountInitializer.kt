@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -41,7 +42,7 @@ class AuthAccountInitializer(
     private val dfeApi: DfeApi,
     private val playSessionCoordinator: PlaySessionCoordinator
 ) {
-    private var activeInitialization: Job? = null
+    private val initializations = mutableSetOf<Job>()
 
     private val deviceRegistration = DeviceRegistration(
         preferences = preferences,
@@ -58,18 +59,18 @@ class AuthAccountInitializer(
         val job = checkNotNull(context[Job]) {
             "Account initialization requires an active coroutine job"
         }
-        val previousJob = synchronized(this) {
-            val previous = activeInitialization
+        val previousJobs = synchronized(this) {
+            val previous = initializations.toList()
             if (userInitiated) {
-                previous?.cancel()
+                previous.forEach { it.cancel() }
             }
-            activeInitialization = job
+            initializations.add(job)
             previous
         }
         return try {
-            // Keep canceled intermediate selections waiting so the latest one cannot overtake an active session.
+            // Canceled initializations may still be finishing device registration.
             withContext(NonCancellable) {
-                previousJob?.join()
+                previousJobs.joinAll()
             }
             context.ensureActive()
             if (userInitiated) {
@@ -83,9 +84,7 @@ class AuthAccountInitializer(
             }
         } finally {
             synchronized(this) {
-                if (activeInitialization === job) {
-                    activeInitialization = null
-                }
+                initializations.remove(job)
             }
         }
     }

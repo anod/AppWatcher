@@ -199,6 +199,28 @@ class AccountSelectionViewModelTest {
     }
 
     @Test
+    fun searchSelectionCancelsMainRegistrationBehindAutomaticResume() = runBlocking {
+        preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
+        preferences.versionCode = 0
+        selectAccount(firstAccount)
+        awaitFirstToken()
+
+        assertTrue(preferences.isDeviceRegistrationAuthorized)
+        val searchViewModel = SearchViewModel(SearchViewState())
+        viewModelStore.put("search", searchViewModel)
+        searchViewModel.handleEvent(SearchViewEvent.OnResume)
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        selectSearchAccount(searchViewModel, secondAccount)
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+        tokenProvider.releaseFirst.countDown()
+
+        awaitSearchAccount(searchViewModel, secondAccount, timeoutMillis = 10_000)
+        assertEquals(0, preferences.versionCode)
+        assertEquals(listOf(firstAccount, secondAccount), tokenProvider.requestedAccounts)
+    }
+
+    @Test
     fun searchSelectionWinsOverQueuedMainSelection() = runBlocking {
         preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
         selectAccount(firstAccount)

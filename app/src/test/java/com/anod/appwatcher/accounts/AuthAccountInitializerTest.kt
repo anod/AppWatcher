@@ -9,9 +9,11 @@ import java.io.IOException
 import java.util.ArrayDeque
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -243,6 +245,49 @@ class AuthAccountInitializerTest {
         assertEquals("b@example.com", result.name)
         assertEquals("b@example.com", preferences.account?.name)
         assertEquals(1, tokenProvider.requestedAccounts.size)
+    }
+
+    @Test
+    fun explicitSelectionCancelsRunningInitializationBehindQueuedAutomaticRequest() = runBlocking {
+        preferences.account = AuthAccount("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
+        val checkInStarted = CompletableDeferred<Unit>()
+        val finishCheckIn = CompletableDeferred<Unit>()
+        val dfeApi = FakeDfeApi().apply {
+            beforeCheckIn = {
+                checkInStarted.complete(Unit)
+                finishCheckIn.await()
+            }
+        }
+        val tokenProvider = RecordingTokenProvider("token-a", "token-b")
+        val initializer = AuthAccountInitializer(
+            preferences,
+            AuthTokenBlocking.create(tokenProvider),
+            dfeApi,
+            PlaySessionCoordinator()
+        )
+        val accountA = Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
+        val accountB = Account("b@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
+        val running = async { initializer.initialize(accountA, userInitiated = true) }
+
+        try {
+            withTimeout(5_000) { checkInStarted.await() }
+            val automatic = async(start = CoroutineStart.UNDISPATCHED) {
+                initializer.initialize(accountA, userInitiated = false)
+            }
+            val selected = async(start = CoroutineStart.UNDISPATCHED) {
+                initializer.initialize(accountB, userInitiated = true)
+            }
+
+            assertTrue("The running initialization must be canceled, not just its queued successor", running.isCancelled)
+            assertTrue(automatic.isCancelled)
+            finishCheckIn.complete(Unit)
+
+            assertEquals(accountB.name, withTimeout(5_000) { selected.await().name })
+            assertEquals(accountB.name, preferences.account?.name)
+            assertEquals(listOf(accountA.name, accountB.name), tokenProvider.requestedAccounts)
+        } finally {
+            finishCheckIn.complete(Unit)
+        }
     }
 
     private fun completeAccount() = AuthAccount(
