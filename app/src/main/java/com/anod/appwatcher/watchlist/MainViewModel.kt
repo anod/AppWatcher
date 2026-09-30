@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
+import androidx.work.Operation
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountSelectionResult
 import com.anod.appwatcher.accounts.AccountSessionBusyException
@@ -36,6 +37,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -183,6 +185,9 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     }
 
     private fun onResume() {
+        if (viewState.account != prefs.account) {
+            viewState = viewState.copy(account = prefs.account)
+        }
         initAccount()
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true
@@ -229,8 +234,9 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
-        if (accountInitializationJob?.isActive == true) {
-            return
+        if (userInitiated) {
+            pendingAccountInitialization = null
+            accountInitializationJob?.cancel()
         }
         val collectReports = prefs.collectCrashReports
         val initializer = authAccountInitializer
@@ -294,7 +300,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     private suspend fun scheduleRefresh() {
         SyncScheduler(context)
             .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
-            .collect { }
+            .first { it !is Operation.State.IN_PROGRESS }
     }
 
     private fun showAccountErrorToast(errorMessage: String) {

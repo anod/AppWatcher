@@ -299,8 +299,9 @@ class SearchViewModel(initialState: SearchViewState) : BaseFlowViewModel<SearchV
         userInitiated: Boolean,
         resumingInteractiveAuth: Boolean
     ) {
-        if (accountInitializationJob?.isActive == true) {
-            return
+        if (userInitiated) {
+            pendingAccountInitialization = null
+            accountInitializationJob?.cancel()
         }
         accountInitializationJob = viewModelScope.launch {
             try {

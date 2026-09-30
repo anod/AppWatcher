@@ -5,8 +5,14 @@ import android.os.Build
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
 class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
@@ -36,6 +42,8 @@ class AuthAccountInitializer(
     private val dfeApi: DfeApi,
     private val playSessionCoordinator: PlaySessionCoordinator
 ) {
+    private val initializations = mutableSetOf<Job>()
+
     private val deviceRegistration = DeviceRegistration(
         preferences = preferences,
         dfeApi = dfeApi,
@@ -45,16 +53,41 @@ class AuthAccountInitializer(
     suspend fun initialize(
         account: Account,
         userInitiated: Boolean
-    ): AuthAccount =
-        if (userInitiated) {
-            playSessionCoordinator.withUserInitiatedSession {
-                initializeInSession(account, userInitiated = true)
+    ): AuthAccount {
+        val context = currentCoroutineContext()
+        context.ensureActive()
+        val job = checkNotNull(context[Job]) {
+            "Account initialization requires an active coroutine job"
+        }
+        val previousJobs = synchronized(this) {
+            val previous = initializations.toList()
+            if (userInitiated) {
+                previous.forEach { it.cancel() }
             }
-        } else {
-            playSessionCoordinator.withSession {
-                initializeInSession(account, userInitiated = false)
+            initializations.add(job)
+            previous
+        }
+        return try {
+            // Canceled initializations may still be finishing device registration.
+            withContext(NonCancellable) {
+                previousJobs.joinAll()
+            }
+            context.ensureActive()
+            if (userInitiated) {
+                playSessionCoordinator.withUserInitiatedSession {
+                    initializeInSession(account, userInitiated = true)
+                }
+            } else {
+                playSessionCoordinator.withSession {
+                    initializeInSession(account, userInitiated = false)
+                }
+            }
+        } finally {
+            synchronized(this) {
+                initializations.remove(job)
             }
         }
+    }
 
     private suspend fun initializeInSession(
         account: Account,
