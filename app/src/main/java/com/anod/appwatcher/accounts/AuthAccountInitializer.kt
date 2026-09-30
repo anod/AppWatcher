@@ -5,6 +5,9 @@ import android.os.Build
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -36,6 +39,8 @@ class AuthAccountInitializer(
     private val dfeApi: DfeApi,
     private val playSessionCoordinator: PlaySessionCoordinator
 ) {
+    private var activeInitialization: Job? = null
+
     private val deviceRegistration = DeviceRegistration(
         preferences = preferences,
         dfeApi = dfeApi,
@@ -45,16 +50,39 @@ class AuthAccountInitializer(
     suspend fun initialize(
         account: Account,
         userInitiated: Boolean
-    ): AuthAccount =
-        if (userInitiated) {
-            playSessionCoordinator.withUserInitiatedSession {
-                initializeInSession(account, userInitiated = true)
+    ): AuthAccount {
+        val context = currentCoroutineContext()
+        context.ensureActive()
+        val job = checkNotNull(context[Job]) {
+            "Account initialization requires an active coroutine job"
+        }
+        val previousJob = synchronized(this) {
+            val previous = activeInitialization
+            if (userInitiated) {
+                previous?.cancel()
             }
-        } else {
-            playSessionCoordinator.withSession {
-                initializeInSession(account, userInitiated = false)
+            activeInitialization = job
+            previous
+        }
+        return try {
+            awaitPreviousInitialization(previousJob)
+            if (userInitiated) {
+                playSessionCoordinator.withUserInitiatedSession {
+                    initializeInSession(account, userInitiated = true)
+                }
+            } else {
+                playSessionCoordinator.withSession {
+                    initializeInSession(account, userInitiated = false)
+                }
+            }
+        } finally {
+            synchronized(this) {
+                if (activeInitialization === job) {
+                    activeInitialization = null
+                }
             }
         }
+    }
 
     private suspend fun initializeInSession(
         account: Account,

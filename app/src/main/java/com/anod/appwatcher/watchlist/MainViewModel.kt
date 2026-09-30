@@ -186,6 +186,9 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     }
 
     private fun onResume() {
+        if (viewState.account != prefs.account) {
+            viewState = viewState.copy(account = prefs.account)
+        }
         initAccount()
         AppLog.d("mark updates as viewed.")
         prefs.isLastUpdatesViewed = true

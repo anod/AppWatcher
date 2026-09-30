@@ -20,11 +20,15 @@ internal fun CoroutineScope.launchAccountInitialization(
         previousJob?.cancel()
     }
     return launch {
-        // Keep canceled intermediate jobs waiting so later selections cannot overtake an active session.
-        withContext(NonCancellable) {
-            previousJob?.join()
-        }
-        currentCoroutineContext().ensureActive()
+        awaitPreviousInitialization(previousJob)
         initialize()
     }
+}
+
+internal suspend fun awaitPreviousInitialization(previousJob: Job?) {
+    // Keep canceled intermediate jobs waiting so later selections cannot overtake an active session.
+    withContext(NonCancellable) {
+        previousJob?.join()
+    }
+    currentCoroutineContext().ensureActive()
 }

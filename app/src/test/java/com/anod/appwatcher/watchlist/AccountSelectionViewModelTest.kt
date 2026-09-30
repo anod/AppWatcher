@@ -49,12 +49,13 @@ import org.robolectric.annotation.LooperMode
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = Application::class, sdk = [35])
-@LooperMode(LooperMode.Mode.LEGACY)
+@LooperMode(LooperMode.Mode.PAUSED)
 class AccountSelectionViewModelTest {
     private val firstAccount = "first@example.com"
     private val secondAccount = "second@example.com"
     private val thirdAccount = "third@example.com"
     private val tokenProvider = BlockingTokenProvider(firstAccount)
+    private val dfeApi = FakeDfeApi()
     private val appScope = CoroutineScope(Dispatchers.Unconfined)
     private val viewModelStore = ViewModelStore()
     private lateinit var preferences: Preferences
@@ -87,7 +88,7 @@ class AccountSelectionViewModelTest {
             .allowMainThreadQueries()
             .build()
         val authToken = AuthTokenBlocking.create(tokenProvider)
-        val initializer = AuthAccountInitializer(preferences, authToken, FakeDfeApi(), PlaySessionCoordinator())
+        val initializer = AuthAccountInitializer(preferences, authToken, dfeApi, PlaySessionCoordinator())
         startKoin {
             modules(module {
                 single<Context> { context }
@@ -116,6 +117,7 @@ class AccountSelectionViewModelTest {
 
     @Test
     fun choosingAnotherAccountWhileResumingOldOneSwitchesInBothDirections() = runBlocking {
+        preferences.versionCode = 0
         viewModel.handleEvent(MainViewEvent.OnResume)
         awaitFirstToken()
 
@@ -124,6 +126,7 @@ class AccountSelectionViewModelTest {
 
         awaitAccount(secondAccount)
         assertEquals(secondAccount, preferences.account?.name)
+        awaitUpgradeCheck()
 
         selectAccount(firstAccount)
         awaitAccount(firstAccount)
@@ -156,12 +159,7 @@ class AccountSelectionViewModelTest {
         awaitFirstToken()
         tokenProvider.releaseFirst.countDown()
 
-        withTimeout(10_000) {
-            while (preferences.versionCode != BuildConfig.VERSION_CODE) {
-                Shadows.shadowOf(Looper.getMainLooper()).idle()
-                delay(10)
-            }
-        }
+        awaitUpgradeCheck()
         selectAccount(secondAccount)
         awaitAccount(secondAccount)
         assertEquals(secondAccount, preferences.account?.name)
@@ -200,6 +198,61 @@ class AccountSelectionViewModelTest {
         assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
     }
 
+    @Test
+    fun searchPickerSwitchesAccountWhileMainRegistrationIsRunning() = runBlocking {
+        preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
+        selectAccount(firstAccount)
+        awaitFirstToken()
+
+        assertTrue(preferences.isDeviceRegistrationRequired)
+        val searchViewModel = SearchViewModel(SearchViewState())
+        viewModelStore.put("search", searchViewModel)
+        searchViewModel.handleEvent(
+            SearchViewEvent.SetAccount(
+                AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
+            )
+        )
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+        tokenProvider.releaseFirst.countDown()
+
+        withTimeout(10_000) {
+            while (!searchViewModel.viewState.authenticated || preferences.account?.name != secondAccount) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
+        assertEquals(listOf(firstAccount, secondAccount), tokenProvider.requestedAccounts)
+    }
+
+    @Test
+    fun mainShowsAccountSelectedFromSearchPickerOnReturn() = runBlocking {
+        preferences.account = AuthAccount(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
+        preferences.versionCode = 0
+        selectAccount(firstAccount)
+        awaitFirstToken()
+
+        assertTrue(preferences.isDeviceRegistrationRequired)
+        val searchViewModel = SearchViewModel(SearchViewState())
+        viewModelStore.put("search", searchViewModel)
+        tokenProvider.releaseFirst.countDown()
+        awaitUpgradeCheck()
+
+        searchViewModel.handleEvent(
+            SearchViewEvent.SetAccount(
+                AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
+            )
+        )
+        withTimeout(10_000) {
+            while (!searchViewModel.viewState.authenticated || preferences.account?.name != secondAccount) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
+
+        viewModel.handleEvent(MainViewEvent.OnResume)
+        assertEquals(secondAccount, viewModel.viewState.account?.name)
+    }
+
     private fun selectAccount(name: String) {
         viewModel.handleEvent(
             MainViewEvent.SetAccount(
@@ -217,7 +270,9 @@ class AccountSelectionViewModelTest {
             true
         }
         assertTrue(
-            "Expected $name; shown=${viewModel.viewState.account?.name}, saved=${preferences.account?.name}, requests=${tokenProvider.requestedAccounts}",
+            "Expected $name; shown=${viewModel.viewState.account?.name}, saved=${preferences.account?.name}, " +
+                "configReady=${!preferences.account?.deviceConfig.isNullOrEmpty()}, uploads=${dfeApi.uploadCalls}, " +
+                "requests=${tokenProvider.requestedAccounts}",
             observed == true
         )
     }
@@ -225,6 +280,15 @@ class AccountSelectionViewModelTest {
     private suspend fun awaitFirstToken() {
         withTimeout(5_000) {
             while (!tokenProvider.firstRequested.await(0, TimeUnit.MILLISECONDS)) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
+    }
+
+    private suspend fun awaitUpgradeCheck() {
+        withTimeout(10_000) {
+            while (preferences.versionCode != BuildConfig.VERSION_CODE) {
                 Shadows.shadowOf(Looper.getMainLooper()).idle()
                 delay(10)
             }
