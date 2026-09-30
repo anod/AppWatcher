@@ -32,8 +32,8 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 17112
-        versionName = "1.7.1"
+        versionCode = 17200
+        versionName = "1.7.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

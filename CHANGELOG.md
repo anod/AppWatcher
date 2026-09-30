@@ -1,6 +1,11 @@
 App Watcher Changelog
 =====================
 
+1.7.2 Sep 30, 2026
+
+ * Fix account switching during authentication and automatic sync
+ * Keep account selections consistent across screens and cancel outdated initializations
+
 1.8.7 Mar 4, 2017, 12:49 PM
 
  * DayNight theme
