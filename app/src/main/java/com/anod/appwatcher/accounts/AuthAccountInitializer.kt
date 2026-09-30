@@ -6,10 +6,8 @@ import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -42,7 +40,7 @@ class AuthAccountInitializer(
     private val dfeApi: DfeApi,
     private val playSessionCoordinator: PlaySessionCoordinator
 ) {
-    private val initializations = mutableSetOf<Job>()
+    private var activeInitialization: Job? = null
 
     private val deviceRegistration = DeviceRegistration(
         preferences = preferences,
@@ -59,20 +57,16 @@ class AuthAccountInitializer(
         val job = checkNotNull(context[Job]) {
             "Account initialization requires an active coroutine job"
         }
-        val previousJobs = synchronized(this) {
-            val previous = initializations.toList()
+        val previousJob = synchronized(this) {
+            val previous = activeInitialization
             if (userInitiated) {
-                previous.forEach { it.cancel() }
+                previous?.cancel()
             }
-            initializations.add(job)
+            activeInitialization = job
             previous
         }
         return try {
-            // Canceled initializations may still be finishing device registration.
-            withContext(NonCancellable) {
-                previousJobs.joinAll()
-            }
-            context.ensureActive()
+            awaitPreviousInitialization(previousJob)
             if (userInitiated) {
                 playSessionCoordinator.withUserInitiatedSession {
                     initializeInSession(account, userInitiated = true)
@@ -84,7 +78,9 @@ class AuthAccountInitializer(
             }
         } finally {
             synchronized(this) {
-                initializations.remove(job)
+                if (activeInitialization === job) {
+                    activeInitialization = null
+                }
             }
         }
     }
