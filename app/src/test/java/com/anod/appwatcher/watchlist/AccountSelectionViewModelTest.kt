@@ -169,32 +169,15 @@ class AccountSelectionViewModelTest {
     fun searchAccountPickerResultOverridesInFlightAuthentication() = runBlocking {
         val searchViewModel = SearchViewModel(SearchViewState())
         viewModelStore.put("search", searchViewModel)
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(firstAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
+        selectSearchAccount(searchViewModel, firstAccount)
         awaitFirstToken()
 
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(thirdAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
+        selectSearchAccount(searchViewModel, secondAccount)
+        selectSearchAccount(searchViewModel, thirdAccount)
         Shadows.shadowOf(Looper.getMainLooper()).idle()
         tokenProvider.releaseFirst.countDown()
 
-        withTimeout(5_000) {
-            while (!searchViewModel.viewState.authenticated || preferences.account?.name != thirdAccount) {
-                Shadows.shadowOf(Looper.getMainLooper()).idle()
-                delay(10)
-            }
-        }
+        awaitSearchAccount(searchViewModel, thirdAccount, timeoutMillis = 5_000)
         assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
     }
 
@@ -207,20 +190,11 @@ class AccountSelectionViewModelTest {
         assertTrue(preferences.isDeviceRegistrationRequired)
         val searchViewModel = SearchViewModel(SearchViewState())
         viewModelStore.put("search", searchViewModel)
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
+        selectSearchAccount(searchViewModel, secondAccount)
         Shadows.shadowOf(Looper.getMainLooper()).idle()
         tokenProvider.releaseFirst.countDown()
 
-        withTimeout(10_000) {
-            while (!searchViewModel.viewState.authenticated || preferences.account?.name != secondAccount) {
-                Shadows.shadowOf(Looper.getMainLooper()).idle()
-                delay(10)
-            }
-        }
+        awaitSearchAccount(searchViewModel, secondAccount, timeoutMillis = 10_000)
         assertEquals(listOf(firstAccount, secondAccount), tokenProvider.requestedAccounts)
     }
 
@@ -236,20 +210,11 @@ class AccountSelectionViewModelTest {
         assertTrue(preferences.isDeviceRegistrationRequired)
         val searchViewModel = SearchViewModel(SearchViewState())
         viewModelStore.put("search", searchViewModel)
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(thirdAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
+        selectSearchAccount(searchViewModel, thirdAccount)
         Shadows.shadowOf(Looper.getMainLooper()).idle()
         tokenProvider.releaseFirst.countDown()
 
-        withTimeout(10_000) {
-            while (!searchViewModel.viewState.authenticated || preferences.account?.name != thirdAccount) {
-                Shadows.shadowOf(Looper.getMainLooper()).idle()
-                delay(10)
-            }
-        }
+        awaitSearchAccount(searchViewModel, thirdAccount, timeoutMillis = 10_000)
         assertEquals(listOf(firstAccount, thirdAccount), tokenProvider.requestedAccounts)
     }
 
@@ -266,17 +231,8 @@ class AccountSelectionViewModelTest {
         tokenProvider.releaseFirst.countDown()
         awaitUpgradeCheck()
 
-        searchViewModel.handleEvent(
-            SearchViewEvent.SetAccount(
-                AccountSelectionResult.Success(Account(secondAccount, AuthTokenBlocking.ACCOUNT_TYPE))
-            )
-        )
-        withTimeout(10_000) {
-            while (!searchViewModel.viewState.authenticated || preferences.account?.name != secondAccount) {
-                Shadows.shadowOf(Looper.getMainLooper()).idle()
-                delay(10)
-            }
-        }
+        selectSearchAccount(searchViewModel, secondAccount)
+        awaitSearchAccount(searchViewModel, secondAccount, timeoutMillis = 10_000)
 
         viewModel.handleEvent(MainViewEvent.OnResume)
         assertEquals(secondAccount, viewModel.viewState.account?.name)
@@ -285,6 +241,14 @@ class AccountSelectionViewModelTest {
     private fun selectAccount(name: String) {
         viewModel.handleEvent(
             MainViewEvent.SetAccount(
+                AccountSelectionResult.Success(Account(name, AuthTokenBlocking.ACCOUNT_TYPE))
+            )
+        )
+    }
+
+    private fun selectSearchAccount(searchViewModel: SearchViewModel, name: String) {
+        searchViewModel.handleEvent(
+            SearchViewEvent.SetAccount(
                 AccountSelectionResult.Success(Account(name, AuthTokenBlocking.ACCOUNT_TYPE))
             )
         )
@@ -304,6 +268,15 @@ class AccountSelectionViewModelTest {
                 "requests=${tokenProvider.requestedAccounts}",
             observed == true
         )
+    }
+
+    private suspend fun awaitSearchAccount(searchViewModel: SearchViewModel, name: String, timeoutMillis: Long) {
+        withTimeout(timeoutMillis) {
+            while (!searchViewModel.viewState.authenticated || preferences.account?.name != name) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                delay(10)
+            }
+        }
     }
 
     private suspend fun awaitFirstToken() {
