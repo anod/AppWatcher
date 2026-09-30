@@ -1,6 +1,12 @@
 App Watcher Changelog
 =====================
 
+1.7.2 Sep 30, 2026
+
+ * Improve app list stability, update detection, and installed-app status
+ * Make sync more reliable and efficient, including Google Drive tag updates
+ * Fix account switching, repeated notifications, search crashes, and other UI issues
+
 1.8.7 Mar 4, 2017, 12:49 PM
 
  * DayNight theme
