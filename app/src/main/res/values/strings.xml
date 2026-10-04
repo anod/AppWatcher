@@ -24,8 +24,8 @@
     <string name="alert_dialog_cancel">Cancel</string>
     <string name="version">%s</string>
     <string name="update">Updated to %s</string>
-    <string name="notification_one_updated">%s updated</string>
-    <string name="notification_many_updates">%d apps updated</string>
+    <string name="notification_one_updated">New version of %s</string>
+    <string name="notification_many_updates">New versions for %d apps</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s and more</string>
     <string name="notification_click">Click to see details</string>
@@ -56,7 +56,7 @@
     <string name="no_document_provider">No file manager available on this device</string>
     <string name="import_export">Import</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
-    <string name="new_updates">New updates</string>
+    <string name="new_updates">New versions</string>
     <string name="recently_discovered">Recently discovered</string>
     <string name="watching">Watching</string>
     <string name="menu_filter">Search</string>
@@ -80,7 +80,7 @@
     <string name="tab_all">All</string>
     <string name="tab_installed">Installed</string>
     <string name="tab_not_installed">Not Installed</string>
-    <string name="tab_updatable">Updatable</string>
+    <string name="tab_updatable">New versions</string>
     <string-array name="filter_titles">
         <item>@string/tab_all</item>
         <item>@string/tab_installed</item>
@@ -115,7 +115,7 @@
     <string name="settings_notifications">Notifications</string>
     <string name="uptodate_summary">Notify when app was already updated</string>
     <string name="uptodate_title">Updated notifications</string>
-    <string name="noti_action_update">Update</string>
+    <string name="noti_action_update">Check Play</string>
     <string name="play_store_my_apps">Play Store: My Apps</string>
     <string name="navdrawer_item_wishlist">Wishlist</string>
     <string name="navdrawer_item_purchases">Purchases</string>
@@ -137,7 +137,7 @@
     <string name="refresh_scheduled">Refresh scheduled</string>
     <string name="recently_installed">Recently installed</string>
     <string name="shortcut_search">Search</string>
-    <string name="shortcut_updates">Updatable</string>
+    <string name="shortcut_updates">New versions</string>
     <string name="shortcut_recently_installed">@string/recently_installed</string>
     <string name="open">Open</string>
     <string name="channel_app_updates">Apps updates</string>
