@@ -24,7 +24,7 @@
     <string name="version">Вер. %s</string>
     <string name="update">Обновлено до %s</string>
     <string name="notification_one_updated">Новая версия %s</string>
-    <string name="notification_many_updates">Новые версии для %d приложений</string>
+    <string name="notification_many_updates">Новые версии приложений: %d</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s и еще</string>
     <string name="notification_click">Нажмите для деталей</string>
