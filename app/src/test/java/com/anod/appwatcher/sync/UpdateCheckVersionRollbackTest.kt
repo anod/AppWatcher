@@ -164,6 +164,20 @@ class UpdateCheckVersionRollbackTest {
     }
 
     @Test
+    fun markedSleepingAppUpdateIsKeptOnNextSyncWithoutRepeatNotification() {
+        assertEquals(
+            AppUpdateDecision.KEEP_DEVICE_UPDATE,
+            selectAppUpdateDecision(
+                remoteVersion = 101,
+                cachedVersion = 101,
+                installedVersion = 100,
+                status = App.STATUS_UPDATED,
+                lastUpdatesViewed = true
+            )
+        )
+    }
+
+    @Test
     fun previouslySuppressedSleepingAppUpdateIsRestoredWithoutNotification() {
         assertEquals(
             AppUpdateDecision.RESTORE_DEVICE_UPDATE,

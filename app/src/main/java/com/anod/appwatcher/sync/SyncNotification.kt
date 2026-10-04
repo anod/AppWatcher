@@ -124,19 +124,18 @@ class SyncNotification(private val context: ApplicationContext, private val noti
     }
 
     private fun addMultipleExtraInfo(updatedApps: List<UpdatedApp>, builder: NotificationCompat.Builder) {
-        updatedApps.firstOrNull { it.canUpdateOnDevice && it.versionNumber > it.installedVersionCode }
-            ?: return
-
         val bigText = updatedApps.joinToString(",\n") { it.title }
         builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
 
-        val updateIntent = NotificationActivity.intent(
-            Uri.parse("com.anod.appwatcher://play/myapps/1"),
-            NotificationActivity.ACTION_MY_APPS,
-            context.actual)
-        builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
-            PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
-        )
+        if (updatedApps.any { it.canUpdateOnDevice && it.versionNumber > it.installedVersionCode }) {
+            val updateIntent = NotificationActivity.intent(
+                Uri.parse("com.anod.appwatcher://play/myapps/1"),
+                NotificationActivity.ACTION_MY_APPS,
+                context.actual)
+            builder.addAction(R.drawable.ic_system_update_alt_white_24dp, context.getString(R.string.noti_action_update),
+                PendingIntent.getActivity(context.actual, 0, updateIntent, PendingIntent.FLAG_IMMUTABLE)
+            )
+        }
 
         val readIntent = NotificationActivity.intent(
             Uri.parse("com.anod.appwatcher://dismiss/"),
