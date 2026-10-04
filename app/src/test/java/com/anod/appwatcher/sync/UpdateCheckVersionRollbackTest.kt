@@ -59,8 +59,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 100,
                 installedVersion = 101,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = false,
-                installedEnabled = true
+                lastUpdatesViewed = false
             )
         )
     }
@@ -74,8 +73,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 100,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = true,
-                installedEnabled = true
+                lastUpdatesViewed = true
             )
         )
     }
@@ -89,8 +87,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 100,
                 status = App.STATUS_UPDATED,
-                lastUpdatesViewed = true,
-                installedEnabled = true
+                lastUpdatesViewed = true
             )
         )
     }
@@ -104,8 +101,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 101,
                 status = App.STATUS_UPDATED,
-                lastUpdatesViewed = false,
-                installedEnabled = true
+                lastUpdatesViewed = false
             )
         )
     }
@@ -119,8 +115,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 0,
                 status = App.STATUS_UPDATED,
-                lastUpdatesViewed = true,
-                installedEnabled = false
+                lastUpdatesViewed = true
             )
         )
     }
@@ -134,8 +129,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 0,
                 status = App.STATUS_UPDATED,
-                lastUpdatesViewed = false,
-                installedEnabled = false
+                lastUpdatesViewed = false
             )
         )
     }
@@ -149,38 +143,36 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 101,
                 installedVersion = 101,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = true,
-                installedEnabled = true
+                lastUpdatesViewed = true
             )
         )
     }
 
     @Test
-    fun disabledInstalledAppDoesNotMarkNewVersionAsUpdate() {
+    fun newVersionOfSleepingInstalledAppMarksUpdate() {
+        // Enabled state is not a sync input: disabled apps are notified and hidden from update UI.
         assertEquals(
-            AppUpdateDecision.DISABLED_INSTALLED,
+            AppUpdateDecision.MARK_UPDATED,
             selectAppUpdateDecision(
                 remoteVersion = 101,
                 cachedVersion = 100,
                 installedVersion = 100,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = false,
-                installedEnabled = false
+                lastUpdatesViewed = false
             )
         )
     }
 
     @Test
-    fun disabledInstalledAppClearsExistingUpdate() {
+    fun previouslySuppressedSleepingAppUpdateIsRestoredWithoutNotification() {
         assertEquals(
-            AppUpdateDecision.CLEAR_DISABLED_UPDATE,
+            AppUpdateDecision.RESTORE_DEVICE_UPDATE,
             selectAppUpdateDecision(
                 remoteVersion = 101,
                 cachedVersion = 101,
                 installedVersion = 100,
-                status = App.STATUS_UPDATED,
-                lastUpdatesViewed = false,
-                installedEnabled = false
+                status = App.STATUS_NORMAL,
+                lastUpdatesViewed = false
             )
         )
     }
@@ -194,8 +186,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 100,
                 installedVersion = 100,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = false,
-                installedEnabled = true
+                lastUpdatesViewed = false
             )
         )
     }
@@ -209,8 +200,7 @@ class UpdateCheckVersionRollbackTest {
                 cachedVersion = 100,
                 installedVersion = 0,
                 status = App.STATUS_NORMAL,
-                lastUpdatesViewed = false,
-                installedEnabled = false
+                lastUpdatesViewed = false
             )
         )
     }

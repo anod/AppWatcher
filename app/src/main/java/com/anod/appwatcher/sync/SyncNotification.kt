@@ -124,7 +124,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
     }
 
     private fun addMultipleExtraInfo(updatedApps: List<UpdatedApp>, builder: NotificationCompat.Builder) {
-        updatedApps.firstOrNull { it.installedVersionCode > 0 && it.versionNumber > it.installedVersionCode }
+        updatedApps.firstOrNull { it.canUpdateOnDevice && it.versionNumber > it.installedVersionCode }
             ?: return
 
         val bigText = updatedApps.joinToString(",\n") { it.title }
@@ -165,7 +165,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
             PendingIntent.getActivity(context.actual, 0, playIntent, PendingIntent.FLAG_IMMUTABLE)
         )
 
-        if (update.installedVersionCode > 0) {
+        if (update.canUpdateOnDevice) {
             val updateIntent = NotificationActivity.intent(
                 Uri.parse("com.anod.appwatcher://play/myapps/1"),
                 NotificationActivity.ACTION_MY_APPS,

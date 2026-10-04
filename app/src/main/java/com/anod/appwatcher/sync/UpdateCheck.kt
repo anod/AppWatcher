@@ -29,7 +29,6 @@ import com.anod.appwatcher.database.entities.toApp
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageState
 import com.anod.appwatcher.utils.PackageStateCache
-import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.compareLettersAndDigits
 import com.anod.appwatcher.utils.date.UploadDateParserCache
 import com.anod.appwatcher.utils.extractUploadDate
@@ -250,15 +249,6 @@ class UpdateCheck(
         syncId: Long,
         verboseDiagnostics: Boolean
     ): SyncResult {
-        val clearedDisabledUpdates = database.apps().clearDisabledUpdateStatuses(
-            packageStates = packageStates
-        )
-        if (clearedDisabledUpdates > 0) {
-            AppLog.i(
-                "Cleared $clearedDisabledUpdates disabled app update statuses",
-                "UpdateCheck"
-            )
-        }
         val sortId = preferences.sortIndex
         val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
@@ -658,8 +648,7 @@ class UpdateCheck(
             cachedVersion = localApp.versionNumber,
             installedVersion = installedInfo.versionCode,
             status = localApp.status,
-            lastUpdatesViewed = lastUpdatesViewed,
-            installedEnabled = installedEnabled
+            lastUpdatesViewed = lastUpdatesViewed
         )
         if (decision == AppUpdateDecision.MARK_UPDATED) {
             AppLog.i(
@@ -678,7 +667,7 @@ class UpdateCheck(
             val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
             return AppUpdateResult(
                 values = newApp.contentValues,
-                updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, true),
+                updatedApp = UpdatedApp(newApp, recentChanges, installedInfo.versionCode, installedEnabled, true),
                 persistChangelog = true,
                 installedVersion = installedInfo.versionCode,
                 installedEnabled = installedEnabled,
@@ -691,14 +680,13 @@ class UpdateCheck(
             AppUpdateDecision.RESTORE_DEVICE_UPDATE ->
                 values.put(AppListTable.Columns.STATUS, App.STATUS_UPDATED)
             AppUpdateDecision.CLEAR_INSTALLED_UPDATE,
-            AppUpdateDecision.CLEAR_DISABLED_UPDATE,
             AppUpdateDecision.CLEAR_VIEWED_UPDATE -> {
                 values.put(AppListTable.Columns.STATUS, App.STATUS_NORMAL)
                 values.put(AppListTable.Columns.SYNC_TIMESTAMP, 0L)
             }
             AppUpdateDecision.KEEP_UPDATED -> {
                 val recentChanges = releaseDoc.appDetails.recentChangesHtml ?: ""
-                updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, false)
+                updatedApp = UpdatedApp(localApp, recentChanges, installedInfo.versionCode, installedEnabled, false)
             }
             AppUpdateDecision.MISSING_RESPONSE_KEEP,
             AppUpdateDecision.RESPONSE_WITHOUT_DETAILS_KEEP,
@@ -708,7 +696,6 @@ class UpdateCheck(
             AppUpdateDecision.MARK_UPDATED,
             AppUpdateDecision.REFRESH_INSTALLED_CURRENT,
             AppUpdateDecision.KEEP_DEVICE_UPDATE,
-            AppUpdateDecision.DISABLED_INSTALLED,
             AppUpdateDecision.CURRENT -> {
             }
         }
@@ -920,10 +907,8 @@ internal enum class AppUpdateDecision(val value: String) {
     RESTORE_DEVICE_UPDATE("restore-device-update"),
     KEEP_DEVICE_UPDATE("keep-device-update"),
     CLEAR_INSTALLED_UPDATE("clear-installed-update"),
-    CLEAR_DISABLED_UPDATE("clear-disabled-update"),
     CLEAR_VIEWED_UPDATE("clear-viewed-update"),
     KEEP_UPDATED("keep-updated"),
-    DISABLED_INSTALLED("disabled-installed"),
     CURRENT("current");
 
     val isSteadyState: Boolean
@@ -932,16 +917,14 @@ internal enum class AppUpdateDecision(val value: String) {
             this == UNAVAILABLE_SUPPRESSED ||
             this == UNAVAILABLE_ROLLBACK ||
             this == KEEP_DEVICE_UPDATE ||
-            this == KEEP_UPDATED ||
-            this == DISABLED_INSTALLED
+            this == KEEP_UPDATED
 }
 
 internal enum class SyncDecisionSignal(val value: String) {
     NONE("none"),
     INVALID_MARKED_NOT_NEWER_THAN_INSTALLED("invalid-marked-not-newer-than-installed"),
     DEVICE_UPDATE_RESTORED("device-update-restored"),
-    INSTALLED_UPDATE_CLEARED("installed-update-cleared"),
-    DISABLED_UPDATE_CLEARED("disabled-update-cleared")
+    INSTALLED_UPDATE_CLEARED("installed-update-cleared")
 }
 
 internal fun detectSyncDecisionSignal(
@@ -955,8 +938,6 @@ internal fun detectSyncDecisionSignal(
         SyncDecisionSignal.DEVICE_UPDATE_RESTORED
     decision == AppUpdateDecision.CLEAR_INSTALLED_UPDATE ->
         SyncDecisionSignal.INSTALLED_UPDATE_CLEARED
-    decision == AppUpdateDecision.CLEAR_DISABLED_UPDATE ->
-        SyncDecisionSignal.DISABLED_UPDATE_CLEARED
     else -> SyncDecisionSignal.NONE
 }
 
@@ -965,16 +946,11 @@ internal fun selectAppUpdateDecision(
     cachedVersion: Int,
     installedVersion: Int,
     status: Int,
-    lastUpdatesViewed: Boolean,
-    installedEnabled: Boolean
+    lastUpdatesViewed: Boolean
 ): AppUpdateDecision {
     require(remoteVersion >= cachedVersion)
     val isInstalled = installedVersion > 0
     return when {
-        isInstalled && !installedEnabled && status == App.STATUS_UPDATED ->
-            AppUpdateDecision.CLEAR_DISABLED_UPDATE
-        isInstalled && !installedEnabled ->
-            AppUpdateDecision.DISABLED_INSTALLED
         isInstalled && remoteVersion <= installedVersion && status == App.STATUS_UPDATED ->
             AppUpdateDecision.CLEAR_INSTALLED_UPDATE
         isInstalled && remoteVersion <= installedVersion && remoteVersion > cachedVersion ->

@@ -94,11 +94,27 @@ class SyncNotificationFilterTest {
         ), actual)
     }
 
+    @Test
+    fun disabledInstalledAppIsNotifiedWithoutDeviceUpdate() {
+        val filter = SyncNotification.Filter(
+            filterInstalled = false,
+            filterInstalledUpToDate = true,
+            filterNoChanges = false)
+        val disabled = updatedApp(1, installedVersionCode = 1, versionNumber = 2, installedEnabled = false)
+        val enabled = updatedApp(2, installedVersionCode = 1, versionNumber = 2, installedEnabled = true)
+
+        assertEquals(listOf(disabled, enabled), filter.apply(listOf(disabled, enabled)))
+        assertFalse(disabled.canUpdateOnDevice)
+        assertTrue(enabled.canUpdateOnDevice)
+        assertFalse(updatedApp(3, installedVersionCode = 0, installedEnabled = true).canUpdateOnDevice)
+    }
+
     private fun updatedApp(
         id: Int,
         installedVersionCode: Int = 0,
         versionNumber: Int = 0,
-        noNewDetails: Boolean = false
+        noNewDetails: Boolean = false,
+        installedEnabled: Boolean = installedVersionCode > 0
     ) = UpdatedApp(
         packageName = "item-$id",
         versionNumber = versionNumber,
@@ -107,6 +123,7 @@ class SyncNotificationFilterTest {
         uploadDate = "100",
         recentChanges = "",
         installedVersionCode = installedVersionCode,
+        installedEnabled = installedEnabled,
         isNewUpdate = false,
         noNewDetails = noNewDetails
     )
