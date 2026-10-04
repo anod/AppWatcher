@@ -11,10 +11,17 @@ data class UpdatedApp(
     val uploadDate: String,
     val recentChanges: String,
     val installedVersionCode: Int,
+    val installedEnabled: Boolean,
     val isNewUpdate: Boolean,
     val noNewDetails: Boolean = false
 ) {
-    constructor(appInfo: App, recentChanges: String, installedVersionCode: Int, isNewUpdate: Boolean) : this(
+    constructor(
+        appInfo: App,
+        recentChanges: String,
+        installedVersionCode: Int,
+        installedEnabled: Boolean,
+        isNewUpdate: Boolean
+    ) : this(
         appInfo.packageName,
         appInfo.versionNumber,
         appInfo.title,
@@ -22,6 +29,10 @@ data class UpdatedApp(
         appInfo.uploadDate,
         recentChanges,
         installedVersionCode,
+        installedEnabled,
         isNewUpdate
     )
+
+    val canUpdateOnDevice: Boolean
+        get() = installedVersionCode > 0 && installedEnabled
 }

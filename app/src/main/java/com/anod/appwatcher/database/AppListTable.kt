@@ -92,12 +92,6 @@ interface AppListTable {
 
     @Query(
         "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
-            "${Columns.STATUS} = ${App.STATUS_UPDATED}"
-    )
-    suspend fun loadUpdatedPackages(): List<PackageRowPair>
-
-    @Query(
-        "SELECT ${BaseColumns._ID}, ${Columns.PACKAGE_NAME} FROM $TABLE WHERE " +
             "CASE :includeDeleted WHEN 0 THEN ${Columns.STATUS} != ${App.STATUS_DELETED} ELSE ${Columns.STATUS} >= ${App.STATUS_NORMAL} END"
     )
     suspend fun loadPackages(includeDeleted: Boolean): List<PackageRowPair>
@@ -151,22 +145,6 @@ interface AppListTable {
             "WHERE ${BaseColumns._ID} = :rowId AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
     )
     suspend fun clearUpdateStatus(rowId: Int): Int
-
-    @Query(
-        "UPDATE $TABLE SET " +
-            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
-            "${Columns.SYNC_TIMESTAMP} = 0 " +
-            "WHERE ${Columns.PACKAGE_NAME} = :packageName AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
-    )
-    suspend fun clearUpdateStatusByPackageName(packageName: String): Int
-
-    @Query(
-        "UPDATE $TABLE SET " +
-            "${Columns.STATUS} = ${App.STATUS_NORMAL}, " +
-            "${Columns.SYNC_TIMESTAMP} = 0 " +
-            "WHERE ${BaseColumns._ID} IN (:rowIds) AND ${Columns.STATUS} = ${App.STATUS_UPDATED}"
-    )
-    suspend fun clearUpdateStatuses(rowIds: List<Int>): Int
 
     @Query(
         "UPDATE $TABLE SET " +

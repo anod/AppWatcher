@@ -367,6 +367,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 packageName = "com.anod.appwatcher",
                 title = "Test",
                 installedVersionCode = 25,
+                installedEnabled = true,
                 isNewUpdate = true,
                 recentChanges = "Test notification",
                 uploadDate = "Now",
