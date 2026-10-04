@@ -25,7 +25,7 @@
     <string name="version">%s</string>
     <string name="update">Frissítve erre: %s</string>
     <string name="notification_one_updated">%s új verziója</string>
-    <string name="notification_many_updates">Új verzió %d alkalmazáshoz</string>
+    <string name="notification_many_updates">Új verziók %d alkalmazáshoz</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s és további</string>
     <string name="notification_click">Kattints a részletekhez</string>
