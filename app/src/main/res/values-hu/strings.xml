@@ -24,8 +24,8 @@
     <string name="alert_dialog_cancel">Mégse</string>
     <string name="version">%s</string>
     <string name="update">Frissítve erre: %s</string>
-    <string name="notification_one_updated">%s frissítve</string>
-    <string name="notification_many_updates">%d alkalmazás frissítve</string>
+    <string name="notification_one_updated">%s új verziója</string>
+    <string name="notification_many_updates">Új verziók %d alkalmazáshoz</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s és további</string>
     <string name="notification_click">Kattints a részletekhez</string>
@@ -55,7 +55,7 @@
     <string name="failed_to_write_file">A fájl nem írható</string>
     <string name="import_export">Importálás</string>
     <string name="export_path" translatable="false">/sdcard/data/com.anod.appwatcher/backup/</string>
-    <string name="new_updates">Új frissítések</string>
+    <string name="new_updates">Új verziók</string>
     <string name="recently_discovered">Mostanában frissítve</string>
     <string name="watching">Figyelés</string>
     <string name="menu_filter">Keresés</string>
@@ -79,7 +79,7 @@
     <string name="tab_all">Mind</string>
     <string name="tab_installed">Telepített</string>
     <string name="tab_not_installed">Nem telepített</string>
-    <string name="tab_updatable">Frissíthető</string>
+    <string name="tab_updatable">Új verziók</string>
     <string-array name="filter_titles">
         <item>@string/tab_all</item>
         <item>@string/tab_installed</item>
@@ -114,7 +114,7 @@
     <string name="settings_notifications">Értesítések</string>
     <string name="uptodate_summary">Értesítés, ha az alkalmazás már frissült</string>
     <string name="uptodate_title">Frissítési értesítések</string>
-    <string name="noti_action_update">Frissítés</string>
+    <string name="noti_action_update">Play ellenőrzése</string>
     <string name="play_store_my_apps">Play Store: Alkalmazásaim</string>
     <string name="navdrawer_item_wishlist">Kívánságlista</string>
     <string name="navdrawer_item_purchases">Vásárlások</string>
@@ -136,7 +136,7 @@
     <string name="refresh_scheduled">Időzített ellenőrzés</string>
     <string name="recently_installed">Mostanában telepítve</string>
     <string name="shortcut_search">Keresés</string>
-    <string name="shortcut_updates">Frissíthető</string>
+    <string name="shortcut_updates">Új verziók</string>
     <string name="shortcut_recently_installed">@string/recently_installed</string>
     <string name="open">Megnyitás</string>
     <string name="channel_app_updates">Alkalmazás frissítések</string>

@@ -23,8 +23,8 @@
     <string name="alert_dialog_cancel">Отменить</string>
     <string name="version">Вер. %s</string>
     <string name="update">Обновлено до %s</string>
-    <string name="notification_one_updated">%s обновление найдено</string>
-    <string name="notification_many_updates">%d обновления(-ий) найдено</string>
+    <string name="notification_one_updated">Новая версия %s</string>
+    <string name="notification_many_updates">Новые версии приложений: %d</string>
     <string name="notification_2_apps">%1$s, %2$s</string>
     <string name="notification_2_apps_more">%1$s, %2$s и еще</string>
     <string name="notification_click">Нажмите для деталей</string>
@@ -98,7 +98,7 @@
     <string name="settings_notifications">Уведомления</string>
     <string name="uptodate_summary">Показывать уведомления об уже обновленных аппликациях</string>
     <string name="uptodate_title">Уже обновленные</string>
-    <string name="noti_action_update">Обновить</string>
+    <string name="noti_action_update">Проверить в Play</string>
     <string name="play_store_my_apps">Обновить все</string>
     <string name="navdrawer_item_wishlist">Список желаний</string>
     <string name="wishlist">Список желаний</string>
@@ -143,8 +143,8 @@
 
   <string name="pref_title_updates_frequency">Периодичность проверки</string>
   <string name="share_subject">%1$s версия %2$s</string>
-  <string name="new_updates">Новые обновления</string>
-  <string name="shortcut_updates">Обновляемые</string>
+  <string name="new_updates">Новые версии</string>
+  <string name="shortcut_updates">Новые версии</string>
   <string name="updates_not_available">Информация об обновлениях не доступна</string>
   <string name="filter">Фильтр</string>
   <string name="pref_show_recent_title">Последние установленные</string>
@@ -172,7 +172,7 @@
   <string name="app_info">Апп Инфо</string>
   <string name="crash_reports_title">Отчеты о сбоях</string>
   <string name="crash_reports_descr">Собирайте отчеты о сбоях. Требуется перезапуск.</string>
-  <string name="tab_updatable">Обновляемые</string>
+  <string name="tab_updatable">Новые версии</string>
   <string name="pref_privacy">Конфиденциальность</string>
   <string name="adaptive_icon_style">Форма иконки</string>
   <string name="adaptive_icon_style_summary">Применить форму к квадратным не прозрачным иконкам</string>

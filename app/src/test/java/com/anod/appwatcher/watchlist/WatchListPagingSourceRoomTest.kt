@@ -14,8 +14,6 @@ import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageState
 import com.anod.appwatcher.utils.PackageStateProvider
-import com.anod.appwatcher.utils.clearDisabledUpdateStatus
-import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.notification.NotificationManager
 import kotlinx.coroutines.CoroutineScope
@@ -140,7 +138,7 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
-    fun disabledUpdateStatusIsClearedBeforePackageIsReenabled() = runBlocking {
+    fun sleepingAppUpdateIsKeptButShownAsDisabledUntilReenabled() = runBlocking {
         insertApp(
             appId = "disabled",
             packageName = "disabled.watched",
@@ -155,73 +153,61 @@ class WatchListPagingSourceRoomTest {
             )
         )
 
-        val cleared = db.apps().clearDisabledUpdateStatuses(
-            packageStates = packageStateProvider(
-                installedApps = installedApps,
-                packageEnabled = { false }
+        val disabledItem = loadSingleApp(
+            createPagingSource(
+                showOnDevice = false,
+                showRecentlyDiscovered = true,
+                packageEnabled = { false },
+                installedApps = installedApps
             )
         )
 
-        assertEquals(1, cleared)
-        val storedApp = db.apps().loadApp("disabled")!!
-        assertEquals(App.STATUS_NORMAL, storedApp.status)
-        assertEquals(0L, storedApp.syncTime)
-
-        val result = createPagingSource(
-            showOnDevice = false,
-            packageEnabled = { true },
-            installedApps = installedApps
-        ).load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
-        val appItem = (result as PagingSource.LoadResult.Page)
-            .data
-            .filterIsInstance<SectionItem.App>()
-            .single()
-
-        assertEquals(App.STATUS_NORMAL, appItem.appListItem.app.status)
+        assertFalse(disabledItem.isPackageEnabled)
+        assertEquals(App.STATUS_UPDATED, disabledItem.appListItem.app.status)
         assertEquals(
             SectionHeader.Watching,
-            DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
-                .insertSeparator(before = null, after = appItem)
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = true)
+                .insertSeparator(before = null, after = disabledItem)
                 ?.type
         )
-    }
+        assertTrue(
+            loadApps(
+                createPagingSource(
+                    showOnDevice = false,
+                    filterId = Filters.UPDATABLE,
+                    packageEnabled = { false },
+                    installedApps = installedApps
+                )
+            ).isEmpty()
+        )
+        assertEquals(App.STATUS_UPDATED, db.apps().loadApp("disabled")!!.status)
 
-    @Test
-    fun packageChangeClearsOnlyChangedDisabledUpdateStatus() = runBlocking {
-        insertApp(
-            appId = "disabled",
-            packageName = "disabled.watched",
-            title = "Disabled Watched",
-            versionNumber = 2,
-            status = App.STATUS_UPDATED,
-            syncTime = System.currentTimeMillis()
-        )
-        insertApp(
-            appId = "other",
-            packageName = "other.watched",
-            title = "Other Watched",
-            versionNumber = 2,
-            status = App.STATUS_UPDATED,
-            syncTime = System.currentTimeMillis()
-        )
-        val installedApps = InstalledApps.StaticMap(
-            mapOf(
-                "disabled.watched" to InstalledApps.Info(versionCode = 1, versionName = "1"),
-                "other.watched" to InstalledApps.Info(versionCode = 1, versionName = "1")
+        val enabledItem = loadSingleApp(
+            createPagingSource(
+                showOnDevice = false,
+                showRecentlyDiscovered = true,
+                packageEnabled = { true },
+                installedApps = installedApps
             )
         )
 
-        val cleared = db.apps().clearDisabledUpdateStatus(
-            packageName = "disabled.watched",
-            packageState = PackageState(
-                packageInfo = installedApps.packageInfo("disabled.watched"),
-                isEnabled = false
-            )
+        assertEquals(
+            SectionHeader.New,
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = true)
+                .insertSeparator(before = null, after = enabledItem)
+                ?.type
         )
-
-        assertEquals(1, cleared)
-        assertEquals(App.STATUS_NORMAL, db.apps().loadApp("disabled")!!.status)
-        assertEquals(App.STATUS_UPDATED, db.apps().loadApp("other")!!.status)
+        assertEquals(
+            listOf("disabled.watched"),
+            loadApps(
+                createPagingSource(
+                    showOnDevice = false,
+                    filterId = Filters.UPDATABLE,
+                    packageEnabled = { true },
+                    installedApps = installedApps
+                )
+            ).map { it.appListItem.app.packageName }
+        )
     }
 
     @Test
@@ -547,6 +533,14 @@ class WatchListPagingSourceRoomTest {
         database = db,
         packageStates = packageStateProvider(installedApps, packageEnabled)
     )
+
+    private suspend fun loadApps(pagingSource: WatchListPagingSource): List<SectionItem.App> =
+        (pagingSource.load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)) as PagingSource.LoadResult.Page)
+            .data
+            .filterIsInstance<SectionItem.App>()
+
+    private suspend fun loadSingleApp(pagingSource: WatchListPagingSource): SectionItem.App =
+        loadApps(pagingSource).single()
 
     private fun packageStateProvider(
         installedApps: InstalledApps,

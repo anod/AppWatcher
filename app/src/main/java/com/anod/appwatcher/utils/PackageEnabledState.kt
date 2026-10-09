@@ -3,7 +3,6 @@ package com.anod.appwatcher.utils
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import androidx.core.content.pm.PackageInfoCompat
-import com.anod.appwatcher.database.AppListTable
 import info.anodsplace.framework.content.InstalledApps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -184,35 +183,3 @@ class PackageStateCache(private val packageManager: PackageManager) : PackageSta
 
 internal fun Map<String, PackageState>.stateFor(packageName: String): PackageState =
     get(packageName) ?: PackageState.NotInstalled
-
-internal suspend fun AppListTable.clearDisabledUpdateStatus(
-    packageName: String,
-    packageState: PackageState
-): Int = withContext(Dispatchers.IO) {
-    if (packageState.isInstalled && !packageState.isEnabled) {
-        clearUpdateStatusByPackageName(packageName)
-    } else {
-        0
-    }
-}
-
-internal suspend fun AppListTable.clearDisabledUpdateStatuses(
-    packageStates: PackageStateProvider
-): Int = withContext(Dispatchers.IO) {
-    val updatedPackages = loadUpdatedPackages()
-    if (updatedPackages.isEmpty()) {
-        return@withContext 0
-    }
-    val states = packageStates.load(updatedPackages.map { it.packageName })
-    val disabledRowIds = updatedPackages.mapNotNull { row ->
-        val packageState = states.stateFor(row.packageName)
-        row.rowId.takeIf {
-            packageState.isInstalled && !packageState.isEnabled
-        }
-    }
-    var cleared = 0
-    for (rowIds in disabledRowIds.chunked(998)) {
-        cleared += clearUpdateStatuses(rowIds)
-    }
-    cleared
-}

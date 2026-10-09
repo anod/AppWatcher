@@ -32,7 +32,6 @@ import com.anod.appwatcher.utils.PackageChangedReceiver
 import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.SyncProgress
 import com.anod.appwatcher.utils.appScope
-import com.anod.appwatcher.utils.clearDisabledUpdateStatuses
 import com.anod.appwatcher.utils.color.MaterialColors
 import com.anod.appwatcher.utils.forMyApps
 import com.anod.appwatcher.utils.getInt
@@ -209,16 +208,6 @@ class WatchListStateViewModel(
         )
 
         AppLog.d("Initial state: viewState")
-
-        viewModelScope.launch {
-            val clearedDisabledUpdates = db.apps().clearDisabledUpdateStatuses(
-                packageStates = packageStates
-            )
-            if (clearedDisabledUpdates > 0) {
-                invalidatePagingSources()
-                viewState = viewState.copy(dbAppsChange = viewState.dbAppsChange + 1)
-            }
-        }
 
         viewModelScope.launch {
             syncProgressFlow(application).collect {
