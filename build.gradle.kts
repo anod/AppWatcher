@@ -20,3 +20,14 @@ plugins {
     alias(libs.plugins.baselineprofile) apply false
     alias(libs.plugins.android.test) apply false
 }
+
+subprojects {
+    tasks.withType<Test>().configureEach {
+        // Robolectric 4.17 needs access to JDK internals on Java 17 and newer.
+        jvmArgs(
+            "--add-opens=java.base/java.lang=ALL-UNNAMED",
+            "--add-opens=java.base/java.io=ALL-UNNAMED",
+            "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED"
+        )
+    }
+}

@@ -8,6 +8,8 @@ App Watcher Changelog
  * Fix account switching, repeated notifications, search crashes, and other UI issues
  * Fix account switching during authentication and automatic sync
  * Keep account selections consistent across screens and cancel outdated initializations
+ * Update Compose and Emoji2; use system emoji fonts on Android 15 and newer
+ * Update app dependencies and build tooling, preserving Material3/Foundation compatibility
 
 1.8.7 Mar 4, 2017, 12:49 PM
 
