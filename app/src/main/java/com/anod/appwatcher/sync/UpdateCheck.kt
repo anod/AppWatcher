@@ -55,7 +55,6 @@ import java.security.cert.CertPathValidatorException
 import java.security.cert.CertificateException
 import java.time.Instant
 import java.util.*
-import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.SSLPeerUnverifiedException
 import javax.net.ssl.SSLProtocolException
 import kotlinx.coroutines.CancellationException
@@ -1123,7 +1122,6 @@ internal class SyncFailureException(
                     it is SocketException ||
                     it is InterruptedIOException ||
                     it is EOFException ||
-                    it is SSLHandshakeException ||
                     it.javaClass.name == "android.system.GaiException" ||
                     (it is IOException && it.message?.contains("NetworkError") == true)
             }

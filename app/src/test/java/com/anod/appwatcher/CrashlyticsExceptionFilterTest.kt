@@ -97,7 +97,9 @@ class CrashlyticsExceptionFilterTest {
             SocketTimeoutException("timeout"),
             InterruptedIOException("timeout"),
             EOFException("connection closed"),
-            SSLHandshakeException("connection closed during handshake")
+            SSLHandshakeException("connection closed during handshake").apply {
+                initCause(EOFException("connection closed"))
+            }
         )
         for (manual in listOf(false, true)) {
             for (failure in failures) {
@@ -135,6 +137,7 @@ class CrashlyticsExceptionFilterTest {
             DfeServerError("forbidden", 403, null),
             DfeServerError("missing", 404, null),
             certificateFailure,
+            SSLHandshakeException("handshake failed"),
             SSLPeerUnverifiedException("hostname mismatch")
         )
         for (failure in failures) {
