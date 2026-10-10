@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
 import info.anodsplace.context.ApplicationContext
@@ -26,10 +27,9 @@ class SyncNotification(private val context: ApplicationContext, private val noti
     companion object {
         internal const val SYNC_NOTIFICATION_ID = 1
         internal const val GMS_NOTIFICATION_ID = 2
-        internal const val REGISTRATION_NOTIFICATION_ID = 3
         const val UPDATES_CHANNEL_ID = "versions_updates"
         const val PRICES_CHANNEL_ID = "prices_change"
-        const val AUTHENTICATION_ID = "authentication"
+        const val AUTHENTICATION_ID = DeviceRegistrationNotification.AUTHENTICATION_CHANNEL_ID
     }
 
     class Filter(private val filterInstalled: Boolean, private val filterInstalledUpToDate: Boolean, private val filterNoChanges: Boolean) {
@@ -85,32 +85,6 @@ class SyncNotification(private val context: ApplicationContext, private val noti
 
     fun cancel() {
         notificationManager.cancel(SYNC_NOTIFICATION_ID)
-    }
-
-    fun showRegistrationRequired() {
-        val intent = Intent(context.actual, AppWatcherActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val contentIntent = PendingIntent.getActivity(
-            context.actual,
-            REGISTRATION_NOTIFICATION_ID,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-        val notification = NotificationCompat.Builder(context.actual, AUTHENTICATION_ID)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(context.getString(R.string.device_registration_required))
-            .setContentText(context.getString(R.string.device_registration_required_description))
-            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.device_registration_required_description)))
-            .setContentIntent(contentIntent)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
-            .build()
-        notificationManager.notify(REGISTRATION_NOTIFICATION_ID, notification)
-    }
-
-    fun cancelRegistrationRequired() {
-        notificationManager.cancel(REGISTRATION_NOTIFICATION_ID)
     }
 
     private fun create(updatedApps: List<UpdatedApp>): Notification {

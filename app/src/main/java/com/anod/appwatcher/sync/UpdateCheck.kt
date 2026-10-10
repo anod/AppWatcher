@@ -12,6 +12,7 @@ import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenStartIntent
 import com.anod.appwatcher.accounts.AuthTokenUnavailableException
 import com.anod.appwatcher.accounts.DeviceRegistrationException
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.backup.gdrive.GDriveSilentSignIn
 import com.anod.appwatcher.backup.gdrive.GDriveSync
@@ -69,6 +70,7 @@ class UpdateCheck(
     private val authAccount: AuthAccountInitializer,
     private val uploadDateParserCache: UploadDateParserCache,
     private val playSessionCoordinator: PlaySessionCoordinator,
+    private val deviceRegistrationNotification: DeviceRegistrationNotification,
     private val koin: Koin
 ) {
 
@@ -162,7 +164,7 @@ class UpdateCheck(
         val lastUpdatesViewed = preferences.isLastUpdatesViewed
         val syncResult = try {
             authAccount.refreshInSession()
-            SyncNotification(context, notificationManager).cancelRegistrationRequired()
+            deviceRegistrationNotification.cancel()
             val startIntent = Intent(SYNC_PROGRESS).apply {
                 `package` = context.actual.packageName
             }
@@ -200,7 +202,7 @@ class UpdateCheck(
             return@withContext finishFailedSync(schedule, Schedule.STATUS_FAILED_NO_TOKEN, manualSync)
         } catch (_: DeviceRegistrationException) {
             AppLog.w("Device registration requires account confirmation, skipping sync", "UpdateCheck")
-            SyncNotification(context, notificationManager).showRegistrationRequired()
+            deviceRegistrationNotification.show()
             return@withContext finishFailedSync(schedule, Schedule.STATUS_SKIPPED_DEVICE_REGISTRATION, manualSync)
         } catch (e: CancellationException) {
             throw e

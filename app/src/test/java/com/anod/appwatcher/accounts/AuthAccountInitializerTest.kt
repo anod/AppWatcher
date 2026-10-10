@@ -1,9 +1,11 @@
 package com.anod.appwatcher.accounts
 
 import android.accounts.Account
+import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.anod.appwatcher.preferences.Preferences
+import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import java.io.IOException
 import java.util.ArrayDeque
@@ -28,13 +30,19 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class AuthAccountInitializerTest {
     private lateinit var preferences: Preferences
+    private lateinit var deviceRegistrationNotification: DeviceRegistrationNotification
 
     @Before
     fun setUp() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
         preferences = Preferences(
-            context = ApplicationProvider.getApplicationContext(),
+            context = context,
             notificationManager = NotificationManager.NoOp(),
             appScope = CoroutineScope(Dispatchers.Unconfined)
+        )
+        deviceRegistrationNotification = DeviceRegistrationNotification(
+            ApplicationContext(context),
+            NotificationManager.NoOp()
         )
         runBlocking {
             preferences.saveAccount(
@@ -61,7 +69,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator()
+            PlaySessionCoordinator(),
+            deviceRegistrationNotification
         )
 
         initializer.refresh()
@@ -90,7 +99,8 @@ class AuthAccountInitializerTest {
             preferences,
             authToken,
             AuthRecoveringDfeApi(dfeApi, authToken, preferences),
-            PlaySessionCoordinator()
+            PlaySessionCoordinator(),
+            deviceRegistrationNotification
         )
 
         initializer.initialize(
@@ -125,7 +135,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator()
+            PlaySessionCoordinator(),
+            deviceRegistrationNotification
         )
         val account = Account("new@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
 
@@ -152,7 +163,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a", "token-b")),
             dfeApi,
-            playSessionCoordinator
+            playSessionCoordinator,
+            deviceRegistrationNotification
         )
         val actionStarted = CompletableDeferred<Unit>()
         val finishAction = CompletableDeferred<Unit>()
@@ -193,7 +205,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-b")),
             accountBApi,
-            playSessionCoordinator
+            playSessionCoordinator,
+            deviceRegistrationNotification
         )
 
         accountBInitializer.initialize(
@@ -209,7 +222,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a")),
             accountAApi,
-            playSessionCoordinator
+            playSessionCoordinator,
+            deviceRegistrationNotification
         )
 
         recreatedInitializer.initialize(
@@ -229,7 +243,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator()
+            PlaySessionCoordinator(),
+            deviceRegistrationNotification
         )
 
         initializer.initialize(
@@ -263,7 +278,8 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator()
+            PlaySessionCoordinator(),
+            deviceRegistrationNotification
         )
         val accountA = Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
         val accountB = Account("b@example.com", AuthTokenBlocking.ACCOUNT_TYPE)

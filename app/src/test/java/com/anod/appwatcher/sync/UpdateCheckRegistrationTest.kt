@@ -14,6 +14,7 @@ import com.anod.appwatcher.accounts.AccountAuthTokenProvider
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppsDatabase
@@ -57,6 +58,7 @@ class UpdateCheckRegistrationTest {
     private lateinit var database: AppsDatabase
     private lateinit var updateCheck: UpdateCheck
     private lateinit var initializer: AuthAccountInitializer
+    private lateinit var deviceRegistrationNotification: DeviceRegistrationNotification
     private var previousListener: AppLog.Listener? = null
 
     @Before
@@ -79,6 +81,10 @@ class UpdateCheckRegistrationTest {
         preferences.isWifiOnly = false
         preferences.isDriveSyncEnabled = false
         preferences.lastUpdateTime = -1L
+        deviceRegistrationNotification = DeviceRegistrationNotification(
+            ApplicationContext(context),
+            notificationManager
+        )
         database = Room.inMemoryDatabaseBuilder(context, AppsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
@@ -92,9 +98,7 @@ class UpdateCheckRegistrationTest {
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
             coordinator,
-            onInitializationSucceeded = {
-                SyncNotification(ApplicationContext(context), notificationManager).cancelRegistrationRequired()
-            }
+            deviceRegistrationNotification
         )
         updateCheck = UpdateCheck(
             ApplicationContext(context),
@@ -106,6 +110,7 @@ class UpdateCheckRegistrationTest {
             initializer,
             UploadDateParserCache(),
             coordinator,
+            deviceRegistrationNotification,
             koin.koin
         )
         previousListener = AppLog.instance.listener
@@ -138,7 +143,7 @@ class UpdateCheckRegistrationTest {
         assertEquals("", preferences.account?.gfsId)
         assertTrue("Expected registration state must not be reported: $reportedErrors", reportedErrors.isEmpty())
         assertTrue("Registration must offer an actionable notification", notifications.isNotEmpty())
-        assertEquals(List(2) { SyncNotification.REGISTRATION_NOTIFICATION_ID }, notificationIds)
+        assertEquals(List(2) { DeviceRegistrationNotification.NOTIFICATION_ID }, notificationIds)
         val notification = notifications.last()
         assertEquals(SyncNotification.AUTHENTICATION_ID, notification.channelId)
         assertEquals(
@@ -185,14 +190,29 @@ class UpdateCheckRegistrationTest {
             Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE),
             userInitiated = true
         )
-        assertTrue(canceledIds.contains(SyncNotification.REGISTRATION_NOTIFICATION_ID))
+        assertTrue(canceledIds.contains(DeviceRegistrationNotification.NOTIFICATION_ID))
         assertEquals(0, updateCheck.perform(Data.EMPTY))
 
         assertEquals(1, dfeApi.checkInCalls)
         assertEquals(1, dfeApi.uploadCalls)
         assertEquals("4d2", preferences.account?.gfsId)
         assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().first().result)
-        assertTrue(canceledIds.contains(SyncNotification.REGISTRATION_NOTIFICATION_ID))
+        assertTrue(canceledIds.contains(DeviceRegistrationNotification.NOTIFICATION_ID))
+        assertTrue(reportedErrors.isEmpty())
+    }
+
+    @Test
+    fun staleAutomaticInitializationDoesNotClearRequiredRegistrationNotification() = runBlocking {
+        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+
+        initializer.initialize(
+            Account("old@example.com", AuthTokenBlocking.ACCOUNT_TYPE),
+            userInitiated = false
+        )
+
+        assertTrue(canceledIds.none { it == DeviceRegistrationNotification.NOTIFICATION_ID })
+        assertTrue(preferences.isDeviceRegistrationRequired)
+        assertEquals(0, dfeApi.checkInCalls)
         assertTrue(reportedErrors.isEmpty())
     }
 

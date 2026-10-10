@@ -41,7 +41,7 @@ class AuthAccountInitializer(
     private val authToken: AuthTokenBlocking,
     private val dfeApi: DfeApi,
     private val playSessionCoordinator: PlaySessionCoordinator,
-    private val onInitializationSucceeded: () -> Unit = {}
+    private val deviceRegistrationNotification: DeviceRegistrationNotification
 ) {
     private val initializations = mutableSetOf<Job>()
 
@@ -83,7 +83,9 @@ class AuthAccountInitializer(
                     initializeInSession(account, userInitiated = false)
                 }
             }
-            onInitializationSucceeded()
+            if (!preferences.isDeviceRegistrationRequired) {
+                deviceRegistrationNotification.cancel()
+            }
             initializedAccount
         } finally {
             synchronized(this) {
