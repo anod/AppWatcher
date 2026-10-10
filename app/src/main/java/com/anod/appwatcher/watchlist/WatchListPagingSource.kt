@@ -272,8 +272,8 @@ class WatchListPagingSource(
         ): Pair<Int?, Int?> {
             val prevKey = when {
                 offset <= 0 -> null
-                offset <= loadSize -> 0
-                else -> offset - loadSize
+                offset <= PAGE_SIZE -> 0
+                else -> offset - PAGE_SIZE
             }
             val nextKey = if (loadedDataSize < limit) null else offset + limit
             return prevKey to nextKey

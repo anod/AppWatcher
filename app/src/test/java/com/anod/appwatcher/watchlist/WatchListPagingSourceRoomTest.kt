@@ -125,25 +125,27 @@ class WatchListPagingSourceRoomTest {
                 assertEquals(watchedCount + 45 + if (showRecent) 1 else 0, forwardItems.size)
                 assertEquals(forwardItems.size, forwardItems.distinctBy { it.sectionKey }.size)
 
-                val lastOffset = if (showRecent) 59 else 60
-                val refreshed = source.load(
-                    PagingSource.LoadParams.Refresh(key = lastOffset, loadSize = 20, placeholdersEnabled = false)
-                ) as PagingSource.LoadResult.Page
-                val backwardItems = refreshed.data.toMutableList()
-                var previous = refreshed.prevKey
-                while (previous != null) {
-                    val page = source.load(
-                        PagingSource.LoadParams.Prepend(key = previous, loadSize = 20, placeholdersEnabled = false)
+                for (refreshLoadSize in listOf(20, 60)) {
+                    val lastOffset = (if (refreshLoadSize == 60) 40 else 60) - if (showRecent) 1 else 0
+                    val refreshed = source.load(
+                        PagingSource.LoadParams.Refresh(key = lastOffset, loadSize = refreshLoadSize, placeholdersEnabled = false)
                     ) as PagingSource.LoadResult.Page
-                    backwardItems.addAll(0, page.data)
-                    previous = page.prevKey
+                    val backwardItems = refreshed.data.toMutableList()
+                    var previous = refreshed.prevKey
+                    while (previous != null) {
+                        val page = source.load(
+                            PagingSource.LoadParams.Prepend(key = previous, loadSize = 20, placeholdersEnabled = false)
+                        ) as PagingSource.LoadResult.Page
+                        backwardItems.addAll(0, page.data)
+                        previous = page.prevKey
+                    }
+                    assertEquals(forwardItems.map { it.sectionKey }, backwardItems.map { it.sectionKey })
+                    val headerFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
+                    val headers = backwardItems.mapIndexedNotNull { index, item ->
+                        headerFactory.insertSeparator(backwardItems.getOrNull(index - 1), item)
+                    }
+                    assertEquals(headers.size, headers.distinctBy { it.sectionKey }.size)
                 }
-                assertEquals(forwardItems.map { it.sectionKey }, backwardItems.map { it.sectionKey })
-                val headerFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
-                val headers = backwardItems.mapIndexedNotNull { index, item ->
-                    headerFactory.insertSeparator(backwardItems.getOrNull(index - 1), item)
-                }
-                assertEquals(headers.size, headers.distinctBy { it.sectionKey }.size)
             }
         }
     }
