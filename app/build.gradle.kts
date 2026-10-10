@@ -115,8 +115,7 @@ android {
 
 dependencies {
     constraints {
-        // play-services-oss-licenses hard-requires an androidx.compose.material3 1.5.0 alpha for its
-        // Compose licenses UI, and a Compose BOM constraint does not outrank a hard requirement. Keep
+        // A Compose BOM constraint does not outrank a hard transitive requirement. Keep
         // the catalog pin strict so a future transitive bump fails dependency resolution instead of
         // silently shipping a material3 that is ABI-skewed against the BOM's compose-foundation.
         implementation("androidx.compose.material3:material3") {
@@ -140,6 +139,7 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.emoji2)
 
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
@@ -170,7 +170,7 @@ dependencies {
 
     implementation(libs.google.api.client)
     implementation(libs.google.api.client.android)
-    implementation("com.google.apis:google-api-services-drive:v3-rev20260428-2.0.0") {
+    implementation("com.google.apis:google-api-services-drive:v3-rev20260916-2.0.0") {
         exclude(group = "org.apache.httpcomponents")
         exclude(group = "commons-logging")
     }
@@ -254,7 +254,7 @@ afterEvaluate {
  * material3 1.5.0-alpha17 declares compose-foundation 1.11.x. Paired with the BOM's foundation
  * 1.12.0 that ABI skew crashed every Material3 TextField at measure time. `strictly` stops an
  * external dependency from overriding the pin; this stops the pin itself from being moved to an
- * alpha built against a different foundation minor line.
+ * release built against a different foundation minor line.
  */
 abstract class VerifyComposeMaterial3Alignment : DefaultTask() {
 
@@ -322,10 +322,10 @@ abstract class VerifyComposeMaterial3Alignment : DefaultTask() {
         appendLine("androidx.compose.foundation.style.CustomStyle.applyStyle. This compiles cleanly, so it")
         appendLine("only shows up on device.")
         appendLine()
-        appendLine("Known offender: com.google.android.gms:play-services-oss-licenses hard-requires a")
-        appendLine("material3 1.5.0 alpha for its Compose licenses UI, and a BOM constraint does not")
-        appendLine("outrank a hard requirement. Update the `compose-material3` pin in")
-        appendLine("gradle/libs.versions.toml to an alpha built against the resolved compose-foundation.")
+        appendLine("Older com.google.android.gms:play-services-oss-licenses releases hard-required a")
+        appendLine("material3 1.5.0 alpha, and a BOM constraint does not outrank a hard requirement.")
+        appendLine("Update the `compose-material3` pin in gradle/libs.versions.toml to a release built")
+        appendLine("against the resolved compose-foundation.")
         appendLine()
         append("Bypass with -PskipComposeVersionCheck=true (intended for reproducing the failure only).")
     }

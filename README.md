@@ -46,6 +46,11 @@ App Watcher checks daily the list for updates in Play Store and will notify you 
     ./gradlew installDebug
     ```
 
+Dependency updates prefer stable releases. Material3 remains on 1.5.0-beta01 to match Compose
+Foundation 1.12.x; Material3 1.4.0 targets an older Foundation line. Google Play services Auth
+remains on 21.6.0 because 22.0.0 removes the Google Sign-In APIs used by Drive backup. Moving
+that dependency forward requires migrating the sign-in flow to Credential Manager.
+
 ## Author
 
 Alex Gavrishev, 2012

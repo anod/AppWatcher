@@ -28,8 +28,7 @@ kotlin {
             kotlin.srcDir("src/androidMain/java")
             dependencies {
                 implementation(files("libs/keyczar-0.71g-090613.jar"))
-                // Update from 3.11.4 breaks parsing, may be needs to be regenerated
-                api("com.google.protobuf:protobuf-javalite:3.11.4")
+                api("com.google.protobuf:protobuf-javalite:4.36.2")
                 implementation(libs.okhttp)
 
                 implementation(project(":lib:applog"))

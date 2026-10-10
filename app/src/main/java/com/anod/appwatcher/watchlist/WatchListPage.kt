@@ -242,7 +242,7 @@ fun WatchListSectionItem(
             recentApps = recentlyInstalledApps,
             appIconLoader = appIconLoader
         )
-        is SectionItem.Empty -> EmptyItem(onEvent = onEvent)
+        is SectionItem.Empty -> EmptyItem(onEvent = onEvent, modifier = modifier)
     }
 }
 
