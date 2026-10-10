@@ -47,6 +47,7 @@ class WatchListPagingSource(
     private data class AppListSnapshot(
         val filterQuery: String,
         val rows: List<AppListSnapshotRow>,
+        val onDeviceItems: List<SectionItem.OnDevice>,
     )
 
     private data class AppListSnapshotRow(
@@ -120,9 +121,11 @@ class WatchListPagingSource(
             )
         })
 
-        if (config.showOnDevice && pageRows.size < limit) {
-            items.addAll(loadOnDeviceItems(snapshot.filterQuery))
-        }
+        val onDeviceOffset = max(0, offset - snapshot.rows.size)
+        val onDeviceItems = snapshot.onDeviceItems
+            .drop(onDeviceOffset)
+            .take(limit - pageRows.size)
+        items.addAll(onDeviceItems)
 
         if (offset == 0 && data.isEmpty() && items.firstOrNull() is SectionItem.Recent && items.size == 1) {
             items.add(SectionItem.Empty)
@@ -133,7 +136,7 @@ class WatchListPagingSource(
             key = params.key,
             offset = offset,
             loadSize = params.loadSize,
-            loadedDataSize = pageRows.size,
+            loadedDataSize = pageRows.size + onDeviceItems.size,
             limit = limit
         )
         val itemsBefore = if (totalItems == LoadResult.Page.COUNT_UNDEFINED) {
@@ -205,6 +208,7 @@ class WatchListPagingSource(
                 AppListSnapshot(
                     filterQuery = lockedFilterQuery,
                     rows = rows,
+                    onDeviceItems = if (config.showOnDevice) loadOnDeviceItems(lockedFilterQuery) else emptyList(),
                 ).also {
                     appListSnapshot = it
                 }
@@ -268,8 +272,8 @@ class WatchListPagingSource(
         ): Pair<Int?, Int?> {
             val prevKey = when {
                 offset <= 0 -> null
-                offset <= loadSize -> 0
-                else -> offset - loadSize
+                offset <= PAGE_SIZE -> 0
+                else -> offset - PAGE_SIZE
             }
             val nextKey = if (loadedDataSize < limit) null else offset + limit
             return prevKey to nextKey

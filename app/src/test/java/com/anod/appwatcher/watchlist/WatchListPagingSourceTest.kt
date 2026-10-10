@@ -119,7 +119,7 @@ class WatchListPagingSourceTest {
             loadSize = 60,
             loadedDataSize = 60,
         )
-        assertEquals(60, firstPrev)
+        assertEquals(100, firstPrev)
         assertEquals(180, firstNext)
     }
 
@@ -131,7 +131,7 @@ class WatchListPagingSourceTest {
             loadSize = 60,
             loadedDataSize = 60,
         )
-        assertEquals(20, prev)
+        assertEquals(60, prev)
         assertEquals(140, next)
     }
 
@@ -143,7 +143,7 @@ class WatchListPagingSourceTest {
             loadSize = 60,
             loadedDataSize = 15,
         )
-        assertEquals(60, prev)
+        assertEquals(100, prev)
         assertEquals(null, next)
     }
 
