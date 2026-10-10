@@ -48,7 +48,7 @@ class GDriveUpload(private val googleAccount: Account, private val context: Appl
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
-        val numDeletedTags = if (bytes > 0 && deletedTagIds.isNotEmpty()) {
+        val numDeletedTags = if (deletedTagIds.isNotEmpty()) {
             db.tags().cleanDeleted(deletedTagIds)
         } else {
             0
