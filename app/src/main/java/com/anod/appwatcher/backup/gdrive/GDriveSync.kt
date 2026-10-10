@@ -56,9 +56,11 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
         }
 
         if (driveId == null) {
-            if (db.apps().count(false) > 0) {
-                file.create()
+            if (db.apps().count(false) == 0) {
+                AppLog.i("No apps to back up", "GDriveSync")
+                return@withContext
             }
+            file.create()
         }
 
         val deletedTagIds = db.tags().loadDeletedIds()
@@ -69,7 +71,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
         val numRows = db.apps().cleanDeleted()
         val numTags = db.appTags().clean()
         AppTagsTable.Queries.clean(db)
-        val numDeletedTags = if (bytes > 0 && deletedTagIds.isNotEmpty()) {
+        val numDeletedTags = if (deletedTagIds.isNotEmpty()) {
             db.tags().cleanDeleted(deletedTagIds)
         } else {
             0
@@ -79,8 +81,7 @@ class GDriveSync(private val googleAccount: Account, private val context: info.a
 
     @Throws(Exception::class)
     private suspend fun insertRemoteItems(file: DriveIdFile, db: AppsDatabase) {
-        val reader = file.read() ?: throw IllegalStateException("Cannot read file")
-        reader.use {
+        file.read {
             insertRemoteItems(it, db)
         }
     }
