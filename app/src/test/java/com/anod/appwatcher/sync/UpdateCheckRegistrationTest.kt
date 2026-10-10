@@ -91,7 +91,10 @@ class UpdateCheckRegistrationTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            coordinator
+            coordinator,
+            onInitializationSucceeded = {
+                SyncNotification(ApplicationContext(context), notificationManager).cancelRegistrationRequired()
+            }
         )
         updateCheck = UpdateCheck(
             ApplicationContext(context),
@@ -182,6 +185,7 @@ class UpdateCheckRegistrationTest {
             Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE),
             userInitiated = true
         )
+        assertTrue(canceledIds.contains(SyncNotification.REGISTRATION_NOTIFICATION_ID))
         assertEquals(0, updateCheck.perform(Data.EMPTY))
 
         assertEquals(1, dfeApi.checkInCalls)

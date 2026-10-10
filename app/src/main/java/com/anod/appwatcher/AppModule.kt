@@ -12,6 +12,7 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
+import com.anod.appwatcher.sync.SyncNotification
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
 import com.anod.appwatcher.utils.PackageChangedReceiver
@@ -48,7 +49,16 @@ fun createAppModule(): Module = module {
     }
     factory { get<Application>().packageManager }
     singleOf(::PlaySessionCoordinator)
-    singleOf(::AuthAccountInitializer)
+    single {
+        val syncNotification = SyncNotification(get(), get())
+        AuthAccountInitializer(
+            preferences = get(),
+            authToken = get(),
+            dfeApi = get(),
+            playSessionCoordinator = get(),
+            onInitializationSucceeded = syncNotification::cancelRegistrationRequired
+        )
+    }
     singleOf(::UploadDateParserCache)
     singleOf(::ApplicationContext)
     singleOf(::RealNotificationManager) {
