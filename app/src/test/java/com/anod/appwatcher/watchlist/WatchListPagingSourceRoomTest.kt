@@ -71,6 +71,118 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
+    fun onDeviceRefreshAndPrependDoNotRepeatPackages() = runBlocking {
+        repeat(25) { index ->
+            insertApp(appId = "overlap-$index", packageName = "overlap.watched.$index", title = "Overlap Watched $index")
+        }
+        repeat(40) { index ->
+            installPackage(packageName = "overlap.device.$index", title = "Overlap Device ${index.toString().padStart(2, '0')}")
+        }
+        val source = createPagingSource(showOnDevice = true).also { it.filterQuery = "Overlap" }
+        val refresh = source.load(
+            PagingSource.LoadParams.Refresh(key = 40, loadSize = 20, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        val prepend = source.load(
+            PagingSource.LoadParams.Prepend(key = refresh.prevKey!!, loadSize = 20, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        val items = prepend.data + refresh.data
+        val duplicateKeys = items.groupBy { it.sectionKey }.filterValues { it.size > 1 }.keys
+
+        assertEquals(emptySet<String>(), duplicateKeys)
+        assertEquals(20, refresh.data.size)
+        assertEquals(20, prepend.data.size)
+        assertEquals("overlap.device.15", (refresh.data.first() as SectionItem.OnDevice).appListItem.app.packageName)
+        assertEquals("overlap.device.14", (prepend.data.last() as SectionItem.OnDevice).appListItem.app.packageName)
+    }
+
+    @Test
+    fun onDevicePagesCoverCombinedListInBothDirections() = runBlocking {
+        for (watchedCount in listOf(0, 19, 20, 25)) {
+            val fixture = "Combined$watchedCount"
+            repeat(watchedCount) { index ->
+                insertApp(appId = "$fixture-$index", packageName = "$fixture.watched.$index", title = "$fixture Watched $index")
+            }
+            repeat(45) { index ->
+                installPackage(packageName = "$fixture.device.$index", title = "$fixture Device ${index.toString().padStart(2, '0')}")
+            }
+            for (showRecent in listOf(false, true)) {
+                val source = createPagingSource(showOnDevice = true, showRecentlyInstalled = showRecent).also {
+                    it.filterQuery = "$fixture "
+                }
+                val first = source.load(
+                    PagingSource.LoadParams.Refresh(key = null, loadSize = 60, placeholdersEnabled = false)
+                ) as PagingSource.LoadResult.Page
+                val forwardItems = first.data.toMutableList()
+                var next = first.nextKey
+                while (next != null) {
+                    val page = source.load(
+                        PagingSource.LoadParams.Append(key = next, loadSize = 20, placeholdersEnabled = false)
+                    ) as PagingSource.LoadResult.Page
+                    assertTrue(page.data.size <= 20)
+                    forwardItems.addAll(page.data)
+                    next = page.nextKey
+                }
+                assertEquals(watchedCount + 45 + if (showRecent) 1 else 0, forwardItems.size)
+                assertEquals(forwardItems.size, forwardItems.distinctBy { it.sectionKey }.size)
+
+                val lastOffset = if (showRecent) 59 else 60
+                val refreshed = source.load(
+                    PagingSource.LoadParams.Refresh(key = lastOffset, loadSize = 20, placeholdersEnabled = false)
+                ) as PagingSource.LoadResult.Page
+                val backwardItems = refreshed.data.toMutableList()
+                var previous = refreshed.prevKey
+                while (previous != null) {
+                    val page = source.load(
+                        PagingSource.LoadParams.Prepend(key = previous, loadSize = 20, placeholdersEnabled = false)
+                    ) as PagingSource.LoadResult.Page
+                    backwardItems.addAll(0, page.data)
+                    previous = page.prevKey
+                }
+                assertEquals(forwardItems.map { it.sectionKey }, backwardItems.map { it.sectionKey })
+                val headerFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
+                val headers = backwardItems.mapIndexedNotNull { index, item ->
+                    headerFactory.insertSeparator(backwardItems.getOrNull(index - 1), item)
+                }
+                assertEquals(headers.size, headers.distinctBy { it.sectionKey }.size)
+            }
+        }
+    }
+
+    @Test
+    fun onDeviceSnapshotStaysStableUntilFilterOrGenerationChanges() = runBlocking {
+        repeat(30) { index ->
+            installPackage(packageName = "stable.device.$index", title = "Stable Device ${index.toString().padStart(2, '0')}")
+        }
+        val source = createPagingSource(showOnDevice = true).also { it.filterQuery = "Stable Device" }
+        val first = source.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        installPackage(packageName = "stable.device.new", title = "Stable Device 00 New")
+        insertApp(appId = "now-watched", packageName = "stable.device.25", title = "Stable Device 25")
+        val second = source.load(
+            PagingSource.LoadParams.Append(key = first.nextKey!!, loadSize = 20, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        val currentItems = first.data + second.data
+        assertEquals(30, currentItems.size)
+        assertEquals(30, currentItems.distinctBy { it.sectionKey }.size)
+        assertTrue(currentItems.any { it.sectionKey == "ondevice-stable.device.25" })
+        assertFalse(currentItems.any { it.sectionKey == "ondevice-stable.device.new" })
+
+        val newSource = createPagingSource(showOnDevice = true).also { it.filterQuery = "Stable Device" }
+        val refreshed = newSource.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 60, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        assertEquals(31, refreshed.data.size)
+        assertTrue(refreshed.data.any { it.sectionKey == "ondevice-stable.device.new" })
+        assertFalse(refreshed.data.any { it.sectionKey == "ondevice-stable.device.25" })
+        source.filterQuery = "Stable Device 00 New"
+        val filtered = source.load(
+            PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false)
+        ) as PagingSource.LoadResult.Page
+        assertEquals(listOf("ondevice-stable.device.new"), filtered.data.map { it.sectionKey })
+    }
+
+    @Test
     fun disabledInstalledAppIsNotShownAsUpdatable() = runBlocking {
         insertApp(
             appId = "disabled",
@@ -520,13 +632,14 @@ class WatchListPagingSourceRoomTest {
         filterId: Int = Filters.ALL,
         packageEnabled: (String) -> Boolean = { true },
         installedApps: InstalledApps = defaultInstalledApps(),
+        showRecentlyInstalled: Boolean = false,
     ) = WatchListPagingSource(
         config = WatchListPagingSource.Config(
             filterId = filterId,
             tagId = null,
             showRecentlyDiscovered = showRecentlyDiscovered,
             showOnDevice = showOnDevice,
-            showRecentlyInstalled = false,
+            showRecentlyInstalled = showRecentlyInstalled,
         ),
         prefs = preferences,
         packageManager = context.packageManager,
