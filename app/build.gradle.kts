@@ -236,6 +236,7 @@ val releaseGoogleServicesFile = providers.gradleProperty("APPWATCHER_GOOGLE_SERV
 val releaseGoogleServicesTasks = setOf(
     "processReleaseGoogleServices",
     "processBenchmarkGoogleServices",
+    "processBenchmarkReleaseGoogleServices",
     "processNonMinifiedReleaseGoogleServices"
 )
 
