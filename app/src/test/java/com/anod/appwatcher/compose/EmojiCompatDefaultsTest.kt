@@ -31,7 +31,7 @@ class EmojiCompatDefaultsTest {
     }
 
     @Test
-    @Config(sdk = [36])
+    @Config(sdk = [35, 36])
     fun android15AndNewerSkipMetadataAndUseSystemFonts() {
         var loaderCalled = false
         val config = object : EmojiCompat.Config({
