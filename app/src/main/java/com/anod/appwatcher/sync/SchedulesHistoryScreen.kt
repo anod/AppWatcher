@@ -167,6 +167,7 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
                 is Skipped -> when (result.reason) {
                     Schedule.STATUS_SKIPPED_MIN_TIME -> "Last update less than second"
                     Schedule.STATUS_SKIPPED_NO_WIFI -> "Wifi not enabled"
+                    Schedule.STATUS_SKIPPED_DEVICE_REGISTRATION -> stringResource(R.string.device_registration_required_description)
                     else -> ""
                 }
                 else -> ""

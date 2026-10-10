@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.NotificationActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
 import info.anodsplace.context.ApplicationContext
@@ -28,7 +29,7 @@ class SyncNotification(private val context: ApplicationContext, private val noti
         internal const val GMS_NOTIFICATION_ID = 2
         const val UPDATES_CHANNEL_ID = "versions_updates"
         const val PRICES_CHANNEL_ID = "prices_change"
-        const val AUTHENTICATION_ID = "authentication"
+        const val AUTHENTICATION_ID = DeviceRegistrationNotification.AUTHENTICATION_CHANNEL_ID
     }
 
     class Filter(private val filterInstalled: Boolean, private val filterInstalledUpToDate: Boolean, private val filterNoChanges: Boolean) {

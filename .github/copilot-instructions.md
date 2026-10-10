@@ -54,6 +54,7 @@
 - `WatchListStateViewModel` receives functional list behavior directly: `WatchListTagFilter.None`, `Untagged`, or `Tag(id)`, plus `showOnDeviceApps` and `showRecentlyInstalledApps`. Keep `Tag` for UI state/title/color, and use `WatchListTagFilter` for query semantics so “no tag filter” and explicit untagged remain distinct.
 - Room schema is in `app/schemas`; migrations are in `AppsDatabase`; app list queries live in `AppListTable.Queries`. Play Store documents are converted to entities outside Room entity constructors.
 - Play Store/network calls go through `:playstore` and DFE APIs in feature view models/paging sources. Sync/account/backup are split across `sync`, `accounts`, and `backup`.
+- On Android 15+, missing or ambiguous device registration requires explicit account confirmation. Sync records `STATUS_SKIPPED_DEVICE_REGISTRATION` and posts an authentication-channel notification that opens a fresh main screen for account selection; it must not retry check-in automatically or report this expected state as a non-fatal error. Successful session initialization clears the registration notification.
 
 ## Repository-specific conventions
 

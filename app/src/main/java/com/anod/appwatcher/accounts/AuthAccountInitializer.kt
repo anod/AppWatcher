@@ -40,7 +40,8 @@ class AuthAccountInitializer(
     private val preferences: Preferences,
     private val authToken: AuthTokenBlocking,
     private val dfeApi: DfeApi,
-    private val playSessionCoordinator: PlaySessionCoordinator
+    private val playSessionCoordinator: PlaySessionCoordinator,
+    private val deviceRegistrationNotification: DeviceRegistrationNotification
 ) {
     private val initializations = mutableSetOf<Job>()
 
@@ -73,7 +74,7 @@ class AuthAccountInitializer(
                 previousJobs.joinAll()
             }
             context.ensureActive()
-            if (userInitiated) {
+            val initializedAccount = if (userInitiated) {
                 playSessionCoordinator.withUserInitiatedSession {
                     initializeInSession(account, userInitiated = true)
                 }
@@ -82,6 +83,10 @@ class AuthAccountInitializer(
                     initializeInSession(account, userInitiated = false)
                 }
             }
+            if (!preferences.isDeviceRegistrationRequired) {
+                deviceRegistrationNotification.cancel()
+            }
+            initializedAccount
         } finally {
             synchronized(this) {
                 initializations.remove(job)

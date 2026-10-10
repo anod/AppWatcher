@@ -229,6 +229,8 @@
     <string name="schedule_status_success">Success</string>
     <string name="schedule_status_failed">Failed</string>
     <string name="schedule_status_skipped">Skipped</string>
+    <string name="device_registration_required">Confirm your account to resume updates</string>
+    <string name="device_registration_required_description">Open AppWatcher and confirm your Google account to register this device and resume update checks.</string>
     <string name="schedule_reason_schedule">Schedule</string>
     <string name="schedule_status_manual">Manual</string>
     <string name="schedule_chip_checked">%d synced</string>

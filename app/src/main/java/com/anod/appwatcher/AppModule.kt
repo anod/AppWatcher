@@ -9,6 +9,7 @@ import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.preferences.Preferences
@@ -48,6 +49,7 @@ fun createAppModule(): Module = module {
     }
     factory { get<Application>().packageManager }
     singleOf(::PlaySessionCoordinator)
+    singleOf(::DeviceRegistrationNotification)
     singleOf(::AuthAccountInitializer)
     singleOf(::UploadDateParserCache)
     singleOf(::ApplicationContext)
@@ -95,6 +97,7 @@ fun createAppModule(): Module = module {
             preferences = get(),
             playSessionCoordinator = get(),
             uploadDateParserCache = get(),
+            deviceRegistrationNotification = get(),
             koin = getKoin()
         )
     }

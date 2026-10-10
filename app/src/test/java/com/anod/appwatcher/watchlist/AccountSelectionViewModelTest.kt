@@ -15,6 +15,7 @@ import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.AuthAccountInitializer
 import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.DeviceRegistration
+import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppsDatabase
@@ -22,6 +23,7 @@ import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchViewEvent
 import com.anod.appwatcher.search.SearchViewModel
 import com.anod.appwatcher.search.SearchViewState
+import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -88,7 +90,13 @@ class AccountSelectionViewModelTest {
             .allowMainThreadQueries()
             .build()
         val authToken = AuthTokenBlocking.create(tokenProvider)
-        val initializer = AuthAccountInitializer(preferences, authToken, dfeApi, PlaySessionCoordinator())
+        val initializer = AuthAccountInitializer(
+            preferences,
+            authToken,
+            dfeApi,
+            PlaySessionCoordinator(),
+            DeviceRegistrationNotification(ApplicationContext(context), NotificationManager.NoOp())
+        )
         startKoin {
             modules(module {
                 single<Context> { context }
