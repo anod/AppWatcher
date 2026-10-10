@@ -74,7 +74,7 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
     fun visitDrawerScreen(titleResName: String) {
         openDrawer()
         val label = string(titleResName)
-        val item = device.findObject(By.text(label))
+        val item = device.wait(Until.findObject(By.text(label)), TIMEOUT_MILLIS)
         checkNotNull(item) { "The drawer item $label did not appear, on ${describeScreen()}" }
         clicked(item)
         device.waitForIdle()
