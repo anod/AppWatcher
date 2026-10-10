@@ -40,10 +40,13 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPInputStream
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -95,7 +98,7 @@ class GDriveFailureTest {
     @After
     fun tearDown() {
         db.close()
-        listOf(context.cacheDir, context.noBackupFilesDir).forEach { dir ->
+        listOf(context.cacheDir, context.noBackupFilesDir, File(context.noBackupFilesDir, "drive-staging")).forEach { dir ->
             dir.listFiles()?.filter { it.name.startsWith(AppListFile.fileName) }?.forEach {
                 assertTrue("Staging file could not be removed (possibly still open)", it.delete())
             }
@@ -236,7 +239,7 @@ class GDriveFailureTest {
     fun missingStagingFileFailsUploadAndPreservesDeletionRecords() = runBackup {
         insertDeletionRecords()
         BackupJsonWriterShadow.evictCache = true
-        BackupJsonWriterShadow.otherEvictionDir = context.noBackupFilesDir
+        BackupJsonWriterShadow.otherEvictionDir = File(context.noBackupFilesDir, "drive-staging")
 
         assertTrue(failure { upload().doUploadInBackground() } is FileNotFoundException)
         assertEquals(1, BackupJsonWriterShadow.evictedFiles)
@@ -248,6 +251,50 @@ class GDriveFailureTest {
     fun stagingIsRemovedAfterSuccessfulUpload() = runBackup {
         existingFile().write(DbJsonWriter(), db)
 
+        assertNoStagingFiles()
+    }
+
+    @Test
+    fun abandonedSnapshotsArePurgedBeforeTransfer() = runBackup {
+        val dir = File(context.noBackupFilesDir, "drive-staging")
+        assertTrue(dir.mkdirs() || dir.isDirectory)
+        val abandoned = File(dir, "${AppListFile.fileName}-abandoned.json")
+        abandoned.writeText("""{"apps":[],"tags":[]}""")
+        try {
+            existingFile().write(DbJsonWriter(), db)
+
+            assertTrue("Abandoned snapshot was retained", !abandoned.exists())
+        } finally {
+            abandoned.delete()
+        }
+    }
+
+    @Test
+    fun concurrentTransferDoesNotPurgeActiveReader() = runBackup {
+        coroutineScope {
+            val reading = CompletableDeferred<File>()
+            val finishReading = CompletableDeferred<Unit>()
+            val first = existingFile()
+            val second = existingFile()
+            val read = async {
+                first.read { reader ->
+                    val dir = File(context.noBackupFilesDir, "drive-staging")
+                    val active = dir.listFiles().orEmpty().single()
+                    reading.complete(active)
+                    finishReading.await()
+                    assertTrue("Concurrent transfer deleted active snapshot", active.exists())
+                    assertEquals(emptyList<Tag>(), DbJsonReader().read(reader).tags)
+                }
+            }
+            try {
+                val active = reading.await()
+                second.write(DbJsonWriter(), db)
+                assertTrue("Concurrent cleanup deleted active snapshot", active.exists())
+            } finally {
+                finishReading.complete(Unit)
+            }
+            read.await()
+        }
         assertNoStagingFiles()
     }
 
@@ -378,7 +425,7 @@ class GDriveFailureTest {
     }
 
     private fun assertNoStagingFiles() {
-        listOf(context.cacheDir, context.noBackupFilesDir).forEach { dir ->
+        listOf(context.cacheDir, context.noBackupFilesDir, File(context.noBackupFilesDir, "drive-staging")).forEach { dir ->
             assertTrue("Leaked backup staging file in ${dir.name}",
                 dir.listFiles().orEmpty().none { it.name.startsWith(AppListFile.fileName) })
         }

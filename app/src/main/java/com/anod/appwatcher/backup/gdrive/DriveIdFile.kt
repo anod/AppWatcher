@@ -10,6 +10,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
+import java.io.IOException
 import java.io.Reader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +25,7 @@ import kotlinx.coroutines.withContext
 class DriveIdFile(private val file: FileDescription, private val driveClient: DriveService, private val tempDir: File) {
 
     constructor(file: FileDescription, driveClient: DriveService, context: Context)
-        : this(file, driveClient, context.noBackupFilesDir)
+        : this(file, driveClient, File(context.noBackupFilesDir, "drive-staging"))
 
     interface FileDescription {
         val fileName: String
@@ -66,8 +67,7 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
         val driveId = requireId()
 
         AppLog.i("Write full list to a temp file", "DriveIdFile")
-        val tempFile = File.createTempFile(file.fileName, ".json", tempDir)
-        try {
+        withTempFile { tempFile ->
             FileWriter(tempFile).use { writer.write(it, db) }
             val bytes = tempFile.length()
             BufferedInputStream(FileInputStream(tempFile)).use { inputStream ->
@@ -75,8 +75,6 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
                 driveClient.saveFile(driveId, file.mimeType, inputStream)
             }
             bytes
-        } finally {
-            deleteTempFile(tempFile)
         }
     }
 
@@ -86,13 +84,10 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
     suspend fun <T> read(onRead: suspend (Reader) -> T): T = withContext(Dispatchers.IO) {
         val driveId = requireId()
 
-        val tempFile = File.createTempFile(file.fileName, ".json", tempDir)
-        try {
+        withTempFile { tempFile ->
             AppLog.d("[GDrive] Read into temp $tempFile")
             FileOutputStream(tempFile).use { driveClient.readFile(driveId, it) }
             FileReader(tempFile).use { onRead(it) }
-        } finally {
-            deleteTempFile(tempFile)
         }
     }
 
@@ -100,9 +95,36 @@ class DriveIdFile(private val file: FileDescription, private val driveClient: Dr
         checkNotNull(driveId) { "Drive Id is not initialized" }
     }
 
+    private suspend fun <T> withTempFile(block: suspend (File) -> T): T {
+        val tempFile = synchronized(stagingLock) {
+            if (!tempDir.mkdirs() && !tempDir.isDirectory) {
+                throw IOException("Cannot create backup staging directory")
+            }
+            val files = tempDir.listFiles() ?: throw IOException("Cannot list backup staging directory")
+            files.filter {
+                it.isFile && it.name.startsWith(file.fileName) && it.name.endsWith(".json") && it !in activeFiles
+            }.forEach { deleteTempFile(it) }
+            File.createTempFile(file.fileName, ".json", tempDir).also { activeFiles.add(it) }
+        }
+        try {
+            return block(tempFile)
+        } finally {
+            synchronized(stagingLock) {
+                deleteTempFile(tempFile)
+                activeFiles.remove(tempFile)
+            }
+        }
+    }
+
     private fun deleteTempFile(tempFile: File) {
         if (!tempFile.delete() && tempFile.exists()) {
             AppLog.e("Cannot delete backup staging file", "DriveIdFile")
         }
+    }
+
+    companion object {
+        // Sync and upload have separate locks, so staging ownership must be shared across instances.
+        private val stagingLock = Any()
+        private val activeFiles = mutableSetOf<File>()
     }
 }
