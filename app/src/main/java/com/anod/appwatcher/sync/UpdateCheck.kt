@@ -37,6 +37,7 @@ import com.anod.appwatcher.utils.extractUploadDate
 import com.anod.appwatcher.utils.stateFor
 import finsky.api.BulkDocId
 import finsky.api.DfeApi
+import finsky.api.DfeParseError
 import finsky.api.DfeServerError
 import finsky.api.Document
 import finsky.api.filterDocuments
@@ -45,9 +46,17 @@ import info.anodsplace.framework.content.InstalledApps
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.ktx.Hash
 import info.anodsplace.playstore.AppDetailsFilter
+import java.io.EOFException
 import java.io.IOException
+import java.io.InterruptedIOException
+import java.net.SocketException
+import java.net.UnknownHostException
+import java.security.cert.CertPathValidatorException
+import java.security.cert.CertificateException
 import java.time.Instant
 import java.util.*
+import javax.net.ssl.SSLPeerUnverifiedException
+import javax.net.ssl.SSLProtocolException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1072,7 +1081,6 @@ internal class SyncFailureException(
     stage: SyncFailureStage,
     error: Throwable
 ) : Exception(createMessage(schedule, stage, error)) {
-
     init {
         stackTrace = error.stackTrace
     }
@@ -1086,13 +1094,43 @@ internal class SyncFailureException(
             error: Throwable
         ): String {
             val syncType = if (schedule.reason == Schedule.REASON_MANUAL) "manual" else "scheduled"
+            val failureKind = if (isExpectedTransientFailure(error)) "expected-transient" else "unexpected"
             return "$syncType sync #${schedule.id} failed during ${stage.value}; " +
                 "started=${Instant.ofEpochMilli(schedule.start)}; " +
                 "durationMs=${schedule.finish - schedule.start}; " +
+                "failureKind=$failureKind; " +
                 "causeChain=${error.describeChain()}"
         }
 
-        private fun Throwable.describeChain(): String {
+        private fun isExpectedTransientFailure(error: Throwable): Boolean {
+            val causes = error.causeChain()
+            val serverError = causes.filterIsInstance<DfeServerError>().firstOrNull { it.statusCode != null }
+            if (serverError != null) {
+                return serverError.statusCode == 429 || serverError.statusCode?.let { it in 500..599 } == true
+            }
+            if (causes.any {
+                    it is DfeParseError ||
+                        it is CertificateException ||
+                        it is CertPathValidatorException ||
+                        it is SSLProtocolException ||
+                        it is SSLPeerUnverifiedException
+                }) {
+                return false
+            }
+            return causes.any {
+                it is UnknownHostException ||
+                    it is SocketException ||
+                    it is InterruptedIOException ||
+                    it is EOFException ||
+                    it.javaClass.name == "android.system.GaiException" ||
+                    (it is IOException && it.message?.contains("NetworkError") == true)
+            }
+        }
+
+        private fun Throwable.describeChain(): String =
+            causeChain().joinToString(" <- ", transform = Throwable::syncFailureDescription)
+
+        private fun Throwable.causeChain(): List<Throwable> {
             val causes = mutableListOf<Throwable>()
             val seen = mutableSetOf<Throwable>()
             var current: Throwable? = this
@@ -1100,7 +1138,7 @@ internal class SyncFailureException(
                 causes.add(current)
                 current = current.cause
             }
-            return causes.joinToString(" <- ", transform = Throwable::syncFailureDescription)
+            return causes
         }
     }
 }

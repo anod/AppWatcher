@@ -9,6 +9,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.Data
 import com.anod.appwatcher.AppWatcherActivity
+import com.anod.appwatcher.CrashlyticsExceptionFilter
 import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.AccountAuthTokenProvider
 import com.anod.appwatcher.accounts.AuthAccount
@@ -17,17 +18,22 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
+import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.date.UploadDateParserCache
+import finsky.api.DfeApi
+import finsky.api.DfeServerError
 import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.notification.NotificationManager
 import java.io.IOException
+import java.net.UnknownHostException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -40,6 +46,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -53,7 +60,9 @@ class UpdateCheckRegistrationTest {
     private val canceledIds = mutableListOf<Int>()
     private val reportedErrors = mutableListOf<Throwable>()
     private val dfeApi = FakeDfeApi()
-    private val koin = koinApplication {}
+    private val koin = koinApplication {
+        modules(module { single<DfeApi> { dfeApi } })
+    }
     private lateinit var preferences: Preferences
     private lateinit var database: AppsDatabase
     private lateinit var updateCheck: UpdateCheck
@@ -226,7 +235,64 @@ class UpdateCheckRegistrationTest {
         assertEquals(Schedule.STATUS_FAILED, database.schedules().load().first().single().result)
         assertTrue(reportedErrors.single() is SyncFailureException)
         assertTrue(reportedErrors.single().message!!.contains("java.io.IOException"))
+        assertEquals(false, CrashlyticsExceptionFilter.shouldIgnore(reportedErrors.single()) { false })
         assertTrue(notifications.isEmpty())
+    }
+
+    @Test
+    fun scheduledNetworkFailureKeepsFailedHistoryWithoutNotificationsAndRecovers() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        dfeApi.uploadFailure = UnknownHostException("offline")
+
+        repeat(2) {
+            assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        }
+
+        val schedules = database.schedules().load().first()
+        assertEquals(2, schedules.size)
+        assertTrue(schedules.all { it.result == Schedule.STATUS_FAILED && it.finish >= it.start && it.notified == 0 })
+        assertEquals(-1L, preferences.lastUpdateTime)
+        assertTrue(notifications.isEmpty())
+        assertEquals(2, reportedErrors.size)
+        assertTrue(reportedErrors.all { !CrashlyticsExceptionFilter.shouldIgnore(it) { true } })
+        assertTrue(reportedErrors.all { it.message!!.contains("failureKind=expected-transient") })
+
+        dfeApi.uploadFailure = null
+        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().first().result)
+        assertTrue(preferences.lastUpdateTime > 0)
+        assertTrue(notifications.isEmpty())
+    }
+
+    @Test
+    fun scheduledPlayStoreFailuresExhaustChunkRetriesWithLabeledReportsWithoutChangingApps() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        val app = App.fromLocalPackage(1, "com.example.app", 0, 1, "1", "App", null)
+            .copy(status = App.STATUS_NORMAL)
+        AppListTable.Queries.insert(app, database)
+        val savedApp = database.apps().loadApp(app.appId)
+
+        for (failure in listOf(
+            UnknownHostException("offline"),
+            DfeServerError("server failure", 500, DfeServerError("display error", null, null))
+        )) {
+            val callsBefore = dfeApi.bulkDetailsCalls
+            dfeApi.bulkDetailsFailure = failure
+
+            assertEquals(-1, updateCheck.perform(Data.EMPTY))
+
+            assertEquals(UpdateCheck.MAX_CHUNK_ATTEMPTS, dfeApi.bulkDetailsCalls - callsBefore)
+            val schedule = database.schedules().load().first().first()
+            assertEquals(Schedule.STATUS_FAILED, schedule.result)
+            assertEquals(0, schedule.notified)
+            assertEquals(savedApp, database.apps().loadApp(app.appId))
+            assertEquals(-1L, preferences.lastUpdateTime)
+            val diagnostic = reportedErrors.last()
+            assertTrue(diagnostic.message!!.contains("play-store-update-check"))
+            assertEquals(false, CrashlyticsExceptionFilter.shouldIgnore(diagnostic) { true })
+            assertTrue(diagnostic.message!!.contains("failureKind=expected-transient"))
+            assertTrue(notifications.isEmpty())
+        }
     }
 
     @Test
