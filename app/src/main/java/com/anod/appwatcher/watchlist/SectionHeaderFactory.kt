@@ -18,10 +18,10 @@ interface SectionHeaderFactory {
 class DefaultSectionHeaderFactory(private var showRecentlyDiscovered: Boolean) : SectionHeaderFactory {
 
     private val SectionItem.App.hasUpdate: Boolean
-        get() = isPackageEnabled && appListItem.app.status == App.STATUS_UPDATED
+        get() = appListItem.app.status == App.STATUS_UPDATED
 
     private val SectionItem.App.isRecentlyDiscovered: Boolean
-        get() = isPackageEnabled && appListItem.recentFlag
+        get() = appListItem.recentFlag
 
     override fun insertSeparator(before: SectionItem?, after: SectionItem?): SectionItem.Header? {
         if (after == null) {

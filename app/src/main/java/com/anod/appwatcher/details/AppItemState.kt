@@ -100,7 +100,6 @@ internal fun calcAppItemState(
     }
 
     val showRecent = when {
-        !isPackageEnabled -> false
         app.status == App.STATUS_UPDATED || recentFlag -> true
         else -> false
     }

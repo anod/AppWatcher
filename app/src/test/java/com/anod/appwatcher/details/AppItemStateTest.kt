@@ -32,7 +32,7 @@ class AppItemStateTest {
         )
 
         assertTrue(state.installed)
-        assertFalse(state.showRecent)
+        assertTrue(state.showRecent)
         assertEquals(Color.Black, state.color)
         assertEquals(
             context.getString(R.string.installed_disabled_version, "1.0", 100),
