@@ -252,6 +252,57 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
+    fun disabledNormalAppIsRankedAndGroupedAsRecentlyDiscovered() = runBlocking {
+        insertApp(
+            appId = "disabled",
+            packageName = "disabled.watched",
+            title = "Z Disabled Recent",
+            status = App.STATUS_NORMAL,
+            syncTime = System.currentTimeMillis()
+        )
+        insertApp(
+            appId = "enabled",
+            packageName = "enabled.watched",
+            title = "M Enabled Updated",
+            status = App.STATUS_UPDATED
+        )
+        insertApp(
+            appId = "normal",
+            packageName = "normal.watched",
+            title = "A Normal Watched"
+        )
+
+        val items = loadApps(
+            createPagingSource(
+                showOnDevice = false,
+                showRecentlyDiscovered = true,
+                packageEnabled = { it != "disabled.watched" }
+            )
+        )
+        val disabledItem = items.single { it.appListItem.app.packageName == "disabled.watched" }
+
+        assertFalse(disabledItem.isPackageEnabled)
+        assertEquals(App.STATUS_NORMAL, disabledItem.appListItem.app.status)
+        assertTrue(disabledItem.appListItem.recentFlag)
+        assertEquals(
+            listOf("enabled.watched", "disabled.watched", "normal.watched"),
+            items.map { it.appListItem.app.packageName }
+        )
+        val sections = insertHeaders(items, showRecentlyDiscovered = true)
+        assertEquals(
+            listOf(SectionHeader.New, SectionHeader.RecentlyDiscovered, SectionHeader.Watching),
+            sections.filterIsInstance<SectionItem.Header>().map { it.type }
+        )
+        assertEquals(sections.size, sections.distinctBy { it.sectionKey }.size)
+        assertEquals(
+            SectionHeader.RecentlyDiscovered,
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = true)
+                .insertSeparator(before = null, after = disabledItem)
+                ?.type
+        )
+    }
+
+    @Test
     fun sleepingAppUpdateIsShownAsNew() = runBlocking {
         insertApp(
             appId = "disabled",

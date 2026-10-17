@@ -23,7 +23,7 @@ class AppItemStateTest {
     fun disabledInstalledAppDoesNotShowAvailableUpgrade() {
         val state = calcAppItemState(
             app = app(versionNumber = 200, status = App.STATUS_UPDATED),
-            recentFlag = true,
+            recentFlag = false,
             textColor = Color.Black,
             primaryColor = Color.Blue,
             packageInfo = InstalledApps.Info(versionCode = 100, versionName = "1.0"),
@@ -34,6 +34,26 @@ class AppItemStateTest {
         assertTrue(state.installed)
         assertTrue(state.showRecent)
         assertEquals(Color.Black, state.color)
+        assertEquals(
+            context.getString(R.string.installed_disabled_version, "1.0", 100),
+            state.text
+        )
+    }
+
+    @Test
+    fun disabledInstalledAppShowsRecentFlagWithoutUpdatedStatus() {
+        val state = calcAppItemState(
+            app = app(versionNumber = 200, status = App.STATUS_NORMAL),
+            recentFlag = true,
+            textColor = Color.Black,
+            primaryColor = Color.Blue,
+            packageInfo = InstalledApps.Info(versionCode = 100, versionName = "1.0"),
+            isPackageEnabled = false,
+            context = context
+        )
+
+        assertTrue(state.installed)
+        assertTrue(state.showRecent)
         assertEquals(
             context.getString(R.string.installed_disabled_version, "1.0", 100),
             state.text
