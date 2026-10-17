@@ -157,23 +157,20 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
      * A freshly installed build asks Play Services to pick an account, and the account screens are
      * owned by another package, so the app's own UI is not reachable until they are dismissed.
      *
-     * Back is only meaningful for a window stacked on top of the app. Once the app is gone from the
-     * foreground altogether no number of back presses brings it forward, so pressing again just
-     * burns the timeout and then loses the rest of the iteration to a restart. Relaunch instead.
+     * Back dismisses windows stacked on top of the app. If the app is no longer in the foreground,
+     * relaunch it instead of sending back presses to the launcher.
      */
     private fun dismissExternalWindow() {
         repeat(MAX_ATTEMPTS) {
-            if (device.hasObject(By.pkg(packageName))) {
+            if (device.currentPackageName == packageName && device.hasObject(By.pkg(packageName))) {
                 return
             }
             if (device.currentPackageName == device.launcherPackageName) {
-                // Deliberately not restart(), which would recurse: restart() calls awaitWatchList(),
-                // and awaitWatchList() calls this. Start the activity directly instead.
                 scope.startActivityAndWait()
-                return
+            } else {
+                device.pressBack()
             }
-            device.pressBack()
-            device.wait(Until.hasObject(By.pkg(packageName)), DISMISS_TIMEOUT_MILLIS)
+            device.waitForIdle()
         }
     }
 
@@ -199,9 +196,6 @@ internal class AppWatcherJourney(private val scope: MacrobenchmarkScope, private
         const val RESOURCE_PACKAGE = "com.anod.appwatcher"
         const val TIMEOUT_MILLIS = 10_000L
 
-        // Dismissing a window that is genuinely on top takes well under a second. A longer wait here
-        // never succeeds, it only delays noticing that the app needs relaunching instead.
-        const val DISMISS_TIMEOUT_MILLIS = 2_000L
         const val MAX_BACK_PRESSES = 6
         const val MAX_ATTEMPTS = 3
     }

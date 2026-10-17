@@ -510,6 +510,7 @@ SPLandroidx/collection/MutableScatterMap;-><init>(I)V
 SPLandroidx/collection/MutableScatterMap;-><init>(IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 SPLandroidx/collection/MutableScatterMap;->adjustStorage$collection()V
 SPLandroidx/collection/MutableScatterMap;->clear()V
+SPLandroidx/collection/MutableScatterMap;->dropDeletes$collection()V
 SPLandroidx/collection/MutableScatterMap;->findFirstAvailableSlot(I)I
 HSPLandroidx/collection/MutableScatterMap;->findInsertIndex(Ljava/lang/Object;)I
 SPLandroidx/collection/MutableScatterMap;->initializeGrowth()V
@@ -5798,7 +5799,7 @@ HSPLandroidx/compose/runtime/GapComposer;->endRestartGroup()Landroidx/compose/ru
 SPLandroidx/compose/runtime/GapComposer;->endReusableGroup()V
 SPLandroidx/compose/runtime/GapComposer;->endRoot()V
 SPLandroidx/compose/runtime/GapComposer;->ensureWriter()V
-HSPLandroidx/compose/runtime/GapComposer;->enterGroup(ZLandroidx/compose/runtime/GapPending;)V
+SPLandroidx/compose/runtime/GapComposer;->enterGroup(ZLandroidx/compose/runtime/GapPending;)V
 SPLandroidx/compose/runtime/GapComposer;->enterRecomposeScope(Landroidx/compose/runtime/RecomposeScopeImpl;)V
 HSPLandroidx/compose/runtime/GapComposer;->exitGroup(IZ)V
 SPLandroidx/compose/runtime/GapComposer;->exitRecomposeScope(Landroidx/compose/runtime/RecomposeScopeImpl;)Lkotlin/jvm/functions/Function1;
@@ -11193,7 +11194,7 @@ SPLandroidx/compose/ui/node/NodeCoordinator;->invalidateParentLayer$lambda$0(Lan
 SPLandroidx/compose/ui/node/NodeCoordinator;->isAttached()Z
 SPLandroidx/compose/ui/node/NodeCoordinator;->isTransparent()Z
 SPLandroidx/compose/ui/node/NodeCoordinator;->isValidOwnerScope()Z
-HSPLandroidx/compose/ui/node/NodeCoordinator;->localBoundingBoxOf(Landroidx/compose/ui/layout/LayoutCoordinates;Z)Landroidx/compose/ui/geometry/Rect;
+SPLandroidx/compose/ui/node/NodeCoordinator;->localBoundingBoxOf(Landroidx/compose/ui/layout/LayoutCoordinates;Z)Landroidx/compose/ui/geometry/Rect;
 SPLandroidx/compose/ui/node/NodeCoordinator;->localToRoot-MK-Hz9U(J)J
 SPLandroidx/compose/ui/node/NodeCoordinator;->localToScreen-MK-Hz9U(J)J
 SPLandroidx/compose/ui/node/NodeCoordinator;->localToWindow-MK-Hz9U(J)J
@@ -11210,6 +11211,7 @@ SPLandroidx/compose/ui/node/NodeCoordinator;->placeAt-f8xVGno(JFLkotlin/jvm/func
 HSPLandroidx/compose/ui/node/NodeCoordinator;->placeSelf-MLgxB_4(JFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/layer/GraphicsLayer;)V
 SPLandroidx/compose/ui/node/NodeCoordinator;->placeSelfApparentToRealOffset-MLgxB_4(JFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/layer/GraphicsLayer;)V
 SPLandroidx/compose/ui/node/NodeCoordinator;->rectInParent$ui$default(Landroidx/compose/ui/node/NodeCoordinator;Landroidx/compose/ui/geometry/MutableRect;ZZILjava/lang/Object;)V
+HSPLandroidx/compose/ui/node/NodeCoordinator;->rectInParent$ui(Landroidx/compose/ui/geometry/MutableRect;ZZ)V
 SPLandroidx/compose/ui/node/NodeCoordinator;->releaseLayer()V
 SPLandroidx/compose/ui/node/NodeCoordinator;->replace$ui()V
 SPLandroidx/compose/ui/node/NodeCoordinator;->setForcePlaceWithLookaheadOffset$ui(Z)V
@@ -11716,15 +11718,15 @@ SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_an
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->access$getInfoText(Landroidx/compose/ui/semantics/SemanticsNode;)Landroidx/compose/ui/text/AnnotatedString;
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->access$isRtl(Landroidx/compose/ui/semantics/SemanticsNode;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->access$isScreenReaderFocusable(Landroidx/compose/ui/semantics/SemanticsNode;Landroid/content/res/Resources;)Z
+SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->access$isUnmergedLeafNode(Landroidx/compose/ui/semantics/SemanticsNode;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->enabled(Landroidx/compose/ui/semantics/SemanticsNode;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->excludeLineAndPageGranularities(Landroidx/compose/ui/semantics/SemanticsNode;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->getInfoIsCheckable(Landroidx/compose/ui/semantics/SemanticsNode;)Z
-HSPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->getInfoStateDescriptionOrNull(Landroidx/compose/ui/semantics/SemanticsNode;Landroid/content/res/Resources;)Ljava/lang/String;
+SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->getInfoStateDescriptionOrNull(Landroidx/compose/ui/semantics/SemanticsNode;Landroid/content/res/Resources;)Ljava/lang/String;
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->getInfoText(Landroidx/compose/ui/semantics/SemanticsNode;)Landroidx/compose/ui/text/AnnotatedString;
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->isRtl(Landroidx/compose/ui/semantics/SemanticsNode;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->isScreenReaderFocusable(Landroidx/compose/ui/semantics/SemanticsNode;Landroid/content/res/Resources;)Z
 SPLandroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt;->isUnmergedLeafNode(Landroidx/compose/ui/semantics/SemanticsNode;)Z
-Landroidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat_androidKt$WhenMappings;
 Landroidx/compose/ui/platform/AndroidComposeViewForceDarkModeQ;
 SPLandroidx/compose/ui/platform/AndroidComposeViewForceDarkModeQ;-><clinit>()V
 SPLandroidx/compose/ui/platform/AndroidComposeViewForceDarkModeQ;-><init>()V
@@ -12487,7 +12489,7 @@ SPLandroidx/compose/ui/semantics/SemanticsConfiguration;->setClearingSemantics(Z
 SPLandroidx/compose/ui/semantics/SemanticsConfiguration;->setMergingSemanticsOfDescendants(Z)V
 Landroidx/compose/ui/semantics/SemanticsConfigurationKt;
 SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt;->getOrNull$lambda$0()Ljava/lang/Object;
-HSPLandroidx/compose/ui/semantics/SemanticsConfigurationKt;->getOrNull(Landroidx/compose/ui/semantics/SemanticsConfiguration;Landroidx/compose/ui/semantics/SemanticsPropertyKey;)Ljava/lang/Object;
+SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt;->getOrNull(Landroidx/compose/ui/semantics/SemanticsConfiguration;Landroidx/compose/ui/semantics/SemanticsPropertyKey;)Ljava/lang/Object;
 Landroidx/compose/ui/semantics/SemanticsConfigurationKt$$ExternalSyntheticLambda0;
 SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$$ExternalSyntheticLambda0;-><init>()V
 SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$$ExternalSyntheticLambda0;->invoke()Ljava/lang/Object;
@@ -12507,7 +12509,7 @@ SPLandroidx/compose/ui/semantics/SemanticsNode;->boundsInImportantForBoundsAnces
 SPLandroidx/compose/ui/semantics/SemanticsNode;->emitFakeNodes$lambda$0(Landroidx/compose/ui/semantics/Role;Landroidx/compose/ui/semantics/SemanticsPropertyReceiver;)Lkotlin/Unit;
 SPLandroidx/compose/ui/semantics/SemanticsNode;->emitFakeNodes(Ljava/util/List;)V
 SPLandroidx/compose/ui/semantics/SemanticsNode;->fakeSemanticsNode-ypyhhiA(Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function1;)Landroidx/compose/ui/semantics/SemanticsNode;
-HSPLandroidx/compose/ui/semantics/SemanticsNode;->fillOneLayerOfSemanticsWrappers(Landroidx/compose/ui/node/LayoutNode;Ljava/util/List;Z)V
+SPLandroidx/compose/ui/semantics/SemanticsNode;->fillOneLayerOfSemanticsWrappers(Landroidx/compose/ui/node/LayoutNode;Ljava/util/List;Z)V
 SPLandroidx/compose/ui/semantics/SemanticsNode;->findCoordinatorToGetBounds$ui()Landroidx/compose/ui/node/NodeCoordinator;
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->findSemanticsModifierNodeToGetBounds()Landroidx/compose/ui/node/SemanticsModifierNode;
 SPLandroidx/compose/ui/semantics/SemanticsNode;->getBoundsInParent$ui()Landroidx/compose/ui/geometry/Rect;
@@ -19207,7 +19209,6 @@ SPLcoil3/decode/BitmapFactoryDecoder$Factory;-><init>(Lkotlinx/coroutines/sync/S
 SPLcoil3/decode/BitmapFactoryDecoder$Factory;->create(Lcoil3/fetch/SourceFetchResult;Lcoil3/request/Options;Lcoil3/ImageLoader;)Lcoil3/decode/Decoder;
 Lcoil3/decode/BitmapFactoryDecoder$decode$1;
 SPLcoil3/decode/BitmapFactoryDecoder$decode$1;-><init>(Lcoil3/decode/BitmapFactoryDecoder;Lkotlin/coroutines/Continuation;)V
-SPLcoil3/decode/BitmapFactoryDecoder$decode$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lcoil3/decode/ByteBufferMetadata;
 Lcoil3/decode/ContentMetadata;
 Lcoil3/decode/DataSource;
@@ -19346,10 +19347,8 @@ SPLcoil3/intercept/EngineInterceptor$ExecuteResult;->getImage()Lcoil3/Image;
 SPLcoil3/intercept/EngineInterceptor$ExecuteResult;->isSampled()Z
 Lcoil3/intercept/EngineInterceptor$decode$1;
 SPLcoil3/intercept/EngineInterceptor$decode$1;-><init>(Lcoil3/intercept/EngineInterceptor;Lkotlin/coroutines/Continuation;)V
-SPLcoil3/intercept/EngineInterceptor$decode$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lcoil3/intercept/EngineInterceptor$execute$1;
 SPLcoil3/intercept/EngineInterceptor$execute$1;-><init>(Lcoil3/intercept/EngineInterceptor;Lkotlin/coroutines/Continuation;)V
-SPLcoil3/intercept/EngineInterceptor$execute$1;->invokeSuspend(Ljava/lang/Object;)Ljava/lang/Object;
 Lcoil3/intercept/EngineInterceptor$execute$executeResult$1;
 SPLcoil3/intercept/EngineInterceptor$execute$executeResult$1;-><init>(Lcoil3/intercept/EngineInterceptor;Lkotlin/jvm/internal/Ref$ObjectRef;Lkotlin/jvm/internal/Ref$ObjectRef;Lcoil3/request/ImageRequest;Ljava/lang/Object;Lkotlin/jvm/internal/Ref$ObjectRef;Lcoil3/EventListener;Lkotlin/coroutines/Continuation;)V
 SPLcoil3/intercept/EngineInterceptor$execute$executeResult$1;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;
@@ -24730,6 +24729,7 @@ SPLcom/google/android/gms/measurement/internal/zzgw;->zzg(Ljava/lang/String;)Lco
 SPLcom/google/android/gms/measurement/internal/zzgw;->zzl()V
 SPLcom/google/android/gms/measurement/internal/zzgw;->zzm()Ljava/lang/String;
 SPLcom/google/android/gms/measurement/internal/zzgw;->zzn()Ljava/lang/String;
+SPLcom/google/android/gms/measurement/internal/zzgw;->zzr()I
 SPLcom/google/android/gms/measurement/internal/zzgw;->zzs()Ljava/util/List;
 Lcom/google/android/gms/measurement/internal/zzgx;
 Lcom/google/android/gms/measurement/internal/zzgy;
@@ -24778,6 +24778,7 @@ SPLcom/google/android/gms/measurement/internal/zzhp;->zzb(J)V
 Lcom/google/android/gms/measurement/internal/zzhq;
 SPLcom/google/android/gms/measurement/internal/zzhq;-><init>(Lcom/google/android/gms/measurement/internal/zzhs;Ljava/lang/String;J[B)V
 SPLcom/google/android/gms/measurement/internal/zzhq;->zzb()Landroid/util/Pair;
+SPLcom/google/android/gms/measurement/internal/zzhq;->zzc()V
 SPLcom/google/android/gms/measurement/internal/zzhq;->zzd()J
 Lcom/google/android/gms/measurement/internal/zzhr;
 SPLcom/google/android/gms/measurement/internal/zzhr;-><init>(Lcom/google/android/gms/measurement/internal/zzhs;Ljava/lang/String;Ljava/lang/String;)V
@@ -24793,6 +24794,7 @@ SPLcom/google/android/gms/measurement/internal/zzhs;->zze()Landroid/content/Shar
 SPLcom/google/android/gms/measurement/internal/zzhs;->zzg()Ljava/lang/Boolean;
 SPLcom/google/android/gms/measurement/internal/zzhs;->zzh()Lcom/google/android/gms/internal/measurement/zzfd;
 SPLcom/google/android/gms/measurement/internal/zzhs;->zzj()Lcom/google/android/gms/internal/measurement/zzfh;
+SPLcom/google/android/gms/measurement/internal/zzhs;->zzl(Z)V
 SPLcom/google/android/gms/measurement/internal/zzhs;->zzm()Z
 SPLcom/google/android/gms/measurement/internal/zzhs;->zzn(J)Z
 Lcom/google/android/gms/measurement/internal/zzif;
@@ -24992,6 +24994,7 @@ SPLcom/google/android/gms/measurement/internal/zzop;->zzae(Landroid/content/Cont
 SPLcom/google/android/gms/measurement/internal/zzop;->zzag(Ljava/lang/String;)Z
 SPLcom/google/android/gms/measurement/internal/zzop;->zzah(IZ)Z
 SPLcom/google/android/gms/measurement/internal/zzop;->zzai()I
+SPLcom/google/android/gms/measurement/internal/zzop;->zzaj(I)I
 SPLcom/google/android/gms/measurement/internal/zzop;->zzax(Landroid/content/Context;)Z
 SPLcom/google/android/gms/measurement/internal/zzop;->zzay(Lcom/google/android/gms/internal/measurement/zzgl;Landroid/os/Bundle;Z)V
 SPLcom/google/android/gms/measurement/internal/zzop;->zzaz()Ljava/lang/String;
@@ -26207,14 +26210,15 @@ SPLcom/google/firebase/crashlytics/internal/common/FirebaseInstallationId;->getF
 Lcom/google/firebase/crashlytics/internal/common/IdManager;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;-><clinit>()V
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;-><init>(Landroid/content/Context;Ljava/lang/String;Lcom/google/firebase/installations/FirebaseInstallationsApi;Lcom/google/firebase/crashlytics/internal/common/DataCollectionArbiter;)V
+SPLcom/google/firebase/crashlytics/internal/common/IdManager;->createAndCacheCrashlyticsInstallId(Ljava/lang/String;Landroid/content/SharedPreferences;)Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->fetchTrueFid(Z)Lcom/google/firebase/crashlytics/internal/common/FirebaseInstallationId;
+SPLcom/google/firebase/crashlytics/internal/common/IdManager;->formatId(Ljava/lang/String;)Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getAppIdentifier()Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getInstallIds()Lcom/google/firebase/crashlytics/internal/common/InstallIdProvider$InstallIds;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getInstallerPackageName()Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getModelName()Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getOsBuildVersionString()Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->getOsDisplayVersionString()Ljava/lang/String;
-SPLcom/google/firebase/crashlytics/internal/common/IdManager;->readCachedCrashlyticsInstallId(Landroid/content/SharedPreferences;)Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->removeForwardSlashesIn(Ljava/lang/String;)Ljava/lang/String;
 SPLcom/google/firebase/crashlytics/internal/common/IdManager;->shouldRefresh()Z
 Lcom/google/firebase/crashlytics/internal/common/InstallIdProvider;
@@ -28792,7 +28796,6 @@ SPLkotlin/LazyThreadSafetyMode;->$values()[Lkotlin/LazyThreadSafetyMode;
 SPLkotlin/LazyThreadSafetyMode;-><clinit>()V
 SPLkotlin/LazyThreadSafetyMode;-><init>(Ljava/lang/String;I)V
 SPLkotlin/LazyThreadSafetyMode;->values()[Lkotlin/LazyThreadSafetyMode;
-Lkotlin/NoWhenBranchMatchedException;
 Lkotlin/NotImplementedError;
 Lkotlin/Pair;
 SPLkotlin/Pair;-><init>(Ljava/lang/Object;Ljava/lang/Object;)V
@@ -30478,6 +30481,7 @@ Lkotlinx/coroutines/channels/BufferedChannel;
 SPLkotlinx/coroutines/channels/BufferedChannel;-><clinit>()V
 SPLkotlinx/coroutines/channels/BufferedChannel;-><init>(ILkotlin/jvm/functions/Function1;)V
 SPLkotlinx/coroutines/channels/BufferedChannel;->access$findSegmentReceive(Lkotlinx/coroutines/channels/BufferedChannel;JLkotlinx/coroutines/channels/ChannelSegment;)Lkotlinx/coroutines/channels/ChannelSegment;
+SPLkotlinx/coroutines/channels/BufferedChannel;->access$findSegmentSend(Lkotlinx/coroutines/channels/BufferedChannel;JLkotlinx/coroutines/channels/ChannelSegment;)Lkotlinx/coroutines/channels/ChannelSegment;
 SPLkotlinx/coroutines/channels/BufferedChannel;->access$getReceiveSegment$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
 SPLkotlinx/coroutines/channels/BufferedChannel;->access$getReceivers$volatile$FU()Ljava/util/concurrent/atomic/AtomicLongFieldUpdater;
 SPLkotlinx/coroutines/channels/BufferedChannel;->access$getSendSegment$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
@@ -30529,13 +30533,14 @@ SPLkotlinx/coroutines/channels/BufferedChannel;->shouldSendSuspend(J)Z
 SPLkotlinx/coroutines/channels/BufferedChannel;->tryReceive-PtdJZtk()Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel;->tryResumeReceiver(Ljava/lang/Object;Ljava/lang/Object;)Z
 SPLkotlinx/coroutines/channels/BufferedChannel;->tryResumeSender(Ljava/lang/Object;Lkotlinx/coroutines/channels/ChannelSegment;I)Z
-HSPLkotlinx/coroutines/channels/BufferedChannel;->trySend-JP2dKIU(Ljava/lang/Object;)Ljava/lang/Object;
+SPLkotlinx/coroutines/channels/BufferedChannel;->trySend-JP2dKIU(Ljava/lang/Object;)Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel;->updateCellReceive(Lkotlinx/coroutines/channels/ChannelSegment;IJLjava/lang/Object;)Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel;->updateCellReceiveSlow(Lkotlinx/coroutines/channels/ChannelSegment;IJLjava/lang/Object;)Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel;->updateCellSend(Lkotlinx/coroutines/channels/ChannelSegment;ILjava/lang/Object;JLjava/lang/Object;Z)I
 Lkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;
 SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;-><init>(Lkotlinx/coroutines/channels/BufferedChannel;)V
 SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;->access$setContinuation$p(Lkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;Lkotlinx/coroutines/CancellableContinuationImpl;)V
+SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;->access$setReceiveResult$p(Lkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;Ljava/lang/Object;)V
 SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;->hasNext(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;->hasNextOnNoWaiterSuspend(Lkotlinx/coroutines/channels/ChannelSegment;IJLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLkotlinx/coroutines/channels/BufferedChannel$BufferedChannelIterator;->invokeOnCancellation(Lkotlinx/coroutines/internal/Segment;I)V
@@ -31530,6 +31535,7 @@ SPLkotlinx/coroutines/scheduling/WorkQueue;-><clinit>()V
 SPLkotlinx/coroutines/scheduling/WorkQueue;-><init>()V
 SPLkotlinx/coroutines/scheduling/WorkQueue;->add(Lkotlinx/coroutines/scheduling/Task;Z)Lkotlinx/coroutines/scheduling/Task;
 SPLkotlinx/coroutines/scheduling/WorkQueue;->addLast(Lkotlinx/coroutines/scheduling/Task;)Lkotlinx/coroutines/scheduling/Task;
+SPLkotlinx/coroutines/scheduling/WorkQueue;->decrementIfBlocking(Lkotlinx/coroutines/scheduling/Task;)V
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getBufferSize()I
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getConsumerIndex$volatile$FU()Ljava/util/concurrent/atomic/AtomicIntegerFieldUpdater;
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getLastScheduledTask$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
@@ -31576,10 +31582,8 @@ Lkotlinx/coroutines/sync/Semaphore;
 Lkotlinx/coroutines/sync/SemaphoreAndMutexImpl;
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;-><clinit>()V
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;-><init>(II)V
-SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->access$addAcquireToQueue(Lkotlinx/coroutines/sync/SemaphoreAndMutexImpl;Lkotlinx/coroutines/Waiter;)Z
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->acquire(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->acquire(Lkotlinx/coroutines/CancellableContinuation;)V
-SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->acquireSlowPath(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->addAcquireToQueue(Lkotlinx/coroutines/Waiter;)Z
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->decPermits()I
 SPLkotlinx/coroutines/sync/SemaphoreAndMutexImpl;->getAvailablePermits()I
