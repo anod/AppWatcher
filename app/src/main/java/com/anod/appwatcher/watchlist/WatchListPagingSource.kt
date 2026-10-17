@@ -193,7 +193,7 @@ class WatchListPagingSource(
                             databaseRow = row,
                             packageInfo = packageState.packageInfo,
                             isPackageEnabled = packageState.isEnabled,
-                            sectionRank = sectionRank(row, packageState.isEnabled),
+                            sectionRank = sectionRank(row),
                             sortPosition = index,
                         )
                     }
@@ -216,10 +216,10 @@ class WatchListPagingSource(
         }
     }
 
-    private fun sectionRank(row: AppListRowSnapshot, isPackageEnabled: Boolean): Int =
+    private fun sectionRank(row: AppListRowSnapshot): Int =
         when {
-            isPackageEnabled && row.status == App.STATUS_UPDATED -> 0
-            isPackageEnabled && config.showRecentlyDiscovered && row.recentFlag -> 1
+            row.status == App.STATUS_UPDATED -> 0
+            config.showRecentlyDiscovered && row.recentFlag -> 1
             else -> 2
         }
 

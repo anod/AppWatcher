@@ -58,11 +58,7 @@ interface AppListFilter {
             versionCode: Int,
             packageInfo: InstalledApps.Info,
             isPackageEnabled: Boolean
-        ): Boolean = !(
-            packageInfo.isInstalled &&
-                isPackageEnabled &&
-                packageInfo.isUpdatable(versionCode)
-            )
+        ): Boolean = !(packageInfo.isInstalled && packageInfo.isUpdatable(versionCode))
 
         override fun hashCode(): Int = hashCodeOf(filterId)
         override fun equals(other: Any?): Boolean = (other as? Installed)?.hashCode() == hashCode()

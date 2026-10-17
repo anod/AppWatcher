@@ -185,7 +185,7 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
-    fun disabledInstalledAppIsNotShownAsUpdatable() = runBlocking {
+    fun disabledInstalledAppIsShownAsUpdatable() = runBlocking {
         insertApp(
             appId = "disabled",
             packageName = "disabled.watched",
@@ -217,7 +217,7 @@ class WatchListPagingSourceRoomTest {
 
         assertFalse(disabledItem.isPackageEnabled)
         assertEquals(
-            listOf("enabled.watched", "normal.watched", "disabled.watched"),
+            listOf("enabled.watched", "disabled.watched", "normal.watched"),
             appItems.map { it.appListItem.app.packageName }
         )
         val sectionHeaderFactory = DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
@@ -230,7 +230,7 @@ class WatchListPagingSourceRoomTest {
         )
         assertEquals(headers.size, headers.distinctBy { it.sectionKey }.size)
         assertEquals(
-            SectionHeader.Watching,
+            null,
             DefaultSectionHeaderFactory(showRecentlyDiscovered = false)
                 .insertSeparator(before = appItems.first(), after = disabledItem)
                 ?.type
@@ -243,7 +243,7 @@ class WatchListPagingSourceRoomTest {
         ).load(PagingSource.LoadParams.Refresh(key = null, loadSize = 20, placeholdersEnabled = false))
 
         assertEquals(
-            listOf("enabled.watched"),
+            listOf("enabled.watched", "disabled.watched"),
             (updatableResult as PagingSource.LoadResult.Page)
                 .data
                 .filterIsInstance<SectionItem.App>()
@@ -252,7 +252,58 @@ class WatchListPagingSourceRoomTest {
     }
 
     @Test
-    fun sleepingAppUpdateIsKeptButShownAsDisabledUntilReenabled() = runBlocking {
+    fun disabledNormalAppIsRankedAndGroupedAsRecentlyDiscovered() = runBlocking {
+        insertApp(
+            appId = "disabled",
+            packageName = "disabled.watched",
+            title = "Z Disabled Recent",
+            status = App.STATUS_NORMAL,
+            syncTime = System.currentTimeMillis()
+        )
+        insertApp(
+            appId = "enabled",
+            packageName = "enabled.watched",
+            title = "M Enabled Updated",
+            status = App.STATUS_UPDATED
+        )
+        insertApp(
+            appId = "normal",
+            packageName = "normal.watched",
+            title = "A Normal Watched"
+        )
+
+        val items = loadApps(
+            createPagingSource(
+                showOnDevice = false,
+                showRecentlyDiscovered = true,
+                packageEnabled = { it != "disabled.watched" }
+            )
+        )
+        val disabledItem = items.single { it.appListItem.app.packageName == "disabled.watched" }
+
+        assertFalse(disabledItem.isPackageEnabled)
+        assertEquals(App.STATUS_NORMAL, disabledItem.appListItem.app.status)
+        assertTrue(disabledItem.appListItem.recentFlag)
+        assertEquals(
+            listOf("enabled.watched", "disabled.watched", "normal.watched"),
+            items.map { it.appListItem.app.packageName }
+        )
+        val sections = insertHeaders(items, showRecentlyDiscovered = true)
+        assertEquals(
+            listOf(SectionHeader.New, SectionHeader.RecentlyDiscovered, SectionHeader.Watching),
+            sections.filterIsInstance<SectionItem.Header>().map { it.type }
+        )
+        assertEquals(sections.size, sections.distinctBy { it.sectionKey }.size)
+        assertEquals(
+            SectionHeader.RecentlyDiscovered,
+            DefaultSectionHeaderFactory(showRecentlyDiscovered = true)
+                .insertSeparator(before = null, after = disabledItem)
+                ?.type
+        )
+    }
+
+    @Test
+    fun sleepingAppUpdateIsShownAsNew() = runBlocking {
         insertApp(
             appId = "disabled",
             packageName = "disabled.watched",
@@ -279,12 +330,13 @@ class WatchListPagingSourceRoomTest {
         assertFalse(disabledItem.isPackageEnabled)
         assertEquals(App.STATUS_UPDATED, disabledItem.appListItem.app.status)
         assertEquals(
-            SectionHeader.Watching,
+            SectionHeader.New,
             DefaultSectionHeaderFactory(showRecentlyDiscovered = true)
                 .insertSeparator(before = null, after = disabledItem)
                 ?.type
         )
-        assertTrue(
+        assertEquals(
+            listOf("disabled.watched"),
             loadApps(
                 createPagingSource(
                     showOnDevice = false,
@@ -292,7 +344,7 @@ class WatchListPagingSourceRoomTest {
                     packageEnabled = { false },
                     installedApps = installedApps
                 )
-            ).isEmpty()
+            ).map { it.appListItem.app.packageName }
         )
         assertEquals(App.STATUS_UPDATED, db.apps().loadApp("disabled")!!.status)
 
@@ -594,7 +646,7 @@ class WatchListPagingSourceRoomTest {
         assertFalse(refreshedItems.single { it.appListItem.app.packageName == "snapshot.25" }.isPackageEnabled)
         assertEquals(80, enabledLookups)
         assertEquals(1, refreshedWithHeaders.count { it.sectionKey == "header:new" })
-        assertEquals(1, refreshedWithHeaders.count { it.sectionKey == "header:watching" })
+        assertEquals(0, refreshedWithHeaders.count { it.sectionKey == "header:watching" })
         assertEquals(refreshedWithHeaders.map { it.sectionKey }.toSet().size, refreshedWithHeaders.size)
     }
 
