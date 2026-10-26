@@ -20,7 +20,9 @@ import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.database.SchedulesTable
 import com.anod.appwatcher.database.entities.App
+import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
 import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
@@ -35,10 +37,16 @@ import info.anodsplace.framework.net.NetworkConnectivity
 import info.anodsplace.notification.NotificationManager
 import java.io.IOException
 import java.net.UnknownHostException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -69,12 +77,16 @@ class UpdateCheckRegistrationTest {
     private lateinit var updateCheck: UpdateCheck
     private lateinit var initializer: AuthAccountInitializer
     private lateinit var deviceRegistrationNotification: DeviceRegistrationNotification
+    private lateinit var coordinator: PlaySessionCoordinator
+    private lateinit var notificationManager: NotificationManager
     private var previousListener: AppLog.Listener? = null
+    private var tokenRequested = CountDownLatch(1)
+    private var tokenRelease: CountDownLatch? = null
 
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val notificationManager = object : NotificationManager {
+        notificationManager = object : NotificationManager {
             override val areNotificationsEnabled = true
 
             override fun notify(notificationId: Int, notification: Notification) {
@@ -98,9 +110,14 @@ class UpdateCheckRegistrationTest {
         database = Room.inMemoryDatabaseBuilder(context, AppsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        val coordinator = PlaySessionCoordinator()
+        coordinator = PlaySessionCoordinator()
         val tokenProvider = object : AccountAuthTokenProvider {
-            override fun getAuthToken(account: Account) = "token"
+            override fun getAuthToken(account: Account): String {
+                tokenRequested.countDown()
+                // Blocks like a lost AccountManager callback until interrupted.
+                tokenRelease?.await()
+                return "token"
+            }
             override fun invalidateAuthToken(token: String) = Unit
         }
         initializer = AuthAccountInitializer(
@@ -110,19 +127,7 @@ class UpdateCheckRegistrationTest {
             coordinator,
             deviceRegistrationNotification
         )
-        updateCheck = UpdateCheck(
-            ApplicationContext(context),
-            PackageStateCache(context.packageManager),
-            notificationManager,
-            database,
-            preferences,
-            NetworkConnectivity(context),
-            initializer,
-            UploadDateParserCache(),
-            coordinator,
-            deviceRegistrationNotification,
-            koin.koin
-        )
+        updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts())
         previousListener = AppLog.instance.listener
         AppLog.instance.listener = object : AppLog.Listener {
             override fun onLogException(tr: Throwable) {
@@ -133,11 +138,130 @@ class UpdateCheckRegistrationTest {
 
     @After
     fun tearDown() {
+        tokenRelease?.countDown()
         AppLog.instance.listener = previousListener
         preferences.account = null
         database.close()
         appScope.cancel()
         koin.close()
+    }
+
+    private fun createUpdateCheck(timeouts: UpdateCheck.SyncTimeouts): UpdateCheck {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        return UpdateCheck(
+            ApplicationContext(context),
+            PackageStateCache(context.packageManager),
+            notificationManager,
+            database,
+            preferences,
+            NetworkConnectivity(context),
+            initializer,
+            UploadDateParserCache(),
+            coordinator,
+            deviceRegistrationNotification,
+            koin.koin,
+            timeouts
+        )
+    }
+
+    @Test
+    fun stalledAuthTokenTimesOutRecordsInterruptedSyncAndReleasesSession() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        tokenRelease = CountDownLatch(1)
+        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(sessionWaitMillis = 5_000L, syncMillis = 300L))
+
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { "timeout(3)" })
+
+        val schedule = database.schedules().load().first().single()
+        assertEquals(Schedule.STATUS_INTERRUPTED, schedule.result)
+        assertTrue(schedule.result() is Failed)
+        assertTrue(schedule.finish >= schedule.start)
+        val diagnostic = reportedErrors.single()
+        assertTrue(diagnostic is SyncInterruptedException)
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("interrupted by timeout"))
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("holder=scheduled-sync"))
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("stage=auth-token"))
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("failureKind=unexpected"))
+        assertEquals(false, CrashlyticsExceptionFilter.shouldIgnore(diagnostic) { true })
+
+        tokenRelease = null
+        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().first().result)
+        assertEquals(1, reportedErrors.size)
+    }
+
+    @Test
+    fun stoppedSyncRecordsSystemStopReason() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        tokenRelease = CountDownLatch(1)
+
+        val sync = launch(Dispatchers.Default) {
+            updateCheck.perform(Data.EMPTY) { "device-state(4)" }
+        }
+        assertTrue(tokenRequested.await(5, TimeUnit.SECONDS))
+        sync.cancelAndJoin()
+
+        assertEquals(Schedule.STATUS_INTERRUPTED, database.schedules().load().first().single().result)
+        val message = reportedErrors.single().message!!
+        assertTrue(message, message.contains("interrupted by cancellation"))
+        assertTrue(message, message.contains("stopReason=device-state(4)"))
+        assertTrue(message, message.contains("failureKind=expected-transient"))
+    }
+
+    @Test
+    fun busySessionTimesOutWithHolderDiagnostics() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        val holderStarted = CompletableDeferred<Unit>()
+        val holder = launch(Dispatchers.Default) {
+            coordinator.withSession(owner = "stuck-holder") {
+                coordinator.updateStage("bulk-details 1/1")
+                holderStarted.complete(Unit)
+                awaitCancellation()
+            }
+        }
+        holderStarted.await()
+        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(sessionWaitMillis = 200L, syncMillis = 5_000L))
+
+        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        holder.cancelAndJoin()
+
+        assertEquals(Schedule.STATUS_FAILED_SESSION_BUSY, database.schedules().load().first().single().result)
+        val diagnostic = reportedErrors.single()
+        assertTrue(diagnostic is SyncFailureException)
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("session-wait"))
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("holder=stuck-holder"))
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("stage=bulk-details 1/1"))
+        assertEquals(0, updateCheck.perform(Data.EMPTY))
+    }
+
+    @Test
+    fun abandonedSyncRowsAreMarkedInterruptedOnNextRun() = runBlocking {
+        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
+        val abandoned = Schedule(false)
+        SchedulesTable.Queries.save(abandoned, database)
+
+        assertEquals(0, updateCheck.perform(Data.EMPTY))
+
+        val schedules = database.schedules().load().first().associateBy { it.id }
+        assertEquals(Schedule.STATUS_INTERRUPTED, schedules.getValue(abandoned.id).result)
+        assertEquals(2, schedules.size)
+        assertTrue(schedules.values.any { it.result == Schedule.STATUS_SUCCESS })
+        val diagnostic = reportedErrors.single()
+        assertTrue(diagnostic is SyncInterruptedException)
+        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("Found 1 abandoned sync"))
+    }
+
+    @Test
+    fun earlyFinishedSyncIsNotReportedAsInterrupted() = runBlocking {
+        preferences.account = null
+
+        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+
+        val schedules = database.schedules().load().first()
+        assertEquals(2, schedules.size)
+        assertTrue(schedules.all { it.result == Schedule.STATUS_FAILED_NO_ACCOUNT })
+        assertTrue(reportedErrors.isEmpty())
     }
 
     @Test

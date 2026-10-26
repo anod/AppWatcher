@@ -11,26 +11,87 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
 class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
+class PlaySessionWaitTimeoutException(message: String) : IllegalStateException(message)
 
 class PlaySessionCoordinator {
+    private class Holder(
+        val owner: String,
+        val acquiredAt: Long
+    ) {
+        @Volatile
+        var stage: String = "started"
+
+        @Volatile
+        var stageAt: Long = acquiredAt
+    }
+
     private val sessionMutex = Mutex()
 
-    suspend fun <T> withSession(action: suspend () -> T): T = sessionMutex.withLock {
-        action()
+    @Volatile
+    private var holder: Holder? = null
+
+    suspend fun <T> withSession(action: suspend () -> T): T = withSession(owner = "session", action = action)
+
+    suspend fun <T> withSession(owner: String, action: suspend () -> T): T {
+        sessionMutex.lock()
+        return holdSession(owner, action)
+    }
+
+    /**
+     * Waits at most [waitTimeoutMillis] for the session and throws [PlaySessionWaitTimeoutException]
+     * describing the current holder instead of waiting behind a stalled session indefinitely.
+     */
+    suspend fun <T> withSession(
+        owner: String,
+        waitTimeoutMillis: Long,
+        action: suspend () -> T
+    ): T {
+        val waitStartedAt = System.currentTimeMillis()
+        withTimeoutOrNull(waitTimeoutMillis) { sessionMutex.lock() }
+            ?: throw PlaySessionWaitTimeoutException(
+                "$owner waited ${System.currentTimeMillis() - waitStartedAt}ms for Play session; ${describeHolder()}"
+            )
+        return holdSession(owner, action)
     }
 
     suspend fun <T> withUserInitiatedSession(action: suspend () -> T): T {
         if (!sessionMutex.tryLock()) {
+            AppLog.w("User session rejected; ${describeHolder()}", "PlaySession")
             throw AccountSessionBusyException()
         }
+        return holdSession("user-initiated", action)
+    }
+
+    fun updateStage(stage: String) {
+        val current = holder ?: return
+        val now = System.currentTimeMillis()
+        AppLog.i(
+            "${current.owner} stage $stage (previous=${current.stage} ${now - current.stageAt}ms, " +
+                "total=${now - current.acquiredAt}ms)",
+            "PlaySession"
+        )
+        current.stage = stage
+        current.stageAt = now
+    }
+
+    fun describeHolder(): String {
+        val current = holder ?: return "holder=none"
+        val now = System.currentTimeMillis()
+        return "holder=${current.owner}; heldMs=${now - current.acquiredAt}; " +
+            "stage=${current.stage}; stageMs=${now - current.stageAt}"
+    }
+
+    private suspend fun <T> holdSession(owner: String, action: suspend () -> T): T {
+        holder = Holder(owner, System.currentTimeMillis())
         return try {
             action()
         } finally {
+            holder = null
             sessionMutex.unlock()
         }
     }
@@ -79,7 +140,7 @@ class AuthAccountInitializer(
                     initializeInSession(account, userInitiated = true)
                 }
             } else {
-                playSessionCoordinator.withSession {
+                playSessionCoordinator.withSession(owner = "account-initialization") {
                     initializeInSession(account, userInitiated = false)
                 }
             }
@@ -147,7 +208,7 @@ class AuthAccountInitializer(
     }
 
     suspend fun refresh() {
-        playSessionCoordinator.withSession {
+        playSessionCoordinator.withSession(owner = "account-refresh") {
             refreshInSession()
         }
     }
@@ -155,7 +216,9 @@ class AuthAccountInitializer(
     internal suspend fun refreshInSession(): AuthAccount {
         val account = preferences.account ?: throw IllegalStateException("Account should not be null")
         val androidAccount = account.toAndroidAccount()
+        playSessionCoordinator.updateStage("auth-token")
         requireToken(authToken.refreshToken(androidAccount))
+        playSessionCoordinator.updateStage("device-registration")
         return deviceRegistration.ensure(account, allowCheckIn = false)
     }
 

@@ -1,12 +1,19 @@
 package com.anod.appwatcher.accounts
 
 import android.accounts.Account
+import android.accounts.OperationCanceledException
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -107,6 +114,55 @@ class AuthTokenBlockingTest {
         )
     }
 
+    @Test
+    fun cancellationInterruptsBlockedTokenRequest() = runBlocking {
+        for (interruptAsOperationCanceled in listOf(false, true)) {
+            val provider = BlockingReplacementTokenProvider(interruptAsOperationCanceled)
+            val authToken = AuthTokenBlocking.create(provider)
+            val account = account()
+            authToken.refreshToken(account)
+
+            val recovery = async(Dispatchers.Default) {
+                authToken.refreshAfterAuthenticationFailure(account, "expired-token")
+            }
+            assertTrue(provider.replacementRequested.await(5, TimeUnit.SECONDS))
+
+            val cancelled = withTimeoutOrNull(5_000L) { recovery.cancelAndJoin() }
+
+            assertTrue("Blocked AccountManager wait must be interruptible", cancelled != null)
+            assertTrue(provider.interrupted)
+            assertTrue(recovery.isCancelled)
+            assertTrue(runCatching { recovery.await() }.exceptionOrNull() is CancellationException)
+            provider.releaseReplacement.countDown()
+            assertTrue(authToken.refreshToken(account) is CheckTokenResult.Success)
+        }
+    }
+
+    @Test
+    fun sessionWaitTimeoutDescribesHolderAndKeepsLockUsable() = runBlocking {
+        val coordinator = PlaySessionCoordinator()
+        val holderStarted = CompletableDeferred<Unit>()
+        val holder = launch(Dispatchers.Default) {
+            coordinator.withSession(owner = "stuck") {
+                coordinator.updateStage("auth-token")
+                holderStarted.complete(Unit)
+                awaitCancellation()
+            }
+        }
+        holderStarted.await()
+
+        val error = runCatching {
+            coordinator.withSession(owner = "waiter", waitTimeoutMillis = 100L) { Unit }
+        }.exceptionOrNull()
+
+        assertTrue(error is PlaySessionWaitTimeoutException)
+        assertTrue(error!!.message!!, error.message!!.contains("holder=stuck"))
+        assertTrue(error.message!!, error.message!!.contains("stage=auth-token"))
+        holder.cancelAndJoin()
+        assertEquals("holder=none", coordinator.describeHolder())
+        assertEquals(1, coordinator.withSession(owner = "next", waitTimeoutMillis = 100L) { 1 })
+    }
+
     private fun account(name: String = "account@example.com") = Account(name, AuthTokenBlocking.ACCOUNT_TYPE)
 
     private fun authAccount() = AuthAccount(
@@ -132,9 +188,14 @@ class AuthTokenBlockingTest {
         }
     }
 
-    private class BlockingReplacementTokenProvider : AccountAuthTokenProvider {
+    private class BlockingReplacementTokenProvider(
+        private val interruptAsOperationCanceled: Boolean = false
+    ) : AccountAuthTokenProvider {
         val replacementRequested = CountDownLatch(1)
         val releaseReplacement = CountDownLatch(1)
+
+        @Volatile
+        var interrupted = false
         private var requests = 0
 
         override fun getAuthToken(account: Account): String {
@@ -143,7 +204,15 @@ class AuthTokenBlockingTest {
                 return "expired-token"
             }
             replacementRequested.countDown()
-            check(releaseReplacement.await(5, TimeUnit.SECONDS))
+            try {
+                check(releaseReplacement.await(5, TimeUnit.SECONDS))
+            } catch (e: InterruptedException) {
+                interrupted = true
+                if (interruptAsOperationCanceled) {
+                    throw OperationCanceledException(e)
+                }
+                throw e
+            }
             return "fresh-token"
         }
 

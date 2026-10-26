@@ -9,13 +9,19 @@ import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 
 class AuthTokenStartIntent(val intent: Intent) : RuntimeException("getAuthToken finished with intent: $intent")
+
+class AuthTokenTimeoutException(timeoutMillis: Long, cause: Throwable) :
+    IOException("AccountManager did not return an auth token within ${timeoutMillis}ms", cause)
 
 sealed interface CheckTokenError {
     class Unknown(val e: Exception) : CheckTokenError
@@ -37,7 +43,17 @@ internal interface AccountAuthTokenProvider {
 private class AccountManagerAuthTokenProvider(private val accountManager: AccountManager) : AccountAuthTokenProvider {
     @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)
     override fun getAuthToken(account: Account): String {
-        val bundle = accountManager.getAuthToken(account, AuthTokenBlocking.AUTH_TOKEN_TYPE, null, false, null, null).result
+        val future = accountManager.getAuthToken(account, AuthTokenBlocking.AUTH_TOKEN_TYPE, null, false, null, null)
+        val startedAt = System.currentTimeMillis()
+        // A lost AccountManager callback (e.g. while the process is frozen) must not hang the sync forever.
+        val bundle = try {
+            future.getResult(AuthTokenBlocking.AUTH_TOKEN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+        } catch (e: OperationCanceledException) {
+            if (System.currentTimeMillis() - startedAt >= AuthTokenBlocking.AUTH_TOKEN_TIMEOUT_MILLIS) {
+                throw AuthTokenTimeoutException(AuthTokenBlocking.AUTH_TOKEN_TIMEOUT_MILLIS, e)
+            }
+            throw e
+        }
         val token = bundle.getString(AccountManager.KEY_AUTHTOKEN) ?: ""
 
         if (token.isEmpty()) {
@@ -60,6 +76,7 @@ class AuthTokenBlocking private constructor(private val tokenProvider: AccountAu
     companion object {
         internal const val AUTH_TOKEN_TYPE = "androidmarket"
         const val ACCOUNT_TYPE = "com.google"
+        internal val AUTH_TOKEN_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(60L)
         private val expiration = TimeUnit.MINUTES.toMillis(5L)
 
         internal fun create(tokenProvider: AccountAuthTokenProvider): AuthTokenBlocking =
@@ -91,6 +108,8 @@ class AuthTokenBlocking private constructor(private val tokenProvider: AccountAu
             }
         } catch (e: AuthTokenStartIntent) {
             CheckTokenResult.Error(CheckTokenError.RequiresInteraction(e.intent))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             AppLog.e("onResume", e)
             CheckTokenResult.Error(CheckTokenError.Unknown(e))
@@ -168,24 +187,33 @@ class AuthTokenBlocking private constructor(private val tokenProvider: AccountAu
         }
     }
 
-    private suspend fun retrieve(acc: Account, invalidate: Boolean): Pair<String, Boolean> = withContext(Dispatchers.IO) {
+    // runInterruptible lets cancellation (WorkManager stop, sync timeout) interrupt a blocked AccountManager wait.
+    private suspend fun retrieve(acc: Account, invalidate: Boolean): Pair<String, Boolean> = interruptibleAccountCall {
         val current = tokenProvider.getAuthToken(acc)
         if (!invalidate || current.isEmpty()) {
-            return@withContext Pair(current, false)
+            return@interruptibleAccountCall Pair(current, false)
         }
 
         tokenProvider.invalidateAuthToken(current)
         tokenSession = null
         tokenState.value = ""
         lastUpdated = 0L
-        return@withContext Pair(tokenProvider.getAuthToken(acc), true)
+        return@interruptibleAccountCall Pair(tokenProvider.getAuthToken(acc), true)
     }
 
     private suspend fun invalidateRejectedToken(
         account: Account,
         rejectedToken: String
-    ): Pair<String, Boolean> = withContext(Dispatchers.IO) {
+    ): Pair<String, Boolean> = interruptibleAccountCall {
         tokenProvider.invalidateAuthToken(rejectedToken)
         Pair(tokenProvider.getAuthToken(account), true)
+    }
+
+    private suspend fun <T> interruptibleAccountCall(block: () -> T): T = try {
+        runInterruptible(Dispatchers.IO, block)
+    } catch (e: OperationCanceledException) {
+        // AccountManager reports an interrupted wait as OperationCanceledException.
+        currentCoroutineContext().ensureActive()
+        throw e
     }
 }

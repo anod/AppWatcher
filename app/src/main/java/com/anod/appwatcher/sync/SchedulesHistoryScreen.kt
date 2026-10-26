@@ -162,6 +162,8 @@ private fun ScheduleRow(schedule: Schedule, dateFormat: DateFormat) {
                 is Failed -> when (result.reason) {
                     Schedule.STATUS_FAILED -> "Unknown error"
                     Schedule.STATUS_FAILED_NO_TOKEN -> "Cannot receive access token"
+                    Schedule.STATUS_INTERRUPTED -> "Interrupted before finishing"
+                    Schedule.STATUS_FAILED_SESSION_BUSY -> "Previous sync is still running"
                     else -> ""
                 }
                 is Skipped -> when (result.reason) {
