@@ -101,6 +101,7 @@ class AccountSelectionViewModelTest {
         startKoin {
             modules(module {
                 single<Context> { context }
+                single { disabledDiagnostics(context) }
                 single { preferences }
                 single { database }
                 single { authToken }

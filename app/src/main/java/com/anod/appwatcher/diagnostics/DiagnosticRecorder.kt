@@ -11,6 +11,7 @@ import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.anod.appwatcher.BuildConfig
+import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
 import java.io.File
 import java.io.IOException
@@ -32,17 +33,20 @@ import kotlinx.coroutines.launch
 
 class DiagnosticRecorder(
     private val context: Context,
-    val consent: DiagnosticConsent,
+    private val prefs: Preferences,
     scope: CoroutineScope,
     private val workInfos: (String) -> List<WorkInfo> = { name ->
         WorkManager.getInstance(context).getWorkInfosForUniqueWork(name).get(5, TimeUnit.SECONDS)
     }
 ) {
     private sealed interface Command {
-        data class Record(val record: DiagnosticRecord, val time: Long, val permit: Long) : Command
+        data class Record(val record: DiagnosticRecord, val time: Long, val account: String, val generation: Long) : Command
         class Operation(val action: suspend () -> Unit, val result: CompletableDeferred<Unit>) : Command
     }
 
+    private val lock = Any()
+    private var generation = 0L
+    private val accountHash: String? get() = prefs.account?.name?.let(DiagnosticAccounts::hash)
     private val process = UUID.randomUUID()
     private val store by lazy { DiagnosticFileStore(File(context.noBackupFilesDir, "diagnostics")) }
     private val exports by lazy { File(context.cacheDir, "diagnostic-exports") }
@@ -58,6 +62,7 @@ class DiagnosticRecorder(
 
     init {
         scope.launch(Dispatchers.IO) {
+            process(Command.Operation({}, CompletableDeferred()))
             for (command in commands) process(command)
         }.invokeOnCompletion {
             stopped.set(true)
@@ -68,7 +73,8 @@ class DiagnosticRecorder(
     private suspend fun process(command: Command) {
         try {
             when (command) {
-                is Command.Record -> consent.withPermit(command.permit) {
+                is Command.Record -> synchronized(lock) {
+                    if (!prefs.isDiagnosticsEnabled || command.account != accountHash || command.generation != generation) return@synchronized
                     store.append(command.record.encode(command.time, process), command.time)
                     val lost = dropped.get()
                     val failed = failures.get()
@@ -119,8 +125,11 @@ class DiagnosticRecorder(
     // Diagnostics are optional: internal failures surface through state and never reach the caller.
     fun record(record: DiagnosticRecord) {
         try {
-            val permit = consent.permit() ?: return
-            if (!commands.trySend(Command.Record(record, System.currentTimeMillis(), permit)).isSuccess) {
+            val command = synchronized(lock) {
+                if (!prefs.isDiagnosticsEnabled) return
+                Command.Record(record, System.currentTimeMillis(), accountHash ?: return, generation)
+            }
+            if (!commands.trySend(command).isSuccess) {
                 val count = dropped.incrementAndGet()
                 mutableState.value = mutableState.value.copy(dropped = count)
             }
@@ -130,22 +139,28 @@ class DiagnosticRecorder(
         }
     }
 
-    fun reportError() {
+    private fun reportError() {
         mutableState.value = mutableState.value.copy(error = true)
     }
 
-    suspend fun refresh() = operation { }
+    internal suspend fun refresh() = operation { }
 
-    suspend fun setEnabled(enabled: Boolean) {
-        // Revocation is synchronous: do not wait behind queued disk writes.
-        consent.setEnabled(enabled)
-        refresh()
-        if (consent.enabled) captureProcessState()
+    suspend fun setEnabled(enabled: Boolean): Boolean = safely(false) {
+        // Revocation does not wait behind queued disk writes.
+        synchronized(lock) {
+            generation++
+            prefs.isDiagnosticsEnabled = enabled
+        }
+        if (prefs.isDiagnosticsEnabled) {
+            captureProcessState()
+        } else {
+            refresh()
+            true
+        }
     }
 
-    suspend fun delete() {
-        // Invalidate queued entries so deleting cannot resurrect old buffered records.
-        consent.discardQueued()
+    suspend fun delete(): Boolean = safely(false) {
+        synchronized(lock) { generation++ }
         operation {
             store.delete()
             exportFiles().forEach { if (!it.delete()) throw IOException("diagnostic export delete") }
@@ -154,12 +169,22 @@ class DiagnosticRecorder(
             lastHealthDropped = 0
             lastHealthFailures = 0
         }
+        true
     }
 
-    suspend fun shareIntent(): Intent {
+    suspend fun shareIntent(): Intent? = safely(null) {
         val snapshot = snapshot()
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.diagnostics", snapshot)
-        return diagnosticShareIntent(uri)
+        diagnosticShareIntent(uri)
+    }
+
+    private suspend fun <T> safely(failure: T, action: suspend () -> T): T = try {
+        action()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        reportError()
+        failure
     }
 
     internal suspend fun snapshot(): File {
@@ -182,10 +207,10 @@ class DiagnosticRecorder(
         return checkNotNull(snapshot)
     }
 
-    suspend fun captureProcessState() {
-        if (!consent.enabled) {
+    suspend fun captureProcessState(): Boolean = safely(false) {
+        if (!prefs.isDiagnosticsEnabled) {
             refresh()
-            return
+            return@safely true
         }
         operation {
             val now = System.currentTimeMillis()
@@ -226,11 +251,12 @@ class DiagnosticRecorder(
                 }
             }
         }
+        true
     }
 
     fun notification(record: DiagnosticRecord, channel: String) {
-        if (!consent.enabled) return
         try {
+            if (!prefs.isDiagnosticsEnabled) return
             val manager = context.getSystemService(NotificationManager::class.java)
             record(record.copy(
                 flag = manager.areNotificationsEnabled(),

@@ -179,11 +179,11 @@ fun preferenceItems(
         )
     ).apply {
         val storage = diagnostics.state.value
-        if (diagnostics.consent.allowed || storage.bytes > 0 || storage.error) {
+        if (prefs.isDiagnosticsAllowed || storage.bytes > 0 || storage.error) {
             add(PreferenceItem.Category(titleRes = R.string.diagnostics_title))
             add(PreferenceItem.Switch(
-                checked = diagnostics.consent.enabled,
-                enabled = diagnostics.consent.allowed,
+                checked = prefs.isDiagnosticsEnabled,
+                enabled = prefs.isDiagnosticsAllowed,
                 titleRes = R.string.diagnostics_record,
                 summaryRes = R.string.diagnostics_description,
                 key = "diagnostics-enabled"

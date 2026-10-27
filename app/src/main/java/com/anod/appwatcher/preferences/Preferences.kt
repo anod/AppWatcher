@@ -9,7 +9,7 @@ import android.os.Build
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.GfsIdResult
-import com.anod.appwatcher.diagnostics.DiagnosticConsent
+import com.anod.appwatcher.diagnostics.DiagnosticAccounts
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.AdaptiveIcon
@@ -31,18 +31,22 @@ class Preferences(
     context: Context,
     private val notificationManager: NotificationManager,
     private val appScope: CoroutineScope,
-    diagnosticAccountHashes: String = BuildConfig.DIAGNOSTIC_ACCOUNT_HASHES
+    private val diagnosticAccountHashes: String = BuildConfig.DIAGNOSTIC_ACCOUNT_HASHES
 ) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
     private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
 
-    val diagnosticConsent = DiagnosticConsent(
-        account = { accountSnapshot?.name },
-        hashes = diagnosticAccountHashes,
-        read = { devicePreferences.getString("diagnostic-consent", null) },
-        write = { value -> devicePreferences.edit().putString("diagnostic-consent", value).apply() }
-    )
+    val isDiagnosticsAllowed: Boolean
+        get() = DiagnosticAccounts.allows(accountSnapshot?.name, diagnosticAccountHashes)
+
+    var isDiagnosticsEnabled: Boolean
+        get() = isDiagnosticsAllowed && devicePreferences.getString("diagnostic-consent", null) ==
+            accountSnapshot?.name?.let(DiagnosticAccounts::hash)
+        set(value) {
+            val hash = if (value && isDiagnosticsAllowed) accountSnapshot?.name?.let(DiagnosticAccounts::hash) else null
+            devicePreferences.edit().putString("diagnostic-consent", hash).apply()
+        }
 
     @Volatile
     private var accountSnapshot: AuthAccount? = null
@@ -57,7 +61,6 @@ class Preferences(
             wasRestored = devicePreferences.getBoolean(RESTORED_FROM_BACKUP, false)
         )
         accountSnapshot = readAccount()
-        if (!diagnosticConsent.allowed) diagnosticConsent.setEnabled(false)
         preferences.registerOnSharedPreferenceChangeListener(this)
         devicePreferences.registerOnSharedPreferenceChangeListener(this)
     }
@@ -65,7 +68,6 @@ class Preferences(
     var account: AuthAccount?
         get() = accountSnapshot
         set(value) {
-            diagnosticConsent.changingAccount(value?.name)
             editAccount(
                 account = value,
                 deviceRegistrationPending = null,
@@ -97,7 +99,6 @@ class Preferences(
         deviceRegistrationAuthorized: Boolean?,
         deviceConfigRevision: Int?
     ): Boolean = withContext(Dispatchers.IO) {
-        diagnosticConsent.changingAccount(account?.name)
         val committed = editAccount(
             account,
             deviceRegistrationPending,

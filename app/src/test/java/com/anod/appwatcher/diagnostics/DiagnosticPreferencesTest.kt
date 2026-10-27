@@ -26,7 +26,7 @@ class DiagnosticPreferencesTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
     private val hashes = DiagnosticAccounts.hash("diagnostic-account")
-    private fun preferences() = Preferences(context, NotificationManager.NoOp(), scope, DiagnosticAllowlist(setOf(hashes)))
+    private fun preferences() = Preferences(context, NotificationManager.NoOp(), scope, hashes)
     private fun account(name: String) = AuthAccount(name, "account-type", "", "", "")
 
     @After
@@ -49,7 +49,7 @@ class DiagnosticPreferencesTest {
     }
 
     @Test
-    fun accountSwitchClearsConsentAndBackgroundSaveBindsConsentToSelectedAccount() = runBlocking {
+    fun accountSetterAndBackgroundSaveBindConsentToTheSelectedAccount() = runBlocking {
         val prefs = preferences()
         prefs.account = account("diagnostic-account")
         prefs.isDiagnosticsEnabled = true
@@ -57,9 +57,10 @@ class DiagnosticPreferencesTest {
         assertFalse(prefs.isDiagnosticsAllowed)
         assertFalse(prefs.isDiagnosticsEnabled)
         assertFalse(preferences().isDiagnosticsEnabled)
+        prefs.isDiagnosticsEnabled = true
+        assertFalse(preferences().isDiagnosticsEnabled)
         prefs.account = account("diagnostic-account")
         assertFalse(prefs.isDiagnosticsEnabled)
-        assertFalse(preferences().isDiagnosticsEnabled)
         prefs.isDiagnosticsEnabled = true
         assertTrue(prefs.saveAccount(account("not-allowed"), null, null, null))
         assertFalse(prefs.isDiagnosticsEnabled)
@@ -79,16 +80,13 @@ class DiagnosticPreferencesTest {
 
     @Test
     fun normalizationEmptyAllowlistAndLiteralInjectionValues() {
-        val normalized = preferences()
-        normalized.account = account("  DIAGNOSTIC-ACCOUNT ")
-        assertTrue(normalized.isDiagnosticsAllowed)
-        normalized.account = null
-        assertFalse(normalized.isDiagnosticsAllowed)
+        assertTrue(DiagnosticAccounts.allows("  DIAGNOSTIC-ACCOUNT ", hashes))
+        assertFalse(DiagnosticAccounts.allows("diagnostic-account", ""))
+        assertFalse(DiagnosticAccounts.allows(null, hashes))
         val digest = DiagnosticAccounts.hash("quotes\"\\\n,=injection")
         assertTrue(digest.matches(Regex("[0-9a-f]{64}")))
-        val prefs = Preferences(context, NotificationManager.NoOp(), scope, DiagnosticAllowlist(emptySet()))
+        val prefs = Preferences(context, NotificationManager.NoOp(), scope, "")
         prefs.account = account("diagnostic-account")
-        assertFalse(prefs.isDiagnosticsAllowed)
         prefs.isDiagnosticsEnabled = true
         assertFalse(prefs.isDiagnosticsEnabled)
         prefs.account = null

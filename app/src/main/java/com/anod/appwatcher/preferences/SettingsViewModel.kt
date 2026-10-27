@@ -39,6 +39,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -72,7 +73,6 @@ sealed interface SettingsViewEvent {
     data class DiagnosticToggle(val checked: Boolean) : SettingsViewEvent
     data object DiagnosticShare : SettingsViewEvent
     data object DiagnosticDelete : SettingsViewEvent
-    data object DiagnosticShareFailed : SettingsViewEvent
 }
 
 sealed interface SettingsViewAction {
@@ -87,7 +87,6 @@ sealed interface SettingsViewAction {
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
     data class NavigateTo(val navKey: NavKey) : SettingsViewAction
-    data class ShareDiagnostics(val intent: Intent) : SettingsViewAction
 }
 
 private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction = SettingsViewAction.ShowToast(
@@ -111,36 +110,22 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             areNotificationsEnabled = notificationManager.areNotificationsEnabled
         )
         viewModelScope.launch {
-            diagnostics.state.collect {
-                refreshDiagnosticItems()
-            }
-        }
-        viewModelScope.launch {
-            prefs.changes.collect {
-                refreshDiagnosticItems()
-            }
-        }
-        viewModelScope.launch {
-            try {
-                diagnostics.refresh()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                diagnostics.reportError()
+            merge(diagnostics.state, prefs.changes).collect {
+                viewState = viewState.copy(items = preferenceItems(prefs, viewState.isProgressVisible, playServices, application, diagnostics))
             }
         }
     }
 
     override fun handleEvent(event: SettingsViewEvent) {
         when (event) {
-            is SettingsViewEvent.DiagnosticToggle -> diagnosticOperation { diagnostics.setEnabled(event.checked) }
-            SettingsViewEvent.DiagnosticShare -> diagnosticOperation {
-                emitAction(SettingsViewAction.ShareDiagnostics(diagnostics.shareIntent()))
+            is SettingsViewEvent.DiagnosticToggle -> viewModelScope.launch {
+                if (!diagnostics.setEnabled(event.checked)) emitAction(showToastAction(R.string.diagnostics_error))
             }
-            SettingsViewEvent.DiagnosticDelete -> diagnosticOperation { diagnostics.delete() }
-            SettingsViewEvent.DiagnosticShareFailed -> {
-                diagnostics.reportError()
-                emitAction(showToastAction(R.string.diagnostics_error))
+            SettingsViewEvent.DiagnosticShare -> viewModelScope.launch {
+                emitAction(diagnostics.shareIntent()?.let(SettingsViewAction::StartActivity) ?: showToastAction(R.string.diagnostics_error))
+            }
+            SettingsViewEvent.DiagnosticDelete -> viewModelScope.launch {
+                if (!diagnostics.delete()) emitAction(showToastAction(R.string.diagnostics_error))
             }
             is SettingsViewEvent.ChangeUpdatePolicy -> changeUpdatePolicy(event.frequency, event.isWifiOnly, event.isRequiresCharging)
             is SettingsViewEvent.Export -> {
@@ -219,24 +204,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 }
             }
             is SettingsViewEvent.GDriveActivityResult -> onGDriveActivityResult(event.activityResult)
-        }
-    }
-
-    private fun refreshDiagnosticItems() {
-        viewState = viewState.copy(items = preferenceItems(prefs, viewState.isProgressVisible, playServices, application, diagnostics))
-    }
-
-    private fun diagnosticOperation(action: suspend () -> Unit) {
-        viewModelScope.launch {
-            try {
-                action()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                diagnostics.reportError()
-                emitAction(showToastAction(R.string.diagnostics_error))
-            }
-            refreshDiagnosticItems()
         }
     }
 

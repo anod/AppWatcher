@@ -61,7 +61,8 @@ before entering BuildConfig; generated constants contain only hexadecimal digest
 This gate is a feature rollout mechanism, **not a security boundary**.
 
 Recording defaults off, persists per selected account on this device, and is independent of
-Crashlytics. Changing accounts revokes consent and discards queued records; old files remain
+Crashlytics. Consent is stored as the selected account hash in device preferences. Switching to a different
+account disables recording and discards its queued records; old files remain
 shareable/deletable without enabling recording. Files live in `noBackupFilesDir` and never
 enter cloud/device backups. Structured records accept only fixed event/stage/decision enums,
 UUID correlation IDs, UTC times, counts and platform state codes/booleans: no account identifiers,

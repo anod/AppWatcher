@@ -51,7 +51,7 @@ fun createAppModule(): Module = module {
     }
     factory { get<Application>().packageManager }
     singleOf(::PlaySessionCoordinator)
-    single { DiagnosticRecorder(get(), get<Preferences>().diagnosticConsent, get()) }
+    single { DiagnosticRecorder(get(), get(), get()) }
     singleOf(::DeviceRegistrationNotification)
     singleOf(::AuthAccountInitializer)
     singleOf(::UploadDateParserCache)

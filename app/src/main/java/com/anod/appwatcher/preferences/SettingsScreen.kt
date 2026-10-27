@@ -110,15 +110,6 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
                 is SettingsViewAction.NavigateTo -> currentNavigateTo(action.navKey)
                 is SettingsViewAction.ShowToast -> context.showToast(action)
                 is SettingsViewAction.StartActivity -> context.startActivity(action)
-                is SettingsViewAction.ShareDiagnostics -> {
-                    try {
-                        context.startActivity(action.intent)
-                    } catch (_: ActivityNotFoundException) {
-                        viewModel.handleEvent(SettingsViewEvent.DiagnosticShareFailed)
-                    } catch (_: SecurityException) {
-                        viewModel.handleEvent(SettingsViewEvent.DiagnosticShareFailed)
-                    }
-                }
             }
         }
     }

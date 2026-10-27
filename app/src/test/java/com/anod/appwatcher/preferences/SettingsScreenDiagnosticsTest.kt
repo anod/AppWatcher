@@ -27,7 +27,7 @@ class SettingsScreenDiagnosticsTest {
     val compose = createComposeRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val prefs = Preferences(context, NotificationManager.NoOp(), CoroutineScope(Dispatchers.Unconfined))
+    private val prefs = Preferences(context, NotificationManager.NoOp(), CoroutineScope(Dispatchers.Unconfined), "")
 
     private fun items() = listOf<PreferenceItem>(
         PreferenceItem.Switch(checked = false, titleRes = R.string.diagnostics_record, key = "diagnostics-enabled"),
