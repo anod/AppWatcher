@@ -1,8 +1,9 @@
 package com.anod.appwatcher.diagnostics
 
-import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
+import java.time.Instant
+import java.util.UUID
 
 data class DiagnosticStorageState(
     val bytes: Long = 0,
@@ -15,76 +16,58 @@ data class DiagnosticStorageState(
 /** Access only from the recorder's serialized IO consumer. Segments are evicted oldest first. */
 class DiagnosticFileStore(
     private val directory: File,
-    private val maxBytes: Long,
-    private val segmentBytes: Long,
-    private val retentionMillis: Long
+    private val maxBytes: Long = MAX_BYTES,
+    private val segmentBytes: Long = 256L * 1024,
+    private val retentionMillis: Long = RETENTION_MILLIS
 ) {
-    private val segmentLimit = segmentBytes.coerceAtMost(maxBytes)
     private var active: File? = null
-    private var output: BufferedOutputStream? = null
-    private var activeBytes = 0L
-    private var initialized = false
 
     fun append(line: String, now: Long) {
         val bytes = line.toByteArray(Charsets.UTF_8)
-        require(bytes.size <= segmentLimit)
-        if (!initialized) {
-            prune(now, 0)
-            initialized = true
-        }
-        if (active == null || activeBytes + bytes.size > segmentLimit) {
-            close()
-            prune(now, segmentLimit)
+        require(bytes.size <= segmentBytes && bytes.size <= maxBytes)
+        prune(now)
+        var target = active
+        if (target == null || !target.exists() || target.length() + bytes.size > segmentBytes) {
             if (!directory.isDirectory && !directory.mkdirs()) throw IOException("diagnostic directory")
             val sequence = (files().lastOrNull()?.name?.substringBefore('-')?.toLongOrNull() ?: -1L) + 1
-            val segment = File(directory, "${sequence.toString().padStart(20, '0')}-$now.log")
-            val stream = BufferedOutputStream(segment.outputStream())
-            active = segment
-            output = stream
-            activeBytes = 0
+            target = File(directory, "${sequence.toString().padStart(20, '0')}-$now.jsonl")
+            active = target
         }
-        output!!.write(bytes)
-        activeBytes += bytes.size
-    }
-
-    fun flush() {
-        output?.flush()
-    }
-
-    fun close() {
-        output?.close()
-        output = null
-        active = null
-        activeBytes = 0
+        target.appendBytes(bytes)
+        prune(now)
     }
 
     fun state(now: Long): DiagnosticStorageState {
-        prune(now, 0)
+        prune(now)
         val files = files()
         return DiagnosticStorageState(
             bytes = files.sumOf { it.length() },
-            oldest = files.firstOrNull()?.name?.substringAfter('-')?.substringBefore('.')?.toLongOrNull()
+            oldest = files.firstOrNull()?.bufferedReader()?.use { reader ->
+                reader.readLine()?.substringAfter("\"time\":\"", "")?.substringBefore('"')
+                    ?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
+            }
         )
     }
 
-    /** Returns up to [limit] of the newest stored lines, oldest first. */
-    fun tail(limit: Int, now: Long): List<String> {
-        output?.flush()
-        prune(now, 0)
-        val chunks = mutableListOf<List<String>>()
-        var count = 0
-        for (file in files().asReversed()) {
-            if (count >= limit) break
-            val chunk = file.readLines().takeLast(limit - count)
-            chunks.add(chunk)
-            count += chunk.size
+    /** Counts work started by previous processes; [currentProcess] may still be running. */
+    fun unfinishedRuns(now: Long, currentProcess: UUID): Int {
+        prune(now)
+        val runs = mutableSetOf<String>()
+        files().forEach { file ->
+            file.forEachLine { line ->
+                val run = line.substringAfter("\"run\":\"", "").substringBefore('"')
+                if (run.isNotEmpty()) {
+                    val process = line.substringAfter("\"process\":\"", "").substringBefore('"')
+                    if (line.contains("\"event\":\"WORK_START\"") && process != currentProcess.toString()) runs.add(run)
+                    if (listOf("WORK_END", "WORK_CANCELLED", "WORK_FAILED").any { line.contains("\"event\":\"$it\"") }) runs.remove(run)
+                }
+            }
         }
-        return chunks.asReversed().flatten()
+        return runs.size
     }
 
     fun snapshot(destination: File, now: Long): File {
-        output?.flush()
-        prune(now, 0)
+        prune(now)
         if (!destination.parentFile!!.isDirectory && !destination.parentFile!!.mkdirs()) throw IOException("diagnostic export directory")
         try {
             destination.outputStream().use { output ->
@@ -98,7 +81,6 @@ class DiagnosticFileStore(
     }
 
     fun delete() {
-        close()
         files().forEach { if (!it.delete()) throw IOException("diagnostic delete") }
         active = null
     }
@@ -106,18 +88,16 @@ class DiagnosticFileStore(
     private fun files(): List<File> {
         if (!directory.exists()) return emptyList()
         return (directory.listFiles() ?: throw IOException("diagnostic list"))
-            .filter { it.isFile && it.extension in listOf("log", "jsonl") }
+            .filter { it.isFile && it.extension == "jsonl" }
             .sortedBy { it.name }
     }
 
-    private fun prune(now: Long, incoming: Long) {
-        output?.flush()
+    private fun prune(now: Long) {
         val files = files()
         var total = files.sumOf { it.length() }
         for (file in files) {
             val created = file.name.substringAfter('-').substringBefore('.').toLongOrNull() ?: 0L
-            if (created < now - retentionMillis || total + incoming > maxBytes) {
-                if (active == file) close()
+            if (created < now - retentionMillis || total > maxBytes) {
                 val size = file.length()
                 if (!file.delete()) throw IOException("diagnostic prune")
                 total -= size

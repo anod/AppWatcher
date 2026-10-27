@@ -19,6 +19,7 @@ import com.anod.appwatcher.accounts.DeviceRegistrationException
 import com.anod.appwatcher.accounts.toAndroidAccount
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.upgrade.UpgradeCheck
@@ -91,6 +92,7 @@ private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length
 class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAction>(), KoinComponent {
     private val database: AppsDatabase by inject()
     private val context: Context by inject()
+    private val diagnostics: DiagnosticRecorder by inject()
     private val authAccountInitializer: AuthAccountInitializer by inject()
     val authToken: AuthTokenBlocking by inject()
 
@@ -298,7 +300,7 @@ class MainViewModel : BaseFlowViewModel<MainViewState, MainViewEvent, MainViewAc
     }
 
     private suspend fun scheduleRefresh() {
-        SyncScheduler(context)
+        SyncScheduler(context, diagnostics)
             .schedule(prefs.isRequiresCharging, prefs.isWifiOnly, prefs.updatesFrequency.toLong(), false)
             .first { it !is Operation.State.IN_PROGRESS }
     }

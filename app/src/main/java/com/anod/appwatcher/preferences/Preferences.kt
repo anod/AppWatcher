@@ -6,10 +6,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
+import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.GfsIdResult
-import com.anod.appwatcher.diagnostics.DiagnosticAccounts
-import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
+import com.anod.appwatcher.diagnostics.DiagnosticConsent
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.AdaptiveIcon
@@ -31,38 +31,21 @@ class Preferences(
     context: Context,
     private val notificationManager: NotificationManager,
     private val appScope: CoroutineScope,
-    private val diagnosticAllowlist: DiagnosticAllowlist
+    diagnosticAccountHashes: String = BuildConfig.DIAGNOSTIC_ACCOUNT_HASHES
 ) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
     private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
 
-    val isDiagnosticsAllowed: Boolean
-        get() = diagnosticAccountHash?.let { it in diagnosticAllowlist } == true
-
-    var isDiagnosticsEnabled: Boolean
-        get() = isDiagnosticsAllowed && devicePreferences.getString("diagnostic-consent", null) ==
-            diagnosticAccountHash
-        set(value) {
-            val hash = if (value && isDiagnosticsAllowed) diagnosticAccountHash else null
-            devicePreferences.edit().putString("diagnostic-consent", hash).apply()
-        }
-
-    @Volatile
-    private var diagnosticAccountHash: String? = null
+    val diagnosticConsent = DiagnosticConsent(
+        account = { accountSnapshot?.name },
+        hashes = diagnosticAccountHashes,
+        read = { devicePreferences.getString("diagnostic-consent", null) },
+        write = { value -> devicePreferences.edit().putString("diagnostic-consent", value).apply() }
+    )
 
     @Volatile
     private var accountSnapshot: AuthAccount? = null
-        set(value) {
-            val accountHash = value?.name?.let(DiagnosticAccounts::hash)
-            val consent = devicePreferences.getString("diagnostic-consent", null)
-            if (consent != null && consent != accountHash) {
-                devicePreferences.edit().remove("diagnostic-consent").apply()
-            }
-            diagnosticAccountHash = accountHash
-            field = value
-            appScope.launch { _changes.emit("diagnostic-account") }
-        }
 
     val changes: Flow<String> = _changes
 
@@ -74,6 +57,7 @@ class Preferences(
             wasRestored = devicePreferences.getBoolean(RESTORED_FROM_BACKUP, false)
         )
         accountSnapshot = readAccount()
+        if (!diagnosticConsent.allowed) diagnosticConsent.setEnabled(false)
         preferences.registerOnSharedPreferenceChangeListener(this)
         devicePreferences.registerOnSharedPreferenceChangeListener(this)
     }
@@ -81,6 +65,7 @@ class Preferences(
     var account: AuthAccount?
         get() = accountSnapshot
         set(value) {
+            diagnosticConsent.changingAccount(value?.name)
             editAccount(
                 account = value,
                 deviceRegistrationPending = null,
@@ -112,6 +97,7 @@ class Preferences(
         deviceRegistrationAuthorized: Boolean?,
         deviceConfigRevision: Int?
     ): Boolean = withContext(Dispatchers.IO) {
+        diagnosticConsent.changingAccount(account?.name)
         val committed = editAccount(
             account,
             deviceRegistrationPending,

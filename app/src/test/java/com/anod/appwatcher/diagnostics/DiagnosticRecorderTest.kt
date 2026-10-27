@@ -1,41 +1,38 @@
 package com.anod.appwatcher.diagnostics
 
 import android.app.Application
+import android.app.Notification
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import com.anod.appwatcher.accounts.AuthAccount
+import com.anod.appwatcher.accounts.PlaySessionCoordinator
+import com.anod.appwatcher.createAppModule
 import com.anod.appwatcher.preferences.Preferences
-import com.anod.appwatcher.userLog.UserLogMessage
-import info.anodsplace.applog.AppLog
 import info.anodsplace.notification.NotificationManager
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -48,373 +45,213 @@ class DiagnosticRecorderTest {
         override fun getNoBackupFilesDir(): File = File(root, "no-backup").apply { mkdirs() }
         override fun getCacheDir(): File = File(root, "cache").apply { mkdirs() }
     }
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(job + Dispatchers.IO)
-    private val original = AppLog.logger
-    private val delegate = object : AppLog.Logger {
-        override fun println(priority: Int, tag: String, msg: String) { }
-        override fun getStackTraceString(tr: Throwable?): String = tr?.let { "$it\n\tat test.Frame(Test.kt:1)\n" }.orEmpty()
-    }
-    private val prefs = Preferences(context, NotificationManager.NoOp(), scope,
-        DiagnosticAllowlist(setOf(DiagnosticAccounts.hash("diagnostic-account"), DiagnosticAccounts.hash("other-account")))).apply {
-        account = account("diagnostic-account")
-        AppLog.logger = delegate
-    }
-    private fun account(name: String) = AuthAccount(name, "account-type", "", "", "")
-    private fun recorder() = DiagnosticRecorder(context, prefs, scope, workInfos = { emptyList() })
-    private val storedDirectory = File(context.noBackupFilesDir, "diagnostics")
-    private val exportDirectory = File(context.cacheDir, "diagnostic-exports")
-    private fun storedBytes() = storedDirectory.listFiles().orEmpty().sumOf { it.length() }
-    private fun leftover(directory: File, name: String) = File(directory, name).apply {
-        parentFile!!.mkdirs()
-        writeText("leftover from an earlier session\n")
-    }
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var selected: String? = "diagnostic-account"
+    private var persisted: String? = null
+    private val consent = DiagnosticConsent(
+        { selected }, DiagnosticAccounts.hash("diagnostic-account"), { persisted }, { persisted = it }
+    )
 
     @After
-    fun tearDown() = runBlocking {
-        job.cancelAndJoin()
-        AppLog.logger = original
+    fun tearDown() {
+        scope.cancel()
         root.deleteRecursively()
-        Unit
     }
 
     @Test
-    fun disabledAndNotAllowedNeverInstallTeeOrWriteFiles() = runBlocking {
-        val recorder = recorder()
-        assertSame(delegate, AppLog.logger)
-        AppLog.i("disabled")
-        prefs.account = account("not-allowed")
-        assertTrue(recorder.setEnabled(true))
-        assertSame(delegate, AppLog.logger)
-        AppLog.i("not allowed")
+    fun disabledRecordsAreIgnoredAndRetainedFilesCanBeExportedAndDeleted() = runBlocking {
+        val now = System.currentTimeMillis()
+        val store = DiagnosticFileStore(File(context.noBackupFilesDir, "diagnostics"))
+        store.append(DiagnosticRecord(DiagnosticEvent.WORK_START).encode(now, UUID.randomUUID()), now)
+        val recorder = DiagnosticRecorder(context, consent, scope)
         recorder.refresh()
-        assertEquals(0L, recorder.state.value.bytes)
-        assertFalse(File(context.noBackupFilesDir, "diagnostics").exists())
-    }
-
-    @Test
-    fun enabledPersistsAppLogAndStartupMetadataAndDisablingUninstallsTee() = runBlocking {
-        val recorder = recorder()
-        assertTrue(recorder.setEnabled(true))
-        assertTrue(AppLog.logger is DiagnosticLogger)
-        recorder.captureProcessState()
-        AppLog.i("saved application line")
-        val text = recorder.snapshot().readText()
-        assertTrue(text, text.contains("saved application line"))
-        assertTrue(text, text.contains("Diagnostics started versionCode="))
-        assertTrue(text, text.contains("sdk=35"))
-        assertTrue(text, text.contains("Standby bucket="))
-        assertTrue(text, text.contains("Work AppRefresh"))
-        assertTrue(recorder.setEnabled(false))
-        assertSame(delegate, AppLog.logger)
-        AppLog.i("not saved")
+        val originalBytes = recorder.state.value.bytes
+        recorder.record(DiagnosticRecord(DiagnosticEvent.WORK_END))
         recorder.refresh()
-        assertEquals(0L, recorder.state.value.bytes)
-        assertEquals(0L, storedBytes())
-    }
+        assertEquals(originalBytes, recorder.state.value.bytes)
 
-    @Test
-    fun disablingDeletesStoredLogsAndExportsAndReenablingStartsEmpty() = runBlocking {
-        val recorder = recorder()
-        assertTrue(recorder.setEnabled(true))
-        AppLog.i("before disable")
-        val snapshot = recorder.snapshot()
-        assertTrue(snapshot.readText().contains("before disable"))
-        assertTrue(recorder.state.value.bytes > 0)
-
-        assertTrue(recorder.setEnabled(false))
-
-        assertFalse(snapshot.exists())
-        assertEquals(0L, storedBytes())
-        assertEquals(DiagnosticStorageState(), recorder.state.value)
-        assertTrue(recorder.setEnabled(true))
-        AppLog.i("after enable")
-        val text = recorder.snapshot().readText()
-        assertTrue(text.contains("after enable"))
-        assertFalse(text.contains("before disable"))
-    }
-
-    @Test
-    fun accountSwitchStopsRecordingAndDeletesStoredLogsAndExports() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        AppLog.i("old account line")
-        val snapshot = recorder.snapshot()
-        assertTrue(storedBytes() > 0)
-
-        prefs.account = account("other-account")
-
-        withTimeout(5000) {
-            while (storedBytes() > 0 || snapshot.exists() || recorder.state.value.bytes > 0) delay(1)
-        }
-        assertSame(delegate, AppLog.logger)
-    }
-
-    @Test
-    fun startupDeletesLeftoverLogsAndExportsWhileRecordingIsOff() = runBlocking {
-        val segment = leftover(storedDirectory, "00000000000000000000-${System.currentTimeMillis()}.log")
-        val export = leftover(exportDirectory, "appwatcher-diagnostics-old.log")
-
-        recorder()
-
-        withTimeout(5000) { while (segment.exists() || export.exists()) delay(1) }
-    }
-
-    @Test
-    fun startupKeepsStoredLogsWhileRecordingIsOn() = runBlocking {
-        prefs.isDiagnosticsEnabled = true
-        val segment = leftover(storedDirectory, "00000000000000000000-${System.currentTimeMillis()}.log")
-        val export = leftover(exportDirectory, "appwatcher-diagnostics-old.log")
-
-        val recorder = recorder()
-
-        assertTrue(recorder.snapshot().readText().contains("leftover from an earlier session"))
-        assertTrue(segment.exists())
-        assertTrue(export.exists())
-    }
-
-    @Test
-    fun recentLinesFeedTheAppLogViewerWithStoredEntries() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        AppLog.i("first viewer line")
-        AppLog.e("second viewer line", IllegalStateException("boom"))
-
-        val messages = UserLogMessage.fromDiagnosticLines(checkNotNull(recorder.recentLines(100)))
-
-        val first = messages.single { it.message.contains("first viewer line") }
-        val second = messages.single { it.message.contains("second viewer line") }
-        assertEquals(Log.INFO, first.level)
-        assertEquals(Log.ERROR, second.level)
-        assertTrue(second.message, second.message.endsWith("java.lang.IllegalStateException: boom\n\tat test.Frame(Test.kt:1)"))
-        assertTrue(messages.indexOf(first) < messages.indexOf(second))
-        assertEquals(1, checkNotNull(recorder.recentLines(1)).size)
-    }
-
-    @Test
-    fun enabledAtProcessStartWrapsCurrentLoggerAndCapturesMetadataOnce() = runBlocking {
-        prefs.isDiagnosticsEnabled = true
-        val captured = CompletableDeferred<Unit>()
-        val queries = AtomicInteger()
-        val recorder = DiagnosticRecorder(context, prefs, scope, workInfos = {
-            if (queries.incrementAndGet() == 2) captured.complete(Unit)
-            emptyList()
-        })
-        assertSame(delegate, (AppLog.logger as DiagnosticLogger).delegate)
-        withTimeout(5000) { captured.await() }
-        val text = recorder.snapshot().readText()
-        assertEquals(1, text.lineSequence().count { it.contains("Diagnostics started versionCode=") })
-        assertEquals(2, queries.get())
-    }
-
-    @Test
-    fun boundedQueueNeverBlocksOrThrowsAndReportsDrops() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        val started = CompletableDeferred<Unit>()
-        val release = CompletableDeferred<Unit>()
-        val blocker = async { recorder.operation { started.complete(Unit); release.await() } }
-        started.await()
-        repeat(1000) { AppLog.i("queued $it") }
-        release.complete(Unit)
-        blocker.await()
-        recorder.refresh()
-        assertTrue(recorder.state.value.dropped >= 872)
-    }
-
-    @Test
-    fun failedDelegateAndSinkNeverThrowFromPrintln() {
-        val logger = DiagnosticLogger(object : AppLog.Logger {
-            override fun println(priority: Int, tag: String, msg: String) { error("delegate") }
-        }) { _, _, _ -> error("sink") }
-        logger.println(4, "tag", "message")
-    }
-
-    @Test
-    fun disablingAndReenablingDiscardsQueuedLinesImmediately() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        val started = CompletableDeferred<Unit>()
-        val release = CompletableDeferred<Unit>()
-        val blocker = async { recorder.operation { started.complete(Unit); release.await() } }
-        started.await()
-        AppLog.i("discard on disable")
-        val disable = async(start = CoroutineStart.UNDISPATCHED) { recorder.setEnabled(false) }
-        assertSame(delegate, AppLog.logger)
-        val enable = async(start = CoroutineStart.UNDISPATCHED) { recorder.setEnabled(true) }
-        release.complete(Unit)
-        blocker.await()
-        assertTrue(disable.await())
-        assertTrue(enable.await())
-        assertFalse(recorder.snapshot().readText().contains("discard on disable"))
-    }
-
-    @Test
-    fun accountSwitchDiscardsQueuedLinesAndRemovesTee() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        val started = CompletableDeferred<Unit>()
-        val release = CompletableDeferred<Unit>()
-        val blocker = async { recorder.operation { started.complete(Unit); release.await() } }
-        started.await()
-        AppLog.i("old account line")
-        prefs.account = account("other-account")
-        withTimeout(5000) { while (AppLog.logger is DiagnosticLogger) delay(1) }
-        assertFalse(prefs.isDiagnosticsEnabled)
-        prefs.isDiagnosticsEnabled = true
-        release.complete(Unit)
-        blocker.await()
-        assertFalse(recorder.snapshot().readText().contains("old account line"))
-    }
-
-    @Test
-    fun disablingDiscardsQueuedLinesDeletesStoredLogsAndLaterLinesStillWrite() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        AppLog.i("stored before disable")
-        recorder.refresh()
-        val started = CompletableDeferred<Unit>()
-        val release = CompletableDeferred<Unit>()
-        val blocker = async { recorder.operation { started.complete(Unit); release.await() } }
-        started.await()
-        AppLog.i("discard on disable")
-        val disable = async(start = CoroutineStart.UNDISPATCHED) { recorder.setEnabled(false) }
-        release.complete(Unit)
-        blocker.await()
-        assertTrue(disable.await())
-        assertEquals(0L, storedBytes())
-        assertTrue(recorder.setEnabled(true))
-        AppLog.i("after disable")
-        val text = recorder.snapshot().readText()
-        assertTrue(text.contains("after disable"))
-        assertFalse(text.contains("stored before disable"))
-        assertFalse(text.contains("discard on disable"))
-    }
-
-    @Test
-    fun storageStateUpdatesAfterLogBatchFlush() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        recorder.refresh()
-        val before = recorder.state.value.bytes
-
-        repeat(20) { AppLog.i("refresh storage state $it ${"x".repeat(500)}") }
-
-        withTimeout(5000) {
-            while (recorder.state.value.bytes < before + 10_000) delay(1)
-        }
-    }
-
-    @Test
-    fun shareUsesStableSnapshotWithReadPermissionAndDisablingClearsExports() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        AppLog.i("share this")
+        selected = "not-allowed"
         val snapshot = recorder.snapshot()
         // AndroidX FileProvider's slash-based canonical-path check cannot run on Windows.
-        // Exercise the real snapshot and intent separately; the manifest restricts the URI root.
-        val uri = Uri.parse("content://${context.packageName}.diagnostics/diagnostic_snapshots/${snapshot.name}")
-        val chooser = diagnosticShareIntent(uri)
+        // Exercise the real snapshot and intent separately; manifest restricts the Android URI root.
+        val chooser = diagnosticShareIntent(Uri.parse("content://${context.packageName}.diagnostics/diagnostic_snapshots/${snapshot.name}"))
         val send = chooser.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)!!
         assertEquals(Intent.ACTION_SEND, send.action)
-        assertEquals("text/plain", send.type)
         assertTrue(send.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
         assertFalse(send.hasExtra(Intent.EXTRA_TEXT))
-        assertEquals(uri, send.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
+        val uri = send.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)!!
+        assertEquals("content", uri.scheme)
+        assertTrue(uri.path!!.startsWith("/diagnostic_snapshots/"))
         assertEquals(uri, send.clipData!!.getItemAt(0).uri)
-        val text = snapshot.readText()
-        assertTrue(text.contains("share this"))
-        AppLog.i("later line")
-        recorder.refresh()
-        assertEquals(text, snapshot.readText())
-        assertTrue(recorder.setEnabled(false))
-        assertFalse(snapshot.exists())
+        assertTrue(File(context.cacheDir, "diagnostic-exports").listFiles()!!.single().readText().contains("WORK_START"))
+        recorder.delete()
+        assertEquals(0L, recorder.state.value.bytes)
+        assertTrue(File(context.cacheDir, "diagnostic-exports").listFiles()!!.isEmpty())
     }
 
     @Test
-    fun lineLengthIsBoundedAndExportsExpireAndAreCapped() = runBlocking {
-        val recorder = recorder()
+    fun boundedQueueReportsDropsWithoutRecursiveLogging() {
+        scope.cancel()
+        consent.setEnabled(true)
+        val recorder = DiagnosticRecorder(context, consent, scope)
+        repeat(140) { recorder.record(DiagnosticRecord(DiagnosticEvent.STAGE)) }
+        assertEquals(12L, recorder.state.value.dropped)
+    }
+
+    @Test
+    fun enablingCapturesStartupMetadataAndDisablingImmediatelyStopsWrites() = runBlocking {
+        val recorder = DiagnosticRecorder(context, consent, scope)
         recorder.setEnabled(true)
-        AppLog.i("x".repeat(100_000))
-        val snapshot = recorder.snapshot()
-        val text = snapshot.readText()
-        assertTrue(text.contains("x".repeat(16_000)))
-        assertFalse(text.contains("x".repeat(16_400)))
+        recorder.refresh()
+        val startup = recorder.snapshot().readText()
+        assertTrue(startup.contains("\"event\":\"PROCESS_START\""))
+        assertTrue(startup.contains("\"code\":35"))
+        assertTrue(startup.contains("\"event\":\"POWER_STATE\""))
+        assertFalse(startup.contains("diagnostic-account"))
+        recorder.setEnabled(false)
+        val bytes = recorder.state.value.bytes
+        repeat(5) { recorder.record(DiagnosticRecord(DiagnosticEvent.WORK_START)) }
+        recorder.refresh()
+        assertEquals(bytes, recorder.state.value.bytes)
+    }
+
+    @Test
+    fun productionDependencyGraphSharesThePreferencesGate() {
+        val container = koinApplication {
+            modules(module {
+                single<Context> { context }
+                single<Application> { app as Application }
+            }, createAppModule())
+        }
+        try {
+            val recorder = container.koin.get<DiagnosticRecorder>()
+            assertTrue(recorder.consent === container.koin.get<Preferences>().diagnosticConsent)
+            container.koin.get<PlaySessionCoordinator>()
+        } finally {
+            container.koin.get<CoroutineScope>().cancel()
+            container.close()
+        }
+    }
+
+    @Test
+    fun preferencesAccountSetterAndBackgroundSaveRevokeConsentPersistently() = runBlocking {
+        val manager = object : NotificationManager {
+            override val areNotificationsEnabled = true
+            override fun notify(notificationId: Int, notification: Notification) = Unit
+            override fun cancel(notificationId: Int) = Unit
+        }
+        fun preferences() = Preferences(context, manager, scope, DiagnosticAccounts.hash("diagnostic-account"))
+        val prefs = preferences()
+        prefs.account = AuthAccount("diagnostic-account", "account-type", "", "", "")
+        assertFalse(prefs.diagnosticConsent.enabled)
+        prefs.diagnosticConsent.setEnabled(true)
+        assertTrue(preferences().diagnosticConsent.enabled)
+        prefs.account = AuthAccount("not-allowed", "account-type", "", "", "")
+        assertFalse(prefs.diagnosticConsent.enabled)
+        assertFalse(preferences().diagnosticConsent.enabled)
+        prefs.account = AuthAccount("diagnostic-account", "account-type", "", "", "")
+        assertFalse(prefs.diagnosticConsent.enabled)
+        prefs.diagnosticConsent.setEnabled(true)
+        assertTrue(prefs.saveAccount(AuthAccount("not-allowed", "account-type", "", "", ""), null, null, null))
+        assertFalse(preferences().diagnosticConsent.enabled)
+    }
+
+    @Test
+    fun storageFailureIsVisibleAndDeleteFailureIsReported() = runBlocking {
+        val location = File(context.noBackupFilesDir, "diagnostics")
+        location.writeText("not a directory")
+        val recorder = DiagnosticRecorder(context, consent, scope)
+        val result = runCatching { recorder.refresh() }
+        assertTrue(result.isFailure)
+        assertTrue(recorder.state.value.error)
+        assertEquals(1L, recorder.state.value.writeFailures)
+        assertTrue(runCatching { recorder.delete() }.isFailure)
+        assertEquals(2L, recorder.state.value.writeFailures)
+    }
+
+    @Test
+    fun exportFailureIsVisibleWithoutDiscardingRetainedLogs() = runBlocking {
+        val now = System.currentTimeMillis()
+        DiagnosticFileStore(File(context.noBackupFilesDir, "diagnostics"))
+            .append(DiagnosticRecord(DiagnosticEvent.WORK_START).encode(now, UUID.randomUUID()), now)
+        val recorder = DiagnosticRecorder(context, consent, scope)
+        recorder.refresh()
+        val bytes = recorder.state.value.bytes
+        File(context.cacheDir, "diagnostic-exports").writeText("not a directory")
+        assertTrue(runCatching { recorder.snapshot() }.isFailure)
+        assertTrue(recorder.state.value.error)
+        assertEquals(1L, recorder.state.value.writeFailures)
+        assertEquals(bytes, recorder.state.value.bytes)
+    }
+
+    @Test
+    fun cachedExportsAreBoundedAndExpireWithoutEnablingRecording() = runBlocking {
+        val now = System.currentTimeMillis()
+        DiagnosticFileStore(File(context.noBackupFilesDir, "diagnostics"))
+            .append(DiagnosticRecord(DiagnosticEvent.WORK_START).encode(now, UUID.randomUUID()), now)
+        val recorder = DiagnosticRecorder(context, consent, scope)
         repeat(5) { recorder.snapshot() }
-        val directory = snapshot.parentFile!!
+        val directory = File(context.cacheDir, "diagnostic-exports")
         assertEquals(3, directory.listFiles()!!.size)
-        directory.listFiles()!!.forEach { assertTrue(it.setLastModified(System.currentTimeMillis() - 25L * 60 * 60 * 1000)) }
+        directory.listFiles()!!.forEach { assertTrue(it.setLastModified(now - 25L * 60 * 60 * 1000)) }
         recorder.refresh()
         assertTrue(directory.listFiles()!!.isEmpty())
-        File(directory, "old-a.log").writeBytes(ByteArray(6 * 1024 * 1024))
-        File(directory, "old-b.log").writeBytes(ByteArray(6 * 1024 * 1024))
-        recorder.snapshot()
+        assertTrue(recorder.state.value.bytes > 0)
+        assertFalse(consent.enabled)
+        val largeExport = ByteArray(6 * 1024 * 1024)
+        File(directory, "old-a.jsonl").writeBytes(largeExport)
+        File(directory, "old-b.jsonl").writeBytes(largeExport)
+        val latest = recorder.snapshot()
+        assertTrue(latest.isFile)
         assertTrue(directory.listFiles()!!.sumOf { it.length() } <= DiagnosticFileStore.MAX_BYTES)
     }
 
     @Test
-    fun storageFailureIsVisibleWithoutThrowingIntoLoggerOrOperations() = runBlocking {
-        File(context.noBackupFilesDir, "diagnostics").writeText("not a directory")
-        val recorder = recorder()
-        assertFalse(recorder.setEnabled(true))
-        AppLog.i("failed storage")
-        assertTrue(runCatching { recorder.refresh() }.isFailure)
+    fun diagnosticFailureNeverStrandsSessionLockOrReplacesActionOutcome() = runBlocking {
+        val failingConsent = DiagnosticConsent({ error("diagnostic gate unavailable") }, "", { null }, { })
+        val recorder = DiagnosticRecorder(context, failingConsent, scope)
+        val coordinator = PlaySessionCoordinator(recorder)
+
+        assertEquals(7, coordinator.withSession(owner = "first") { 7 })
+        val failure = runCatching { coordinator.withSession(owner = "failing") { throw IllegalArgumentException("action") } }
+        assertTrue(failure.exceptionOrNull() is IllegalArgumentException)
+        assertEquals("holder=none", coordinator.describeHolder())
+        assertEquals(9, coordinator.withUserInitiatedSession { 9 })
         assertTrue(recorder.state.value.error)
-        assertFalse(recorder.setEnabled(false))
-        assertNull(recorder.recentLines(10))
-        assertNull(recorder.shareIntent())
     }
 
     @Test
-    fun cancelledMetadataFutureAndCommandDoNotStopWriter() = runBlocking {
-        val recorder = DiagnosticRecorder(context, prefs, scope, workInfos = { throw CancellationException("cancelled future") })
-        assertTrue(recorder.setEnabled(true))
-        assertTrue(recorder.captureProcessState())
-        assertTrue(runCatching { recorder.operation { throw CancellationException("command") } }.exceptionOrNull() is IOException)
-        AppLog.i("still alive")
-        assertTrue(recorder.snapshot().readText().contains("still alive"))
+    fun cancelledMetadataFutureDoesNotStopTheRecorder() = runBlocking {
+        val recorder = DiagnosticRecorder(context, consent, scope, workInfos = { throw CancellationException("work future cancelled") })
+        recorder.setEnabled(true)
+        recorder.refresh()
+        val snapshot = recorder.snapshot().readText()
+        assertTrue(snapshot, snapshot.contains("\"event\":\"SNAPSHOT_UNAVAILABLE\",\"code\":4"))
+        assertTrue(snapshot, snapshot.contains("\"event\":\"SNAPSHOT_UNAVAILABLE\",\"code\":5"))
+        recorder.refresh()
     }
 
     @Test
-    fun writerCancellationCompletesRunningAndQueuedCallers() = runBlocking {
-        val recorder = recorder()
+    fun cancelledCommandFailsOnlyThatCommand() = runBlocking {
+        val recorder = DiagnosticRecorder(context, consent, scope)
+        val failure = runCatching { recorder.operation { throw CancellationException("not the writer") } }
+        assertTrue(failure.exceptionOrNull() is IOException)
+        assertTrue(recorder.state.value.error)
+        recorder.refresh()
+    }
+
+    @Test
+    fun writerScopeCancellationCompletesRunningAndQueuedCallers() = runBlocking {
+        val writerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        val recorder = DiagnosticRecorder(context, consent, writerScope)
         val started = CompletableDeferred<Unit>()
         val running = async { runCatching { recorder.operation { started.complete(Unit); awaitCancellation() } } }
         started.await()
         val queued = async { runCatching { recorder.refresh() } }
-        job.cancelAndJoin()
+        writerScope.cancel()
         withTimeout(5000) {
             assertTrue(running.await().exceptionOrNull() is IOException)
             assertTrue(queued.await().exceptionOrNull() is IOException)
             assertTrue(runCatching { recorder.refresh() }.exceptionOrNull() is IOException)
         }
-    }
-
-    @Test
-    fun writerShutdownUnblocksSenderSuspendedOnFullQueue() = runBlocking {
-        val recorder = recorder()
-        recorder.setEnabled(true)
-        val started = CompletableDeferred<Unit>()
-        val running = async {
-            runCatching {
-                recorder.operation {
-                    started.complete(Unit)
-                    awaitCancellation()
-                }
-            }
-        }
-        started.await()
-        repeat(256) { AppLog.i("fill queue $it") }
-        val suspended = async(start = CoroutineStart.UNDISPATCHED) {
-            runCatching { recorder.operation { } }
-        }
-        assertFalse(suspended.isCompleted)
-
-        job.cancelAndJoin()
-
-        withTimeout(5000) {
-            assertTrue(running.await().exceptionOrNull() is IOException)
-            assertTrue(suspended.await().exceptionOrNull() is IOException)
-        }
-    }
-}
+    }}

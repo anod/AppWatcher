@@ -19,7 +19,7 @@ import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
+import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchViewEvent
 import com.anod.appwatcher.search.SearchViewModel
@@ -71,7 +71,7 @@ class AccountSelectionViewModelTest {
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        preferences = Preferences(context, NotificationManager.NoOp(areNotificationsEnabled = true), appScope, DiagnosticAllowlist(emptySet()))
+        preferences = Preferences(context, NotificationManager.NoOp(areNotificationsEnabled = true), appScope)
         originalCrashReports = preferences.collectCrashReports
         originalUpdateFrequency = preferences.updatesFrequency
         originalVersionCode = preferences.versionCode
@@ -95,8 +95,8 @@ class AccountSelectionViewModelTest {
             preferences,
             authToken,
             dfeApi,
-            PlaySessionCoordinator(),
-            DeviceRegistrationNotification(ApplicationContext(context), NotificationManager.NoOp())
+            PlaySessionCoordinator(disabledDiagnostics(context)),
+            DeviceRegistrationNotification(ApplicationContext(context), NotificationManager.NoOp(), disabledDiagnostics(context))
         )
         startKoin {
             modules(module {

@@ -4,7 +4,7 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
+import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
@@ -39,12 +39,12 @@ class AuthAccountInitializerTest {
         preferences = Preferences(
             context = context,
             notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined),
-            diagnosticAllowlist = DiagnosticAllowlist(emptySet())
+            appScope = CoroutineScope(Dispatchers.Unconfined)
         )
         deviceRegistrationNotification = DeviceRegistrationNotification(
             ApplicationContext(context),
-            NotificationManager.NoOp()
+            NotificationManager.NoOp(),
+            disabledDiagnostics(context)
         )
         runBlocking {
             preferences.saveAccount(
@@ -71,7 +71,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(),
+            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
             deviceRegistrationNotification
         )
 
@@ -101,7 +101,7 @@ class AuthAccountInitializerTest {
             preferences,
             authToken,
             AuthRecoveringDfeApi(dfeApi, authToken, preferences),
-            PlaySessionCoordinator(),
+            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
             deviceRegistrationNotification
         )
 
@@ -137,7 +137,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(),
+            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
             deviceRegistrationNotification
         )
         val account = Account("new@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
@@ -160,7 +160,7 @@ class AuthAccountInitializerTest {
     @Test
     fun interactiveAccountSwitchFailsFastWhileSyncSessionIsActive() = runBlocking {
         val dfeApi = FakeDfeApi()
-        val playSessionCoordinator = PlaySessionCoordinator()
+        val playSessionCoordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a", "token-b")),
@@ -201,7 +201,7 @@ class AuthAccountInitializerTest {
 
     @Test
     fun accountSwitchesReuseDeviceIdentityAcrossInitializers() = runBlocking {
-        val playSessionCoordinator = PlaySessionCoordinator()
+        val playSessionCoordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
         val accountBApi = FakeDfeApi()
         val accountBInitializer = AuthAccountInitializer(
             preferences,
@@ -245,7 +245,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(),
+            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
             deviceRegistrationNotification
         )
 
@@ -280,7 +280,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(),
+            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
             deviceRegistrationNotification
         )
         val accountA = Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE)

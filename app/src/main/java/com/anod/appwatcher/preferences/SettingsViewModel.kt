@@ -35,12 +35,10 @@ import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GooglePlayServices
-import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -72,6 +70,9 @@ sealed interface SettingsViewEvent {
     object CheckNotificationPermission : SettingsViewEvent
     object DbCleanup : SettingsViewEvent
     data class DiagnosticToggle(val checked: Boolean) : SettingsViewEvent
+    data object DiagnosticShare : SettingsViewEvent
+    data object DiagnosticDelete : SettingsViewEvent
+    data object DiagnosticShareFailed : SettingsViewEvent
 }
 
 sealed interface SettingsViewAction {
@@ -86,6 +87,7 @@ sealed interface SettingsViewAction {
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
     data class NavigateTo(val navKey: NavKey) : SettingsViewAction
+    data class ShareDiagnostics(val intent: Intent) : SettingsViewAction
 }
 
 private fun showToastAction(@StringRes resId: Int = 0, text: String = "", length: Int = Toast.LENGTH_SHORT): SettingsViewAction = SettingsViewAction.ShowToast(
@@ -105,26 +107,40 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
 
     init {
         viewState = SettingsViewState(
-            items = preferenceItems(prefs, false, playServices, application, diagnostics.state.value),
+            items = preferenceItems(prefs, false, playServices, application, diagnostics),
             areNotificationsEnabled = notificationManager.areNotificationsEnabled
         )
         viewModelScope.launch {
-            try {
-                diagnostics.refresh()
-            } catch (_: IOException) {
+            diagnostics.state.collect {
+                refreshDiagnosticItems()
             }
         }
         viewModelScope.launch {
-            merge(diagnostics.state, prefs.changes).collect {
-                viewState = viewState.copy(items = preferenceItems(prefs, viewState.isProgressVisible, playServices, application, diagnostics.state.value))
+            prefs.changes.collect {
+                refreshDiagnosticItems()
+            }
+        }
+        viewModelScope.launch {
+            try {
+                diagnostics.refresh()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                diagnostics.reportError()
             }
         }
     }
 
     override fun handleEvent(event: SettingsViewEvent) {
         when (event) {
-            is SettingsViewEvent.DiagnosticToggle -> viewModelScope.launch {
-                if (!diagnostics.setEnabled(event.checked)) emitAction(showToastAction(R.string.diagnostics_error))
+            is SettingsViewEvent.DiagnosticToggle -> diagnosticOperation { diagnostics.setEnabled(event.checked) }
+            SettingsViewEvent.DiagnosticShare -> diagnosticOperation {
+                emitAction(SettingsViewAction.ShareDiagnostics(diagnostics.shareIntent()))
+            }
+            SettingsViewEvent.DiagnosticDelete -> diagnosticOperation { diagnostics.delete() }
+            SettingsViewEvent.DiagnosticShareFailed -> {
+                diagnostics.reportError()
+                emitAction(showToastAction(R.string.diagnostics_error))
             }
             is SettingsViewEvent.ChangeUpdatePolicy -> changeUpdatePolicy(event.frequency, event.isWifiOnly, event.isRequiresCharging)
             is SettingsViewEvent.Export -> {
@@ -167,7 +183,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             is SettingsViewEvent.UpdateListPreference -> {
                 event.update(event.checked)
                 viewState = viewState.copy(
-                    items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics.state.value)
+                    items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics)
                 )
             }
             SettingsViewEvent.TestNotification -> testNotification()
@@ -180,7 +196,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             is SettingsViewEvent.NotificationPermissionResult -> {
                 viewState = viewState.copy(
                     areNotificationsEnabled = prefs.areNotificationsEnabled,
-                    items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                    items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
                 )
             }
             SettingsViewEvent.ShowAppSettings -> emitAction(
@@ -192,7 +208,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 if (areNotificationsEnabled != viewState.areNotificationsEnabled) {
                     viewState = viewState.copy(
                         areNotificationsEnabled = prefs.areNotificationsEnabled,
-                        items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                        items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
                     )
                 }
             }
@@ -203,6 +219,24 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 }
             }
             is SettingsViewEvent.GDriveActivityResult -> onGDriveActivityResult(event.activityResult)
+        }
+    }
+
+    private fun refreshDiagnosticItems() {
+        viewState = viewState.copy(items = preferenceItems(prefs, viewState.isProgressVisible, playServices, application, diagnostics))
+    }
+
+    private fun diagnosticOperation(action: suspend () -> Unit) {
+        viewModelScope.launch {
+            try {
+                action()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                diagnostics.reportError()
+                emitAction(showToastAction(R.string.diagnostics_error))
+            }
+            refreshDiagnosticItems()
         }
     }
 
@@ -223,7 +257,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             prefs.isDriveSyncEnabled = true
             viewState = viewState.copy(
                 isProgressVisible = true,
-                items = preferenceItems(prefs, inProgress = true, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = true, playServices, application, diagnostics)
             )
             viewModelScope.launch {
                 try {
@@ -241,7 +275,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             prefs.isDriveSyncEnabled = false
             viewState = viewState.copy(
                 isProgressVisible = false,
-                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
             )
             viewModelScope.launch {
                 gDriveSignIn.signOut()
@@ -275,7 +309,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                     prefs.lastDriveSyncTime = System.currentTimeMillis()
                     viewState = viewState.copy(
                         isProgressVisible = false,
-                        items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                        items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
                     )
                     emitAction(showToastAction(resId = R.string.sync_finish))
                 } catch (e: CancellationException) {
@@ -311,14 +345,14 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             emitAction(showToastAction(resId = R.string.gdrive_connected))
             viewState = viewState.copy(
                 isProgressVisible = false,
-                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
             )
         } else {
             prefs.isDriveSyncEnabled = false
             emitAction(showToastAction(text = "Drive login error $errorCode"))
             viewState = viewState.copy(
                 isProgressVisible = false,
-                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = false, playServices, application, diagnostics)
             )
         }
     }
@@ -332,17 +366,17 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
 
         appScope.launch {
             viewState = viewState.copy(
-                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics)
             )
             if (useAutoSync) {
-                SyncScheduler(context).schedule(
+                SyncScheduler(context, diagnostics).schedule(
                     prefs.isRequiresCharging,
                     prefs.isWifiOnly,
                     prefs.updatesFrequency.toLong(),
                     true
                 ).first { it !is Operation.State.IN_PROGRESS }
             } else {
-                SyncScheduler(context).cancel().first { it !is Operation.State.IN_PROGRESS }
+                SyncScheduler(context, diagnostics).cancel().first { it !is Operation.State.IN_PROGRESS }
             }
         }
     }
@@ -363,7 +397,7 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         }
         if (recreate) {
             viewState = viewState.copy(
-                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics.state.value)
+                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics)
             )
             emitAction(SettingsViewAction.Rebirth)
         }

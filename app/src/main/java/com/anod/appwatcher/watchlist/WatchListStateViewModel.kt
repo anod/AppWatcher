@@ -24,6 +24,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
@@ -134,6 +135,7 @@ class WatchListStateViewModel(
     KoinComponent {
     private val authToken: AuthTokenBlocking by inject()
     private val application: Application by inject()
+    private val diagnostics: DiagnosticRecorder by inject()
     private val db: AppsDatabase by inject()
     private val packageChangedReceiver: PackageChangedReceiver by inject()
     private val recentlyInstalledAppsLoader: RecentlyInstalledAppsLoader by inject()
@@ -421,7 +423,7 @@ class WatchListStateViewModel(
             syncProgress = SyncProgress(true, 0),
             refreshRequest = viewState.refreshRequest + 1
         )
-        SyncScheduler(application).execute().first()
+        SyncScheduler(application, diagnostics).execute().first()
     }
 
     private fun invalidatePagingSources() {

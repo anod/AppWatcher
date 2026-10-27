@@ -20,6 +20,7 @@ import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.database.SchedulesTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Failed
@@ -41,6 +42,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancel
@@ -105,12 +107,13 @@ class UpdateCheckRegistrationTest {
         preferences.lastUpdateTime = -1L
         deviceRegistrationNotification = DeviceRegistrationNotification(
             ApplicationContext(context),
-            notificationManager
+            notificationManager,
+            disabledDiagnostics(context)
         )
         database = Room.inMemoryDatabaseBuilder(context, AppsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        coordinator = PlaySessionCoordinator()
+        coordinator = PlaySessionCoordinator(disabledDiagnostics(context))
         val tokenProvider = object : AccountAuthTokenProvider {
             override fun getAuthToken(account: Account): String {
                 tokenRequested.countDown()
@@ -160,7 +163,8 @@ class UpdateCheckRegistrationTest {
             coordinator,
             deviceRegistrationNotification,
             koin.koin,
-            timeouts
+            timeouts,
+            disabledDiagnostics(context)
         )
     }
 
@@ -168,7 +172,7 @@ class UpdateCheckRegistrationTest {
     fun stalledAuthTokenTimesOutRecordsInterruptedSyncAndReleasesSession() = runBlocking {
         preferences.account = preferences.account!!.copy(gfsId = "existing-id")
         tokenRelease = CountDownLatch(1)
-        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(sessionWaitMillis = 5_000L, syncMillis = 300L))
+        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(syncMillis = 300L))
 
         assertEquals(-1, updateCheck.perform(Data.EMPTY) { "timeout(3)" })
 
@@ -209,7 +213,7 @@ class UpdateCheckRegistrationTest {
     }
 
     @Test
-    fun busySessionTimesOutWithHolderDiagnostics() = runBlocking {
+    fun cancelledSessionWaitDoesNotRecordFailedSyncOrReleaseHolder() = runBlocking {
         preferences.account = preferences.account!!.copy(gfsId = "existing-id")
         val holderStarted = CompletableDeferred<Unit>()
         val holder = launch(Dispatchers.Default) {
@@ -220,18 +224,19 @@ class UpdateCheckRegistrationTest {
             }
         }
         holderStarted.await()
-        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(sessionWaitMillis = 200L, syncMillis = 5_000L))
+        val sync = launch(start = CoroutineStart.UNDISPATCHED) {
+            updateCheck.perform(Data.EMPTY)
+        }
+        sync.cancelAndJoin()
 
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertTrue(database.schedules().load().first().isEmpty())
+        assertTrue(reportedErrors.isEmpty())
+        assertTrue(coordinator.describeHolder().contains("holder=stuck-holder"))
         holder.cancelAndJoin()
 
-        assertEquals(Schedule.STATUS_FAILED_SESSION_BUSY, database.schedules().load().first().single().result)
-        val diagnostic = reportedErrors.single()
-        assertTrue(diagnostic is SyncFailureException)
-        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("session-wait"))
-        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("holder=stuck-holder"))
-        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("stage=bulk-details 1/1"))
         assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().single().result)
+        assertTrue(reportedErrors.isEmpty())
     }
 
     @Test

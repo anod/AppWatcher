@@ -16,6 +16,8 @@ import com.anod.appwatcher.utils.networkConnection
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import info.anodsplace.applog.AndroidLogger
 import info.anodsplace.applog.AppLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.context.startKoin
@@ -65,6 +67,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
         }
 
         val prefs = get<Preferences>()
+        get<CoroutineScope>().launch {
+            runCatching { diagnostics.captureProcessState() }
+        }
         if (prefs.collectCrashReports) {
             FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
             AppLog.logger = FirebaseLogger()

@@ -2,11 +2,14 @@ package com.anod.appwatcher.accounts
 
 import android.accounts.Account
 import android.accounts.OperationCanceledException
+import androidx.test.core.app.ApplicationProvider
+import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitCancellation
@@ -139,8 +142,8 @@ class AuthTokenBlockingTest {
     }
 
     @Test
-    fun sessionWaitTimeoutDescribesHolderAndKeepsLockUsable() = runBlocking {
-        val coordinator = PlaySessionCoordinator()
+    fun cancelledSessionWaitKeepsHolderAndLockUsable() = runBlocking {
+        val coordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
         val holderStarted = CompletableDeferred<Unit>()
         val holder = launch(Dispatchers.Default) {
             coordinator.withSession(owner = "stuck") {
@@ -151,16 +154,42 @@ class AuthTokenBlockingTest {
         }
         holderStarted.await()
 
-        val error = runCatching {
-            coordinator.withSession(owner = "waiter", waitTimeoutMillis = 100L) { Unit }
-        }.exceptionOrNull()
+        var waiterEntered = false
+        val waiter = launch(start = CoroutineStart.UNDISPATCHED) {
+            coordinator.withSession(owner = "waiter") { waiterEntered = true }
+        }
+        waiter.cancelAndJoin()
 
-        assertTrue(error is PlaySessionWaitTimeoutException)
-        assertTrue(error!!.message!!, error.message!!.contains("holder=stuck"))
-        assertTrue(error.message!!, error.message!!.contains("stage=auth-token"))
+        assertFalse(waiterEntered)
+        val description = coordinator.describeHolder()
+        assertTrue(description, description.contains("holder=stuck"))
+        assertTrue(description, description.contains("stage=auth-token"))
         holder.cancelAndJoin()
         assertEquals("holder=none", coordinator.describeHolder())
-        assertEquals(1, coordinator.withSession(owner = "next", waitTimeoutMillis = 100L) { 1 })
+        assertEquals(1, coordinator.withSession(owner = "next") { 1 })
+    }
+
+    @Test
+    fun sessionWaitsForHolderBeforeEntering() = runBlocking {
+        val coordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
+        val release = CompletableDeferred<Unit>()
+        val holder = launch(start = CoroutineStart.UNDISPATCHED) {
+            coordinator.withSession(owner = "holder") { release.await() }
+        }
+        var waiterEntered = false
+        val waiter = async(start = CoroutineStart.UNDISPATCHED) {
+            coordinator.withSession(owner = "waiter") {
+                waiterEntered = true
+                1
+            }
+        }
+
+        assertFalse(waiterEntered)
+        release.complete(Unit)
+        assertEquals(1, waiter.await())
+        holder.join()
+        assertTrue(waiterEntered)
+        assertEquals("holder=none", coordinator.describeHolder())
     }
 
     private fun account(name: String = "account@example.com") = Account(name, AuthTokenBlocking.ACCOUNT_TYPE)

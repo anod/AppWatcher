@@ -2,6 +2,11 @@ package com.anod.appwatcher.accounts
 
 import android.accounts.Account
 import android.os.Build
+import com.anod.appwatcher.diagnostics.DiagnosticEvent
+import com.anod.appwatcher.diagnostics.DiagnosticRecord
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
+import com.anod.appwatcher.diagnostics.DiagnosticRun
+import com.anod.appwatcher.diagnostics.DiagnosticStage
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
@@ -12,13 +17,11 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 
 class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
 class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
-class PlaySessionWaitTimeoutException(message: String) : IllegalStateException(message)
 
-class PlaySessionCoordinator {
+class PlaySessionCoordinator(private val diagnostics: DiagnosticRecorder) {
     private class Holder(
         val owner: String,
         val acquiredAt: Long
@@ -38,24 +41,9 @@ class PlaySessionCoordinator {
     suspend fun <T> withSession(action: suspend () -> T): T = withSession(owner = "session", action = action)
 
     suspend fun <T> withSession(owner: String, action: suspend () -> T): T {
+        val run = currentCoroutineContext()[DiagnosticRun]?.id
+        diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_WAIT, run = run))
         sessionMutex.lock()
-        return holdSession(owner, action)
-    }
-
-    /**
-     * Waits at most [waitTimeoutMillis] for the session and throws [PlaySessionWaitTimeoutException]
-     * describing the current holder instead of waiting behind a stalled session indefinitely.
-     */
-    suspend fun <T> withSession(
-        owner: String,
-        waitTimeoutMillis: Long,
-        action: suspend () -> T
-    ): T {
-        val waitStartedAt = System.currentTimeMillis()
-        withTimeoutOrNull(waitTimeoutMillis) { sessionMutex.lock() }
-            ?: throw PlaySessionWaitTimeoutException(
-                "$owner waited ${System.currentTimeMillis() - waitStartedAt}ms for Play session; ${describeHolder()}"
-            )
         return holdSession(owner, action)
     }
 
@@ -67,8 +55,12 @@ class PlaySessionCoordinator {
         return holdSession("user-initiated", action)
     }
 
-    fun updateStage(stage: String) {
+    suspend fun updateStage(stage: String) {
         val current = holder ?: return
+        diagnostics.record(DiagnosticRecord(
+            DiagnosticEvent.STAGE, run = currentCoroutineContext()[DiagnosticRun]?.id,
+            stage = DiagnosticStage.fromInternalStage(stage)
+        ))
         val now = System.currentTimeMillis()
         AppLog.i(
             "${current.owner} stage $stage (previous=${current.stage} ${now - current.stageAt}ms, " +
@@ -87,12 +79,15 @@ class PlaySessionCoordinator {
     }
 
     private suspend fun <T> holdSession(owner: String, action: suspend () -> T): T {
-        holder = Holder(owner, System.currentTimeMillis())
+        val run = currentCoroutineContext()[DiagnosticRun]?.id
         return try {
+            holder = Holder(owner, System.currentTimeMillis())
+            diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_ACQUIRED, run = run, stage = DiagnosticStage.SESSION))
             action()
         } finally {
             holder = null
             sessionMutex.unlock()
+            diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_RELEASED, run = run))
         }
     }
 }

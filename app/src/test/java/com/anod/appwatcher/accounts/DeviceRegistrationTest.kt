@@ -2,7 +2,7 @@ package com.anod.appwatcher.accounts
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
+import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeDeviceIdentity
 import info.anodsplace.notification.NotificationManager
@@ -36,8 +36,7 @@ class DeviceRegistrationTest {
         preferences = Preferences(
             context = ApplicationProvider.getApplicationContext(),
             notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined),
-            diagnosticAllowlist = DiagnosticAllowlist(emptySet())
+            appScope = CoroutineScope(Dispatchers.Unconfined)
         )
         preferences.account = null
     }
@@ -145,7 +144,7 @@ class DeviceRegistrationTest {
             beforeCheckIn = { delay(50) }
         }
         val registration = DeviceRegistration(preferences, dfeApi, sdkInt = 35)
-        val playSessionCoordinator = PlaySessionCoordinator()
+        val playSessionCoordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
         val account = account()
 
         val results = coroutineScope {

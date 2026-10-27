@@ -1,6 +1,7 @@
 package com.anod.appwatcher.database
 
 import android.text.format.DateUtils
+import com.anod.appwatcher.diagnostics.DiagnosticFileStore
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.applog.AppLog
 
@@ -14,7 +15,7 @@ class Cleanup(private val pref: Preferences, private val database: AppsDatabase)
 
     suspend fun perform(now: Long) {
         AppLog.d("Perform cleanup")
-        database.schedules().clean(now - (30 * DateUtils.DAY_IN_MILLIS))
+        database.schedules().clean(now - DiagnosticFileStore.RETENTION_MILLIS)
         pref.lastCleanupTime = System.currentTimeMillis()
     }
 }
