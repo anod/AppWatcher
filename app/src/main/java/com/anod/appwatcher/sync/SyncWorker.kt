@@ -6,9 +6,6 @@ import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.WorkInfo
 import androidx.work.WorkerParameters
-import com.anod.appwatcher.diagnostics.DiagnosticEvent
-import com.anod.appwatcher.diagnostics.DiagnosticRecord
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import info.anodsplace.applog.AppLog
 import kotlinx.coroutines.CancellationException
 import org.koin.core.component.KoinComponent
@@ -17,22 +14,14 @@ import org.koin.core.component.get
 class SyncWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams), KoinComponent {
     override suspend fun doWork(): Result {
         AppLog.i("Scheduled call executed. Id: $id, attempt: $runAttemptCount, tags: $tags", "SyncWorker")
-        val diagnostics = get<DiagnosticRecorder>()
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.WORK_START, run = id, attempt = runAttemptCount,
-            flag = inputData.getBoolean(UpdateCheck.EXTRAS_MANUAL, false)
-        ))
 
         val result = try {
-            get<UpdateCheck>().perform(inputData, runId = id, stopReason = ::describeStopReason)
+            get<UpdateCheck>().perform(inputData, stopReason = ::describeStopReason)
         } catch (e: CancellationException) {
-            diagnostics.record(DiagnosticRecord(
-                DiagnosticEvent.WORK_CANCELLED, run = id, code = stopReason, attempt = runAttemptCount
-            ))
             AppLog.w("Sync work $id stopped: ${describeStopReason() ?: "unknown"}", "SyncWorker")
             throw e
         } catch (e: Exception) {
-            diagnostics.record(DiagnosticRecord(DiagnosticEvent.WORK_FAILED, run = id, code = stopReason))
+            AppLog.e("Sync work $id failed: ${describeStopReason() ?: "unknown"}; failureKind=unexpected", "SyncWorker", e)
             throw e
         }
 
@@ -43,9 +32,6 @@ class SyncWorker(appContext: Context, workerParams: WorkerParameters) : Coroutin
         applicationContext.sendBroadcast(finishIntent)
 
         AppLog.i("Sync work $id finished with $result", "SyncWorker")
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.WORK_END, run = id, count = result.toLong(), code = stopReason, attempt = runAttemptCount
-        ))
         return Result.success()
     }
 

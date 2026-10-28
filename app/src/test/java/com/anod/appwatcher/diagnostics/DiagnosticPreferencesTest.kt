@@ -80,13 +80,16 @@ class DiagnosticPreferencesTest {
 
     @Test
     fun normalizationEmptyAllowlistAndLiteralInjectionValues() {
-        assertTrue(DiagnosticAccounts.allows("  DIAGNOSTIC-ACCOUNT ", hashes))
-        assertFalse(DiagnosticAccounts.allows("diagnostic-account", ""))
-        assertFalse(DiagnosticAccounts.allows(null, hashes))
+        val normalized = preferences()
+        normalized.account = account("  DIAGNOSTIC-ACCOUNT ")
+        assertTrue(normalized.isDiagnosticsAllowed)
+        normalized.account = null
+        assertFalse(normalized.isDiagnosticsAllowed)
         val digest = DiagnosticAccounts.hash("quotes\"\\\n,=injection")
         assertTrue(digest.matches(Regex("[0-9a-f]{64}")))
         val prefs = Preferences(context, NotificationManager.NoOp(), scope, "")
         prefs.account = account("diagnostic-account")
+        assertFalse(prefs.isDiagnosticsAllowed)
         prefs.isDiagnosticsEnabled = true
         assertFalse(prefs.isDiagnosticsEnabled)
         prefs.account = null

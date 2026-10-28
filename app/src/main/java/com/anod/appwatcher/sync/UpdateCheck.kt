@@ -28,11 +28,6 @@ import com.anod.appwatcher.database.entities.AppListItem
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.preserveCachedMetadata
 import com.anod.appwatcher.database.entities.toApp
-import com.anod.appwatcher.diagnostics.DiagnosticDecision
-import com.anod.appwatcher.diagnostics.DiagnosticEvent
-import com.anod.appwatcher.diagnostics.DiagnosticRecord
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
-import com.anod.appwatcher.diagnostics.DiagnosticRun
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageState
 import com.anod.appwatcher.utils.PackageStateCache
@@ -89,8 +84,7 @@ class UpdateCheck(
     private val playSessionCoordinator: PlaySessionCoordinator,
     private val deviceRegistrationNotification: DeviceRegistrationNotification,
     private val koin: Koin,
-    private val timeouts: SyncTimeouts = SyncTimeouts(),
-    private val diagnostics: DiagnosticRecorder
+    private val timeouts: SyncTimeouts = SyncTimeouts()
 ) {
 
     /**
@@ -148,7 +142,6 @@ class UpdateCheck(
         private const val BULK_SIZE = 20
         internal const val MAX_CHUNK_ATTEMPTS = 3
         private const val CHUNK_RETRY_DELAY_MILLIS = 250L
-        private const val MAX_REPORTED_ABANDONED = 10
         internal const val EXTRAS_MANUAL = "manual"
 
         const val SYNC_STOP = "com.anod.appwatcher.sync.start"
@@ -156,10 +149,10 @@ class UpdateCheck(
         const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
-    suspend fun perform(extras: Data, runId: java.util.UUID = java.util.UUID.randomUUID(), stopReason: () -> String? = { null }): Int = withContext(DiagnosticRun(runId)) {
+    suspend fun perform(extras: Data, stopReason: () -> String?): Int {
         val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
         val owner = if (manualSync) "manual-sync" else "scheduled-sync"
-        playSessionCoordinator.withSession(owner) {
+        return playSessionCoordinator.withSession(owner) {
             withTimeoutOrNull(timeouts.syncMillis) {
                 performSerialized(manualSync, stopReason)
             } ?: -1
@@ -168,7 +161,6 @@ class UpdateCheck(
 
     private suspend fun performSerialized(manualSync: Boolean, stopReason: () -> String?): Int {
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
-        markAbandonedSyncs()
         val schedule = Schedule(manualSync)
         return try {
             syncSerialized(schedule, manualSync)
@@ -178,34 +170,6 @@ class UpdateCheck(
             }
             throw e
         }
-    }
-
-    /** Rows still NEW when the session is free belong to runs that never finished (e.g. the process was killed). */
-    private suspend fun markAbandonedSyncs() {
-        val abandoned = try {
-            database.schedules().loadUnfinished()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            AppLog.e("Cannot load unfinished syncs", "UpdateCheck", e)
-            return
-        }
-        if (abandoned.isEmpty()) {
-            return
-        }
-        val marked = abandoned.sumOf { database.schedules().markInterrupted(it.id, 0L) }
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.RECOVERY, run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id,
-            count = abandoned.size.toLong(), secondaryCount = marked.toLong(),
-            historicalTime = abandoned.first().start
-        ))
-        val message = "Found ${abandoned.size} abandoned sync(s), marked=$marked; " +
-            "ids=${abandoned.take(MAX_REPORTED_ABANDONED).joinToString { it.id.toString() }}; " +
-            "scheduled=${abandoned.count { it.reason != Schedule.REASON_MANUAL }}; " +
-            "oldest=${Instant.ofEpochMilli(abandoned.first().start)}; " +
-            "newest=${Instant.ofEpochMilli(abandoned.last().start)}; " +
-            "failureKind=unexpected"
-        AppLog.e(message, "UpdateCheck", SyncInterruptedException(message))
     }
 
     private suspend fun recordInterruptedSync(
@@ -224,11 +188,6 @@ class UpdateCheck(
             val durationMs = interrupted.finish - interrupted.start
             val timedOut = error is TimeoutCancellationException || durationMs >= timeouts.syncMillis
             val reason = if (timedOut) "timeout" else "cancellation"
-            diagnostics.record(DiagnosticRecord(
-                DiagnosticEvent.FAILURE, run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id,
-                code = Schedule.STATUS_INTERRUPTED, count = durationMs,
-                decision = if (timedOut) DiagnosticDecision.UNEXPECTED else DiagnosticDecision.EXPECTED_TRANSIENT
-            ))
             val message = "${if (schedule.reason == Schedule.REASON_MANUAL) "manual" else "scheduled"} " +
                 "sync #${interrupted.id} interrupted by $reason; " +
                 "started=${Instant.ofEpochMilli(interrupted.start)}; " +
@@ -332,11 +291,6 @@ class UpdateCheck(
         }
 
         if (syncResult.success) {
-            diagnostics.record(DiagnosticRecord(
-                DiagnosticEvent.SYNC_RESULT, run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id,
-                count = syncResult.checked.toLong(), secondaryCount = syncResult.updates.size.toLong(),
-                code = syncResult.unavailable
-            ))
             stage("save-result")
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
@@ -575,24 +529,11 @@ class UpdateCheck(
     ): Int {
         val failedSchedule = saveFailedSchedule(schedule, status)
         val failure = SyncFailureException(failedSchedule, stage, error)
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.FAILURE, run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id,
-            code = status,
-            decision = if (SyncFailureException.isExpectedTransientFailure(error)) {
-                DiagnosticDecision.EXPECTED_TRANSIENT
-            } else {
-                DiagnosticDecision.UNEXPECTED
-            }
-        ))
         AppLog.e(checkNotNull(failure.message), "UpdateCheck", failure)
         return completeFailedSync(manualSync)
     }
 
     private suspend fun saveFailedSchedule(schedule: Schedule, status: Int): Schedule {
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.SYNC_RESULT, run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id,
-            code = status, decision = DiagnosticDecision.FAILED
-        ))
         val failedSchedule = schedule.finish(status)
         SchedulesTable.Queries.save(failedSchedule, database)
         // Keeps a later interruption from inserting a second row for this run.
@@ -888,19 +829,13 @@ class UpdateCheck(
 
     private suspend fun notifyIfNeeded(manualSync: Boolean, updatedApps: List<UpdatedApp>, schedule: Schedule) {
         val sn = SyncNotification(context, notificationManager)
-        val run = kotlinx.coroutines.currentCoroutineContext()[DiagnosticRun]?.id
-        if (manualSync || updatedApps.isEmpty()) {
-            diagnostics.notification(DiagnosticRecord(
-                DiagnosticEvent.NOTIFICATION, run = run, count = updatedApps.size.toLong(),
-                decision = if (manualSync) DiagnosticDecision.MANUAL_CANCEL else DiagnosticDecision.NO_UPDATES
-            ), SyncNotification.UPDATES_CHANNEL_ID)
-        }
         if (manualSync) {
             if (updatedApps.isEmpty()) {
                 AppLog.i("No new updates", "UpdateCheck")
             } else {
                 AppLog.i("Updates found: ${updatedApps.size}", "UpdateCheck")
             }
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "cancel manual, updates=${updatedApps.size}")
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
             val filter = SyncNotification.Filter(preferences)
@@ -909,17 +844,13 @@ class UpdateCheck(
             } else {
                 updatedApps
             }
-            AppLog.i("Notifying about ${filteredApps.size} updates", "UpdateCheck")
-            diagnostics.notification(DiagnosticRecord(
-                DiagnosticEvent.NOTIFICATION, run = run, count = filteredApps.size.toLong(),
-                secondaryCount = updatedApps.size.toLong(),
-                decision = if (filteredApps.isEmpty()) DiagnosticDecision.FILTERED else DiagnosticDecision.POST_REQUESTED
-            ), SyncNotification.UPDATES_CHANNEL_ID)
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "filtered=${filteredApps.size}, total=${updatedApps.size}")
             database.schedules().updateNotified(schedule.id, filteredApps.size)
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
         } else {
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "no updates")
             AppLog.i("No new updates", "UpdateCheck")
         }
     }

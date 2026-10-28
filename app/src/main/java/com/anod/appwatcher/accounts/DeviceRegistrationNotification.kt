@@ -5,17 +5,13 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
-import com.anod.appwatcher.diagnostics.DiagnosticDecision
-import com.anod.appwatcher.diagnostics.DiagnosticEvent
-import com.anod.appwatcher.diagnostics.DiagnosticRecord
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
+import com.anod.appwatcher.sync.logNotificationDecision
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 
 class DeviceRegistrationNotification(
     private val context: ApplicationContext,
-    private val notificationManager: NotificationManager,
-    private val diagnostics: DiagnosticRecorder
+    private val notificationManager: NotificationManager
 ) {
     companion object {
         internal const val NOTIFICATION_ID = 3
@@ -23,9 +19,7 @@ class DeviceRegistrationNotification(
     }
 
     fun show() {
-        diagnostics.notification(DiagnosticRecord(
-            DiagnosticEvent.NOTIFICATION, code = NOTIFICATION_ID, decision = DiagnosticDecision.POST_REQUESTED
-        ), AUTHENTICATION_CHANNEL_ID)
+        logNotificationDecision(context.actual, AUTHENTICATION_CHANNEL_ID, "post registration request")
         val intent = Intent(context.actual, AppWatcherActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -49,9 +43,7 @@ class DeviceRegistrationNotification(
     }
 
     fun cancel() {
-        diagnostics.notification(DiagnosticRecord(
-            DiagnosticEvent.NOTIFICATION, code = NOTIFICATION_ID, decision = DiagnosticDecision.CANCEL_REQUESTED
-        ), AUTHENTICATION_CHANNEL_ID)
+        logNotificationDecision(context.actual, AUTHENTICATION_CHANNEL_ID, "cancel registration request")
         notificationManager.cancel(NOTIFICATION_ID)
     }
 }

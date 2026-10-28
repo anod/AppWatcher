@@ -1,10 +1,12 @@
 package com.anod.appwatcher
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ShortcutManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.work.WorkManager
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.anod.appwatcher.accounts.AuthAccountInitializer
@@ -51,7 +53,11 @@ fun createAppModule(): Module = module {
     }
     factory { get<Application>().packageManager }
     singleOf(::PlaySessionCoordinator)
-    single { DiagnosticRecorder(get(), get(), get()) }
+    single {
+        DiagnosticRecorder(get(), get(), get(), workInfos = { name ->
+            WorkManager.getInstance(get<Context>()).getWorkInfosForUniqueWork(name).get(5, TimeUnit.SECONDS)
+        })
+    }
     singleOf(::DeviceRegistrationNotification)
     singleOf(::AuthAccountInitializer)
     singleOf(::UploadDateParserCache)
@@ -102,8 +108,7 @@ fun createAppModule(): Module = module {
             playSessionCoordinator = get(),
             uploadDateParserCache = get(),
             deviceRegistrationNotification = get(),
-            koin = getKoin(),
-            diagnostics = get()
+            koin = getKoin()
         )
     }
 }

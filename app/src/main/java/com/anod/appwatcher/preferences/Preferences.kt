@@ -37,19 +37,29 @@ class Preferences(
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
     private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
 
+    private val diagnosticHashes = diagnosticAccountHashes.split(',').toSet()
+
     val isDiagnosticsAllowed: Boolean
-        get() = DiagnosticAccounts.allows(accountSnapshot?.name, diagnosticAccountHashes)
+        get() = diagnosticAccountHash != null && diagnosticAccountHash in diagnosticHashes
 
     var isDiagnosticsEnabled: Boolean
         get() = isDiagnosticsAllowed && devicePreferences.getString("diagnostic-consent", null) ==
-            accountSnapshot?.name?.let(DiagnosticAccounts::hash)
+            diagnosticAccountHash
         set(value) {
-            val hash = if (value && isDiagnosticsAllowed) accountSnapshot?.name?.let(DiagnosticAccounts::hash) else null
+            val hash = if (value && isDiagnosticsAllowed) diagnosticAccountHash else null
             devicePreferences.edit().putString("diagnostic-consent", hash).apply()
         }
 
     @Volatile
+    private var diagnosticAccountHash: String? = null
+
+    @Volatile
     private var accountSnapshot: AuthAccount? = null
+        set(value) {
+            diagnosticAccountHash = value?.name?.let(DiagnosticAccounts::hash)
+            field = value
+            appScope.launch { _changes.emit("diagnostic-account") }
+        }
 
     val changes: Flow<String> = _changes
 

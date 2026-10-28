@@ -45,7 +45,7 @@ class SettingsScreenDiagnosticsTest {
             }
         }
         compose.waitForIdle()
-        state.value = SettingsViewState(items())
+        state.value = SettingsViewState(items() + PreferenceItem.Text(titleRes = R.string.diagnostics_error, key = "diagnostics-error"))
         compose.waitForIdle()
         assertTrue(events.toString(), events.isEmpty())
 

@@ -3,7 +3,6 @@ package com.anod.appwatcher.accounts
 import android.accounts.Account
 import android.accounts.OperationCanceledException
 import androidx.test.core.app.ApplicationProvider
-import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -143,7 +142,7 @@ class AuthTokenBlockingTest {
 
     @Test
     fun cancelledSessionWaitKeepsHolderAndLockUsable() = runBlocking {
-        val coordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
+        val coordinator = PlaySessionCoordinator()
         val holderStarted = CompletableDeferred<Unit>()
         val holder = launch(Dispatchers.Default) {
             coordinator.withSession(owner = "stuck") {
@@ -171,7 +170,7 @@ class AuthTokenBlockingTest {
 
     @Test
     fun sessionWaitsForHolderBeforeEntering() = runBlocking {
-        val coordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
+        val coordinator = PlaySessionCoordinator()
         val release = CompletableDeferred<Unit>()
         val holder = launch(start = CoroutineStart.UNDISPATCHED) {
             coordinator.withSession(owner = "holder") { release.await() }

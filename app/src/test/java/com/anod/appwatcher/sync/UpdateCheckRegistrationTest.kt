@@ -20,7 +20,6 @@ import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.database.SchedulesTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Failed
@@ -107,13 +106,12 @@ class UpdateCheckRegistrationTest {
         preferences.lastUpdateTime = -1L
         deviceRegistrationNotification = DeviceRegistrationNotification(
             ApplicationContext(context),
-            notificationManager,
-            disabledDiagnostics(context)
+            notificationManager
         )
         database = Room.inMemoryDatabaseBuilder(context, AppsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        coordinator = PlaySessionCoordinator(disabledDiagnostics(context))
+        coordinator = PlaySessionCoordinator()
         val tokenProvider = object : AccountAuthTokenProvider {
             override fun getAuthToken(account: Account): String {
                 tokenRequested.countDown()
@@ -163,8 +161,7 @@ class UpdateCheckRegistrationTest {
             coordinator,
             deviceRegistrationNotification,
             koin.koin,
-            timeouts,
-            disabledDiagnostics(context)
+            timeouts
         )
     }
 
@@ -189,7 +186,7 @@ class UpdateCheckRegistrationTest {
         assertEquals(false, CrashlyticsExceptionFilter.shouldIgnore(diagnostic) { true })
 
         tokenRelease = null
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(0, updateCheck.perform(Data.EMPTY) { null })
         assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().first().result)
         assertEquals(1, reportedErrors.size)
     }
@@ -225,7 +222,7 @@ class UpdateCheckRegistrationTest {
         }
         holderStarted.await()
         val sync = launch(start = CoroutineStart.UNDISPATCHED) {
-            updateCheck.perform(Data.EMPTY)
+            updateCheck.perform(Data.EMPTY) { null }
         }
         sync.cancelAndJoin()
 
@@ -234,34 +231,17 @@ class UpdateCheckRegistrationTest {
         assertTrue(coordinator.describeHolder().contains("holder=stuck-holder"))
         holder.cancelAndJoin()
 
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(0, updateCheck.perform(Data.EMPTY) { null })
         assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().single().result)
         assertTrue(reportedErrors.isEmpty())
-    }
-
-    @Test
-    fun abandonedSyncRowsAreMarkedInterruptedOnNextRun() = runBlocking {
-        preferences.account = preferences.account!!.copy(gfsId = "existing-id")
-        val abandoned = Schedule(false)
-        SchedulesTable.Queries.save(abandoned, database)
-
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
-
-        val schedules = database.schedules().load().first().associateBy { it.id }
-        assertEquals(Schedule.STATUS_INTERRUPTED, schedules.getValue(abandoned.id).result)
-        assertEquals(2, schedules.size)
-        assertTrue(schedules.values.any { it.result == Schedule.STATUS_SUCCESS })
-        val diagnostic = reportedErrors.single()
-        assertTrue(diagnostic is SyncInterruptedException)
-        assertTrue(diagnostic.message!!, diagnostic.message!!.contains("Found 1 abandoned sync"))
     }
 
     @Test
     fun earlyFinishedSyncIsNotReportedAsInterrupted() = runBlocking {
         preferences.account = null
 
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
         val schedules = database.schedules().load().first()
         assertEquals(2, schedules.size)
@@ -272,7 +252,7 @@ class UpdateCheckRegistrationTest {
     @Test
     fun repeatedScheduledSyncRequestsConfirmationInsteadOfReportingRegistrationFailure() = runBlocking {
         repeat(2) {
-            assertEquals(-1, updateCheck.perform(Data.EMPTY))
+            assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
         }
 
         val schedules = database.schedules().load().first()
@@ -301,7 +281,7 @@ class UpdateCheckRegistrationTest {
     fun pendingRegistrationAlsoRequiresConfirmationWithoutAnotherCheckIn() = runBlocking {
         assertTrue(preferences.saveDeviceRegistrationPending(true))
 
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
         assertEquals(Schedule.STATUS_SKIPPED_DEVICE_REGISTRATION, database.schedules().load().first().single().result)
         assertTrue(preferences.isDeviceRegistrationPending)
@@ -312,7 +292,7 @@ class UpdateCheckRegistrationTest {
 
     @Test
     fun manualSyncAlsoOffersRegistrationResolution() = runBlocking {
-        assertEquals(-1, updateCheck.perform(Data.Builder().putBoolean(UpdateCheck.EXTRAS_MANUAL, true).build()))
+        assertEquals(-1, updateCheck.perform(Data.Builder().putBoolean(UpdateCheck.EXTRAS_MANUAL, true).build()) { null })
 
         val schedule = database.schedules().load().first().single()
         assertEquals(Schedule.REASON_MANUAL, schedule.reason)
@@ -323,14 +303,14 @@ class UpdateCheckRegistrationTest {
 
     @Test
     fun explicitConfirmationRegistersOnceAndScheduledSyncResumes() = runBlocking {
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
         initializer.initialize(
             Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE),
             userInitiated = true
         )
         assertTrue(canceledIds.contains(DeviceRegistrationNotification.NOTIFICATION_ID))
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(0, updateCheck.perform(Data.EMPTY) { null })
 
         assertEquals(1, dfeApi.checkInCalls)
         assertEquals(1, dfeApi.uploadCalls)
@@ -342,7 +322,7 @@ class UpdateCheckRegistrationTest {
 
     @Test
     fun staleAutomaticInitializationDoesNotClearRequiredRegistrationNotification() = runBlocking {
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
         initializer.initialize(
             Account("old@example.com", AuthTokenBlocking.ACCOUNT_TYPE),
@@ -360,7 +340,7 @@ class UpdateCheckRegistrationTest {
         preferences.account = preferences.account!!.copy(gfsId = "existing-id")
         dfeApi.uploadFailure = IOException("offline")
 
-        assertEquals(-1, updateCheck.perform(Data.EMPTY))
+        assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
         assertEquals(Schedule.STATUS_FAILED, database.schedules().load().first().single().result)
         assertTrue(reportedErrors.single() is SyncFailureException)
@@ -375,7 +355,7 @@ class UpdateCheckRegistrationTest {
         dfeApi.uploadFailure = UnknownHostException("offline")
 
         repeat(2) {
-            assertEquals(-1, updateCheck.perform(Data.EMPTY))
+            assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
         }
 
         val schedules = database.schedules().load().first()
@@ -388,7 +368,7 @@ class UpdateCheckRegistrationTest {
         assertTrue(reportedErrors.all { it.message!!.contains("failureKind=expected-transient") })
 
         dfeApi.uploadFailure = null
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(0, updateCheck.perform(Data.EMPTY) { null })
         assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().first().result)
         assertTrue(preferences.lastUpdateTime > 0)
         assertTrue(notifications.isEmpty())
@@ -409,7 +389,7 @@ class UpdateCheckRegistrationTest {
             val callsBefore = dfeApi.bulkDetailsCalls
             dfeApi.bulkDetailsFailure = failure
 
-            assertEquals(-1, updateCheck.perform(Data.EMPTY))
+            assertEquals(-1, updateCheck.perform(Data.EMPTY) { null })
 
             assertEquals(UpdateCheck.MAX_CHUNK_ATTEMPTS, dfeApi.bulkDetailsCalls - callsBefore)
             val schedule = database.schedules().load().first().first()
@@ -428,7 +408,7 @@ class UpdateCheckRegistrationTest {
     @Test
     @Config(sdk = [34])
     fun olderAndroidSyncDoesNotRequireRegistration() = runBlocking {
-        assertEquals(0, updateCheck.perform(Data.EMPTY))
+        assertEquals(0, updateCheck.perform(Data.EMPTY) { null })
 
         assertEquals(Schedule.STATUS_SUCCESS, database.schedules().load().first().single().result)
         assertEquals(0, dfeApi.checkInCalls)

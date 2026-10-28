@@ -19,7 +19,6 @@ import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchViewEvent
 import com.anod.appwatcher.search.SearchViewModel
@@ -95,13 +94,12 @@ class AccountSelectionViewModelTest {
             preferences,
             authToken,
             dfeApi,
-            PlaySessionCoordinator(disabledDiagnostics(context)),
-            DeviceRegistrationNotification(ApplicationContext(context), NotificationManager.NoOp(), disabledDiagnostics(context))
+            PlaySessionCoordinator(),
+            DeviceRegistrationNotification(ApplicationContext(context), NotificationManager.NoOp())
         )
         startKoin {
             modules(module {
                 single<Context> { context }
-                single { disabledDiagnostics(context) }
                 single { preferences }
                 single { database }
                 single { authToken }

@@ -35,6 +35,7 @@ import info.anodsplace.framework.content.StartActivityAction
 import info.anodsplace.framework.content.forAppInfo
 import info.anodsplace.notification.NotificationManager
 import info.anodsplace.playservices.GooglePlayServices
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -109,6 +110,12 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
             items = preferenceItems(prefs, false, playServices, application, diagnostics),
             areNotificationsEnabled = notificationManager.areNotificationsEnabled
         )
+        viewModelScope.launch {
+            try {
+                diagnostics.refresh()
+            } catch (_: IOException) {
+            }
+        }
         viewModelScope.launch {
             merge(diagnostics.state, prefs.changes).collect {
                 viewState = viewState.copy(items = preferenceItems(prefs, viewState.isProgressVisible, playServices, application, diagnostics))
@@ -336,14 +343,14 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
                 items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics)
             )
             if (useAutoSync) {
-                SyncScheduler(context, diagnostics).schedule(
+                SyncScheduler(context).schedule(
                     prefs.isRequiresCharging,
                     prefs.isWifiOnly,
                     prefs.updatesFrequency.toLong(),
                     true
                 ).first { it !is Operation.State.IN_PROGRESS }
             } else {
-                SyncScheduler(context, diagnostics).cancel().first { it !is Operation.State.IN_PROGRESS }
+                SyncScheduler(context).cancel().first { it !is Operation.State.IN_PROGRESS }
             }
         }
     }

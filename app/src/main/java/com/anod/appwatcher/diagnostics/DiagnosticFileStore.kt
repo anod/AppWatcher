@@ -1,9 +1,8 @@
 package com.anod.appwatcher.diagnostics
 
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
-import java.time.Instant
-import java.util.UUID
 
 data class DiagnosticStorageState(
     val bytes: Long = 0,
@@ -20,54 +19,55 @@ class DiagnosticFileStore(
     private val segmentBytes: Long = 256L * 1024,
     private val retentionMillis: Long = RETENTION_MILLIS
 ) {
+    private val segmentLimit = segmentBytes.coerceAtMost(maxBytes)
     private var active: File? = null
+    private var output: BufferedOutputStream? = null
+    private var activeBytes = 0L
+    private var initialized = false
 
     fun append(line: String, now: Long) {
         val bytes = line.toByteArray(Charsets.UTF_8)
-        require(bytes.size <= segmentBytes && bytes.size <= maxBytes)
-        prune(now)
-        var target = active
-        if (target == null || !target.exists() || target.length() + bytes.size > segmentBytes) {
+        require(bytes.size <= segmentLimit)
+        if (!initialized) {
+            prune(now, 0)
+            initialized = true
+        }
+        if (active == null || activeBytes + bytes.size > segmentLimit) {
+            close()
+            prune(now, segmentLimit)
             if (!directory.isDirectory && !directory.mkdirs()) throw IOException("diagnostic directory")
             val sequence = (files().lastOrNull()?.name?.substringBefore('-')?.toLongOrNull() ?: -1L) + 1
-            target = File(directory, "${sequence.toString().padStart(20, '0')}-$now.jsonl")
-            active = target
+            active = File(directory, "${sequence.toString().padStart(20, '0')}-$now.log")
+            output = BufferedOutputStream(active!!.outputStream())
+            activeBytes = 0
         }
-        target.appendBytes(bytes)
-        prune(now)
+        output!!.write(bytes)
+        activeBytes += bytes.size
+    }
+
+    fun flush() {
+        output?.flush()
+    }
+
+    fun close() {
+        output?.close()
+        output = null
+        active = null
+        activeBytes = 0
     }
 
     fun state(now: Long): DiagnosticStorageState {
-        prune(now)
+        prune(now, 0)
         val files = files()
         return DiagnosticStorageState(
             bytes = files.sumOf { it.length() },
-            oldest = files.firstOrNull()?.bufferedReader()?.use { reader ->
-                reader.readLine()?.substringAfter("\"time\":\"", "")?.substringBefore('"')
-                    ?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
-            }
+            oldest = files.firstOrNull()?.name?.substringAfter('-')?.substringBefore('.')?.toLongOrNull()
         )
     }
 
-    /** Counts work started by previous processes; [currentProcess] may still be running. */
-    fun unfinishedRuns(now: Long, currentProcess: UUID): Int {
-        prune(now)
-        val runs = mutableSetOf<String>()
-        files().forEach { file ->
-            file.forEachLine { line ->
-                val run = line.substringAfter("\"run\":\"", "").substringBefore('"')
-                if (run.isNotEmpty()) {
-                    val process = line.substringAfter("\"process\":\"", "").substringBefore('"')
-                    if (line.contains("\"event\":\"WORK_START\"") && process != currentProcess.toString()) runs.add(run)
-                    if (listOf("WORK_END", "WORK_CANCELLED", "WORK_FAILED").any { line.contains("\"event\":\"$it\"") }) runs.remove(run)
-                }
-            }
-        }
-        return runs.size
-    }
-
     fun snapshot(destination: File, now: Long): File {
-        prune(now)
+        output?.flush()
+        prune(now, 0)
         if (!destination.parentFile!!.isDirectory && !destination.parentFile!!.mkdirs()) throw IOException("diagnostic export directory")
         try {
             destination.outputStream().use { output ->
@@ -81,6 +81,7 @@ class DiagnosticFileStore(
     }
 
     fun delete() {
+        close()
         files().forEach { if (!it.delete()) throw IOException("diagnostic delete") }
         active = null
     }
@@ -88,16 +89,18 @@ class DiagnosticFileStore(
     private fun files(): List<File> {
         if (!directory.exists()) return emptyList()
         return (directory.listFiles() ?: throw IOException("diagnostic list"))
-            .filter { it.isFile && it.extension == "jsonl" }
+            .filter { it.isFile && it.extension in listOf("log", "jsonl") }
             .sortedBy { it.name }
     }
 
-    private fun prune(now: Long) {
+    private fun prune(now: Long, incoming: Long) {
+        output?.flush()
         val files = files()
         var total = files.sumOf { it.length() }
         for (file in files) {
             val created = file.name.substringAfter('-').substringBefore('.').toLongOrNull() ?: 0L
-            if (created < now - retentionMillis || total > maxBytes) {
+            if (created < now - retentionMillis || total + incoming > maxBytes) {
+                if (active == file) close()
                 val size = file.length()
                 if (!file.delete()) throw IOException("diagnostic prune")
                 total -= size

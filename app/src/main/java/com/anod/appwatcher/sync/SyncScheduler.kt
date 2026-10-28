@@ -12,10 +12,6 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.Operation
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
-import com.anod.appwatcher.diagnostics.DiagnosticDecision
-import com.anod.appwatcher.diagnostics.DiagnosticEvent
-import com.anod.appwatcher.diagnostics.DiagnosticRecord
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import info.anodsplace.applog.AppLog
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
@@ -28,13 +24,12 @@ import kotlinx.coroutines.flow.onEach
  */
 
 class SyncScheduler(
-    private val context: info.anodsplace.context.ApplicationContext,
-    private val diagnostics: DiagnosticRecorder
+    private val context: info.anodsplace.context.ApplicationContext
 ) {
     private val wm: WorkManager
         get() = WorkManager.getInstance(context.actual)
 
-    constructor(context: Context, diagnostics: DiagnosticRecorder) : this(info.anodsplace.context.ApplicationContext(context), diagnostics)
+    constructor(context: Context) : this(info.anodsplace.context.ApplicationContext(context))
 
     fun schedule(
         requiresCharging: Boolean,
@@ -62,17 +57,11 @@ class SyncScheduler(
         } else {
             ExistingPeriodicWorkPolicy.KEEP
         }
-        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"})", "PeriodicWork")
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.SCHEDULE, run = request.id,
-            decision = if (update) DiagnosticDecision.PERIODIC_UPDATE else DiagnosticDecision.PERIODIC_KEEP,
-            count = windowStartSec, flag = requiresCharging, secondaryFlag = requiresWifi
-        ))
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"}), charging=$requiresCharging, wifi=$requiresWifi", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(TAG, policy, request)
             .state
             .asFlow()
             .onEach {
-                recordOperation(it, request.id)
                 when (it) {
                     is Operation.State.SUCCESS -> AppLog.i("Sync scheduled", "PeriodicWork")
                     is Operation.State.IN_PROGRESS -> AppLog.i("Sync schedule in progress", "PeriodicWork")
@@ -98,14 +87,10 @@ class SyncScheduler(
             .build()
 
         AppLog.i("Enqueue update check", "OneTimeWork")
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.SCHEDULE, run = request.id, decision = DiagnosticDecision.MANUAL
-        ))
         return wm.enqueueUniqueWork(TAG_MANUAL, ExistingWorkPolicy.REPLACE, request)
             .state
             .asFlow()
             .onEach {
-                recordOperation(it, request.id)
                 when (it) {
                     is Operation.State.SUCCESS -> AppLog.i("Update scheduled", "OneTimeWork")
                     is Operation.State.IN_PROGRESS -> AppLog.i("Update schedule in progress", "OneTimeWork")
@@ -116,11 +101,9 @@ class SyncScheduler(
 
     fun cancel(): Flow<Operation.State> {
         AppLog.i("Cancel scheduled sync", "SyncSchedule")
-        diagnostics.record(DiagnosticRecord(DiagnosticEvent.CANCEL_SCHEDULE))
         return wm.cancelUniqueWork(TAG)
             .state
             .map {
-                recordOperation(it, null)
                 when (it) {
                     is Operation.State.SUCCESS -> AppLog.i("Sync canceled", "PeriodicWork")
                     is Operation.State.IN_PROGRESS -> AppLog.i("Sync cancel in progress", "PeriodicWork")
@@ -128,17 +111,6 @@ class SyncScheduler(
                 }
                 it
             }.asFlow()
-    }
-
-    private fun recordOperation(state: Operation.State, id: java.util.UUID?) {
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.SCHEDULE_RESULT, run = id,
-            decision = when (state) {
-                is Operation.State.SUCCESS -> DiagnosticDecision.SUCCESS
-                is Operation.State.FAILURE -> DiagnosticDecision.FAILED
-                else -> DiagnosticDecision.IN_PROGRESS
-            }
-        ))
     }
 
     companion object {

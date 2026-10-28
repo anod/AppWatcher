@@ -9,5 +9,5 @@ import kotlinx.coroutines.Job
 /** A recorder with consent off and no writer, for tests that do not exercise diagnostics. */
 fun disabledDiagnostics(context: Context): DiagnosticRecorder {
     val scope = CoroutineScope(Job().apply { cancel() })
-    return DiagnosticRecorder(context, Preferences(context, NotificationManager.NoOp(), scope, ""), scope)
+    return DiagnosticRecorder(context, Preferences(context, NotificationManager.NoOp(), scope, ""), scope, workInfos = { emptyList() })
 }

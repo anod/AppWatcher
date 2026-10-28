@@ -2,11 +2,6 @@ package com.anod.appwatcher.accounts
 
 import android.accounts.Account
 import android.os.Build
-import com.anod.appwatcher.diagnostics.DiagnosticEvent
-import com.anod.appwatcher.diagnostics.DiagnosticRecord
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
-import com.anod.appwatcher.diagnostics.DiagnosticRun
-import com.anod.appwatcher.diagnostics.DiagnosticStage
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeApi
 import info.anodsplace.applog.AppLog
@@ -21,7 +16,7 @@ import kotlinx.coroutines.withContext
 class AuthTokenUnavailableException : IllegalStateException("Unable to retrieve authentication token")
 class AccountSessionBusyException : IllegalStateException("A Play Store synchronization is in progress")
 
-class PlaySessionCoordinator(private val diagnostics: DiagnosticRecorder) {
+class PlaySessionCoordinator {
     private class Holder(
         val owner: String,
         val acquiredAt: Long
@@ -41,8 +36,7 @@ class PlaySessionCoordinator(private val diagnostics: DiagnosticRecorder) {
     suspend fun <T> withSession(action: suspend () -> T): T = withSession(owner = "session", action = action)
 
     suspend fun <T> withSession(owner: String, action: suspend () -> T): T {
-        val run = currentCoroutineContext()[DiagnosticRun]?.id
-        diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_WAIT, run = run))
+        AppLog.i("$owner waiting; ${describeHolder()}", "PlaySession")
         sessionMutex.lock()
         return holdSession(owner, action)
     }
@@ -57,10 +51,6 @@ class PlaySessionCoordinator(private val diagnostics: DiagnosticRecorder) {
 
     suspend fun updateStage(stage: String) {
         val current = holder ?: return
-        diagnostics.record(DiagnosticRecord(
-            DiagnosticEvent.STAGE, run = currentCoroutineContext()[DiagnosticRun]?.id,
-            stage = DiagnosticStage.fromInternalStage(stage)
-        ))
         val now = System.currentTimeMillis()
         AppLog.i(
             "${current.owner} stage $stage (previous=${current.stage} ${now - current.stageAt}ms, " +
@@ -78,17 +68,14 @@ class PlaySessionCoordinator(private val diagnostics: DiagnosticRecorder) {
             "stage=${current.stage}; stageMs=${now - current.stageAt}"
     }
 
-    private suspend fun <T> holdSession(owner: String, action: suspend () -> T): T {
-        val run = currentCoroutineContext()[DiagnosticRun]?.id
-        return try {
-            holder = Holder(owner, System.currentTimeMillis())
-            diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_ACQUIRED, run = run, stage = DiagnosticStage.SESSION))
-            action()
-        } finally {
-            holder = null
-            sessionMutex.unlock()
-            diagnostics.record(DiagnosticRecord(DiagnosticEvent.LOCK_RELEASED, run = run))
-        }
+    private suspend fun <T> holdSession(owner: String, action: suspend () -> T): T = try {
+        holder = Holder(owner, System.currentTimeMillis())
+        AppLog.i("$owner acquired session", "PlaySession")
+        action()
+    } finally {
+        holder = null
+        sessionMutex.unlock()
+        AppLog.i("$owner released session", "PlaySession")
     }
 }
 

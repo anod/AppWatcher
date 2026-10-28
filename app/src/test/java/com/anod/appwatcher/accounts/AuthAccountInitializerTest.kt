@@ -4,7 +4,6 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import com.anod.appwatcher.diagnostics.disabledDiagnostics
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
@@ -43,8 +42,7 @@ class AuthAccountInitializerTest {
         )
         deviceRegistrationNotification = DeviceRegistrationNotification(
             ApplicationContext(context),
-            NotificationManager.NoOp(),
-            disabledDiagnostics(context)
+            NotificationManager.NoOp()
         )
         runBlocking {
             preferences.saveAccount(
@@ -71,7 +69,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
+            PlaySessionCoordinator(),
             deviceRegistrationNotification
         )
 
@@ -101,7 +99,7 @@ class AuthAccountInitializerTest {
             preferences,
             authToken,
             AuthRecoveringDfeApi(dfeApi, authToken, preferences),
-            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
+            PlaySessionCoordinator(),
             deviceRegistrationNotification
         )
 
@@ -137,7 +135,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
+            PlaySessionCoordinator(),
             deviceRegistrationNotification
         )
         val account = Account("new@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
@@ -160,7 +158,7 @@ class AuthAccountInitializerTest {
     @Test
     fun interactiveAccountSwitchFailsFastWhileSyncSessionIsActive() = runBlocking {
         val dfeApi = FakeDfeApi()
-        val playSessionCoordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
+        val playSessionCoordinator = PlaySessionCoordinator()
         val initializer = AuthAccountInitializer(
             preferences,
             AuthTokenBlocking.create(RecordingTokenProvider("token-a", "token-b")),
@@ -201,7 +199,7 @@ class AuthAccountInitializerTest {
 
     @Test
     fun accountSwitchesReuseDeviceIdentityAcrossInitializers() = runBlocking {
-        val playSessionCoordinator = PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext()))
+        val playSessionCoordinator = PlaySessionCoordinator()
         val accountBApi = FakeDfeApi()
         val accountBInitializer = AuthAccountInitializer(
             preferences,
@@ -245,7 +243,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
+            PlaySessionCoordinator(),
             deviceRegistrationNotification
         )
 
@@ -280,7 +278,7 @@ class AuthAccountInitializerTest {
             preferences,
             AuthTokenBlocking.create(tokenProvider),
             dfeApi,
-            PlaySessionCoordinator(disabledDiagnostics(ApplicationProvider.getApplicationContext())),
+            PlaySessionCoordinator(),
             deviceRegistrationNotification
         )
         val accountA = Account("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE)
