@@ -10,6 +10,7 @@ import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.model.Filters
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageState
@@ -738,7 +739,8 @@ class WatchListPagingSourceRoomTest {
     private fun createPreferences() = Preferences(
         context = context,
         notificationManager = NotificationManager.NoOp(),
-        appScope = CoroutineScope(Dispatchers.Unconfined)
+        appScope = CoroutineScope(Dispatchers.Unconfined),
+        diagnosticAllowlist = DiagnosticAllowlist(emptySet())
     ).also { it.sortIndex = Preferences.SORT_NAME_ASC }
 
     private fun insertHeaders(

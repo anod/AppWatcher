@@ -51,6 +51,30 @@ Foundation 1.12.x; Material3 1.4.0 targets an older Foundation line. Google Play
 remains on 21.6.0 because 22.0.0 removes the Google Sign-In APIs used by Drive backup. Moving
 that dependency forward requires migrating the sign-in flow to Credential Manager.
 
+## Local sync diagnostics
+
+Settings offers local recording only for the selected diagnostic account. Configure the private,
+comma-separated `APPWATCHER_DIAGNOSTIC_ACCOUNTS` property in the Gradle user home
+`gradle.properties` (`GRADLE_USER_HOME`, otherwise `~/.gradle`). Values are normalized and
+SHA-256 hashed before entering BuildConfig; generated constants contain digests, not addresses.
+This allowlist is a rollout mechanism, not a security boundary. An absent/empty property disables
+the allowlist. Consent persists on this device and is bound to
+the selected account. Recording is off by default. When disabled or not allowed, no logging tee
+is installed.
+
+When enabled, app log lines are also saved under `noBackupFilesDir/diagnostics`. Logs may contain
+package names and error messages. Startup logs include device power/background restrictions,
+recent process exit reasons and sync work state. Recording is bounded and non-blocking; lines
+may be truncated or dropped under load. Files rotate with a 30-day retention and a 10 MiB cap,
+evicting the oldest segments first. Nothing can be logged while Android does not run the app.
+
+Logs stay on the device unless you manually Share them. Share creates a snapshot under the narrow
+`diagnostic-exports` cache FileProvider path and grants temporary read permission through Android's
+share sheet. Nothing uploads automatically. Up to three snapshots remain cached (at most 10 MiB
+beyond the retained-log cap); cached exports expire after 24 hours on the next diagnostic operation.
+Delete removes retained logs and snapshots; recording can create new lines afterward if still
+enabled. Recipients control their exported copies. Release bundles must be rebuilt to include this feature.
+
 ## Author
 
 Alex Gavrishev, 2012

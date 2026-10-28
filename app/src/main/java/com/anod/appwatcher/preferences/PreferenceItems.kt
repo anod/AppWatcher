@@ -2,8 +2,10 @@ package com.anod.appwatcher.preferences
 
 import android.content.Context
 import android.text.format.DateUtils
+import android.text.format.Formatter
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.playservices.GooglePlayServices
 import java.util.Locale
@@ -27,7 +29,8 @@ fun preferenceItems(
     prefs: Preferences,
     inProgress: Boolean,
     playServices: GooglePlayServices,
-    context: Context
+    context: Context,
+    diagnostics: DiagnosticRecorder
 ): List<PreferenceItem> {
     val hasPlayServices = playServices.isSupported
     val useAutoSync = prefs.useAutoSync
@@ -175,6 +178,42 @@ fun preferenceItems(
             key = "user-log"
         )
     ).apply {
+        val storage = diagnostics.state.value
+        if (prefs.isDiagnosticsAllowed || storage.bytes > 0 || storage.error) {
+            add(PreferenceItem.Category(titleRes = R.string.diagnostics_title))
+            add(PreferenceItem.Switch(
+                checked = prefs.isDiagnosticsEnabled,
+                enabled = prefs.isDiagnosticsAllowed,
+                titleRes = R.string.diagnostics_record,
+                summaryRes = R.string.diagnostics_description,
+                key = "diagnostics-enabled"
+            ))
+            val oldest = storage.oldest?.let { java.time.Instant.ofEpochMilli(it).toString() }
+                ?: context.getString(R.string.never)
+            add(PreferenceItem.Text(
+                titleRes = R.string.diagnostics_retained,
+                summary = context.getString(
+                    R.string.diagnostics_retained_summary,
+                    oldest, Formatter.formatFileSize(context, storage.bytes), storage.dropped, storage.writeFailures
+                ),
+                key = "diagnostics-status"
+            ))
+            if (storage.error) {
+                add(PreferenceItem.Text(
+                    titleRes = R.string.diagnostics_error,
+                    key = "diagnostics-error"
+                ))
+            }
+            add(PreferenceItem.Text(
+                titleRes = R.string.diagnostics_share,
+                enabled = storage.bytes > 0,
+                key = "diagnostics-share"
+            ))
+            add(PreferenceItem.Text(
+                titleRes = R.string.diagnostics_delete,
+                key = "diagnostics-delete"
+            ))
+        }
         if (BuildConfig.DEBUG) {
             add(PreferenceItem.Text(
                 title = "Test notification",

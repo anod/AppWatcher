@@ -2,6 +2,7 @@ package com.anod.appwatcher.accounts
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeDeviceIdentity
 import info.anodsplace.notification.NotificationManager
@@ -35,7 +36,8 @@ class DeviceRegistrationTest {
         preferences = Preferences(
             context = ApplicationProvider.getApplicationContext(),
             notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined)
+            appScope = CoroutineScope(Dispatchers.Unconfined),
+            diagnosticAllowlist = DiagnosticAllowlist(emptySet())
         )
         preferences.account = null
     }

@@ -1,4 +1,6 @@
 import com.google.gms.googleservices.GoogleServicesTask
+import java.security.MessageDigest
+import java.util.Locale
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
@@ -25,6 +27,22 @@ kotlin {
 
 val composeMaterial3Version = libs.versions.compose.material3.get()
 
+// Only hex digests enter generated Java, so property delimiters/quotes cannot escape the literal.
+val diagnosticAccountHashes = providers.gradleProperty("APPWATCHER_DIAGNOSTIC_ACCOUNTS")
+    .orElse("")
+    .get()
+    .split(',')
+    .map { it.trim().lowercase(Locale.ROOT) }
+    .filter { it.isNotEmpty() }
+    .map { account ->
+        MessageDigest.getInstance("SHA-256")
+            .digest(account.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+    }
+    .distinct()
+    .sorted()
+    .joinToString(",")
+
 android {
     compileSdk = 37
 
@@ -35,6 +53,7 @@ android {
         versionCode = 17204
         versionName = "1.7.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "DIAGNOSTIC_ACCOUNT_HASHES", "\"$diagnosticAccountHashes\"")
     }
 
     buildFeatures {

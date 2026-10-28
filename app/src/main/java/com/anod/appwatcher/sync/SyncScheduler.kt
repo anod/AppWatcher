@@ -112,7 +112,7 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
     }
 
     companion object {
-        private const val TAG = "AppRefresh"
-        private const val TAG_MANUAL = "AppRefreshManual"
+        internal const val TAG = "AppRefresh"
+        internal const val TAG_MANUAL = "AppRefreshManual"
     }
 }

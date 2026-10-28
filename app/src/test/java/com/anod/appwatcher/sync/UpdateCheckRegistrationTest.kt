@@ -23,6 +23,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Schedule
 import com.anod.appwatcher.database.entities.Skipped
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.PackageStateCache
 import com.anod.appwatcher.utils.date.UploadDateParserCache
@@ -85,7 +86,7 @@ class UpdateCheckRegistrationTest {
                 canceledIds.add(notificationId)
             }
         }
-        preferences = Preferences(context, notificationManager, appScope)
+        preferences = Preferences(context, notificationManager, appScope, DiagnosticAllowlist(emptySet()))
         preferences.account = AuthAccount("account@example.com", AuthTokenBlocking.ACCOUNT_TYPE, "", "", "")
         preferences.isWifiOnly = false
         preferences.isDriveSyncEnabled = false

@@ -8,6 +8,7 @@ import androidx.work.Configuration
 import com.anod.appwatcher.backup.createBackupModule
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
 import com.anod.appwatcher.installed.createInstalledModule
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.SyncNotification
@@ -21,6 +22,8 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
 class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Provider, KoinComponent {
+
+    val diagnostics: DiagnosticRecorder by lazy { get() }
 
     override val workManagerConfiguration = Configuration.Builder().apply {
         setMinimumLoggingLevel(android.util.Log.DEBUG)
@@ -67,6 +70,9 @@ class AppWatcherApplication : Application(), AppLog.Listener, Configuration.Prov
             AppLog.logger = FirebaseLogger()
             AppLog.instance.listener = this
         }
+
+        // Created after the crash logger so the diagnostics tee wraps it when enabled.
+        diagnostics
 
         if (prefs.isDriveSyncEnabled) {
             appsDatabase.invalidationTracker.addObserver(get<UploadServiceContentObserver>())
