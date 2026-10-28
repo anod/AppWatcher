@@ -259,7 +259,6 @@
     <string name="unable_pin_shortcut">Unable to pin a shortcut</string>
     <string name="diagnostics_title">Local diagnostics</string>
     <string name="diagnostics_record">Record local diagnostic logs</string>
-    <string name="diagnostics_description">Off by default. Available only for selected diagnostic accounts. App log lines stay on this device, independently of crash reports. Retained up to 30 days (same as refresh history), limited to 10 MB; older events may be removed sooner. Only Share exports a file.</string>
     <string name="diagnostics_retained">Retained diagnostic logs</string>
     <string name="diagnostics_retained_summary">Oldest (UTC): %1$s\nSize: %2$s\nDropped events: %3$d; storage failures: %4$d</string>
     <string name="diagnostics_share">Share diagnostic file snapshot</string>

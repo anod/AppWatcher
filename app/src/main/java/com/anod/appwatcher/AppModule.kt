@@ -33,10 +33,10 @@ import info.anodsplace.notification.NotificationManager
 import info.anodsplace.notification.RealNotificationManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
@@ -58,7 +58,7 @@ fun createAppModule(): Module = module {
     single { DiagnosticAllowlist.parse(BuildConfig.DIAGNOSTIC_ACCOUNT_HASHES) }
     single {
         WorkInfoSource { name ->
-            WorkManager.getInstance(get<Context>()).getWorkInfosForUniqueWork(name).get(5, TimeUnit.SECONDS)
+            WorkManager.getInstance(get<Context>()).getWorkInfosForUniqueWorkFlow(name).first()
         }
     }
     singleOf(::DiagnosticRecorder)

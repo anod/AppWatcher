@@ -45,7 +45,14 @@ class DiagnosticRecorder(
 
     private val generation = AtomicLong()
     private var logger: DiagnosticLogger? = null
-    private val store by lazy { DiagnosticFileStore(File(context.noBackupFilesDir, "diagnostics")) }
+    private val store by lazy {
+        DiagnosticFileStore(
+            directory = File(context.noBackupFilesDir, "diagnostics"),
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
+    }
     private val exports by lazy { File(context.cacheDir, "diagnostic-exports") }
     private val commands = Channel<Command>(128)
     private val stopped = AtomicBoolean()
@@ -242,7 +249,7 @@ class DiagnosticRecorder(
         true
     }
 
-    private suspend fun metadata(action: () -> Unit) {
+    private suspend fun metadata(action: suspend () -> Unit) {
         try {
             action()
         } catch (e: Exception) {
@@ -271,7 +278,7 @@ class DiagnosticRecorder(
 }
 
 fun interface WorkInfoSource {
-    operator fun invoke(uniqueWorkName: String): List<WorkInfo>
+    suspend operator fun invoke(uniqueWorkName: String): List<WorkInfo>
 }
 
 internal fun diagnosticShareIntent(uri: Uri): Intent = Intent.createChooser(Intent(Intent.ACTION_SEND).apply {

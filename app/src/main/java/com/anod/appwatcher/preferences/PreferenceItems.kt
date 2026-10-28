@@ -5,7 +5,7 @@ import android.text.format.DateUtils
 import android.text.format.Formatter
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
-import com.anod.appwatcher.diagnostics.DiagnosticRecorder
+import com.anod.appwatcher.diagnostics.DiagnosticStorageState
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.playservices.GooglePlayServices
 import java.util.Locale
@@ -30,7 +30,7 @@ fun preferenceItems(
     inProgress: Boolean,
     playServices: GooglePlayServices,
     context: Context,
-    diagnostics: DiagnosticRecorder
+    diagnosticStorage: DiagnosticStorageState
 ): List<PreferenceItem> {
     val hasPlayServices = playServices.isSupported
     val useAutoSync = prefs.useAutoSync
@@ -178,14 +178,12 @@ fun preferenceItems(
             key = "user-log"
         )
     ).apply {
-        val storage = diagnostics.state.value
-        if (prefs.isDiagnosticsAllowed || storage.bytes > 0 || storage.error) {
+        val storage = diagnosticStorage
+        if (prefs.isDiagnosticsAllowed) {
             add(PreferenceItem.Category(titleRes = R.string.diagnostics_title))
             add(PreferenceItem.Switch(
                 checked = prefs.isDiagnosticsEnabled,
-                enabled = prefs.isDiagnosticsAllowed,
                 titleRes = R.string.diagnostics_record,
-                summaryRes = R.string.diagnostics_description,
                 key = "diagnostics-enabled"
             ))
             val oldest = storage.oldest?.let { java.time.Instant.ofEpochMilli(it).toString() }

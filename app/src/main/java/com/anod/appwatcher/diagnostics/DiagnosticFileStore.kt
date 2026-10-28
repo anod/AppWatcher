@@ -15,9 +15,9 @@ data class DiagnosticStorageState(
 /** Access only from the recorder's serialized IO consumer. Segments are evicted oldest first. */
 class DiagnosticFileStore(
     private val directory: File,
-    private val maxBytes: Long = MAX_BYTES,
-    private val segmentBytes: Long = 256L * 1024,
-    private val retentionMillis: Long = RETENTION_MILLIS
+    private val maxBytes: Long,
+    private val segmentBytes: Long,
+    private val retentionMillis: Long
 ) {
     private val segmentLimit = segmentBytes.coerceAtMost(maxBytes)
     private var active: File? = null

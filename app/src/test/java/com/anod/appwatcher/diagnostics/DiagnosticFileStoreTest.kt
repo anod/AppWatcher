@@ -20,19 +20,34 @@ class DiagnosticFileStoreTest {
 
     @Test
     fun rotatesAndCapsOldestSegmentsAcrossRestart() {
-        val store = DiagnosticFileStore(logs, maxBytes = 700, segmentBytes = 256)
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = 700,
+            segmentBytes = 256,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
         repeat(15) { index -> store.append(line(now + index), now + index) }
         val state = store.state(now + 15)
         assertTrue(state.bytes in 1..700)
         assertTrue(logs.listFiles()!!.size > 1)
         assertTrue(state.oldest!! > now)
-        val reopened = DiagnosticFileStore(logs, maxBytes = 700, segmentBytes = 256)
+        val reopened = DiagnosticFileStore(
+            logs,
+            maxBytes = 700,
+            segmentBytes = 256,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
         assertEquals(state, reopened.state(now + 15))
     }
 
     @Test
     fun capAlsoBoundsSegmentsWhenSmallerThanDefaultSegmentSize() {
-        val store = DiagnosticFileStore(logs, maxBytes = 100)
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = 100,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
         repeat(20) { store.append(line(now + it), now + it) }
         store.flush()
         assertTrue(logs.listFiles()!!.sumOf { it.length() } <= 100)
@@ -41,7 +56,12 @@ class DiagnosticFileStoreTest {
 
     @Test
     fun ageRetentionAppliesWhenDisabledAndExporting() {
-        val store = DiagnosticFileStore(logs)
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
         store.append(line(now), now)
         assertTrue(store.state(now).bytes > 0)
         val later = now + DiagnosticFileStore.RETENTION_MILLIS + 1
@@ -52,7 +72,12 @@ class DiagnosticFileStoreTest {
 
     @Test
     fun snapshotIsStableAndDeleteDoesNotResurrectData() {
-        val store = DiagnosticFileStore(logs)
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
         store.append(line(now), now)
         val snapshot = store.snapshot(File(root, "exports/snapshot.jsonl"), now)
         val content = snapshot.readText()
@@ -68,7 +93,12 @@ class DiagnosticFileStoreTest {
     fun invalidStorageLocationIsAnExplicitFailure() {
         root.mkdirs()
         logs.writeText("not a directory")
-        DiagnosticFileStore(logs).append(line(now), now)
+        DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        ).append(line(now), now)
     }
 
     private fun line(time: Long): String = "$time 4/AppWatcher: line\n"

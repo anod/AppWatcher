@@ -53,14 +53,13 @@ that dependency forward requires migrating the sign-in flow to Credential Manage
 
 ## Local sync diagnostics
 
-Settings offers local recording only for the selected diagnostic account. Configure the private,
-comma-separated `APPWATCHER_DIAGNOSTIC_ACCOUNTS` property in the Gradle user home
-`gradle.properties` (`GRADLE_USER_HOME`, otherwise `~/.gradle`). Values are normalized and
-SHA-256 hashed before entering BuildConfig; generated constants contain digests, not addresses.
-This allowlist is a rollout mechanism, not a security boundary. An absent/empty property disables
-the allowlist. Consent persists on this device and is bound to
-the selected account. Recording is off by default. When disabled or not allowed, no logging tee
-is installed.
+Settings shows the Local diagnostics section only while the selected account is a diagnostic
+account. Configure the private, comma-separated `APPWATCHER_DIAGNOSTIC_ACCOUNTS` property in the
+Gradle user home `gradle.properties` (`GRADLE_USER_HOME`, otherwise `~/.gradle`). Values are
+normalized and SHA-256 hashed before entering BuildConfig. The allowlist is a rollout mechanism,
+not a security boundary. An absent/empty property disables the allowlist. Consent persists on this
+device and is bound to the selected account. Recording is off by default. When disabled or not
+allowed, no logging tee is installed.
 
 When enabled, app log lines are also saved under `noBackupFilesDir/diagnostics`. Logs may contain
 package names and error messages. Startup logs include device power/background restrictions,
