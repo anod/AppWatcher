@@ -23,9 +23,7 @@ import kotlinx.coroutines.flow.onEach
  * @date 27/05/2016.
  */
 
-class SyncScheduler(
-    private val context: info.anodsplace.context.ApplicationContext
-) {
+class SyncScheduler(private val context: info.anodsplace.context.ApplicationContext) {
     private val wm: WorkManager
         get() = WorkManager.getInstance(context.actual)
 

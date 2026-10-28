@@ -47,6 +47,7 @@ import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportBackupTask
 import com.anod.appwatcher.backup.ImportBackupTask
 import com.anod.appwatcher.compose.AppTheme
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.utils.POST_NOTIFICATIONS_PERMISSION
 import com.anod.appwatcher.utils.isPostNotificationsPermissionRequired
 import com.anod.appwatcher.utils.postNotificationsPermissionRequestInput
@@ -271,8 +272,6 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
 
     when (item.key) {
         "diagnostics-enabled" -> onEvent(SettingsViewEvent.DiagnosticToggle((item as PreferenceItem.Switch).checked))
-        "diagnostics-share" -> onEvent(SettingsViewEvent.DiagnosticShare)
-        "diagnostics-delete" -> onEvent(SettingsViewEvent.DiagnosticDelete)
         "drive_sync" -> onEvent(SettingsViewEvent.GDriveSyncToggle((item as PreferenceItem.Switch).checked))
         "drive-sync-now" -> onEvent(SettingsViewEvent.GDriveSyncNow)
         "update_frequency" -> onEvent(SettingsViewEvent.ChangeUpdatePolicy(
@@ -460,7 +459,7 @@ private fun PreferencesScreenPreview() {
                     isProgressVisible = true
                 ),
                 onEvent = { },
-                prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope)
+                prefs = Preferences(context, info.anodsplace.notification.NotificationManager.NoOp(), scope, DiagnosticAllowlist(emptySet()))
             )
         }
     }

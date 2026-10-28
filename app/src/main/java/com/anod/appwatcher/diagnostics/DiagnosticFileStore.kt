@@ -15,9 +15,9 @@ data class DiagnosticStorageState(
 /** Access only from the recorder's serialized IO consumer. Segments are evicted oldest first. */
 class DiagnosticFileStore(
     private val directory: File,
-    private val maxBytes: Long = MAX_BYTES,
-    private val segmentBytes: Long = 256L * 1024,
-    private val retentionMillis: Long = RETENTION_MILLIS
+    private val maxBytes: Long,
+    private val segmentBytes: Long,
+    private val retentionMillis: Long
 ) {
     private val segmentLimit = segmentBytes.coerceAtMost(maxBytes)
     private var active: File? = null
@@ -37,8 +37,10 @@ class DiagnosticFileStore(
             prune(now, segmentLimit)
             if (!directory.isDirectory && !directory.mkdirs()) throw IOException("diagnostic directory")
             val sequence = (files().lastOrNull()?.name?.substringBefore('-')?.toLongOrNull() ?: -1L) + 1
-            active = File(directory, "${sequence.toString().padStart(20, '0')}-$now.log")
-            output = BufferedOutputStream(active!!.outputStream())
+            val segment = File(directory, "${sequence.toString().padStart(20, '0')}-$now.log")
+            val stream = BufferedOutputStream(segment.outputStream())
+            active = segment
+            output = stream
             activeBytes = 0
         }
         output!!.write(bytes)
@@ -63,6 +65,21 @@ class DiagnosticFileStore(
             bytes = files.sumOf { it.length() },
             oldest = files.firstOrNull()?.name?.substringAfter('-')?.substringBefore('.')?.toLongOrNull()
         )
+    }
+
+    /** Returns up to [limit] of the newest stored lines, oldest first. */
+    fun tail(limit: Int, now: Long): List<String> {
+        output?.flush()
+        prune(now, 0)
+        val chunks = mutableListOf<List<String>>()
+        var count = 0
+        for (file in files().asReversed()) {
+            if (count >= limit) break
+            val chunk = file.readLines().takeLast(limit - count)
+            chunks.add(chunk)
+            count += chunk.size
+        }
+        return chunks.asReversed().flatten()
     }
 
     fun snapshot(destination: File, now: Long): File {

@@ -19,6 +19,7 @@ import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppsDatabase
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.search.SearchViewEvent
 import com.anod.appwatcher.search.SearchViewModel
@@ -70,7 +71,7 @@ class AccountSelectionViewModelTest {
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        preferences = Preferences(context, NotificationManager.NoOp(areNotificationsEnabled = true), appScope)
+        preferences = Preferences(context, NotificationManager.NoOp(areNotificationsEnabled = true), appScope, DiagnosticAllowlist(emptySet()))
         originalCrashReports = preferences.collectCrashReports
         originalUpdateFrequency = preferences.updatesFrequency
         originalVersionCode = preferences.versionCode

@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
@@ -38,7 +39,8 @@ class AuthAccountInitializerTest {
         preferences = Preferences(
             context = context,
             notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined)
+            appScope = CoroutineScope(Dispatchers.Unconfined),
+            diagnosticAllowlist = DiagnosticAllowlist(emptySet())
         )
         deviceRegistrationNotification = DeviceRegistrationNotification(
             ApplicationContext(context),
@@ -170,7 +172,7 @@ class AuthAccountInitializerTest {
         val finishAction = CompletableDeferred<Unit>()
 
         val session = async {
-            playSessionCoordinator.withSession {
+            playSessionCoordinator.withSession(owner = "test") {
                 actionStarted.complete(Unit)
                 finishAction.await()
             }

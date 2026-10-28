@@ -33,8 +33,6 @@ class PlaySessionCoordinator {
     @Volatile
     private var holder: Holder? = null
 
-    suspend fun <T> withSession(action: suspend () -> T): T = withSession(owner = "session", action = action)
-
     suspend fun <T> withSession(owner: String, action: suspend () -> T): T {
         AppLog.i("$owner waiting; ${describeHolder()}", "PlaySession")
         sessionMutex.lock()
@@ -49,7 +47,7 @@ class PlaySessionCoordinator {
         return holdSession("user-initiated", action)
     }
 
-    suspend fun updateStage(stage: String) {
+    fun updateStage(stage: String) {
         val current = holder ?: return
         val now = System.currentTimeMillis()
         AppLog.i(
@@ -74,8 +72,8 @@ class PlaySessionCoordinator {
         action()
     } finally {
         holder = null
-        sessionMutex.unlock()
         AppLog.i("$owner released session", "PlaySession")
+        sessionMutex.unlock()
     }
 }
 

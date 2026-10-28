@@ -2,7 +2,6 @@ package com.anod.appwatcher.accounts
 
 import android.accounts.Account
 import android.accounts.OperationCanceledException
-import androidx.test.core.app.ApplicationProvider
 import java.util.ArrayDeque
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit

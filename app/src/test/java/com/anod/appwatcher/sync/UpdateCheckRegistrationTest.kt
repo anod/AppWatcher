@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
+import android.text.format.DateUtils
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.Data
@@ -20,7 +21,6 @@ import com.anod.appwatcher.accounts.FakeDfeApi
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.database.AppListTable
 import com.anod.appwatcher.database.AppsDatabase
-import com.anod.appwatcher.database.SchedulesTable
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Failed
 import com.anod.appwatcher.database.entities.Schedule
@@ -128,7 +128,7 @@ class UpdateCheckRegistrationTest {
             coordinator,
             deviceRegistrationNotification
         )
-        updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts())
+        updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(syncMillis = 6 * DateUtils.MINUTE_IN_MILLIS))
         previousListener = AppLog.instance.listener
         AppLog.instance.listener = object : AppLog.Listener {
             override fun onLogException(tr: Throwable) {

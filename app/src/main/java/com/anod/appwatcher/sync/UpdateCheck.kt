@@ -62,6 +62,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.Koin
@@ -84,7 +85,7 @@ class UpdateCheck(
     private val playSessionCoordinator: PlaySessionCoordinator,
     private val deviceRegistrationNotification: DeviceRegistrationNotification,
     private val koin: Koin,
-    private val timeouts: SyncTimeouts = SyncTimeouts()
+    private val timeouts: SyncTimeouts
 ) {
 
     /**
@@ -92,7 +93,7 @@ class UpdateCheck(
      * session acquisition, so waiting does not need a separate timeout or failure status.
      */
     class SyncTimeouts(
-        val syncMillis: Long = 6 * DateUtils.MINUTE_IN_MILLIS
+        val syncMillis: Long
     )
 
     class SyncResult(
@@ -205,10 +206,6 @@ class UpdateCheck(
         }
     }
 
-    private suspend fun stage(name: String) {
-        playSessionCoordinator.updateStage(name)
-    }
-
     private suspend fun syncSerialized(schedule: Schedule, manualSync: Boolean): Int = withContext(Dispatchers.Default) {
         val account = preferences.account
         if (account == null) {
@@ -244,7 +241,7 @@ class UpdateCheck(
             context.sendBroadcast(startIntent)
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
-            stage("installed-packages")
+            playSessionCoordinator.updateStage("installed-packages")
             val installedPackageStates = packageStates.reload(listOf("com.android.vending"))
             val playStoreVersion = installedPackageStates.stateFor("com.android.vending").packageInfo.versionCode
             AppLog.i(
@@ -291,7 +288,7 @@ class UpdateCheck(
         }
 
         if (syncResult.success) {
-            stage("save-result")
+            playSessionCoordinator.updateStage("save-result")
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
             return@withContext finishFailedSyncWithDiagnostics(
@@ -318,7 +315,7 @@ class UpdateCheck(
             preferences.isLastUpdatesViewed = false
         }
 
-        stage("notify")
+        playSessionCoordinator.updateStage("notify")
         notifyIfNeeded(manualSync, updatedApps, schedule)
 
         performMaintenance(manualSync, now)
@@ -334,7 +331,7 @@ class UpdateCheck(
         verboseDiagnostics: Boolean
     ): SyncResult {
         val sortId = preferences.sortIndex
-        stage("load-apps")
+        playSessionCoordinator.updateStage("load-apps")
         val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
             apps.close()
@@ -357,8 +354,8 @@ class UpdateCheck(
             chunks = localAppChunks,
             maxAttempts = MAX_CHUNK_ATTEMPTS,
             initialRetryDelayMillis = CHUNK_RETRY_DELAY_MILLIS
-        ) { localApps ->
-            stage("bulk-details ${localAppChunks.indexOf(localApps) + 1}/${localAppChunks.size}")
+        ) { index, localApps ->
+            playSessionCoordinator.updateStage("bulk-details ${index + 1}/${localAppChunks.size}")
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk of ${docIds.size} apps")
@@ -404,7 +401,7 @@ class UpdateCheck(
         // The update-check response (?au=1) only signals availability, so fetch full documents for
         // apps that moved to a new version.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
-        stage("apply-updates")
+        playSessionCoordinator.updateStage("apply-updates")
         // Applied chunk by chunk so only one chunk worth of prepared updates is held at a time.
         // Each chunk commits its own transaction, so a failure part way through leaves earlier
         // chunks applied. That is safe: a row and its changelog still commit together, app rows
@@ -447,7 +444,7 @@ class UpdateCheck(
         if (docIds.isEmpty()) {
             return emptyMap()
         }
-        stage("release-details ${docIds.size}")
+        playSessionCoordinator.updateStage("release-details ${docIds.size}")
         val dfeApi = koin.get<DfeApi>()
         val details = mutableMapOf<String, Document>()
         for (chunk in docIds.chunked(BULK_SIZE)) {
@@ -552,12 +549,12 @@ class UpdateCheck(
         }
         if (preferences.isDriveSyncEnabled) {
             AppLog.d("DriveSyncEnabled = true")
-            stage("drive-sync")
+            playSessionCoordinator.updateStage("drive-sync")
             performGDriveSync(preferences, now)
         } else {
             AppLog.d("DriveSyncEnabled = false, skipping...")
         }
-        stage("cleanup")
+        playSessionCoordinator.updateStage("cleanup")
         Cleanup(preferences, database).performIfNeeded(now)
     }
 
@@ -863,7 +860,8 @@ class UpdateCheck(
 
             try {
                 AppLog.i("Perform Google Drive sync", "UpdateCheck")
-                val googleAccount = signIn.signInLocked()
+                // Silent sign-in blocks on a Play services task without a timeout; let the sync cap interrupt it.
+                val googleAccount = runInterruptible(Dispatchers.IO) { signIn.signInLocked() }
                 val worker = koin.get<GDriveSync> { parametersOf(googleAccount) }
                 worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
@@ -1108,16 +1106,16 @@ internal suspend fun <T, R> fetchAllChunks(
     chunks: List<T>,
     maxAttempts: Int,
     initialRetryDelayMillis: Long,
-    fetch: suspend (T) -> R
+    fetch: suspend (index: Int, chunk: T) -> R
 ): List<Pair<T, R>> {
     require(maxAttempts > 0)
     require(initialRetryDelayMillis >= 0)
     val fetched = ArrayList<Pair<T, R>>(chunks.size)
-    for (chunk in chunks) {
+    for ((index, chunk) in chunks.withIndex()) {
         var attempt = 1
         while (true) {
             try {
-                fetched.add(Pair(chunk, fetch(chunk)))
+                fetched.add(Pair(chunk, fetch(index, chunk)))
                 break
             } catch (error: Exception) {
                 if (attempt >= maxAttempts || !isTransientChunkFailure(error)) {
