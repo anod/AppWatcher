@@ -51,6 +51,36 @@ Foundation 1.12.x; Material3 1.4.0 targets an older Foundation line. Google Play
 remains on 21.6.0 because 22.0.0 removes the Google Sign-In APIs used by Drive backup. Moving
 that dependency forward requires migrating the sign-in flow to Credential Manager.
 
+## Local sync diagnostics
+
+Settings shows the Local diagnostics section only while the selected account is a diagnostic
+account. Configure the private, comma-separated `APPWATCHER_DIAGNOSTIC_ACCOUNTS` property in the
+Gradle user home `gradle.properties` (`GRADLE_USER_HOME`, otherwise `~/.gradle`). Values are
+normalized and SHA-256 hashed before entering BuildConfig. The allowlist is a rollout mechanism,
+not a security boundary. An absent/empty property disables the allowlist. Consent persists on this
+device and is bound to the selected account. Recording is off by default. When disabled or not
+allowed, no logging tee is installed.
+
+The section has one switch, Record local diagnostic logs. While it is on, the switch description
+shows the retained size, oldest entry, dropped lines and write failures, and app log lines are also
+saved under `noBackupFilesDir/diagnostics`. Logs may contain package names and error messages.
+Startup logs include device power/background restrictions, recent process exit reasons and sync
+work state. Recording is bounded and non-blocking; lines may be truncated or dropped under load.
+Files rotate with a 30-day retention and a 10 MiB cap, evicting the oldest segments first. Nothing
+can be logged while Android does not run the app.
+
+While recording is on, the App log screen shows the newest 4,000 recorded lines instead of logcat.
+Logs stay on the device unless you manually use its Share action. Share creates a snapshot under the
+narrow `diagnostic-exports` cache FileProvider path and grants temporary read permission through
+Android's share sheet. Nothing uploads automatically. Up to three snapshots remain cached (at most
+10 MiB beyond the retained-log cap); cached exports expire after 24 hours on the next diagnostic
+operation. Recipients control their exported copies.
+
+Switching the switch off deletes the retained logs and snapshots; there is no separate delete
+action. Recording also stops and the logs are deleted when the selected account changes or signs
+out, and at startup when recording is not enabled for the selected account. Release bundles must be
+rebuilt to include this feature.
+
 ## Author
 
 Alex Gavrishev, 2012

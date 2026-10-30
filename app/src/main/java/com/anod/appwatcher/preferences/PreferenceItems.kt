@@ -2,10 +2,13 @@ package com.anod.appwatcher.preferences
 
 import android.content.Context
 import android.text.format.DateUtils
+import android.text.format.Formatter
 import com.anod.appwatcher.BuildConfig
 import com.anod.appwatcher.R
+import com.anod.appwatcher.diagnostics.DiagnosticStorageState
 import info.anodsplace.compose.PreferenceItem
 import info.anodsplace.playservices.GooglePlayServices
+import java.time.Instant
 import java.util.Locale
 
 private val appVersion: String
@@ -23,11 +26,22 @@ private fun renderDriveSyncTime(prefs: Preferences, context: Context): String {
     }
 }
 
+private fun diagnosticsSummary(enabled: Boolean, storage: DiagnosticStorageState, context: Context): String {
+    if (!enabled && storage.bytes == 0L && !storage.error) return ""
+    val oldest = storage.oldest?.let { Instant.ofEpochMilli(it).toString() } ?: context.getString(R.string.never)
+    val stats = context.getString(
+        R.string.diagnostics_retained_summary,
+        oldest, Formatter.formatFileSize(context, storage.bytes), storage.dropped, storage.writeFailures
+    )
+    return if (storage.error) "$stats\n${context.getString(R.string.diagnostics_error)}" else stats
+}
+
 fun preferenceItems(
     prefs: Preferences,
     inProgress: Boolean,
     playServices: GooglePlayServices,
-    context: Context
+    context: Context,
+    diagnosticStorage: DiagnosticStorageState
 ): List<PreferenceItem> {
     val hasPlayServices = playServices.isSupported
     val useAutoSync = prefs.useAutoSync
@@ -175,6 +189,15 @@ fun preferenceItems(
             key = "user-log"
         )
     ).apply {
+        if (prefs.isDiagnosticsAllowed) {
+            add(PreferenceItem.Category(titleRes = R.string.diagnostics_title))
+            add(PreferenceItem.Switch(
+                checked = prefs.isDiagnosticsEnabled,
+                titleRes = R.string.diagnostics_record,
+                summary = diagnosticsSummary(prefs.isDiagnosticsEnabled, diagnosticStorage, context),
+                key = "diagnostics-enabled"
+            ))
+        }
         if (BuildConfig.DEBUG) {
             add(PreferenceItem.Text(
                 title = "Test notification",

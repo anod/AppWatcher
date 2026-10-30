@@ -2,6 +2,7 @@ package com.anod.appwatcher.accounts
 
 import android.accounts.Account
 import androidx.test.core.app.ApplicationProvider
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import finsky.api.DfeServerError
 import finsky.protos.Details
@@ -26,7 +27,8 @@ class AuthRecoveringDfeApiTest {
         preferences = Preferences(
             context = ApplicationProvider.getApplicationContext(),
             notificationManager = NotificationManager.NoOp(),
-            appScope = CoroutineScope(Dispatchers.Unconfined)
+            appScope = CoroutineScope(Dispatchers.Unconfined),
+            diagnosticAllowlist = DiagnosticAllowlist(emptySet())
         )
         preferences.account = AuthAccount(
             name = "account@example.com",

@@ -1,10 +1,12 @@
 package com.anod.appwatcher
 
 import android.app.Application
+import android.content.Context
 import android.content.pm.ShortcutManager
 import android.telephony.TelephonyManager
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.work.WorkManager
 import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.anod.appwatcher.accounts.AuthAccountInitializer
@@ -12,6 +14,9 @@ import com.anod.appwatcher.accounts.AuthTokenBlocking
 import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.accounts.PlaySessionCoordinator
 import com.anod.appwatcher.backup.gdrive.UploadServiceContentObserver
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
+import com.anod.appwatcher.diagnostics.DiagnosticRecorder
+import com.anod.appwatcher.diagnostics.WorkInfoSource
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.sync.UpdateCheck
 import com.anod.appwatcher.utils.AppIconLoader
@@ -31,6 +36,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import okhttp3.OkHttpClient
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.bind
@@ -49,6 +55,13 @@ fun createAppModule(): Module = module {
     }
     factory { get<Application>().packageManager }
     singleOf(::PlaySessionCoordinator)
+    single { DiagnosticAllowlist.parse(BuildConfig.DIAGNOSTIC_ACCOUNT_HASHES) }
+    single {
+        WorkInfoSource { name ->
+            WorkManager.getInstance(get<Context>()).getWorkInfosForUniqueWorkFlow(name).first()
+        }
+    }
+    singleOf(::DiagnosticRecorder)
     singleOf(::DeviceRegistrationNotification)
     singleOf(::AuthAccountInitializer)
     singleOf(::UploadDateParserCache)

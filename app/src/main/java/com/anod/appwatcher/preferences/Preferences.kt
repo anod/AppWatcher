@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.anod.appwatcher.accounts.AuthAccount
 import com.anod.appwatcher.accounts.GfsIdResult
+import com.anod.appwatcher.diagnostics.DiagnosticAccounts
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.model.Filters
 import info.anodsplace.applog.AppLog
 import info.anodsplace.graphics.AdaptiveIcon
@@ -25,13 +27,42 @@ data class SelectedTheme(val id: Int = Preferences.THEME_DEFAULT, val mode: Int 
     val isSystem: Boolean = mode == Preferences.THEME_MODE_SYSTEM
 }
 
-class Preferences(context: Context, private val notificationManager: NotificationManager, private val appScope: CoroutineScope) : SharedPreferences.OnSharedPreferenceChangeListener {
+class Preferences(
+    context: Context,
+    private val notificationManager: NotificationManager,
+    private val appScope: CoroutineScope,
+    private val diagnosticAllowlist: DiagnosticAllowlist
+) : SharedPreferences.OnSharedPreferenceChangeListener {
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
     private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
 
+    val isDiagnosticsAllowed: Boolean
+        get() = diagnosticAccountHash?.let { it in diagnosticAllowlist } == true
+
+    var isDiagnosticsEnabled: Boolean
+        get() = isDiagnosticsAllowed && devicePreferences.getString("diagnostic-consent", null) ==
+            diagnosticAccountHash
+        set(value) {
+            val hash = if (value && isDiagnosticsAllowed) diagnosticAccountHash else null
+            devicePreferences.edit().putString("diagnostic-consent", hash).apply()
+        }
+
+    @Volatile
+    private var diagnosticAccountHash: String? = null
+
     @Volatile
     private var accountSnapshot: AuthAccount? = null
+        set(value) {
+            val accountHash = value?.name?.let(DiagnosticAccounts::hash)
+            val consent = devicePreferences.getString("diagnostic-consent", null)
+            if (consent != null && consent != accountHash) {
+                devicePreferences.edit().remove("diagnostic-consent").apply()
+            }
+            diagnosticAccountHash = accountHash
+            field = value
+            appScope.launch { _changes.emit("diagnostic-account") }
+        }
 
     val changes: Flow<String> = _changes
 

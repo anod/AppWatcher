@@ -15,6 +15,7 @@ import com.anod.appwatcher.database.AppsDatabase
 import com.anod.appwatcher.database.entities.App
 import com.anod.appwatcher.database.entities.Price
 import com.anod.appwatcher.database.entities.Tag
+import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.preferences.Preferences
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -176,7 +177,7 @@ class GDriveFailureTest {
         insertDeletionRecords()
         BackupTransportShadow.quotaExceeded = true
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        val prefs = Preferences(context, NotificationManager.NoOp(), scope)
+        val prefs = Preferences(context, NotificationManager.NoOp(), scope, DiagnosticAllowlist(emptySet()))
         prefs.lastDriveSyncTime = 123L
         startKoin {
             modules(module {
