@@ -49,7 +49,7 @@ class DiagnosticPreferencesTest {
     }
 
     @Test
-    fun accountSetterAndBackgroundSaveBindConsentToTheSelectedAccount() = runBlocking {
+    fun accountSwitchClearsConsentAndBackgroundSaveBindsConsentToSelectedAccount() = runBlocking {
         val prefs = preferences()
         prefs.account = account("diagnostic-account")
         prefs.isDiagnosticsEnabled = true
@@ -57,10 +57,9 @@ class DiagnosticPreferencesTest {
         assertFalse(prefs.isDiagnosticsAllowed)
         assertFalse(prefs.isDiagnosticsEnabled)
         assertFalse(preferences().isDiagnosticsEnabled)
-        prefs.isDiagnosticsEnabled = true
-        assertFalse(preferences().isDiagnosticsEnabled)
         prefs.account = account("diagnostic-account")
         assertFalse(prefs.isDiagnosticsEnabled)
+        assertFalse(preferences().isDiagnosticsEnabled)
         prefs.isDiagnosticsEnabled = true
         assertTrue(prefs.saveAccount(account("not-allowed"), null, null, null))
         assertFalse(prefs.isDiagnosticsEnabled)

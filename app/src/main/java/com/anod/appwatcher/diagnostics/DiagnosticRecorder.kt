@@ -26,11 +26,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 
 class DiagnosticRecorder(
     private val context: Context,
@@ -56,6 +58,7 @@ class DiagnosticRecorder(
     private val exports by lazy { File(context.cacheDir, "diagnostic-exports") }
     private val commands = Channel<Command>(128)
     private val stopped = AtomicBoolean()
+    private val stoppedSignal = CompletableDeferred<Unit>()
     private val pendingResults: MutableSet<CompletableDeferred<Unit>> = ConcurrentHashMap.newKeySet()
     private val dropped = AtomicLong()
     private val failures = AtomicLong()
@@ -65,7 +68,9 @@ class DiagnosticRecorder(
     init {
         scope.launch(Dispatchers.IO) {
             try {
+                purgeLeftovers()
                 for (command in commands) {
+                    val failuresBeforeBatch = failures.get()
                     process(command)
                     var next = commands.tryReceive().getOrNull()
                     while (next != null) {
@@ -74,6 +79,12 @@ class DiagnosticRecorder(
                     }
                     try {
                         store.flush()
+                        val storage = store.state(System.currentTimeMillis())
+                        mutableState.value = storage.copy(
+                            dropped = dropped.get(),
+                            writeFailures = failures.get(),
+                            error = failures.get() > failuresBeforeBatch
+                        )
                     } catch (_: Exception) {
                         fail(command)
                     }
@@ -83,6 +94,8 @@ class DiagnosticRecorder(
             }
         }.invokeOnCompletion {
             stopped.set(true)
+            stoppedSignal.complete(Unit)
+            commands.close()
             synchronized(this) {
                 logger?.let { if (AppLog.logger === it) AppLog.logger = it.delegate }
                 logger = null
@@ -90,13 +103,14 @@ class DiagnosticRecorder(
             drainPending()
         }
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            prefs.changes.collect { updateLogger() }
+            prefs.changes.collect { if (updateLogger()) scope.launch { safely(Unit) { purge() } } }
         }
         updateLogger()
     }
 
+    /** Returns true when this call stopped an installed tee. */
     @Synchronized
-    private fun updateLogger() {
+    private fun updateLogger(): Boolean {
         if (prefs.isDiagnosticsEnabled && !stopped.get()) {
             if (logger == null) {
                 val tee = DiagnosticLogger(AppLog.logger, ::offer)
@@ -104,13 +118,13 @@ class DiagnosticRecorder(
                 AppLog.logger = tee
                 scope.launch(Dispatchers.IO) { captureProcessState() }
             }
-        } else {
-            logger?.let {
-                generation.incrementAndGet()
-                if (AppLog.logger === it) AppLog.logger = it.delegate
-                logger = null
-            }
+            return false
         }
+        val tee = logger ?: return false
+        generation.incrementAndGet()
+        if (AppLog.logger === tee) AppLog.logger = tee.delegate
+        logger = null
+        return true
     }
 
     private suspend fun process(command: Command) {
@@ -173,25 +187,40 @@ class DiagnosticRecorder(
         generation.incrementAndGet()
         prefs.isDiagnosticsEnabled = enabled
         updateLogger()
-        refresh()
+        if (enabled) refresh() else purge()
         true
     }
 
-    suspend fun delete(): Boolean = safely(false) {
-        generation.incrementAndGet()
-        operation {
-            store.delete()
-            exportFiles().forEach { if (!it.delete()) throw IOException("diagnostic export delete") }
-            dropped.set(0)
-            failures.set(0)
+    /** Stored logs only exist while recording is enabled, so every stop deletes them. */
+    private suspend fun purge() = operation { purgeFiles() }
+
+    private fun purgeLeftovers() {
+        if (prefs.isDiagnosticsEnabled) return
+        try {
+            purgeFiles()
+        } catch (_: Exception) {
+            reportError()
         }
-        true
+    }
+
+    private fun purgeFiles() {
+        store.delete()
+        exportFiles().forEach { if (!it.delete()) throw IOException("diagnostic export delete") }
+        dropped.set(0)
+        failures.set(0)
     }
 
     suspend fun shareIntent(): Intent? = safely(null) {
         val snapshot = snapshot()
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.diagnostics", snapshot)
         diagnosticShareIntent(uri)
+    }
+
+    /** Up to [limit] of the newest stored lines, oldest first, or null when storage fails. */
+    suspend fun recentLines(limit: Int): List<String>? = safely(null) {
+        var lines = emptyList<String>()
+        operation { lines = store.tail(limit, System.currentTimeMillis()) }
+        lines
     }
 
     private suspend fun <T> safely(failure: T, action: suspend () -> T): T = try {
@@ -267,7 +296,14 @@ class DiagnosticRecorder(
         val result = CompletableDeferred<Unit>()
         pendingResults.add(result)
         try {
-            commands.send(Command.Operation(action, result))
+            try {
+                select<Unit> {
+                    commands.onSend(Command.Operation(action, result)) { }
+                    stoppedSignal.onAwait { throw IOException("Diagnostic recorder stopped") }
+                }
+            } catch (e: ClosedSendChannelException) {
+                throw IOException("Diagnostic recorder stopped", e)
+            }
             // The writer may have stopped after the send; nothing will consume this command.
             if (stopped.get()) drainPending()
             result.await()

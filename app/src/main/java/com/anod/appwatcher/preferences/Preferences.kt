@@ -54,7 +54,12 @@ class Preferences(
     @Volatile
     private var accountSnapshot: AuthAccount? = null
         set(value) {
-            diagnosticAccountHash = value?.name?.let(DiagnosticAccounts::hash)
+            val accountHash = value?.name?.let(DiagnosticAccounts::hash)
+            val consent = devicePreferences.getString("diagnostic-consent", null)
+            if (consent != null && consent != accountHash) {
+                devicePreferences.edit().remove("diagnostic-consent").apply()
+            }
+            diagnosticAccountHash = accountHash
             field = value
             appScope.launch { _changes.emit("diagnostic-account") }
         }

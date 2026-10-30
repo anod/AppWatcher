@@ -5,6 +5,7 @@ import java.io.IOException
 import java.util.UUID
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -100,6 +101,71 @@ class DiagnosticFileStoreTest {
             retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
         ).append(line(now), now)
     }
+
+    @Test
+    fun failedSegmentOpenDoesNotPreventLaterAppend() {
+        logs.mkdirs()
+        val blockedSegment = File(logs, "00000000000000000000-$now.log")
+        assertTrue(blockedSegment.mkdir())
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
+
+        assertTrue(runCatching { store.append(line(now), now) }.exceptionOrNull() is IOException)
+        assertTrue(blockedSegment.delete())
+        store.append(line(now), now)
+
+        assertEquals(line(now), store.snapshot(File(root, "exports/retried.jsonl"), now).readText())
+    }
+
+    @Test
+    fun tailReturnsTheNewestLinesOldestFirstAcrossSegments() {
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
+        val lines = (0 until 30).map { numbered(it) }
+        lines.forEachIndexed { index, line -> store.append("$line\n", now + index) }
+        assertTrue(logs.listFiles()!!.size > 2)
+
+        assertEquals(lines.takeLast(10), store.tail(10, now + 30))
+        assertEquals(lines, store.tail(1000, now + 30))
+        assertEquals(emptyList<String>(), store.tail(0, now + 30))
+    }
+
+    @Test
+    fun tailOfAnEmptyStoreIsEmptyAndCreatesNothing() {
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
+
+        assertEquals(emptyList<String>(), store.tail(10, now))
+        assertFalse(logs.exists())
+    }
+
+    @Test
+    fun tailSeesBufferedLinesAndSkipsExpiredSegments() {
+        val store = DiagnosticFileStore(
+            logs,
+            maxBytes = DiagnosticFileStore.MAX_BYTES,
+            segmentBytes = 256L * 1024,
+            retentionMillis = DiagnosticFileStore.RETENTION_MILLIS
+        )
+        store.append("${numbered(0)}\n", now)
+
+        assertEquals(listOf(numbered(0)), store.tail(10, now))
+        assertEquals(emptyList<String>(), store.tail(10, now + DiagnosticFileStore.RETENTION_MILLIS + 1))
+    }
+
+    private fun numbered(index: Int): String = "${now + index} 4/AppWatcher: line $index"
 
     private fun line(time: Long): String = "$time 4/AppWatcher: line\n"
 }

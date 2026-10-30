@@ -272,8 +272,6 @@ fun onSettingsItemClick(prefs: Preferences, item: PreferenceItem, onEvent: (Sett
 
     when (item.key) {
         "diagnostics-enabled" -> onEvent(SettingsViewEvent.DiagnosticToggle((item as PreferenceItem.Switch).checked))
-        "diagnostics-share" -> onEvent(SettingsViewEvent.DiagnosticShare)
-        "diagnostics-delete" -> onEvent(SettingsViewEvent.DiagnosticDelete)
         "drive_sync" -> onEvent(SettingsViewEvent.GDriveSyncToggle((item as PreferenceItem.Switch).checked))
         "drive-sync-now" -> onEvent(SettingsViewEvent.GDriveSyncNow)
         "update_frequency" -> onEvent(SettingsViewEvent.ChangeUpdatePolicy(

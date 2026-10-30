@@ -72,8 +72,6 @@ sealed interface SettingsViewEvent {
     object CheckNotificationPermission : SettingsViewEvent
     object DbCleanup : SettingsViewEvent
     data class DiagnosticToggle(val checked: Boolean) : SettingsViewEvent
-    data object DiagnosticShare : SettingsViewEvent
-    data object DiagnosticDelete : SettingsViewEvent
 }
 
 sealed interface SettingsViewAction {
@@ -127,12 +125,6 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         when (event) {
             is SettingsViewEvent.DiagnosticToggle -> viewModelScope.launch {
                 if (!diagnostics.setEnabled(event.checked)) emitAction(showToastAction(R.string.diagnostics_error))
-            }
-            SettingsViewEvent.DiagnosticShare -> viewModelScope.launch {
-                emitAction(diagnostics.shareIntent()?.let(SettingsViewAction::StartActivity) ?: showToastAction(R.string.diagnostics_error))
-            }
-            SettingsViewEvent.DiagnosticDelete -> viewModelScope.launch {
-                if (!diagnostics.delete()) emitAction(showToastAction(R.string.diagnostics_error))
             }
             is SettingsViewEvent.ChangeUpdatePolicy -> changeUpdatePolicy(event.frequency, event.isWifiOnly, event.isRequiresCharging)
             is SettingsViewEvent.Export -> {

@@ -52,6 +52,10 @@ class DiagnosticRecorderDeviceTest {
             AppLog.i("physical-device diagnostic marker $id")
             assertTrue(recorder.captureProcessState())
 
+            val recent = recorder.recentLines(100)
+            assertNotNull(recent)
+            assertTrue(recent.toString(), recent!!.any { it.contains("physical-device diagnostic marker $id") })
+
             val chooser = recorder.shareIntent()
             assertNotNull(chooser)
             @Suppress("DEPRECATION")
@@ -66,12 +70,12 @@ class DiagnosticRecorderDeviceTest {
             assertTrue(contents, contents.contains("Diagnostics started versionCode="))
             assertTrue(contents, contents.contains("Work AppRefresh"))
 
-            assertTrue(recorder.delete())
+            assertTrue(recorder.setEnabled(false))
             assertEquals(0L, recorder.state.value.bytes)
+            assertEquals(emptyList<String>(), recorder.recentLines(100))
             assertFalse(File(context.cacheDir, "diagnostic-exports/${uri.lastPathSegment}").exists())
         } finally {
             recorder.setEnabled(false)
-            recorder.delete()
             AppLog.logger = originalLogger
             scope.cancel()
             root.deleteRecursively()
