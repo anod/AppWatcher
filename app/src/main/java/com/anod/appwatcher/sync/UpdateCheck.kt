@@ -64,7 +64,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 
@@ -154,9 +154,7 @@ class UpdateCheck(
         val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
         val owner = if (manualSync) "manual-sync" else "scheduled-sync"
         return playSessionCoordinator.withSession(owner) {
-            withTimeoutOrNull(timeouts.syncMillis) {
-                performSerialized(manualSync, stopReason)
-            } ?: -1
+            performSerialized(manualSync, stopReason)
         }
     }
 
@@ -164,18 +162,21 @@ class UpdateCheck(
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
         return try {
-            syncSerialized(schedule, manualSync)
-        } catch (e: CancellationException) {
-            withContext(NonCancellable) {
-                recordInterruptedSync(schedule, e, stopReason)
+            withTimeout(timeouts.syncMillis) {
+                syncSerialized(schedule, manualSync)
             }
-            throw e
+        } catch (e: CancellationException) {
+            val timedOut = e is TimeoutCancellationException
+            withContext(NonCancellable) {
+                recordInterruptedSync(schedule, timedOut, stopReason)
+            }
+            if (timedOut) -1 else throw e
         }
     }
 
     private suspend fun recordInterruptedSync(
         schedule: Schedule,
-        error: CancellationException,
+        timedOut: Boolean,
         stopReason: () -> String?
     ) {
         try {
@@ -187,7 +188,6 @@ class UpdateCheck(
                 database.schedules().markInterrupted(schedule.id, interrupted.finish) > 0
             }
             val durationMs = interrupted.finish - interrupted.start
-            val timedOut = error is TimeoutCancellationException || durationMs >= timeouts.syncMillis
             val reason = if (timedOut) "timeout" else "cancellation"
             val message = "${if (schedule.reason == Schedule.REASON_MANUAL) "manual" else "scheduled"} " +
                 "sync #${interrupted.id} interrupted by $reason; " +

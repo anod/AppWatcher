@@ -169,9 +169,9 @@ class UpdateCheckRegistrationTest {
     fun stalledAuthTokenTimesOutRecordsInterruptedSyncAndReleasesSession() = runBlocking {
         preferences.account = preferences.account!!.copy(gfsId = "existing-id")
         tokenRelease = CountDownLatch(1)
-        val updateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(syncMillis = 300L))
+        val stalledUpdateCheck = createUpdateCheck(UpdateCheck.SyncTimeouts(syncMillis = 300L))
 
-        assertEquals(-1, updateCheck.perform(Data.EMPTY) { "timeout(3)" })
+        assertEquals(-1, stalledUpdateCheck.perform(Data.EMPTY) { "timeout(3)" })
 
         val schedule = database.schedules().load().first().single()
         assertEquals(Schedule.STATUS_INTERRUPTED, schedule.result)
