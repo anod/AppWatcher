@@ -1,6 +1,7 @@
 package com.anod.appwatcher
 
 import com.anod.appwatcher.sync.SyncFailureException
+import com.anod.appwatcher.sync.SyncInterruptedException
 import com.google.android.gms.auth.UserRecoverableAuthException
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import finsky.api.DfeError
@@ -10,7 +11,7 @@ import kotlinx.coroutines.CancellationException
 
 internal object CrashlyticsExceptionFilter {
     fun shouldIgnore(tr: Throwable, isNetworkException: (Throwable) -> Boolean): Boolean {
-        if (tr is SyncFailureException) {
+        if (tr is SyncFailureException || tr is SyncInterruptedException) {
             return false
         }
         val root = rootCause(tr)

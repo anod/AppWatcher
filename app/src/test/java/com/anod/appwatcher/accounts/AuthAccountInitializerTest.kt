@@ -172,7 +172,7 @@ class AuthAccountInitializerTest {
         val finishAction = CompletableDeferred<Unit>()
 
         val session = async {
-            playSessionCoordinator.withSession {
+            playSessionCoordinator.withSession(owner = "test") {
                 actionStarted.complete(Unit)
                 finishAction.await()
             }

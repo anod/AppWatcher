@@ -30,6 +30,13 @@ interface SchedulesTable {
     @Query("UPDATE $TABLE SET ${Columns.NOTIFIED} = :notified WHERE ${BaseColumns._ID} = :id")
     suspend fun updateNotified(id: Long, notified: Int)
 
+    /** Marks a still unfinished sync as interrupted; returns 0 when the sync already recorded a result. */
+    @Query(
+        "UPDATE $TABLE SET ${Columns.RESULT} = ${Schedule.STATUS_INTERRUPTED}, ${Columns.FINISH} = :finish " +
+            "WHERE ${BaseColumns._ID} = :id AND ${Columns.RESULT} = ${Schedule.STATUS_NEW}"
+    )
+    suspend fun markInterrupted(id: Long, finish: Long): Int
+
     object Queries {
         @Transaction
         suspend fun save(schedule: Schedule, db: AppsDatabase) {

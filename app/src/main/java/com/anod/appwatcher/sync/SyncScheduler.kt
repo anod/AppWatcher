@@ -55,7 +55,7 @@ class SyncScheduler(private val context: info.anodsplace.context.ApplicationCont
         } else {
             ExistingPeriodicWorkPolicy.KEEP
         }
-        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"})", "PeriodicWork")
+        AppLog.i("Schedule sync in ${windowStartSec / 3600} hours (${if (update) "Update" else "Keep existing"}), charging=$requiresCharging, wifi=$requiresWifi", "PeriodicWork")
         return wm.enqueueUniquePeriodicWork(TAG, policy, request)
             .state
             .asFlow()

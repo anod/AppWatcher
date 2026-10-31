@@ -151,12 +151,12 @@ class DeviceRegistrationTest {
         val results = coroutineScope {
             awaitAll(
                 async {
-                    playSessionCoordinator.withSession {
+                    playSessionCoordinator.withSession(owner = "test") {
                         registration.ensure(account, allowCheckIn = true)
                     }
                 },
                 async {
-                    playSessionCoordinator.withSession {
+                    playSessionCoordinator.withSession(owner = "test") {
                         registration.ensure(account, allowCheckIn = true)
                     }
                 }
