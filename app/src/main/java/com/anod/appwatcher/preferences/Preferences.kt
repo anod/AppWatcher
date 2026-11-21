@@ -23,7 +23,7 @@ import kotlinx.coroutines.withContext
 
 data class SelectedTheme(val id: Int = Preferences.THEME_DEFAULT, val mode: Int = Preferences.THEME_MODE_SYSTEM) {
     val isBlack: Boolean = id == Preferences.THEME_BLACK
-    val isDark: Boolean = isBlack || mode == Preferences.THEME_MODE_DARK
+    val isDark: Boolean = mode == Preferences.THEME_MODE_DARK
     val isSystem: Boolean = mode == Preferences.THEME_MODE_SYSTEM
 }
 
@@ -261,7 +261,7 @@ class Preferences(
         set(value) = preferences.edit().putBoolean(SHOW_RECENTLY_DISCOVERED, value).apply()
 
     val selectedTheme: SelectedTheme
-        get() = SelectedTheme(themeIndex, themeMode)
+        get() = SelectedTheme(theme, themeMode)
 
     private var uiMode: Int
         get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO)

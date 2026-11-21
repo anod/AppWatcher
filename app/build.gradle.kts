@@ -229,6 +229,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.uiautomator)
+    androidTestImplementation(libs.work.testing)
 
     implementation(project(":lib:applog"))
     implementation(project(":lib:compose"))

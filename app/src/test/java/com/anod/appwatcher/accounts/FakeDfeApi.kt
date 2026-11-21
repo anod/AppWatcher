@@ -24,6 +24,7 @@ internal class FakeDfeApi : DfeApi {
     var uploadFailure: Throwable? = null
     var detailsResponse: Details.DetailsResponse? = null
     var bulkDetailsFailure: Throwable? = null
+    var bulkDetailsResponse: ((docIds: List<BulkDocId>, forUpdateCheck: Boolean) -> Details.BulkDetailsResponse)? = null
     var beforeCheckIn: suspend () -> Unit = {}
     var checkInResponse: AndroidCheckinResponse = AndroidCheckinResponse.newBuilder()
         .setAndroidId(1234L)
@@ -51,7 +52,8 @@ internal class FakeDfeApi : DfeApi {
     ): Details.BulkDetailsResponse {
         bulkDetailsCalls++
         bulkDetailsFailure?.let { throw it }
-        error("Unused")
+        val response = bulkDetailsResponse ?: error("Unused")
+        return response(docIds, forUpdateCheck)
     }
 
     override suspend fun delivery(

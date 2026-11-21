@@ -12,8 +12,11 @@ import org.junit.rules.ExternalResource
  * Apply it outside the Compose rule with a [org.junit.rules.RuleChain] so the preferences are in
  * place before the activity launches. The previous values are restored afterwards, so running the
  * tests does not leave a developer's device reconfigured.
+ *
+ * [overrides] are stored on top of that state, for tests that need a specific setting in place
+ * before the first screen is composed. Values must be Boolean, Float, Int, Long or String.
  */
-class StableStartupPreferencesRule : ExternalResource() {
+class StableStartupPreferencesRule(private val overrides: Map<String, Any> = emptyMap()) : ExternalResource() {
     private lateinit var preferences: SharedPreferences
     private lateinit var devicePreferences: SharedPreferences
     private var originalPreferences: Map<String, Any?> = emptyMap()
@@ -26,10 +29,11 @@ class StableStartupPreferencesRule : ExternalResource() {
         originalPreferences = HashMap<String, Any?>(preferences.all)
         originalDevicePreferences = HashMap<String, Any?>(devicePreferences.all)
         devicePreferences.edit().clear().commit()
-        preferences.edit()
+        val editor = preferences.edit()
             .putInt("update_frequency", 0)
             .putBoolean("crash-reports", false)
-            .commit()
+        overrides.forEach { (key, value) -> editor.putValue(key, value) }
+        editor.commit()
     }
 
     override fun after() {
@@ -39,17 +43,19 @@ class StableStartupPreferencesRule : ExternalResource() {
 
     private fun restore(preferences: SharedPreferences, values: Map<String, Any?>) {
         val editor = preferences.edit().clear()
-        values.forEach { (key, value) ->
-            when (value) {
-                is Boolean -> editor.putBoolean(key, value)
-                is Float -> editor.putFloat(key, value)
-                is Int -> editor.putInt(key, value)
-                is Long -> editor.putLong(key, value)
-                is String -> editor.putString(key, value)
-                is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
-            }
-        }
+        values.forEach { (key, value) -> editor.putValue(key, value) }
         editor.commit()
+    }
+
+    private fun SharedPreferences.Editor.putValue(key: String, value: Any?) {
+        when (value) {
+            is Boolean -> putBoolean(key, value)
+            is Float -> putFloat(key, value)
+            is Int -> putInt(key, value)
+            is Long -> putLong(key, value)
+            is String -> putString(key, value)
+            is Set<*> -> putStringSet(key, value.filterIsInstance<String>().toSet())
+        }
     }
 
     private companion object {
