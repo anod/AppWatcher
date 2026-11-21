@@ -36,8 +36,10 @@ import org.koin.java.KoinJavaComponent
  *
  * The screen is reached through the real drawer. The update check is scheduled on an in-memory
  * WorkManager ([IsolatedWorkManagerRule]) and every preference is restored afterwards
- * ([StableStartupPreferencesRule]), so a run leaves a developer's device as it found it. The theme is
- * not chosen here because doing so restarts the process; [ThemeRenderingUiTest] covers it.
+ * ([StableStartupPreferencesRule]), so a run leaves a developer's device as it found it. The one
+ * exception is the notification permission, which [NotificationPermissionRule] grants when a fresh
+ * install lacks it. The theme is not chosen here because doing so restarts the process;
+ * [ThemeRenderingUiTest] covers it.
  * The Drive, backup, crash report and database rows are not clicked, as they would reach accounts,
  * documents or real data.
  */
@@ -63,7 +65,8 @@ class SettingsUiTest {
 
     @get:Rule
     val rules: RuleChain = RuleChain
-        .outerRule(IsolatedWorkManagerRule())
+        .outerRule(NotificationPermissionRule())
+        .around(IsolatedWorkManagerRule())
         .around(StableStartupPreferencesRule(mapOf("wifi_only" to false, "requires-charging" to false)))
         .around(compose)
 
@@ -109,7 +112,7 @@ class SettingsUiTest {
 
     @Test
     fun updateFrequencyAndItsConstraintsRescheduleTheUpdateCheck() {
-        assumeTrue("Automatic checks need notifications to be allowed", prefs.areNotificationsEnabled)
+        assumeTrue("Notifications are blocked for the app in the system settings", prefs.areNotificationsEnabled)
         val title = context.getString(R.string.pref_title_updates_frequency)
         val labels = context.resources.getStringArray(R.array.updates_frequency).toList()
         val seconds = context.resources.getStringArray(R.array.updates_frequency_values).map { it.toInt() }
@@ -221,7 +224,7 @@ class SettingsUiTest {
     @Test
     fun testNotificationRowPostsASampleUpdateNotification() {
         assumeTrue("Only the debug build has the row", BuildConfig.DEBUG)
-        assumeTrue("Notifications must be allowed to be posted", prefs.areNotificationsEnabled)
+        assumeTrue("Notifications are blocked for the app in the system settings", prefs.areNotificationsEnabled)
         val row = titleOf(settingsItems().single { it.key == "test-notification" })
         val sampleTitle = context.getString(R.string.notification_one_updated, "Test")
         val manager = context.getSystemService(NotificationManager::class.java)
