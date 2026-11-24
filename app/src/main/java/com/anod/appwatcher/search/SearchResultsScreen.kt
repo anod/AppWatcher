@@ -92,8 +92,9 @@ fun SearchResultsScreenScene(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.handleEvent(SearchViewEvent.OnResume)
     }
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         SearchResultsScreen(

@@ -55,9 +55,10 @@ fun TagWatchListScreenScene(tag: Tag, navigateBack: () -> Unit, navigateTo: (Nav
     val customPrimaryColor by remember(screenState) {
         derivedStateOf { Color(screenState.tag.color) }
     }
+    val theme by viewModel.prefs.selectedThemeFlow.collectAsState()
     AppTheme(
         customPrimaryColor = customPrimaryColor,
-        theme = viewModel.prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         TagWatchListScreen(

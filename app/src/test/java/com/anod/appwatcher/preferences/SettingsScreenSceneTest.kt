@@ -7,12 +7,18 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -21,14 +27,12 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import androidx.core.content.IntentCompat
 import androidx.navigation3.runtime.NavKey
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.testing.WorkManagerTestInitHelper
-import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbJsonWriter
 import com.anod.appwatcher.database.AppsDatabase
@@ -38,7 +42,6 @@ import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.sync.SyncScheduler
 import com.anod.appwatcher.utils.POST_NOTIFICATIONS_PERMISSION
 import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
-import com.jakewharton.processphoenix.PhoenixActivity
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.StringWriter
@@ -51,6 +54,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -64,6 +68,7 @@ import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
 import org.robolectric.shadows.ShadowActivity
 import org.robolectric.shadows.ShadowToast
@@ -152,6 +157,14 @@ class SettingsScreenSceneTest {
         SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox) and hasText(label)
     )
 
+    /** The background fills most of the list, so its most common pixel is the colour it is painted in. */
+    private fun paintedBackground(): Int {
+        val image = compose.onNode(hasScrollAction()).captureToImage()
+        val pixels = IntArray(image.width * image.height)
+        image.readPixels(pixels)
+        return pixels.toList().groupingBy { it }.eachCount().maxBy { it.value }.key
+    }
+
     private fun scheduledSync(): List<WorkInfo> = WorkManager.getInstance(app).getWorkInfosForUniqueWork(SyncScheduler.TAG).get()
 
     private fun frequencyLabels() = app.resources.getStringArray(R.array.updates_frequency)
@@ -239,34 +252,26 @@ class SettingsScreenSceneTest {
     }
 
     @Test
-    fun pickingAnotherThemeSavesItAndRestartsTheAppOnTheMainScreen() {
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun pickingAThemeRepaintsTheOpenScreenWithoutRestartingTheApp() {
         val themes = app.resources.getStringArray(R.array.themes)
+        val light = dynamicLightColorScheme(app).background.toArgb()
+        val dark = dynamicDarkColorScheme(app).background.toArgb()
+        preferences.themeIndex = LIGHT
         show()
         scrollTo(app.getString(R.string.pref_title_theme))
+        assertEquals(light, paintedBackground())
 
-        chip(themes[3]).performClick()
+        listOf(DARK to dark, BLACK to Color.Black.toArgb(), LIGHT to light, LIGHT to light).forEach { (index, background) ->
+            chip(themes[index]).performClick()
+            compose.waitForIdle()
 
-        val restart = awaitStartedActivity("the app to restart")
-        assertEquals(3, preferences.themeIndex)
-        assertEquals(PhoenixActivity::class.java.name, restart.component?.className)
-        val relaunched = IntentCompat.getParcelableArrayListExtra(restart, "phoenix_restart_intents", Intent::class.java).orEmpty()
-        assertEquals(listOf(AppWatcherActivity::class.java.name), relaunched.map { it.component?.className })
-        assertNull(Shadows.shadowOf(app).peekNextStartedActivity())
-    }
-
-    @Test
-    fun pickingTheCurrentThemeDoesNotRestartTheApp() {
-        val themes = app.resources.getStringArray(R.array.themes)
-        preferences.themeIndex = 2
-        show()
-        scrollTo(app.getString(R.string.pref_title_theme))
-
-        chip(themes[2]).performClick()
-        chip(themes[3]).performClick()
-
-        awaitStartedActivity("the app to restart for the new theme")
-        assertEquals(3, preferences.themeIndex)
-        assertNull("The unchanged theme restarted the app as well", Shadows.shadowOf(app).peekNextStartedActivity())
+            assertEquals(index, preferences.themeIndex)
+            chip(themes[index]).assertIsSelected()
+            assertEquals("background for ${themes[index]}", background, paintedBackground())
+            assertNull("${themes[index]} started an activity", Shadows.shadowOf(app).peekNextStartedActivity())
+            assertFalse("${themes[index]} closed the screen", compose.activity.isFinishing)
+        }
     }
 
     @Test
@@ -346,5 +351,8 @@ class SettingsScreenSceneTest {
 
     private companion object {
         const val SYSTEM_PERMISSION_DIALOG = "android.content.pm.action.REQUEST_PERMISSIONS"
+        const val LIGHT = 2
+        const val DARK = 3
+        const val BLACK = 4
     }
 }

@@ -37,8 +37,9 @@ import kotlinx.collections.immutable.toPersistentList
 fun UserLogScreenScene(prefs: Preferences, navigateBack: () -> Unit) {
     val viewModel: UserLogViewModel = viewModel()
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         UserLogScreen(

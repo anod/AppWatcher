@@ -37,6 +37,11 @@ class SchedulesHistoryViewModel : BaseFlowViewModel<SchedulesHistoryState, Sched
             theme = prefs.selectedTheme,
         )
         viewModelScope.launch {
+            prefs.selectedThemeFlow.collect { theme ->
+                viewState = viewState.copy(theme = theme)
+            }
+        }
+        viewModelScope.launch {
             database.schedules().load().collect { schedules ->
                 viewState = viewState.copy(schedules = schedules.toPersistentList())
             }

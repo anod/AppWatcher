@@ -105,8 +105,9 @@ fun MainScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo: (N
         listViewModel.handleEvent(WatchListEvent.UpdatePreferences(mainState.watchListPreferences))
     }
 
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         MainScreen(

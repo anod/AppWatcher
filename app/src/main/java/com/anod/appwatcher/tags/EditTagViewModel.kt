@@ -44,6 +44,11 @@ class EditTagViewModel(tag: Tag) : BaseFlowViewModel<EditTagState, EditTagEvent,
             tag = tag,
             theme = prefs.selectedTheme
         )
+        viewModelScope.launch {
+            prefs.selectedThemeFlow.collect { theme ->
+                viewState = viewState.copy(theme = theme)
+            }
+        }
     }
 
     override fun handleEvent(event: EditTagEvent) {

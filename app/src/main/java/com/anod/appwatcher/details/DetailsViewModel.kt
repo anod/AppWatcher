@@ -188,6 +188,11 @@ class DetailsViewModel(app: App, isSystemInDarkTheme: Boolean): BaseFlowViewMode
         }
         observeApp()
         viewModelScope.launch {
+            prefs.selectedThemeFlow.collect { theme ->
+                viewState = viewState.copy(theme = theme)
+            }
+        }
+        viewModelScope.launch {
             packageChangedReceiver.observer
                 .filter { it.startsWith("${app.packageName}:") }
                 .collect {

@@ -12,6 +12,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,7 @@ import com.anod.appwatcher.installed.InstalledListScreenScene
 import com.anod.appwatcher.navigation.ResizableListDetailSceneStrategy
 import com.anod.appwatcher.navigation.SceneNavKey
 import com.anod.appwatcher.navigation.rememberResizableListDetailSceneStrategy
+import com.anod.appwatcher.preferences.SelectedTheme
 import com.anod.appwatcher.preferences.SettingsScreenScene
 import com.anod.appwatcher.search.SearchResultsScreenScene
 import com.anod.appwatcher.search.toViewState
@@ -60,12 +63,13 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
 
         val elements = createInitialBackstack()
         setContent {
+            val theme = prefs.selectedThemeFlow.collectAsState()
             val backStack = rememberNavBackStack(*elements)
             val navigateBack = { backStack.navigateBackOrFinish() }
             val listDetailStrategy = rememberResizableListDetailSceneStrategy<NavKey>(
                 sceneContainer = { content ->
                     AppTheme(
-                        theme = prefs.selectedTheme,
+                        theme = theme.value,
                         updateSystemBars = false
                     ) {
                         content()
@@ -89,7 +93,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
                 backStack = backStack,
                 onBack = navigateBack,
                 sceneStrategies = listOf(listDetailStrategy),
-                entryProvider = provideNavEntries(backStack),
+                entryProvider = provideNavEntries(backStack, theme),
                 entryDecorators = listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator()
@@ -189,12 +193,12 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         return elements
     }
 
-    private fun provideNavEntries(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry<NavKey> = entryProvider {
+    private fun provideNavEntries(backStack: NavBackStack<NavKey>, theme: State<SelectedTheme>): (NavKey) -> NavEntry<NavKey> = entryProvider {
         entry<SceneNavKey.Main>(
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) {
@@ -209,7 +213,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
         ) { key ->
             DetailContent(
                 app = key.selectedApp,
-                theme = prefs.selectedTheme,
+                theme = theme.value,
                 onDismissRequest = { backStack.navigateBackOrFinish() },
             )
         }
@@ -217,7 +221,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) { key ->
@@ -239,7 +243,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) {
@@ -264,7 +268,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) { key ->
@@ -278,7 +282,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) { key ->
@@ -293,7 +297,7 @@ class AppWatcherActivity : BaseComposeActivity(), KoinComponent {
             metadata = ResizableListDetailSceneStrategy.listPane(
                 sceneKey = "list-detail",
                 detailPlaceholder = {
-                    DetailPlaceholder(theme = prefs.selectedTheme)
+                    DetailPlaceholder(theme = theme.value)
                 }
             )
         ) {
