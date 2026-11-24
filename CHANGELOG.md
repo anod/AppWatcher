@@ -1,6 +1,15 @@
 App Watcher Changelog
 =====================
 
+1.7.3 (unreleased)
+
+ * Fix theme selection and Black theme light/dark/system modes
+ * Show new versions for disabled apps and clarify notification labels
+ * Fix duplicate on-device entries and related list crashes
+ * Report Drive backup failures correctly and clean up temporary files
+ * Prompt for Google account confirmation when device registration blocks update checks
+ * Use system emoji fonts on Android 15+ and refresh startup profiles
+
 1.7.2 Sep 30, 2026
 
  * Apply theme changes immediately without restarting the app
