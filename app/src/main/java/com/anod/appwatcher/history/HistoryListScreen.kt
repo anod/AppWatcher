@@ -60,8 +60,9 @@ fun HistoryListScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigat
         key = SceneNavKey.PurchaseHistory.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         HistoryListScreen(

@@ -81,7 +81,6 @@ sealed interface SettingsViewAction {
         ShowToastActionDefaults(resId, text, length),
         SettingsViewAction
     class GDriveErrorIntent(val intent: Intent) : SettingsViewAction
-    object Rebirth : SettingsViewAction
     object RequestNotificationPermission : SettingsViewAction
     class ExportResult(val result: Int) : SettingsViewAction
     class ImportResult(val result: Int) : SettingsViewAction
@@ -351,22 +350,10 @@ class SettingsViewModel : BaseFlowViewModel<SettingsViewState, SettingsViewEvent
         if (prefs.themeIndex == newThemeIndex) {
             return
         }
-        val current = prefs.selectedTheme
         prefs.themeIndex = newThemeIndex
-        val new = prefs.selectedTheme
-        var recreate = false
-        if (current.id != new.id) {
-            recreate = true
-        }
-        if (current.mode != new.mode) {
-            recreate = true
-        }
-        if (recreate) {
-            viewState = viewState.copy(
-                items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics.state.value)
-            )
-            emitAction(SettingsViewAction.Rebirth)
-        }
+        viewState = viewState.copy(
+            items = preferenceItems(prefs, inProgress = viewState.isProgressVisible, playServices, application, diagnostics.state.value)
+        )
     }
 
     private fun updateIconsShape(newIconShape: String) {

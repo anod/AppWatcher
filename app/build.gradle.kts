@@ -199,7 +199,6 @@ dependencies {
 
     // 3rd party
     implementation(libs.okhttp)
-    implementation(libs.process.phoenix)
     implementation(libs.koin.core)
 
     // ViewModel and LiveData

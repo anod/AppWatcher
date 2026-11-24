@@ -2,7 +2,6 @@ package com.anod.appwatcher.preferences
 
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -41,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
-import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
 import com.anod.appwatcher.backup.DbBackupManager
 import com.anod.appwatcher.backup.ExportBackupTask
@@ -51,7 +49,6 @@ import com.anod.appwatcher.diagnostics.DiagnosticAllowlist
 import com.anod.appwatcher.utils.POST_NOTIFICATIONS_PERMISSION
 import com.anod.appwatcher.utils.isPostNotificationsPermissionRequired
 import com.anod.appwatcher.utils.postNotificationsPermissionRequestInput
-import com.jakewharton.processphoenix.ProcessPhoenix
 import info.anodsplace.applog.AppLog
 import info.anodsplace.compose.IconShapeSelector
 import info.anodsplace.compose.Preference
@@ -82,8 +79,9 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
     val gDriveErrorIntentRequest = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.handleEvent(SettingsViewEvent.GDriveActivityResult(it))
     }
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         SettingsScreen(
@@ -97,9 +95,6 @@ fun SettingsScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
                 is SettingsViewAction.ExportResult -> onExportResult(action.result, context)
                 is SettingsViewAction.ImportResult -> onImportResult(action.result, context)
                 is SettingsViewAction.GDriveErrorIntent -> gDriveErrorIntentRequest.launch(action.intent)
-                SettingsViewAction.Rebirth -> {
-                    ProcessPhoenix.triggerRebirth(context.applicationContext, Intent(context.applicationContext, AppWatcherActivity::class.java))
-                }
                 SettingsViewAction.RequestNotificationPermission -> {
                     if (isPostNotificationsPermissionRequired()) {
                         notificationPermissionRequest.launch(postNotificationsPermissionRequestInput())

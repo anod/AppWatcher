@@ -268,7 +268,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun everyThemeChangeRestartsTheAppAndKeepingTheThemeDoesNot() {
+    fun everyThemeChangeIsAppliedLiveWithoutRestartingTheApp() {
         start()
 
         for (from in 0..4) {
@@ -279,7 +279,9 @@ class SettingsViewModelTest {
                 send(SettingsViewEvent.UpdateTheme(to))
 
                 assertEquals("theme $from -> $to", to, preferences.themeIndex)
-                assertEquals("restarts for theme $from -> $to", if (from == to) 0 else 1, actions.count { it === SettingsViewAction.Rebirth })
+                assertEquals("shown theme $from -> $to", to.toString(), value("theme"))
+                assertEquals("applied theme $from -> $to", preferences.selectedTheme, preferences.selectedThemeFlow.value)
+                assertTrue("no action for theme $from -> $to", actions.isEmpty())
             }
         }
     }

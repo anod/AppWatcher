@@ -277,6 +277,21 @@ class PreferencesTest {
     }
 
     @Test
+    fun selectedThemeFlowFollowsThemeChangesFromAnySource() {
+        themeChoices.forEach { choice ->
+            prefs.themeIndex = choice.index
+
+            assertEquals("theme ${choice.index}", prefs.selectedTheme, prefs.selectedThemeFlow.value)
+        }
+
+        stored.edit().putInt("night-mode", UiModeManager.MODE_NIGHT_NO).putInt("theme", 0).commit()
+        assertEquals(SelectedTheme(0, Preferences.THEME_MODE_LIGHT), prefs.selectedThemeFlow.value)
+
+        newPreferences().themeIndex = 3
+        assertEquals(SelectedTheme(0, Preferences.THEME_MODE_DARK), prefs.selectedThemeFlow.value)
+    }
+
+    @Test
     fun changesFlowEmitsTheKeyOfEveryWrittenSetting() {
         val keys = mutableListOf<String>()
         scope.launch { prefs.changes.collect { keys += it } }
@@ -286,6 +301,8 @@ class PreferencesTest {
         prefs.themeIndex = 4
         prefs.isNotifyInstalled = false
 
-        assertEquals(listOf("show-recent", "update_frequency", "night-mode", "theme", "notify-installed"), keys)
+        assertEquals(listOf("show-recent", "update_frequency"), keys.take(2))
+        assertEquals("theme is written in one edit", setOf("night-mode", "theme"), keys.subList(2, 4).toSet())
+        assertEquals(listOf("notify-installed"), keys.drop(4))
     }
 }

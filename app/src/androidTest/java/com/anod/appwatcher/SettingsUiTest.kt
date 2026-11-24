@@ -38,8 +38,8 @@ import org.koin.java.KoinJavaComponent
  * WorkManager ([IsolatedWorkManagerRule]) and every preference is restored afterwards
  * ([StableStartupPreferencesRule]), so a run leaves a developer's device as it found it. The one
  * exception is the notification permission, which [NotificationPermissionRule] grants when a fresh
- * install lacks it. The theme is not chosen here because doing so restarts the process;
- * [ThemeRenderingUiTest] covers it.
+ * install lacks it. The theme is covered by [ThemeRenderingUiTest], which also checks how the open
+ * screen is repainted.
  * The Drive, backup, crash report and database rows are not clicked, as they would reach accounts,
  * documents or real data.
  */

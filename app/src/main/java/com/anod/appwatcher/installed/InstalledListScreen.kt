@@ -65,8 +65,9 @@ fun InstalledListScreenScene(
         showRecentlyInstalled = false
     )
 
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         InstalledListScreen(

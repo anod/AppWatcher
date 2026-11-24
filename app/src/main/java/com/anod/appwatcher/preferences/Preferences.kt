@@ -18,6 +18,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -36,6 +39,9 @@ class Preferences(
     private val _changes = MutableSharedFlow<String>()
     private val preferences = context.getSharedPreferences(PREFS_NAME, 0)
     private val devicePreferences = context.getSharedPreferences(DEVICE_PREFS_NAME, 0)
+    private val _selectedThemeFlow = MutableStateFlow(readSelectedTheme())
+
+    val selectedThemeFlow: StateFlow<SelectedTheme> = _selectedThemeFlow.asStateFlow()
 
     val isDiagnosticsAllowed: Boolean
         get() = diagnosticAccountHash?.let { it in diagnosticAllowlist } == true
@@ -261,25 +267,28 @@ class Preferences(
         set(value) = preferences.edit().putBoolean(SHOW_RECENTLY_DISCOVERED, value).apply()
 
     val selectedTheme: SelectedTheme
-        get() = SelectedTheme(theme, themeMode)
+        get() = readSelectedTheme()
 
-    private var uiMode: Int
+    private val uiMode: Int
         get() = preferences.getInt(NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO)
-        set(nightMode) = preferences.edit().putInt(NIGHT_MODE, nightMode).apply()
 
     private val themeMode: Int
         get() = uiModeMap[uiMode] ?: THEME_MODE_LIGHT
 
-    private var theme: Int
+    private val theme: Int
         get() = preferences.getInt(THEME, THEME_DEFAULT)
-        set(theme) = preferences.edit().putInt(THEME, theme).apply()
 
     var themeIndex: Int
         get() = themesCombined.indexOf("$uiMode-$theme")
         set(value) {
-            uiMode = uiModes[value]
-            theme = themeIds[value]
+            preferences.edit()
+                .putInt(NIGHT_MODE, uiModes[value])
+                .putInt(THEME, themeIds[value])
+                .apply()
+            _selectedThemeFlow.value = readSelectedTheme()
         }
+
+    private fun readSelectedTheme(): SelectedTheme = SelectedTheme(theme, themeMode)
 
     var defaultMainFilterId: Int
         get() = preferences.getInt(DEFAULT_MAIN_FILTER_ID, Filters.ALL)
@@ -503,6 +512,9 @@ class Preferences(
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (sharedPreferences === preferences && (key == null || key == NIGHT_MODE || key == THEME)) {
+            _selectedThemeFlow.value = readSelectedTheme()
+        }
         if (key != null) {
             appScope.launch {
                 _changes.emit(key)

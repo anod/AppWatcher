@@ -60,8 +60,9 @@ fun WishListScreenScene(prefs: Preferences, navigateBack: () -> Unit, navigateTo
         key = SceneNavKey.WishList.toString()
     )
     val screenState by viewModel.viewStates.collectAsState(initial = viewModel.viewState)
+    val theme by prefs.selectedThemeFlow.collectAsState()
     AppTheme(
-        theme = prefs.selectedTheme,
+        theme = theme,
         transparentSystemUi = true
     ) {
         WishListScreen(

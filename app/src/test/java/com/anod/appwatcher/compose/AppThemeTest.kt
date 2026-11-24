@@ -9,6 +9,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -41,7 +43,6 @@ class AppThemeTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
     private val prefs = Preferences(context, TestNotificationManager(), scope, DiagnosticAllowlist(emptySet()))
-    private val selectedTheme = mutableStateOf(prefs.selectedTheme)
     private val systemNight = mutableStateOf(false)
     private var rendered: ColorScheme? = null
 
@@ -57,7 +58,8 @@ class AppThemeTest {
                 uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
             }
             CompositionLocalProvider(LocalConfiguration provides configuration) {
-                AppTheme(theme = selectedTheme.value, updateSystemBars = false) {
+                val selectedTheme by prefs.selectedThemeFlow.collectAsState()
+                AppTheme(theme = selectedTheme, updateSystemBars = false) {
                     val colors = MaterialTheme.colorScheme.copy()
                     SideEffect { rendered = colors }
                 }
@@ -119,7 +121,6 @@ class AppThemeTest {
 
     private fun assertLooksLike(expected: ColorScheme, themeIndex: Int, night: Boolean) {
         prefs.themeIndex = themeIndex
-        selectedTheme.value = prefs.selectedTheme
         systemNight.value = night
         compose.waitForIdle()
 
