@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.anod.appwatcher.AppWatcherActivity
 import com.anod.appwatcher.R
+import com.anod.appwatcher.sync.logNotificationDecision
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.notification.NotificationManager
 
@@ -18,6 +19,7 @@ class DeviceRegistrationNotification(
     }
 
     fun show() {
+        logNotificationDecision(context.actual, AUTHENTICATION_CHANNEL_ID, "post registration request")
         val intent = Intent(context.actual, AppWatcherActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -41,6 +43,7 @@ class DeviceRegistrationNotification(
     }
 
     fun cancel() {
+        logNotificationDecision(context.actual, AUTHENTICATION_CHANNEL_ID, "cancel registration request")
         notificationManager.cancel(NOTIFICATION_ID)
     }
 }

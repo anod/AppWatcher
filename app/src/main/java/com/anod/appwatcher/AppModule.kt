@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.pm.ShortcutManager
 import android.telephony.TelephonyManager
+import android.text.format.DateUtils
 import android.util.LruCache
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.work.WorkManager
@@ -33,6 +34,7 @@ import info.anodsplace.notification.NotificationManager
 import info.anodsplace.notification.RealNotificationManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -71,7 +73,8 @@ fun createAppModule(): Module = module {
     }
     singleOf(::Preferences)
     singleOf(::UploadServiceContentObserver)
-    single { OkHttpClient.Builder().build() }
+    // Bounds a whole call so a stalled connection cannot keep a background sync waiting indefinitely.
+    single { OkHttpClient.Builder().callTimeout(2, TimeUnit.MINUTES).build() }
     singleOf(::RealAppIconLoader) {
         bind<AppIconLoader>()
     }
@@ -111,7 +114,8 @@ fun createAppModule(): Module = module {
             playSessionCoordinator = get(),
             uploadDateParserCache = get(),
             deviceRegistrationNotification = get(),
-            koin = getKoin()
+            koin = getKoin(),
+            timeouts = UpdateCheck.SyncTimeouts(syncMillis = 6 * DateUtils.MINUTE_IN_MILLIS)
         )
     }
 }

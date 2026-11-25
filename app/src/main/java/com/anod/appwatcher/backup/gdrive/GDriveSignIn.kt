@@ -111,6 +111,7 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
 
     private val driveConnect by lazy { GoogleSignInConnect(context, createGDriveSignInOptions()) }
 
+    // InterruptedException is not wrapped so runInterruptible can turn it into a cancellation.
     fun signInLocked(): Account {
         val lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context.actual)
         if (lastSignedInAccount?.account != null) {
@@ -134,10 +135,6 @@ class GDriveSilentSignIn(private val context: ApplicationContext) {
             throw Exception(e.message, e)
             // The Task failed, this is the same exception you'd get in a non-blocking
             // failure handler.
-        } catch (e: InterruptedException) {
-            AppLog.e(e)
-            throw Exception(e.message, e)
-            // An interrupt occurred while waiting for the task to complete.
         }
     }
 }

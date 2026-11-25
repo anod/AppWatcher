@@ -59,8 +59,12 @@ import javax.net.ssl.SSLPeerUnverifiedException
 import javax.net.ssl.SSLProtocolException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.koin.core.Koin
 import org.koin.core.parameter.parametersOf
 
@@ -80,8 +84,17 @@ class UpdateCheck(
     private val uploadDateParserCache: UploadDateParserCache,
     private val playSessionCoordinator: PlaySessionCoordinator,
     private val deviceRegistrationNotification: DeviceRegistrationNotification,
-    private val koin: Koin
+    private val koin: Koin,
+    private val timeouts: SyncTimeouts
 ) {
+
+    /**
+     * Caps active sync time after acquiring the session. WorkManager cancellation also interrupts
+     * session acquisition, so waiting does not need a separate timeout or failure status.
+     */
+    class SyncTimeouts(
+        val syncMillis: Long
+    )
 
     class SyncResult(
         val success: Boolean,
@@ -137,19 +150,67 @@ class UpdateCheck(
         const val EXTRA_UPDATES_COUNT = "extra_updates_count"
     }
 
-    suspend fun perform(extras: Data): Int = playSessionCoordinator.withSession {
-        performSerialized(extras)
+    suspend fun perform(extras: Data, stopReason: () -> String?): Int {
+        val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
+        val owner = if (manualSync) "manual-sync" else "scheduled-sync"
+        return playSessionCoordinator.withSession(owner) {
+            performSerialized(manualSync, stopReason)
+        }
     }
 
-    private suspend fun performSerialized(extras: Data): Int = withContext(Dispatchers.Default) {
-        val manualSync = extras.getBoolean(EXTRAS_MANUAL, false)
+    private suspend fun performSerialized(manualSync: Boolean, stopReason: () -> String?): Int {
         AppLog.i("Perform ${if (manualSync) "manual" else "scheduled"} sync", "UpdateCheck")
         val schedule = Schedule(manualSync)
+        return try {
+            withTimeout(timeouts.syncMillis) {
+                syncSerialized(schedule, manualSync)
+            }
+        } catch (e: CancellationException) {
+            val timedOut = e is TimeoutCancellationException
+            withContext(NonCancellable) {
+                recordInterruptedSync(schedule, timedOut, stopReason)
+            }
+            if (timedOut) -1 else throw e
+        }
+    }
 
+    private suspend fun recordInterruptedSync(
+        schedule: Schedule,
+        timedOut: Boolean,
+        stopReason: () -> String?
+    ) {
+        try {
+            val interrupted = schedule.finish(Schedule.STATUS_INTERRUPTED)
+            val recorded = if (schedule.id == -1L) {
+                SchedulesTable.Queries.save(interrupted, database)
+                true
+            } else {
+                database.schedules().markInterrupted(schedule.id, interrupted.finish) > 0
+            }
+            val durationMs = interrupted.finish - interrupted.start
+            val reason = if (timedOut) "timeout" else "cancellation"
+            val message = "${if (schedule.reason == Schedule.REASON_MANUAL) "manual" else "scheduled"} " +
+                "sync #${interrupted.id} interrupted by $reason; " +
+                "started=${Instant.ofEpochMilli(interrupted.start)}; " +
+                "durationMs=$durationMs; " +
+                "stopReason=${runCatching(stopReason).getOrNull() ?: "unknown"}; " +
+                "${playSessionCoordinator.describeHolder()}; " +
+                "failureKind=${if (timedOut) "unexpected" else "expected-transient"}"
+            if (recorded) {
+                AppLog.e(message, "UpdateCheck", SyncInterruptedException(message))
+            } else {
+                AppLog.w("$message (result already recorded)", "UpdateCheck")
+            }
+        } catch (e: Exception) {
+            AppLog.e("Cannot record interrupted sync", "UpdateCheck", e)
+        }
+    }
+
+    private suspend fun syncSerialized(schedule: Schedule, manualSync: Boolean): Int = withContext(Dispatchers.Default) {
         val account = preferences.account
         if (account == null) {
             AppLog.w("No active account, skipping sync...", "UpdateCheck")
-            SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_FAILED_NO_ACCOUNT), database)
+            saveFailedSchedule(schedule, Schedule.STATUS_FAILED_NO_ACCOUNT)
             return@withContext -1
         }
 
@@ -157,12 +218,12 @@ class UpdateCheck(
         if (!manualSync) {
             if (preferences.isWifiOnly && !networkConnection.isWifiEnabled) {
                 AppLog.i("Wifi not enabled, skipping update check....", "UpdateCheck")
-                SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SKIPPED_NO_WIFI), database)
+                saveFailedSchedule(schedule, Schedule.STATUS_SKIPPED_NO_WIFI)
                 return@withContext -1
             }
             val updateTime = preferences.lastUpdateTime
             if (updateTime != (-1).toLong() && System.currentTimeMillis() - updateTime < ONE_SEC_IN_MILLIS) {
-                SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SKIPPED_MIN_TIME), database)
+                saveFailedSchedule(schedule, Schedule.STATUS_SKIPPED_MIN_TIME)
                 AppLog.i("Last update less than second, skipping...", "UpdateCheck")
                 return@withContext -1
             }
@@ -180,6 +241,7 @@ class UpdateCheck(
             context.sendBroadcast(startIntent)
             AppLog.d("Last update viewed: $lastUpdatesViewed")
             SchedulesTable.Queries.save(schedule, database)
+            playSessionCoordinator.updateStage("installed-packages")
             val installedPackageStates = packageStates.reload(listOf("com.android.vending"))
             val playStoreVersion = installedPackageStates.stateFor("com.android.vending").packageInfo.versionCode
             AppLog.i(
@@ -226,6 +288,7 @@ class UpdateCheck(
         }
 
         if (syncResult.success) {
+            playSessionCoordinator.updateStage("save-result")
             SchedulesTable.Queries.save(schedule.finish(Schedule.STATUS_SUCCESS, syncResult.checked, syncResult.updates.size, syncResult.unavailable), database)
         } else {
             return@withContext finishFailedSyncWithDiagnostics(
@@ -252,6 +315,7 @@ class UpdateCheck(
             preferences.isLastUpdatesViewed = false
         }
 
+        playSessionCoordinator.updateStage("notify")
         notifyIfNeeded(manualSync, updatedApps, schedule)
 
         performMaintenance(manualSync, now)
@@ -267,6 +331,7 @@ class UpdateCheck(
         verboseDiagnostics: Boolean
     ): SyncResult {
         val sortId = preferences.sortIndex
+        playSessionCoordinator.updateStage("load-apps")
         val apps = AppListTable.Queries.loadAppList(false, sortId, database.apps())
         if (apps.isEmpty) {
             apps.close()
@@ -289,7 +354,8 @@ class UpdateCheck(
             chunks = localAppChunks,
             maxAttempts = MAX_CHUNK_ATTEMPTS,
             initialRetryDelayMillis = CHUNK_RETRY_DELAY_MILLIS
-        ) { localApps ->
+        ) { index, localApps ->
+            playSessionCoordinator.updateStage("bulk-details ${index + 1}/${localAppChunks.size}")
             val docIds = localApps.map { BulkDocId(it.key, it.value.app.versionNumber) }
             val dfeApi = koin.get<DfeApi>()
             AppLog.d("Sending chunk of ${docIds.size} apps")
@@ -335,6 +401,7 @@ class UpdateCheck(
         // The update-check response (?au=1) only signals availability, so fetch full documents for
         // apps that moved to a new version.
         val releaseDetails = fetchReleaseDetails(selectReleaseDetailsApps(fetchedChunks))
+        playSessionCoordinator.updateStage("apply-updates")
         // Applied chunk by chunk so only one chunk worth of prepared updates is held at a time.
         // Each chunk commits its own transaction, so a failure part way through leaves earlier
         // chunks applied. That is safe: a row and its changelog still commit together, app rows
@@ -377,6 +444,7 @@ class UpdateCheck(
         if (docIds.isEmpty()) {
             return emptyMap()
         }
+        playSessionCoordinator.updateStage("release-details ${docIds.size}")
         val dfeApi = koin.get<DfeApi>()
         val details = mutableMapOf<String, Document>()
         for (chunk in docIds.chunked(BULK_SIZE)) {
@@ -465,6 +533,8 @@ class UpdateCheck(
     private suspend fun saveFailedSchedule(schedule: Schedule, status: Int): Schedule {
         val failedSchedule = schedule.finish(status)
         SchedulesTable.Queries.save(failedSchedule, database)
+        // Keeps a later interruption from inserting a second row for this run.
+        schedule.id = failedSchedule.id
         return failedSchedule
     }
 
@@ -479,10 +549,12 @@ class UpdateCheck(
         }
         if (preferences.isDriveSyncEnabled) {
             AppLog.d("DriveSyncEnabled = true")
+            playSessionCoordinator.updateStage("drive-sync")
             performGDriveSync(preferences, now)
         } else {
             AppLog.d("DriveSyncEnabled = false, skipping...")
         }
+        playSessionCoordinator.updateStage("cleanup")
         Cleanup(preferences, database).performIfNeeded(now)
     }
 
@@ -760,6 +832,7 @@ class UpdateCheck(
             } else {
                 AppLog.i("Updates found: ${updatedApps.size}", "UpdateCheck")
             }
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "cancel manual, updates=${updatedApps.size}")
             sn.cancel()
         } else if (updatedApps.isNotEmpty()) {
             val filter = SyncNotification.Filter(preferences)
@@ -768,12 +841,13 @@ class UpdateCheck(
             } else {
                 updatedApps
             }
-            AppLog.i("Notifying about ${filteredApps.size} updates", "UpdateCheck")
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "filtered=${filteredApps.size}, total=${updatedApps.size}")
             database.schedules().updateNotified(schedule.id, filteredApps.size)
             if (filteredApps.isNotEmpty()) {
                 sn.show(filteredApps)
             }
         } else {
+            logNotificationDecision(context.actual, SyncNotification.UPDATES_CHANNEL_ID, "no updates")
             AppLog.i("No new updates", "UpdateCheck")
         }
     }
@@ -786,7 +860,8 @@ class UpdateCheck(
 
             try {
                 AppLog.i("Perform Google Drive sync", "UpdateCheck")
-                val googleAccount = signIn.signInLocked()
+                // Silent sign-in blocks on a Play services task without a timeout; let the sync cap interrupt it.
+                val googleAccount = runInterruptible(Dispatchers.IO) { signIn.signInLocked() }
                 val worker = koin.get<GDriveSync> { parametersOf(googleAccount) }
                 worker.doSync()
                 pref.lastDriveSyncTime = System.currentTimeMillis()
@@ -1031,16 +1106,16 @@ internal suspend fun <T, R> fetchAllChunks(
     chunks: List<T>,
     maxAttempts: Int,
     initialRetryDelayMillis: Long,
-    fetch: suspend (T) -> R
+    fetch: suspend (index: Int, chunk: T) -> R
 ): List<Pair<T, R>> {
     require(maxAttempts > 0)
     require(initialRetryDelayMillis >= 0)
     val fetched = ArrayList<Pair<T, R>>(chunks.size)
-    for (chunk in chunks) {
+    for ((index, chunk) in chunks.withIndex()) {
         var attempt = 1
         while (true) {
             try {
-                fetched.add(Pair(chunk, fetch(chunk)))
+                fetched.add(Pair(chunk, fetch(index, chunk)))
                 break
             } catch (error: Exception) {
                 if (attempt >= maxAttempts || !isTransientChunkFailure(error)) {
@@ -1076,6 +1151,9 @@ internal enum class SyncFailureStage(val value: String) {
     PLAY_STORE_UPDATE_CHECK("play-store-update-check")
 }
 
+/** Reported when a sync stops without recording a result; carries no cause so crash filters keep it. */
+internal class SyncInterruptedException(message: String) : Exception(message)
+
 internal class SyncFailureException(
     schedule: Schedule,
     stage: SyncFailureStage,
@@ -1102,7 +1180,7 @@ internal class SyncFailureException(
                 "causeChain=${error.describeChain()}"
         }
 
-        private fun isExpectedTransientFailure(error: Throwable): Boolean {
+        internal fun isExpectedTransientFailure(error: Throwable): Boolean {
             val causes = error.causeChain()
             val serverError = causes.filterIsInstance<DfeServerError>().firstOrNull { it.statusCode != null }
             if (serverError != null) {

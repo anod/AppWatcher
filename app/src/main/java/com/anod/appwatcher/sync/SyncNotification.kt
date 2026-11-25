@@ -14,6 +14,7 @@ import com.anod.appwatcher.R
 import com.anod.appwatcher.accounts.DeviceRegistrationNotification
 import com.anod.appwatcher.preferences.Preferences
 import com.anod.appwatcher.utils.color.DynamicColors
+import info.anodsplace.applog.AppLog
 import info.anodsplace.context.ApplicationContext
 import info.anodsplace.framework.text.Html
 
@@ -217,5 +218,15 @@ class SyncNotification(private val context: ApplicationContext, private val noti
             context.getString(R.string.notification_many_updates, count)
         }
         return title
+    }
+}
+
+internal fun logNotificationDecision(context: android.content.Context, channel: String, decision: String) {
+    try {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        AppLog.i("Notification $channel: $decision, enabled=${manager.areNotificationsEnabled()}, " +
+            "importance=${manager.getNotificationChannel(channel)?.importance}", "Notification")
+    } catch (_: Exception) {
+        // Notification diagnostics must not change delivery behavior.
     }
 }

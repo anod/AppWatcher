@@ -350,7 +350,7 @@ class UpdateCheckVersionRollbackTest {
                 chunks = listOf(1, 2, 3),
                 maxAttempts = UpdateCheck.MAX_CHUNK_ATTEMPTS,
                 initialRetryDelayMillis = 0
-            ) { chunk ->
+            ) { _, chunk ->
                 if (chunk == 2) {
                     failedChunkAttempts++
                     throw IOException("failed chunk")
@@ -374,7 +374,7 @@ class UpdateCheckVersionRollbackTest {
             chunks = listOf(1),
             maxAttempts = UpdateCheck.MAX_CHUNK_ATTEMPTS,
             initialRetryDelayMillis = 0
-        ) {
+        ) { _, _ ->
             attempts++
             if (attempts < 3) {
                 throw IOException("temporary failure")

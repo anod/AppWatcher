@@ -50,7 +50,7 @@ android {
         applicationId = "com.anod.appwatcher"
         minSdk = 31
         targetSdk = 36
-        versionCode = 17204
+        versionCode = 17205
         versionName = "1.7.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "DIAGNOSTIC_ACCOUNT_HASHES", "\"$diagnosticAccountHashes\"")

@@ -66,6 +66,7 @@ data class Schedule(
         STATUS_FAILED -> Failed(result)
         STATUS_FAILED_NO_ACCOUNT -> Failed(result)
         STATUS_FAILED_NO_TOKEN -> Failed(result)
+        STATUS_INTERRUPTED -> Failed(result)
         else -> New
     }
 
@@ -78,6 +79,7 @@ data class Schedule(
         const val STATUS_FAILED_NO_ACCOUNT = 5
         const val STATUS_FAILED_NO_TOKEN = 6
         const val STATUS_SKIPPED_DEVICE_REGISTRATION = 7
+        const val STATUS_INTERRUPTED = 8
 
         const val REASON_MANUAL = 1
         const val REASON_SCHEDULE = 2
